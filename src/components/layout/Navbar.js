@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar({ onOpenEstimator }) {
@@ -8,6 +8,21 @@ export default function Navbar({ onOpenEstimator }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  
+  const closeTimeoutRef = useRef(null);
+
+  const handleMouseEnter = (dropdownName) => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+    }
+    setActiveDropdown(dropdownName);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 300); // 300ms safety window
+  };
 
   // Mobile sub-menus state
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
@@ -33,8 +48,8 @@ export default function Navbar({ onOpenEstimator }) {
           {/* About Us (Dropdown) */}
           <div 
             className="relative"
-            onMouseEnter={() => setActiveDropdown("about")}
-            onMouseLeave={() => setActiveDropdown(null)}
+            onMouseEnter={() => handleMouseEnter("about")}
+            onMouseLeave={handleMouseLeave}
           >
             <button className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2 py-1 flex items-center gap-1 focus:outline-none cursor-pointer">
               About Us
@@ -43,11 +58,13 @@ export default function Navbar({ onOpenEstimator }) {
               </svg>
             </button>
             {activeDropdown === "about" && (
-              <div className="absolute left-0 mt-2 w-52 bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5 z-50 animate-fade-in-up">
-                <a href="/about" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Our Story</a>
-                <a href="/about#mission" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Mission & Vision</a>
-                <a href="/about#directors" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Board of Directors</a>
-                <a href="/about#clients" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Our Clients</a>
+              <div className="absolute left-0 pt-2 w-52 bg-transparent z-50 animate-fade-in-up">
+                <div className="bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5">
+                  <a href="/about" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Our Story</a>
+                  <a href="/about#mission" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Mission & Vision</a>
+                  <a href="/about#directors" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Board of Directors</a>
+                  <a href="/testimonials" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Our Testimonials</a>
+                </div>
               </div>
             )}
           </div>
@@ -58,8 +75,8 @@ export default function Navbar({ onOpenEstimator }) {
           {/* Services (Dropdown) */}
           <div 
             className="relative"
-            onMouseEnter={() => setActiveDropdown("services")}
-            onMouseLeave={() => setActiveDropdown(null)}
+            onMouseEnter={() => handleMouseEnter("services")}
+            onMouseLeave={handleMouseLeave}
           >
             <button className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2 py-1 flex items-center gap-1 focus:outline-none cursor-pointer">
               Services
@@ -68,19 +85,21 @@ export default function Navbar({ onOpenEstimator }) {
               </svg>
             </button>
             {activeDropdown === "services" && (
-              <div className="absolute left-0 mt-2 w-60 bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5 z-50 animate-fade-in-up max-h-[350px] overflow-y-auto custom-scrollbar">
-                <a href="/services#design" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Landscape Design</a>
-                <a href="/services#consultancy" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Landscape Consultancy</a>
-                <a href="/services#commercial" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Commercial Landscape</a>
-                <a href="/services#residential" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Residential Landscape</a>
-                <a href="/services#rooftop" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Rooftop Gardening</a>
-                <a href="/services#vertical" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Vertical Garden</a>
-                <a href="/services#maintenance" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Maintenance</a>
-                <a href="/services#hardscaping" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Hardscaping</a>
-                <a href="/services#lighting" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Lighting</a>
-                <a href="/services#irrigation" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Drip Irrigation</a>
-                <a href="/services#fountain" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Water Fountain</a>
-                <a href="/services#pool" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Swimming Pool</a>
+              <div className="absolute left-0 pt-2 w-60 bg-transparent z-50 animate-fade-in-up">
+                <div className="bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5 max-h-[350px] overflow-y-auto custom-scrollbar">
+                  <a href="/services/landscape-design" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Landscape Design</a>
+                  <a href="/services/landscape-consultancy" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Landscape Consultancy</a>
+                  <a href="/services/commercial-landscape" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Commercial Landscape</a>
+                  <a href="/services/residential-landscape" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Residential Landscape</a>
+                  <a href="/services/rooftop-gardening" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Rooftop Gardening</a>
+                  <a href="/services/vertical-garden" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Vertical Garden</a>
+                  <a href="/services/garden-maintenance" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Maintenance</a>
+                  <a href="/services/hardscaping" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Hardscaping</a>
+                  <a href="/services/garden-lighting" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Lighting</a>
+                  <a href="/services/drip-irrigation" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Drip Irrigation</a>
+                  <a href="/services/water-fountain" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Water Fountain</a>
+                  <a href="/services/swimming-pool" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Swimming Pool</a>
+                </div>
               </div>
             )}
           </div>
@@ -88,8 +107,8 @@ export default function Navbar({ onOpenEstimator }) {
           {/* Packages (Dropdown) */}
           <div 
             className="relative"
-            onMouseEnter={() => setActiveDropdown("packages")}
-            onMouseLeave={() => setActiveDropdown(null)}
+            onMouseEnter={() => handleMouseEnter("packages")}
+            onMouseLeave={handleMouseLeave}
           >
             <button className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2 py-1 flex items-center gap-1 focus:outline-none cursor-pointer">
               Packages
@@ -98,12 +117,16 @@ export default function Navbar({ onOpenEstimator }) {
               </svg>
             </button>
             {activeDropdown === "packages" && (
-              <div className="absolute left-0 mt-2 w-64 bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5 z-50 animate-fade-in-up">
-                <a href="/services#packages" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Maintenance Service</a>
-                <a href="/services#packages-rooftop" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Rooftop Gardening Package</a>
-                <a href="/services#packages-terrace" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Terrace & Verandah Package</a>
-                <a href="/services#packages-corporate" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Corporate Gardening Package</a>
-                <a href="/services#packages-gifts" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Gifts</a>
+              <div className="absolute left-0 pt-2 w-64 bg-transparent z-50 animate-fade-in-up">
+                <div className="bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5">
+                  <a href="/faq" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">FAQ Help Desk</a>
+                  <a href="/before-after" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Before & After Slider</a>
+                  <a href="/services#packages" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Maintenance Service</a>
+                  <a href="/services#packages-rooftop" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Rooftop Gardening Package</a>
+                  <a href="/services#packages-terrace" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Terrace & Verandah Package</a>
+                  <a href="/services#packages-corporate" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Corporate Gardening Package</a>
+                  <a href="/services#packages-gifts" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Gifts</a>
+                </div>
               </div>
             )}
           </div>
@@ -118,14 +141,14 @@ export default function Navbar({ onOpenEstimator }) {
         {/* Right Side Tools & Auth Pill */}
         <div className="hidden md:flex items-center gap-5">
           {/* Shopping Cart Icon with Yellow Badge */}
-          <div className="relative text-white cursor-pointer hover:text-white/80 p-2 transition-colors">
+          <a href="/shop" className="relative text-white cursor-pointer hover:text-white/80 p-2 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span className="absolute top-1 right-1 w-4 h-4 bg-yellow-400 text-[#1a3020] rounded-full text-[9px] font-extrabold flex items-center justify-center border border-[#1a3020]">
               0
             </span>
-          </div>
+          </a>
 
           {/* Better-Auth Dynamic Account Pill */}
           {session ? (
