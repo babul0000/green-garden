@@ -16,6 +16,12 @@ import CareersTab from "@/components/admin/CareersTab";
 import SettingsTab from "@/components/admin/SettingsTab";
 import SecurityTab from "@/components/admin/SecurityTab";
 
+// Import new modular admin components
+import UsersTab from "@/components/admin/UsersTab";
+import RolesTab from "@/components/admin/RolesTab";
+import ContentTab from "@/components/admin/ContentTab";
+import ReviewsTab from "@/components/admin/ReviewsTab";
+
 const fetch = (originalFetch => (url, options) => 
   typeof url === "string" && url.startsWith("http://localhost:5000") 
     ? originalFetch(url.replace("http://localhost:5000", process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"), options) 
@@ -163,9 +169,9 @@ export default function AdminPage() {
   };
 
   // --- SERVICES CRUD ---
-  const handleCreateOrUpdateService = async (e) => {
+  const handleCreateOrUpdateService = async (e, customPayload = null) => {
     e.preventDefault();
-    const payload = {
+    const payload = customPayload || {
       label: serviceLabel,
       slug: serviceLabel.toLowerCase().replace(/ /g, "-"),
       desc: serviceDesc,
@@ -305,9 +311,9 @@ export default function AdminPage() {
   };
 
   // --- GALLERY CRUD ---
-  const handleCreateOrUpdateGallery = async (e) => {
+  const handleCreateOrUpdateGallery = async (e, customPayload = null) => {
     e.preventDefault();
-    const payload = {
+    const payload = customPayload || {
       title: galTitle,
       imageUrl: galUrl,
       beforeImageUrl: galBeforeUrl || undefined,
@@ -696,7 +702,6 @@ export default function AdminPage() {
               handleSettingsChange={handleSettingsChange}
             />
           )}
-
           {/* TAB 9: SECURITY */}
           {activeTab === "security" && (
             <SecurityTab 
@@ -704,7 +709,31 @@ export default function AdminPage() {
             />
           )}
 
-        </div>
+          {/* TAB 10: USER MANAGEMENT */}
+          {activeTab === "users" && (
+            <UsersTab />
+          )}
+
+          {/* TAB 11: ROLES & PERMISSIONS */}
+          {activeTab === "roles" && (
+            <RolesTab />
+          )}
+
+          {/* TAB 12: CONTENT MANAGEMENT */}
+          {activeTab === "content" && (
+            <ContentTab 
+              services={services}
+              projects={projects}
+              gallery={gallery}
+              blogs={blogs}
+              setActiveTab={setActiveTab}
+            />
+          )}
+
+          {/* TAB 13: REVIEWS */}
+          {activeTab === "reviews" && (
+            <ReviewsTab />
+          )}        </div>
       </main>
 
     </div>
