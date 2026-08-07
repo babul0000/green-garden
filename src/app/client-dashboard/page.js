@@ -54,6 +54,10 @@ export default function ClientDashboardPage() {
 
   useEffect(() => {
     if (sessionData?.user) {
+      if (sessionData.user.role === "admin" || sessionData.user.role === "editor") {
+        window.location.href = "/admin";
+        return;
+      }
       setName(sessionData.user.name || "");
       fetchBookings();
     }
@@ -120,6 +124,15 @@ export default function ClientDashboardPage() {
   };
 
   if (isPending) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <span className="w-10 h-10 border-4 border-primary-green/20 border-t-primary-green rounded-full animate-spin"></span>
+      </div>
+    );
+  }
+
+  // Redirect admins or editors instantly
+  if (sessionData?.user && (sessionData.user.role === "admin" || sessionData.user.role === "editor")) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <span className="w-10 h-10 border-4 border-primary-green/20 border-t-primary-green rounded-full animate-spin"></span>
