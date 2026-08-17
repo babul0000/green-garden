@@ -22,15 +22,37 @@ import RolesTab from "@/components/admin/RolesTab";
 import ContentTab from "@/components/admin/ContentTab";
 import ReviewsTab from "@/components/admin/ReviewsTab";
 
+const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
+  .split("||")[0]
+  .trim();
+
 const fetch = (originalFetch => (url, options) => 
   typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"), options) 
+    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
     : originalFetch(url, options)
 )(globalThis.fetch);
 
 export default function AdminPage() {
   const { data: sessionData, isPending } = useSession();
   const [activeTab, setActiveTab] = useState("analytics");
+
+  // Load initial tab from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTab = localStorage.getItem("adminActiveTab");
+      if (savedTab) {
+        setActiveTab(savedTab);
+      }
+    }
+  }, []);
+
+  // Save tab to localStorage on change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("adminActiveTab", tab);
+    }
+  };
 
   // State arrays loaded from database
   const [bookings, setBookings] = useState([]);
@@ -545,7 +567,7 @@ export default function AdminPage() {
       {/* 1. LEFT SIDEBAR */}
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+        setActiveTab={handleTabChange} 
         sessionData={sessionData} 
         inboxCount={messages.length + careers.length}
       />
@@ -555,7 +577,7 @@ export default function AdminPage() {
         
         {/* Top Header */}
         <Header 
-          setActiveTab={setActiveTab} 
+          setActiveTab={handleTabChange} 
           setEditingService={setEditingService} 
           fetchData={fetchData}
         />
@@ -569,7 +591,7 @@ export default function AdminPage() {
               bookings={bookings}
               projects={projects}
               services={services}
-              setActiveTab={setActiveTab}
+              setActiveTab={handleTabChange}
             />
           )}
 
@@ -726,7 +748,7 @@ export default function AdminPage() {
               projects={projects}
               gallery={gallery}
               blogs={blogs}
-              setActiveTab={setActiveTab}
+              setActiveTab={handleTabChange}
             />
           )}
 

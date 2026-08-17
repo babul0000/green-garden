@@ -3,9 +3,13 @@
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
+const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
+  .split("||")[0]
+  .trim();
+
 const fetch = (originalFetch => (url, options) => 
   typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"), options) 
+    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
     : originalFetch(url, options)
 )(globalThis.fetch);
 

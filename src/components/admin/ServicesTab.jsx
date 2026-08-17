@@ -63,7 +63,7 @@ export default function ServicesTab({
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-[#f8faf9] p-6 rounded-[24px] border border-slate-200/60 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} autoComplete="off" className="bg-[#f8faf9] p-6 rounded-[24px] border border-slate-200/60 flex flex-col gap-4">
         <h4 className="font-bold text-xs text-[#06120c] uppercase tracking-wider">
           {editingService ? `Edit Details: ${editingService.label}` : "Add New Offering Product"}
         </h4>
@@ -72,6 +72,7 @@ export default function ServicesTab({
           <input 
             type="text" 
             required
+            autoComplete="off"
             placeholder="Service Name (e.g. Lawn Gardening)"
             value={serviceLabel}
             onChange={(e) => setServiceLabel(e.target.value)}
@@ -80,6 +81,7 @@ export default function ServicesTab({
           <input 
             type="text" 
             required
+            autoComplete="off"
             placeholder="Icon Emoji (e.g. 🏡)"
             value={serviceIcon}
             onChange={(e) => setServiceIcon(e.target.value)}
@@ -87,6 +89,7 @@ export default function ServicesTab({
           />
           <input 
             type="text" 
+            autoComplete="off"
             placeholder="Banner Image URL (Optional)"
             value={banner}
             onChange={(e) => setBanner(e.target.value)}
@@ -96,6 +99,7 @@ export default function ServicesTab({
         
         <textarea 
           required
+          autoComplete="off"
           rows={2}
           placeholder="Service description details..."
           value={serviceDesc}
@@ -117,6 +121,7 @@ export default function ServicesTab({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 animate-fade-in-up">
               <input 
                 type="text" 
+                autoComplete="off"
                 placeholder="SEO Title Tag"
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
@@ -124,6 +129,7 @@ export default function ServicesTab({
               />
               <input 
                 type="text" 
+                autoComplete="off"
                 placeholder="SEO Keywords (comma separated)"
                 value={seoKeywords}
                 onChange={(e) => setSeoKeywords(e.target.value)}
@@ -131,6 +137,7 @@ export default function ServicesTab({
               />
               <input 
                 type="text" 
+                autoComplete="off"
                 placeholder="SEO Meta Description"
                 value={seoDescription}
                 onChange={(e) => setSeoDescription(e.target.value)}

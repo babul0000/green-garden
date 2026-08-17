@@ -3,6 +3,16 @@
 import { useState, useEffect } from "react";
 import { useSession } from "@/lib/auth-client";
 
+const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
+  .split("||")[0]
+  .trim();
+
+const fetch = (originalFetch => (url, options) => 
+  typeof url === "string" && url.startsWith("http://localhost:5000") 
+    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
+    : originalFetch(url, options)
+)(globalThis.fetch);
+
 export default function ClientDashboardPage() {
   const { data: sessionData, isPending } = useSession();
   
@@ -27,7 +37,7 @@ export default function ClientDashboardPage() {
   const fetchBookings = async () => {
     if (!sessionData?.user) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/bookings`);
+      const res = await fetch("http://localhost:5000/api/bookings");
       if (res.ok) {
         const data = await res.json();
         // Filter bookings belonging to current user email
@@ -81,7 +91,7 @@ export default function ClientDashboardPage() {
     };
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/bookings`, {
+      const res = await fetch("http://localhost:5000/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bookingPayload)

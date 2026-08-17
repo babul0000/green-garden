@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="bg-primary-green-dark text-white/90 py-16 px-6 border-t border-white/5">
@@ -21,10 +23,11 @@ export default function Footer() {
         <div className="flex flex-col gap-4">
           <h4 className="font-bold text-sm text-white font-serif uppercase tracking-wider">Quick Links</h4>
           <div className="flex flex-col gap-2 text-xs text-white/70">
-            <a href="#" className="hover:text-white transition-colors">Home Page</a>
-            <a href="#services" className="hover:text-white transition-colors">Our Services</a>
-            <a href="#about" className="hover:text-white transition-colors">About Story</a>
-            <a href="#gallery" className="hover:text-white transition-colors">Portfolio Gallery</a>
+            <Link href="/" className="hover:text-white transition-colors">Home Page</Link>
+            <Link href="/services" className="hover:text-white transition-colors">Our Services</Link>
+            <Link href="/about" className="hover:text-white transition-colors">About Story</Link>
+            <Link href="/gallery" className="hover:text-white transition-colors">Portfolio Gallery</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">Latest Blogs</Link>
           </div>
         </div>
 
@@ -32,10 +35,10 @@ export default function Footer() {
         <div className="flex flex-col gap-4">
           <h4 className="font-bold text-sm text-white font-serif uppercase tracking-wider">Services</h4>
           <div className="flex flex-col gap-2 text-xs text-white/70">
-            <a href="#services" className="hover:text-white transition-colors">Rooftop Garden Setup</a>
-            <a href="#services" className="hover:text-white transition-colors">Vertical Plant Wall</a>
-            <a href="#services" className="hover:text-white transition-colors">Indoor Houseplant Styling</a>
-            <a href="#services" className="hover:text-white transition-colors">Lawn Landscaping</a>
+            <Link href="/services" className="hover:text-white transition-colors">Rooftop Garden Setup</Link>
+            <Link href="/services" className="hover:text-white transition-colors">Vertical Plant Wall</Link>
+            <Link href="/services" className="hover:text-white transition-colors">Indoor Houseplant Styling</Link>
+            <Link href="/services" className="hover:text-white transition-colors">Lawn Landscaping</Link>
           </div>
         </div>
 
@@ -61,3 +64,4 @@ export default function Footer() {
     </footer>
   );
 }
+
