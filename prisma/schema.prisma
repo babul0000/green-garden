@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+  EDITOR
+  MODERATOR
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         Role      @default(CLIENT)
+  phone        String?
+  avatar       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  bookings     Booking[]
+  reviews      Review[]
+  comments     Comment[]
+
+  @@map("users")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  label       String
+  desc        String?
+  icon        String?  @default("🌱")
+  pricing     String?
+  features    String[]
+  benefits    String[]
+  process     Json?
+  faqs        Json?
+  bannerImage String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Project {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  name              String
+  client            String?
+  category          String   @default("Residential")
+  imageUrl          String?
+  images            String[]
+  videoUrl          String?
+  location          String?
+  duration          String?
+  budgetRange       String?
+  challenges        String?
+  solution          String?
+  featured          Boolean  @default(false)
+  clientTestimonial Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model GalleryItem {
+  id             String   @id @default(cuid())
+  title          String
+  imageUrl       String
+  beforeImageUrl String?
+  category       String   @default("Rooftop")
+  caption        String?
+  createdAt      DateTime @default(now())
+
+  @@map("gallery_items")
+}
+
+model Blog {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  author      String
+  coverImage  String?
+  category    String    @default("Rooftop Gardening")
+  content     String
+  readingTime String?   @default("5 mins")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
+
+  @@map("blogs")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  name      String
+  text      String
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  blogId    String
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("comments")
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+  clientName    String
+  clientEmail   String
+  phone         String?
+  address       String?
+  service       String
+  budgetRange   String?
+  message       String?
+  status        String   @default("Pending")
+  paymentStatus String   @default("unpaid")
+  assignedStaff String?  @default("Unassigned")
+  bookingDate   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("bookings")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  rating    Int      @default(5)
+  text      String
+  service   String?
+  location  String?
+  status    String   @default("Approved")
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("reviews")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  service   String?
+  message   String
+  status    String   @default("Unread")
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}
+
+model CareerApplication {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String
+  department  String
+  coverLetter String?
+  resumeUrl   String
+  status      String   @default("Pending")
+  createdAt   DateTime @default(now())
+
+  @@map("career_applications")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+
+  @@map("settings")
+}
