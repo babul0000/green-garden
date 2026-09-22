@@ -23,9 +23,14 @@ export default function Login() {
         setError(result.error || "Invalid email or password");
       } else {
         setSuccess(true);
-        const destination = result.user?.role === "admin" || result.user?.role === "editor" 
-          ? "/admin" 
-          : "/client-dashboard";
+        const role = result.user?.role?.toUpperCase();
+        let destination = "/client-dashboard";
+        if (role === "ADMIN" || role === "EDITOR" || role === "MODERATOR") {
+          destination = "/admin";
+        } else if (role === "EMPLOYEE") {
+          destination = "/employee-portal";
+        }
+        
         setTimeout(() => {
           window.location.href = destination;
         }, 800);
@@ -47,9 +52,9 @@ export default function Login() {
       <div className="max-w-md w-full glass-card bg-white p-8 md:p-10 rounded-[32px] border border-white/60 shadow-2xl animate-fade-in-up">
         {/* Title */}
         <div className="text-center mb-8">
-          <span className="text-3xl">🔑</span>
+          <span className="text-3xl">🌿</span>
           <h1 className="text-2xl font-serif font-bold text-primary-green mt-3">Welcome Back</h1>
-          <p className="text-xs text-foreground/50 mt-1.5">Sign in to your green-garden account</p>
+          <p className="text-xs text-foreground/50 mt-1.5">Sign in to your AR Green Garden portal</p>
         </div>
 
         {success ? (
@@ -57,9 +62,9 @@ export default function Login() {
             <div className="w-12 h-12 rounded-full bg-primary-green/10 text-primary-green flex items-center justify-center text-2xl">
               ✓
             </div>
-            <h3 className="text-lg font-bold font-serif">Login Successful!</h3>
+            <h3 className="text-lg font-bold font-serif text-primary-green">Login Successful!</h3>
             <p className="text-xs text-foreground/60 leading-relaxed max-w-[280px]">
-              You are being authenticated. Redirecting to dashboard...
+              Redirecting to your authorized dashboard...
             </p>
           </div>
         ) : (
@@ -78,7 +83,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="john@example.com"
+                placeholder="user@argreengarden.com"
                 className="bg-background border border-foreground/10 text-foreground py-3 px-4 rounded-xl text-xs focus:outline-none focus:border-primary-green transition-all"
               />
             </div>
@@ -109,7 +114,7 @@ export default function Login() {
             >
               {loading ? (
                 <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              ) : "Sign In"}
+              ) : "Sign In to Portal"}
             </button>
 
             {/* Footer */}

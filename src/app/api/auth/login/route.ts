@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { comparePassword, signJwtToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+import { comparePassword, signJwtToken, AUTH_COOKIE_NAME, UserRole } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -35,12 +35,13 @@ export async function POST(req: Request) {
       );
     }
 
-    const roleString = user.role.toLowerCase() as "client" | "admin" | "editor" | "moderator";
+    const roleString = user.role.toLowerCase() as UserRole;
     const token = await signJwtToken({
       id: user.id,
       name: user.name,
       email: user.email,
       role: roleString,
+      phone: user.phone,
     });
 
     const response = NextResponse.json({
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
         name: user.name,
         email: user.email,
         role: roleString,
+        phone: user.phone,
       },
     });
 

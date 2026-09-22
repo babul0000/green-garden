@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Estimator from "@/components/home/Estimator";
+import EmergencyTreeDoctorModal from "@/components/shared/EmergencyTreeDoctorModal";
 
 export default function PublicLayout({
   children,
@@ -25,6 +26,9 @@ export default function PublicLayout({
 
       {/* Main Page Area */}
       <main className="flex-grow">{children}</main>
+
+      {/* Emergency Tree Doctor Floating Quick Hotline & Booking Modal */}
+      <EmergencyTreeDoctorModal />
 
       {/* Footer Layout */}
       <Footer />

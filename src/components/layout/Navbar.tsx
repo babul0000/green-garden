@@ -180,7 +180,13 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     <p className="text-sm font-semibold text-foreground truncate">{user.email}</p>
                   </div>
                   <a 
-                    href={user.role === "admin" || user.role === "editor" ? "/admin" : "/client-dashboard"}
+                    href={
+                      user.role?.toLowerCase() === "admin" || user.role?.toLowerCase() === "editor" 
+                        ? "/admin" 
+                        : user.role?.toLowerCase() === "employee"
+                        ? "/employee-portal"
+                        : "/client-dashboard"
+                    }
                     onClick={() => setUserDropdownOpen(false)}
                     className="block text-left px-4 py-2.5 text-sm hover:bg-sage-light transition-colors font-medium text-primary-green"
                   >

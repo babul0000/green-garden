@@ -1,295 +1,419 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import type { IGalleryItem } from "@/types";
+import React, { useState } from "react";
+import Link from "next/link";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
+interface GalleryProject {
+  id: string;
+  name: string;
+  bengaliName: string;
+  location: string;
+  projectType: string;
+  category: string;
+  status: "Completed" | "Running";
+  completionDate: string;
+  description: string;
+  mainImage: string;
+  photos: string[];
+  beforePhoto?: string;
+  afterPhoto?: string;
+}
 
 export default function GalleryPage() {
-  const [gallery, setGallery] = useState<IGalleryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  // Before & After comparison slider state
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
   const [sliderPosition, setSliderPosition] = useState(50);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
 
-  useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const res = await fetchProxy("http://localhost:5000/api/gallery");
-        if (res.ok) {
-          const data = await res.json();
-          setGallery(data);
-        } else {
-          throw new Error("Failed to fetch");
-        }
-      } catch (err) {
-        console.warn("Backend unavailable, using static fallback for gallery:", err);
-        setGallery([
-          {
-            _id: "1",
-            title: "Gulshan Rooftop Paradise",
-            imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
-            beforeImageUrl: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=800&auto=format&fit=crop",
-            category: "Rooftop",
-            caption: "A 1200 sq. ft concrete rooftop transformed into a lush sanctuary with fruit trees, lawn, and pergolas."
-          },
-          {
-            _id: "2",
-            title: "Corporate Green Facade",
-            imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=800&auto=format&fit=crop",
-            beforeImageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
-            category: "Vertical",
-            caption: "Gulshan commercial reception feature wall utilizing automated drip-irrigation geo-fabric pocket grid."
-          },
-          {
-            _id: "3",
-            title: "Banani Patio Oasis",
-            imageUrl: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=800&auto=format&fit=crop",
-            category: "Landscape",
-            caption: "Monsoon-resilient pathway garden with stepping stones and custom uplighting arrays."
-          }
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGallery();
-  }, []);
+  // Filters exact from PDF page 4
+  const filterList = [
+    "All",
+    "Luxury",
+    "Standard",
+    "Rooftop",
+    "Residential",
+    "Commercial",
+    "Resort",
+    "Vertical Garden",
+    "Flower Garden",
+    "Indoor",
+    "Lawn",
+    "Office",
+    "Restaurant/Café",
+    "Balcony",
+    "Lighting",
+    "Fountain",
+    "Before & After",
+  ];
 
-  const handleMove = (clientX: number) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    let percentage = (x / rect.width) * 100;
-    if (percentage < 0) percentage = 0;
-    if (percentage > 100) percentage = 100;
-    setSliderPosition(percentage);
-  };
+  const projects: GalleryProject[] = [
+    {
+      id: "p1",
+      name: "Dhanmondi Sky Retreat Penthouse",
+      bengaliName: "ধানমন্ডি স্কাই রিট্রিট ছাদবাগান",
+      location: "Road 9/A, Dhanmondi, Dhaka",
+      projectType: "Rooftop Garden",
+      category: "Rooftop",
+      status: "Completed",
+      completionDate: "August 2026",
+      description: "২,২০০ বর্গফুটের ছাদবাগান যাতে রয়েছে ১০০% ওয়াটারপ্রুফ ড্রেনেজ, জাপানিজ গ্রাস লন, মেহগনি কাঠের পারগোলা ও অটো ড্রিপ সেচ ব্যবস্থা।",
+      mainImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
+      photos: [
+        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+        "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=800&q=80",
+      ],
+      beforePhoto: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=800&q=80",
+      afterPhoto: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
+    },
+    {
+      id: "p2",
+      name: "Gulshan Corporate Vertical Eco-Wall",
+      bengaliName: "গুলশান করপোরেট ভার্টিক্যাল গ্রিন ওয়াল",
+      location: "Gulshan Avenue, Dhaka",
+      projectType: "Vertical Garden",
+      category: "Vertical Garden",
+      status: "Completed",
+      completionDate: "July 2026",
+      description: "করপোরেট হেডকোয়ার্টারের ৩ তলা বিশিষ্ট জীবন্ত দেয়ালবাগান। স্বয়ংক্রিয় ফার্টিগেশন এবং এয়ার পিউরিফাইং গাছপালায় সমৃদ্ধ।",
+      mainImage: "https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80",
+      photos: [
+        "https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80",
+        "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&q=80",
+      ],
+      beforePhoto: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800&q=80",
+      afterPhoto: "https://images.unsplash.com/photo-1545241047-6083a3684587?w=800&q=80",
+    },
+    {
+      id: "p3",
+      name: "Banani Royal Residence Landscape",
+      bengaliName: "বনানী রয়্যাল রেসিডেন্স ল্যান্ডস্কেপ",
+      location: "Road 11, Banani, Dhaka",
+      projectType: "Residential Landscape",
+      category: "Residential",
+      status: "Completed",
+      completionDate: "September 2026",
+      description: "আবাসিক ভিলার এন্ট্রান্স ও উঠান ঘিরে প্রিমিয়াম লন কার্পেট, প্রাকৃতিক পাথরের হাঁটার পথ ও ওয়াটারপ্রুফ গার্ডেন স্পাইক লাইটিং।",
+      mainImage: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?w=800&q=80",
+      photos: [
+        "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?w=800&q=80",
+        "https://images.unsplash.com/photo-1592417817098-8f3d6910985b?w=800&q=80",
+      ],
+      beforePhoto: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=800&q=80",
+      afterPhoto: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?w=800&q=80",
+    },
+    {
+      id: "p4",
+      name: "Sreemangal Tea Valley Resort Oasis",
+      bengaliName: "শ্রীমঙ্গল টি ভ্যালি রিসোর্ট গার্ডেন",
+      location: "Sreemangal, Sylhet",
+      projectType: "Resort Landscape",
+      category: "Resort",
+      status: "Completed",
+      completionDate: "June 2026",
+      description: "প্রাকৃতিক পাহাড় ও লেকসংলগ্ন রিসোর্টের প্রাকৃতিক ল্যান্ডস্কেপ ও ট্রপিক্যাল ফ্লোরাল জোন।",
+      mainImage: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=800&q=80",
+      photos: [
+        "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=800&q=80",
+      ],
+    },
+    {
+      id: "p5",
+      name: "Uttara Zen Terrace Japanese Garden",
+      bengaliName: "উত্তরা জেন টেরেস জাপানিজ গার্ডেন",
+      location: "Sector 4, Uttara, Dhaka",
+      projectType: "Luxury Garden",
+      category: "Luxury",
+      status: "Running",
+      completionDate: "Expected Oct 2026",
+      description: "জাপানিজ জেন গার্ডেন শৈলীতে মিনি রোক্স, সাদা নুড়িপাথর, বনসাই কালেকশন ও ব্যাম্বু ওয়াটার ড্রপ ফাউন্টেন।",
+      mainImage: "https://images.unsplash.com/photo-1617854818583-09e7f077a156?w=800&q=80",
+      photos: [
+        "https://images.unsplash.com/photo-1617854818583-09e7f077a156?w=800&q=80",
+      ],
+    },
+    {
+      id: "p6",
+      name: "Bashundhara R/A Pergola & Fountain Plaza",
+      bengaliName: "বসুন্ধরা ফাউন্টেন ও নাইট লাইটিং প্লাজা",
+      location: "Block I, Bashundhara R/A, Dhaka",
+      projectType: "Fountain & Lighting",
+      category: "Fountain",
+      status: "Completed",
+      completionDate: "May 2026",
+      description: "আন্ডারওয়াটার এলইডি লাইট সম্বলিত মার্বেল ফাউন্টেন এবং কাস্টমাইজড গার্ডেন লাইটিং পাথওয়ে।",
+      mainImage: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=800&q=80",
+      photos: [
+        "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?w=800&q=80",
+      ],
+    },
+  ];
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.buttons === 1) { // Left-click dragged
-      handleMove(e.clientX);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (e.touches.length > 0) {
-      handleMove(e.touches[0].clientX);
-    }
-  };
-
-  // Prevent downloading/right click on image
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-  };
-
-  const categories = ["All", "Rooftop", "Vertical", "Landscape", "Indoor"];
-  const filteredGallery = selectedCategory === "All"
-    ? gallery
-    : gallery.filter(item => item.category.toLowerCase() === selectedCategory.toLowerCase());
+  // Filtering logic
+  const filteredProjects = projects.filter((p) => {
+    if (activeFilter === "All") return true;
+    if (activeFilter === "Before & After") return Boolean(p.beforePhoto && p.afterPhoto);
+    return (
+      p.category.toLowerCase().includes(activeFilter.toLowerCase()) ||
+      p.projectType.toLowerCase().includes(activeFilter.toLowerCase()) ||
+      p.name.toLowerCase().includes(activeFilter.toLowerCase())
+    );
+  });
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6 relative">
-      <div className="max-w-6xl mx-auto flex flex-col gap-16">
+    <div className="bg-gradient-to-b from-emerald-50/30 via-white to-white min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-12">
         
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto flex flex-col gap-5 animate-fade-in-up">
-          <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">Visual Gallery</span>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1a3020]">
-            Transformational <br />
-            <span className="text-primary-green italic font-medium">Before & After Showcase</span>
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100 px-3.5 py-1 rounded-full">
+            আমাদের কাজ • Project Gallery
+          </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900">
+            A R Green Garden <br />
+            <span className="text-emerald-700 italic font-medium">Premium Project Portfolio</span>
           </h1>
-          <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded"></div>
-          <p className="text-foreground/75 leading-relaxed text-sm">
-            Drag the slider horizontally to view the incredible transformation from raw concrete to beautiful gardens.
+          <p className="text-sm md:text-base text-gray-600">
+            ঢাকাসহ সারা দেশে আমাদের সম্পন্ন হওয়া ছাদবাগান, ভার্টিক্যাল গ্রিন ওয়াল ও রেসিডেন্সিয়াল ল্যান্ডস্কেপ প্রকল্পের দৃশ্যমালা।
           </p>
         </div>
 
-        {/* Before and After Slider Showcase */}
-        <div className="max-w-3xl mx-auto w-full">
-          <div 
-            ref={containerRef}
-            onMouseMove={handleMouseMove}
-            onTouchMove={handleTouchMove}
-            className="relative h-[250px] md:h-[450px] w-full overflow-hidden rounded-[32px] border border-white/50 shadow-2xl select-none cursor-ew-resize"
-          >
-            {/* Before Image (Bottom) */}
-            <div className="absolute inset-0 bg-[#f4f7f5]">
-              <img 
-                src="https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=1200&auto=format&fit=crop" 
-                alt="Before"
-                className="w-full h-full object-cover pointer-events-none"
-                onContextMenu={handleContextMenu}
-              />
-              <span className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-[10px] uppercase font-bold tracking-wider px-3.5 py-1.5 rounded-lg">
-                Before Setup
-              </span>
-            </div>
-
-            {/* After Image (Top, Clipped) */}
-            <div 
-              className="absolute inset-0 z-10"
-              style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }}
+        {/* 17 Filter Badges exact from PDF */}
+        <div className="flex flex-wrap items-center justify-center gap-2 max-w-5xl mx-auto">
+          {filterList.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveFilter(tab)}
+              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                activeFilter === tab
+                  ? "bg-emerald-700 text-white shadow-md scale-105"
+                  : "bg-white text-gray-700 hover:bg-emerald-50 border border-gray-200"
+              }`}
             >
-              <img 
-                src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop" 
-                alt="After"
-                className="w-full h-full object-cover pointer-events-none"
-                onContextMenu={handleContextMenu}
-              />
-              {/* Watermark */}
-              <span className="absolute bottom-4 right-4 bg-primary-green/85 backdrop-blur-sm text-white text-[10px] uppercase font-bold tracking-wider px-3.5 py-1.5 rounded-lg">
-                AR Green Garden ©
-              </span>
-              <span className="absolute bottom-4 left-4 bg-primary-green/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold tracking-wider px-3.5 py-1.5 rounded-lg z-20">
-                After Transformation
-              </span>
-            </div>
-
-            {/* Slider Line Handler */}
-            <div 
-              className="absolute top-0 bottom-0 z-20 w-1 bg-white cursor-ew-resize flex items-center justify-center"
-              style={{ left: `${sliderPosition}%` }}
-            >
-              <div className="w-8 h-8 rounded-full bg-white text-primary-green shadow-lg flex items-center justify-center font-bold text-sm border-2 border-primary-green">
-                ↔
-              </div>
-            </div>
-          </div>
+              {tab === "Before & After" ? "🔄 " : ""}
+              {tab}
+            </button>
+          ))}
         </div>
 
-        {/* Photo Grid Section */}
-        <div className="flex flex-col gap-10">
-          <div className="flex justify-between items-center flex-wrap gap-4 border-b border-foreground/5 pb-4">
-            <h3 className="text-xl md:text-2xl font-serif font-bold text-[#1a3020]">Photo Catalog</h3>
-            {/* Category tabs */}
-            <div className="flex gap-2 flex-wrap">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-300 cursor-pointer ${
-                    selectedCategory === cat
-                      ? "bg-primary-green text-white border-primary-green"
-                      : "bg-white text-foreground/60 border-foreground/10 hover:border-primary-green/30"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <span className="w-8 h-8 border-3 border-primary-green/20 border-t-primary-green rounded-full animate-spin"></span>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {filteredGallery.map((item, idx) => (
-                <div 
-                  key={item._id || idx}
-                  onClick={() => setLightboxIndex(idx)}
-                  className="group relative bg-[#f8faf9] rounded-2xl overflow-hidden border border-foreground/5 shadow-sm cursor-zoom-in hover:shadow-lg transition-all duration-300"
-                >
-                  {/* Photo Container */}
-                  <div className="relative h-64 overflow-hidden">
-                    <img 
-                      src={item.imageUrl} 
-                      alt={item.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      onContextMenu={handleContextMenu}
-                      loading="lazy"
-                    />
-                    
-                    {/* Watermark Overlay */}
-                    <div className="absolute top-2 right-2 bg-white/20 backdrop-blur-md text-white/50 text-[9px] font-bold px-2 py-0.5 rounded select-none uppercase tracking-wider">
-                      AR Green Garden
-                    </div>
+        {/* Project Gallery Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {filteredProjects.map((p) => (
+            <div
+              key={p.id}
+              className="bg-white rounded-3xl overflow-hidden border border-emerald-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between group"
+            >
+              <div>
+                {/* Main Image with Status & Category Badges */}
+                <div className="relative aspect-[16/11] overflow-hidden bg-gray-100">
+                  <img
+                    src={p.mainImage}
+                    alt={p.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 flex gap-1.5">
+                    <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white rounded-full text-[11px] font-semibold">
+                      {p.category}
+                    </span>
+                    {p.beforePhoto && (
+                      <span className="px-2.5 py-1 bg-emerald-800/90 text-white rounded-full text-[10px] font-bold">
+                        Before/After Available
+                      </span>
+                    )}
                   </div>
-
-                  {/* Info Overlay */}
-                  <div className="p-4 bg-white flex flex-col gap-1.5 border-t border-foreground/5">
-                    <span className="text-[10px] text-primary-green font-bold uppercase tracking-wider">{item.category}</span>
-                    <h4 className="text-sm font-bold text-[#1a3020] truncate">{item.title}</h4>
-                    {item.caption && <p className="text-[11px] text-foreground/60 leading-relaxed truncate">{item.caption}</p>}
+                  <div className="absolute bottom-3 right-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold shadow ${
+                        p.status === "Completed"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-amber-100 text-amber-800"
+                      }`}
+                    >
+                      {p.status === "Completed" ? "✓ সম্পন্ন" : "⏳ চলমান"}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Lightbox Overlay */}
-      {lightboxIndex !== null && filteredGallery[lightboxIndex] && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 animate-fade-in">
-          {/* Top Bar */}
-          <div className="flex justify-between items-center text-white px-4 py-2">
-            <span className="text-xs font-semibold tracking-widest uppercase">
-              {filteredGallery[lightboxIndex].category} • {lightboxIndex + 1} / {filteredGallery.length}
-            </span>
-            <button 
-              onClick={() => setLightboxIndex(null)}
-              className="text-white hover:text-white/70 text-2xl font-bold cursor-pointer p-2"
-            >
-              ✕
-            </button>
-          </div>
+                {/* Card Details */}
+                <div className="p-6 space-y-2">
+                  <h3 className="font-bold text-gray-900 text-lg font-serif group-hover:text-emerald-800 transition-colors">
+                    {p.bengaliName}
+                  </h3>
+                  <p className="text-xs text-gray-500 flex items-center gap-1">
+                    <span>📍</span> {p.location}
+                  </p>
+                  <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed pt-1">
+                    {p.description}
+                  </p>
+                </div>
+              </div>
 
-          {/* Main Content Area */}
-          <div className="flex justify-between items-center h-full max-w-5xl mx-auto w-full gap-4">
-            {/* Prev Btn */}
-            <button 
-              onClick={() => setLightboxIndex((lightboxIndex - 1 + filteredGallery.length) % filteredGallery.length)}
-              className="text-white hover:bg-white/10 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition-colors cursor-pointer"
-            >
-              ‹
-            </button>
-
-            {/* Current Image */}
-            <div className="relative max-h-[70vh] flex flex-col items-center">
-              <img 
-                src={filteredGallery[lightboxIndex].imageUrl} 
-                alt={filteredGallery[lightboxIndex].title} 
-                className="max-h-[65vh] object-contain rounded-lg shadow-xl"
-                onContextMenu={handleContextMenu}
-              />
-              {/* Overlay Watermark inside Lightbox */}
-              <div className="absolute top-4 right-4 bg-black/45 text-white/40 text-[10px] tracking-wider select-none font-bold uppercase px-3 py-1 rounded">
-                AR Green Garden Watermark Protected
+              {/* Card Footer with Details Modal trigger */}
+              <div className="p-6 pt-0 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 mt-4">
+                <span>{p.completionDate}</span>
+                <button
+                  onClick={() => {
+                    setSelectedProject(p);
+                    setActivePhotoIdx(0);
+                    setSliderPosition(50);
+                  }}
+                  className="text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  বিস্তারিত দেখুন →
+                </button>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Next Btn */}
-            <button 
-              onClick={() => setLightboxIndex((lightboxIndex + 1) % filteredGallery.length)}
-              className="text-white hover:bg-white/10 w-10 h-10 rounded-full flex items-center justify-center text-xl font-bold transition-colors cursor-pointer"
+        {/* Empty state if no projects in category */}
+        {filteredProjects.length === 0 && (
+          <div className="text-center py-16 bg-white rounded-3xl border border-gray-100">
+            <span className="text-4xl">🌿</span>
+            <p className="text-gray-500 text-sm mt-2">এই ক্যাটাগরিতে নতুন প্রোজেক্ট আপলোড হচ্ছে...</p>
+            <button
+              onClick={() => setActiveFilter("All")}
+              className="mt-4 px-4 py-2 bg-emerald-700 text-white text-xs font-semibold rounded-xl"
             >
-              ›
+              সব প্রোজেক্ট দেখুন
             </button>
           </div>
+        )}
 
-          {/* Bottom Bar Info */}
-          <div className="text-center text-white/90 p-4 max-w-lg mx-auto flex flex-col gap-2">
-            <h3 className="text-[17px] font-bold font-serif">{filteredGallery[lightboxIndex].title}</h3>
-            {filteredGallery[lightboxIndex].caption && (
-              <p className="text-xs text-white/60 leading-relaxed">{filteredGallery[lightboxIndex].caption}</p>
-            )}
+        {/* Detailed Project Lightbox Modal */}
+        {selectedProject && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-[32px] max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl relative">
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="absolute top-6 right-6 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 flex items-center justify-center font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+
+              {/* Modal Header */}
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    {selectedProject.projectType}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    Status: <strong>{selectedProject.status}</strong> ({selectedProject.completionDate})
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mt-2">
+                  {selectedProject.bengaliName}
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">📍 {selectedProject.location}</p>
+              </div>
+
+              {/* Multi-photo slider / before-after if present */}
+              {selectedProject.beforePhoto && selectedProject.afterPhoto ? (
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-emerald-800 block">
+                    Before & After Comparison (পূর্বে ও পরে)
+                  </span>
+                  <div className="relative aspect-[16/10] rounded-2xl overflow-hidden select-none shadow-md border border-gray-200">
+                    <img
+                      src={selectedProject.afterPhoto}
+                      alt="After"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute top-3 right-3 bg-emerald-800 text-white px-3 py-1 rounded-md text-xs font-bold shadow">
+                      AFTER
+                    </div>
+
+                    <div
+                      className="absolute inset-0 overflow-hidden"
+                      style={{ width: `${sliderPosition}%` }}
+                    >
+                      <img
+                        src={selectedProject.beforePhoto}
+                        alt="Before"
+                        className="absolute inset-0 w-full h-full object-cover max-w-none"
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                      <div className="absolute top-3 left-3 bg-black/70 text-white px-3 py-1 rounded-md text-xs font-bold shadow">
+                        BEFORE
+                      </div>
+                    </div>
+
+                    <div
+                      className="absolute top-0 bottom-0 w-1 bg-white cursor-ew-resize flex items-center justify-center pointer-events-none"
+                      style={{ left: `${sliderPosition}%` }}
+                    >
+                      <div className="w-8 h-8 bg-white text-emerald-800 rounded-full shadow-lg flex items-center justify-center text-xs font-bold border border-emerald-600">
+                        ↔
+                      </div>
+                    </div>
+
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={sliderPosition}
+                      onChange={(e) => setSliderPosition(Number(e.target.value))}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-md">
+                    <img
+                      src={selectedProject.photos[activePhotoIdx]}
+                      alt={selectedProject.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {/* Thumbnails */}
+                  {selectedProject.photos.length > 1 && (
+                    <div className="flex gap-2">
+                      {selectedProject.photos.map((photo, pIdx) => (
+                        <button
+                          key={pIdx}
+                          onClick={() => setActivePhotoIdx(pIdx)}
+                          className={`w-16 h-16 rounded-xl overflow-hidden border-2 cursor-pointer ${
+                            activePhotoIdx === pIdx ? "border-emerald-700" : "border-transparent opacity-70"
+                          }`}
+                        >
+                          <img src={photo} alt="thumb" className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="space-y-2 bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                <h4 className="font-bold text-sm text-gray-900 font-serif">প্রকল্পের বিস্তারিত বিবরণ</h4>
+                <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
+                  {selectedProject.description}
+                </p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Link
+                  href={`/contact?projectRef=${encodeURIComponent(selectedProject.name)}`}
+                  className="flex-1 text-center py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow transition-all"
+                >
+                  এই ধরণের প্রজেক্ট করাতে যোগাযোগ করুন
+                </Link>
+                <a
+                  href="tel:01620692449"
+                  className="py-3.5 px-6 border border-emerald-300 text-emerald-800 text-xs font-semibold rounded-xl hover:bg-emerald-50 text-center transition-all"
+                >
+                  📞 হটলাইন: 01620692449
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+      </div>
     </div>
   );
 }

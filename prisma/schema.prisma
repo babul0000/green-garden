@@ -10,31 +10,143 @@ datasource db {
 enum Role {
   CLIENT
   ADMIN
+  EMPLOYEE
   EDITOR
   MODERATOR
 }
 
 model User {
-  id           String    @id @default(cuid())
-  name         String
-  email        String    @unique
-  password     String
-  role         Role      @default(CLIENT)
-  phone        String?
-  avatar       String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  bookings     Booking[]
-  reviews      Review[]
-  comments     Comment[]
+  id                   String                 @id @default(cuid())
+  name                 String
+  email                String                 @unique
+  password             String
+  role                 Role                   @default(CLIENT)
+  phone                String?
+  avatar               String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  
+  employee             Employee?
+  projects             Project[]              @relation("ClientProjects")
+  bookings             Booking[]
+  designRequests       DesignGardenRequest[]
+  treeDoctorRequests   TreeDoctorRequest[]
+  maintenanceSchedules MaintenanceSchedule[]  @relation("ClientMaintenance")
+  quotations           Quotation[]
+  invoices             Invoice[]
+  reviews              Review[]
+  comments             Comment[]
+  notifications        Notification[]
 
   @@map("users")
+}
+
+model Employee {
+  id                    String                @id @default(cuid())
+  employeeId            String                @unique // e.g. EMP-101
+  userId                String?               @unique
+  user                  User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name                  String
+  designation           String                // e.g. Senior Tree Doctor, Master Gardener, Irrigation Tech
+  department            String                // Tree Doctor, Garden Maintenance, Landscape Design
+  responsibility        String?
+  joiningDate           DateTime
+  experienceYears       Int                   @default(0)
+  experienceMonths      Int                   @default(0)
+  education             String?
+  training              String?
+  skills                String[]
+  salary                Float?                // Private to Admin
+  personalPhone         String?               // Private
+  personalAddress       String?               // Private
+  status                String                @default("ACTIVE") // ACTIVE, INACTIVE, ON_LEAVE
+  isPublicTeam          Boolean               @default(true)
+  photo                 String?
+  internalNotes         String?               // Private
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  attendances           Attendance[]
+  projectAssignments    ProjectAssignment[]
+  treeDoctorAssignments TreeDoctorRequest[]   @relation("DoctorAssigned")
+  maintenanceTasks      MaintenanceSchedule[] @relation("TechnicianAssigned")
+
+  @@map("employees")
+}
+
+model Attendance {
+  id         String    @id @default(cuid())
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  date       DateTime  @default(now())
+  checkIn    DateTime?
+  checkOut   DateTime?
+  status     String    @default("PRESENT") // PRESENT, ABSENT, LATE, LEAVE
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("attendances")
+}
+
+model Project {
+  id                 String                @id @default(cuid())
+  slug               String                @unique
+  name               String
+  clientId           String?
+  clientUser         User?                 @relation("ClientProjects", fields: [clientId], references: [id], onDelete: SetNull)
+  clientName         String?
+  clientPhone        String?
+  category           String                @default("Residential") // Luxury, Standard, Rooftop, Residential, Commercial, Resort, Vertical Garden, etc.
+  location           String?               // Dhanmondi, Gulshan, Banani, etc.
+  description        String?
+  progress           Int                   @default(0) // 0, 25, 50, 75, 100
+  status             String                @default("RUNNING") // PLANNING, RUNNING, COMPLETED, MAINTENANCE
+  budget             Float?
+  totalExpense       Float?                @default(0)
+  startDate          DateTime?
+  deadline           DateTime?
+  completionDate     DateTime?
+  beforeImage        String?
+  afterImage         String?
+  wipImages          String[]
+  images             String[]
+  featured           Boolean               @default(false)
+  materialsUsed      Json?
+  notes              String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  assignments        ProjectAssignment[]
+  plantHealthRecords PlantHealthRecord[]
+  maintenancePlans   MaintenanceSchedule[]
+  quotations         Quotation[]
+  invoices           Invoice[]
+  reviews            Review[]
+
+  @@map("projects")
+}
+
+model ProjectAssignment {
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  roleOnTask   String?   // Lead Gardener, Irrigation Specialist
+  assignedDate DateTime  @default(now())
+  status       String    @default("ASSIGNED") // ASSIGNED, WORKING, COMPLETED
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  @@map("project_assignments")
 }
 
 model Service {
   id          String   @id @default(cuid())
   slug        String   @unique
   label       String
+  category    String   @default("Landscape Design") // Landscape Design, Garden Services, Maintenance, Plant Health, Irrigation, Additional, Gardening Materials
   desc        String?
   icon        String?  @default("🌱")
   pricing     String?
@@ -49,28 +161,6 @@ model Service {
   @@map("services")
 }
 
-model Project {
-  id                String   @id @default(cuid())
-  slug              String   @unique
-  name              String
-  client            String?
-  category          String   @default("Residential")
-  imageUrl          String?
-  images            String[]
-  videoUrl          String?
-  location          String?
-  duration          String?
-  budgetRange       String?
-  challenges        String?
-  solution          String?
-  featured          Boolean  @default(false)
-  clientTestimonial Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@map("projects")
-}
-
 model GalleryItem {
   id             String   @id @default(cuid())
   title          String
@@ -78,9 +168,224 @@ model GalleryItem {
   beforeImageUrl String?
   category       String   @default("Rooftop")
   caption        String?
+  featured       Boolean  @default(false)
   createdAt      DateTime @default(now())
 
   @@map("gallery_items")
+}
+
+model DesignGardenRequest {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name         String
+  phone        String
+  email        String?
+  spaceType    String   // Rooftop, Balcony, Yard, Office, Resort, Restaurant
+  designStyle  String   // Luxury, Modern, Natural, Standard
+  features     String[] // Lawn, Flower Bed, Vertical Garden, Seating, Pergola, Fountain, Lighting, Irrigation
+  sitePhotoUrl String?
+  approxArea   String?  // e.g. "1200 sqft"
+  budgetRange  String?  // e.g. "1.5L - 3L BDT"
+  status       String   @default("NEW") // NEW, CONTACTED, QUOTED, CONVERTED
+  adminNotes   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("design_garden_requests")
+}
+
+model TreeDoctorRequest {
+  id                 String    @id @default(cuid())
+  userId             String?
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clientName         String
+  clientPhone        String
+  location           String
+  treeName           String
+  problem            String
+  treePhotoUrl       String?
+  preferredVisitTime String?
+  isEmergency        Boolean   @default(false)
+  status             String    @default("PENDING") // PENDING, ASSIGNED, VISITED, DIAGNOSED, TREATED, FOLLOW_UP, COMPLETED
+  assignedDoctorId   String?
+  assignedDoctor     Employee? @relation("DoctorAssigned", fields: [assignedDoctorId], references: [id], onDelete: SetNull)
+  diagnosis          String?
+  treatment          String?
+  followUpDate       DateTime?
+  doctorNotes        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("tree_doctor_requests")
+}
+
+model PlantHealthRecord {
+  id                  String    @id @default(cuid())
+  projectId           String
+  project             Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  plantName           String
+  photoUrl            String?
+  plantingDate        DateTime?
+  location            String?
+  diseaseHistory      String?
+  treatment           String?
+  fertilizer          String?
+  pruning             String?
+  nextMaintenanceDate DateTime?
+  doctorReport        String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@map("plant_health_records")
+}
+
+model MaintenanceSchedule {
+  id               String    @id @default(cuid())
+  projectId        String?
+  project          Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  customerId       String?
+  customer         User?     @relation("ClientMaintenance", fields: [customerId], references: [id], onDelete: SetNull)
+  clientName       String
+  clientPhone      String?
+  location         String    // Gulshan, Dhanmondi, Banani
+  frequency        String    @default("MONTHLY") // WEEKLY, MONTHLY, REGULAR, ONE_TIME
+  scheduledDate    DateTime
+  assignedStaffId  String?
+  assignedStaff    Employee? @relation("TechnicianAssigned", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+  status           String    @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("maintenance_schedules")
+}
+
+model Quotation {
+  id              String          @id @default(cuid())
+  quotationNumber String          @unique // QT-2026-001
+  projectId       String?
+  project         Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clientName      String
+  clientEmail     String?
+  clientPhone     String?
+  subtotal        Float           @default(0)
+  discount        Float           @default(0)
+  total           Float           @default(0)
+  advance         Float           @default(0)
+  due             Float           @default(0)
+  status          String          @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
+  validUntil      DateTime?
+  notes           String?
+  items           QuotationItem[]
+  invoices        Invoice[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("quotations")
+}
+
+model QuotationItem {
+  id          String    @id @default(cuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  category    String    // Landscape Design, Plants, Soil, Fertilizer, Pots, Labour, Irrigation, Lighting, Transportation, Other
+  itemTitle   String
+  quantity    Float     @default(1)
+  unit        String?   @default("pcs")
+  unitPrice   Float     @default(0)
+  amount      Float     @default(0)
+
+  @@map("quotation_items")
+}
+
+model Invoice {
+  id            String    @id @default(cuid())
+  invoiceNumber String    @unique // INV-2026-001
+  quotationId   String?
+  quotation     Quotation? @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clientName    String
+  clientPhone   String?
+  totalAmount   Float     @default(0)
+  paidAmount    Float     @default(0)
+  dueAmount     Float     @default(0)
+  status        String    @default("DUE") // PAID, PARTIALLY_PAID, DUE, OVERDUE
+  dueDate       DateTime?
+  notes         String?
+  payments      Payment[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("invoices")
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount        Float
+  paymentDate   DateTime @default(now())
+  paymentMethod String   @default("BKASH") // BKASH, NAGAD, BANK_TRANSFER, CASH
+  transactionId String?
+  receivedBy    String?
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@map("payments")
+}
+
+model InventoryItem {
+  id            String   @id @default(cuid())
+  name          String
+  category      String   // Plants, Trees, Soil/Media, Fertilizer, Pots/Tubs, Irrigation, Lighting, Tools, Other
+  stockQuantity Float    @default(0)
+  minThreshold  Float    @default(10)
+  unit          String   @default("pcs")
+  unitCost      Float?   @default(0)
+  location      String?  @default("Main Nursery")
+  supplier      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("inventory_items")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("INFO") // REQUEST, PROJECT, TREE_DOCTOR, MAINTENANCE, PAYMENT, STOCK_ALERT, SCHEDULE_CONFLICT
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  rating    Int      @default(5)
+  text      String
+  service   String?
+  location  String?
+  photoUrl  String?
+  status    String   @default("Approved")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
 }
 
 model Blog {
@@ -134,34 +439,6 @@ model Booking {
   @@map("bookings")
 }
 
-model Review {
-  id        String   @id @default(cuid())
-  name      String
-  rating    Int      @default(5)
-  text      String
-  service   String?
-  location  String?
-  status    String   @default("Approved")
-  createdAt DateTime @default(now())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@map("reviews")
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  service   String?
-  message   String
-  status    String   @default("Unread")
-  createdAt DateTime @default(now())
-
-  @@map("messages")
-}
-
 model CareerApplication {
   id          String   @id @default(cuid())
   name        String
@@ -183,3 +460,17 @@ model Setting {
 
   @@map("settings")
 }
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+

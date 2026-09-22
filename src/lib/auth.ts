@@ -1,11 +1,14 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 
+export type UserRole = "CLIENT" | "ADMIN" | "EMPLOYEE" | "EDITOR" | "MODERATOR" | "client" | "admin" | "employee" | "editor" | "moderator";
+
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: "client" | "admin" | "editor" | "moderator";
+  role: UserRole;
+  phone?: string | null;
 }
 
 export const AUTH_COOKIE_NAME = "gg_auth_token";
@@ -49,7 +52,8 @@ export async function verifyJwtToken(token: string): Promise<AuthUser | null> {
       id: payload.id as string,
       name: payload.name as string,
       email: payload.email as string,
-      role: (payload.role as AuthUser["role"]) || "client"
+      role: (payload.role as UserRole) || "CLIENT",
+      phone: payload.phone as string | undefined
     };
   } catch {
     return null;
