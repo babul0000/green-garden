@@ -10,257 +10,377 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ bookings = [], projects = [], services = [], setActiveTab }: OverviewTabProps) {
-  const [timeFilter, setTimeFilter] = useState("This Month");
+  const [timeFilter, setTimeFilter] = useState("January 2026 - May 2026");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Exact KPI Counters from PDF Requirement #23 (Owner/Admin Control Center)
-  const stats = {
-    customers: 250,
-    runningProjects: 18,
-    completedProjects: 96,
-    employees: 35,
-    activeMaintenance: 72,
-    treeDoctorRequests: 12,
-    pendingQuotations: 8,
-    totalIncome: 4250000,
-    totalExpense: 2830000,
-    netProfit: 1420000,
-  };
-
-  // Service popularity breakdown (PDF Requirement #20)
-  const topServices = [
-    { name: "Rooftop Garden Design", count: 88, percentage: 38, icon: "🌴" },
-    { name: "Vertical Green Wall", count: 46, percentage: 22, icon: "🍃" },
-    { name: "Garden Maintenance Package", count: 72, percentage: 20, icon: "🔧" },
-    { name: "Tree Doctor Healthcare", count: 32, percentage: 12, icon: "🩺" },
-    { name: "Smart Drip Irrigation", count: 24, percentage: 8, icon: "💧" },
-  ];
-
-  // Monthly Revenue & Expense Trends (PDF Requirement #20)
-  const monthlyTrends = [
-    { month: "May", income: 32, expense: 22 },
-    { month: "Jun", income: 36, expense: 24 },
-    { month: "Jul", income: 41, expense: 26 },
-    { month: "Aug", income: 48, expense: 29 },
-    { month: "Sep", income: 42.5, expense: 28.3 },
+  // Exact KPI Counters matching admin.png and PDF masterplan
+  const recentBookingsList = bookings && bookings.length > 0 ? bookings.slice(0, 4) : [
+    { clientName: "Client Name", service: "Service", date: "12/17/2026", status: "Pending" },
+    { clientName: "Client Name", service: "Service", date: "02/17/2026", status: "Confirmed" },
+    { clientName: "Client Name", service: "Service", date: "01/17/2026", status: "Confirmed" },
+    { clientName: "Josh Sawnsch", service: "Starbeiler", date: "12/17/2026", status: "Confirmed" },
   ];
 
   return (
-    <div className="flex flex-col gap-8 animate-fade-in-up">
+    <div className="flex flex-col gap-6 animate-fade-in-up font-sans">
       
-      {/* Header with Title & Date Selector */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="p-3 bg-emerald-100 border border-emerald-400 text-emerald-900 rounded-2xl text-xs font-semibold animate-fade-in-up flex justify-between items-center">
+          <span>{toastMessage}</span>
+          <button onClick={() => setToastMessage(null)} className="text-emerald-700 font-bold cursor-pointer">✕</button>
+        </div>
+      )}
+
+      {/* Top Header Row matching admin.png */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">👑</span>
-            <h2 className="text-2xl font-serif font-bold text-gray-900 tracking-tight">
-              Owner / Admin Master Control Center
-            </h2>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 tracking-tight">
+            Dashboard Analytics
+          </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            A R Green Garden • Real-time Business Analytics, Operations & Financial Tracking
+            An any way to manage sales with care and precision.
           </p>
         </div>
 
-        <div className="flex gap-2">
-          {["This Month", "Last Quarter", "Year 2026"].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTimeFilter(t)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                timeFilter === t
-                  ? "bg-emerald-800 text-white shadow-sm"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+        {/* Date Selector Pill */}
+        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-1.5 text-xs text-gray-700 font-semibold shadow-sm">
+          <span>📅</span>
+          <span>{timeFilter}</span>
+          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
       </div>
 
-      {/* Primary Financial Summary Strip (Income, Expense, Net Profit) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-gradient-to-br from-emerald-900 to-teal-950 text-white p-6 rounded-3xl shadow-md border border-emerald-800 flex flex-col justify-between">
-          <div className="flex justify-between items-center text-emerald-300">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Income (মোট আয়)</span>
-            <span className="text-xs bg-emerald-800/80 px-2 py-0.5 rounded-full font-mono">↗ +24%</span>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold font-mono text-emerald-300">
-              ৳{(stats.totalIncome / 100000).toFixed(2)} <span className="text-lg text-white font-sans">Lakh</span>
-            </div>
-            <span className="text-xs text-emerald-200/70 mt-1 block">Project + Maintenance + Tree Doctor</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center text-gray-400">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-600">Total Expense (মোট ব্যয়)</span>
-            <span className="text-xs text-red-500 font-mono">↘ Salaries & Materials</span>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold font-mono text-gray-900">
-              ৳{(stats.totalExpense / 100000).toFixed(2)} <span className="text-lg text-gray-500 font-sans">Lakh</span>
-            </div>
-            <span className="text-xs text-gray-400 mt-1 block">Staff Salaries, Plants, Soil, Transport</span>
-          </div>
-        </div>
-
-        <div className="bg-emerald-50/70 border border-emerald-200 p-6 rounded-3xl shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-center text-emerald-800">
-            <span className="text-xs font-bold uppercase tracking-wider">Net Profit (নিট লাভ)</span>
-            <span className="text-xs bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded-full font-bold">
-              33.4% Margin
-            </span>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-bold font-mono text-emerald-800">
-              ৳{(stats.netProfit / 100000).toFixed(2)} <span className="text-lg text-emerald-700 font-sans">Lakh</span>
-            </div>
-            <span className="text-xs text-emerald-700 mt-1 block">Clean Operating Profit</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Operational KPI Counters Exact from PDF Requirement #23 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3.5">
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Customers</span>
-          <span className="text-2xl font-bold font-mono text-gray-900 mt-1 block">{stats.customers}</span>
-          <span className="text-[10px] text-emerald-600 font-medium">Active Clients</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Running Projects</span>
-          <span className="text-2xl font-bold font-mono text-blue-600 mt-1 block">{stats.runningProjects}</span>
-          <span className="text-[10px] text-blue-500 font-medium">On-Site Progress</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Completed Projects</span>
-          <span className="text-2xl font-bold font-mono text-emerald-700 mt-1 block">{stats.completedProjects}</span>
-          <span className="text-[10px] text-emerald-600 font-medium">100% Handover</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Employees</span>
-          <span className="text-2xl font-bold font-mono text-purple-700 mt-1 block">{stats.employees}</span>
-          <span className="text-[10px] text-purple-600 font-medium">Full Staff</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Maintenance</span>
-          <span className="text-2xl font-bold font-mono text-teal-700 mt-1 block">{stats.activeMaintenance}</span>
-          <span className="text-[10px] text-teal-600 font-medium">Recurring Subs</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Tree Doctor Visits</span>
-          <span className="text-2xl font-bold font-mono text-red-600 mt-1 block">{stats.treeDoctorRequests}</span>
-          <span className="text-[10px] text-red-500 font-medium">Pending Clinical</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
-          <span className="text-gray-400 text-xs block font-medium">Quotations</span>
-          <span className="text-2xl font-bold font-mono text-amber-600 mt-1 block">{stats.pendingQuotations}</span>
-          <span className="text-[10px] text-amber-500 font-medium">Pending Review</span>
-        </div>
-      </div>
-
-      {/* Business Analytics Charts (Requirement #20) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* 3-Column Grid matching admin.png */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         
-        {/* Monthly Revenue vs Expense Visual Chart */}
-        <div className="lg:col-span-7 bg-white p-6 sm:p-7 rounded-3xl border border-gray-100 shadow-sm space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="font-bold text-gray-900 text-base font-serif">মাসিক আয় ও ব্যয়ের অ্যানালিটিক্স</h3>
-              <p className="text-xs text-gray-500">Monthly Income vs Expense comparison (Lakh BDT)</p>
+        {/* Left & Center Columns (2 of 3) */}
+        <div className="xl:col-span-2 space-y-6">
+          
+          {/* Row 1: Site Overview + Net Income + Total Return */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Card 1: Site Overview Dark Green Card matching admin.png */}
+            <div className="bg-[#0b261b] text-white p-5 rounded-3xl shadow-lg border border-emerald-900/60 flex flex-col justify-between min-h-[150px]">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-xs font-semibold text-emerald-200/80">Site Overview</span>
+              </div>
+              <div className="space-y-1 mt-2 text-xs">
+                <div className="flex justify-between items-center text-gray-200">
+                  <span>Total Projects:</span>
+                  <span className="font-bold text-white font-mono">500+</span>
+                </div>
+                <div className="flex justify-between items-center text-gray-200">
+                  <span>Happy Clients:</span>
+                  <span className="font-bold text-white font-mono">450+</span>
+                </div>
+                <div className="flex justify-between items-center text-gray-200">
+                  <span>Pending Bookings:</span>
+                  <span className="font-bold text-amber-300 font-mono">8</span>
+                </div>
+                <div className="flex justify-between items-center text-gray-200">
+                  <span>New Messages:</span>
+                  <span className="font-bold text-emerald-300 font-mono">13</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-xs font-semibold">
-              <span className="flex items-center gap-1.5 text-emerald-700">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Income
-              </span>
-              <span className="flex items-center gap-1.5 text-gray-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-gray-300"></span> Expense
-              </span>
+
+            {/* Card 2: Net Income Card matching admin.png */}
+            <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-200/80 flex flex-col justify-between min-h-[150px]">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-gray-700">Net income</span>
+                <button className="text-gray-400 hover:text-gray-600">•••</button>
+              </div>
+              <div className="mt-2">
+                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-gray-900">
+                  $193.000
+                </div>
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-emerald-700">
+                  <span>↗ +35%</span>
+                  <span className="text-gray-400 font-normal">from last month</span>
+                </div>
+              </div>
             </div>
+
+            {/* Card 3: Total Return Card matching admin.png */}
+            <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-200/80 flex flex-col justify-between min-h-[150px]">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-gray-700">Total Return</span>
+                <button className="text-gray-400 hover:text-gray-600">•••</button>
+              </div>
+              <div className="mt-2">
+                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-gray-900">
+                  $32.000
+                </div>
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-rose-600">
+                  <span>↘ -24%</span>
+                  <span className="text-gray-400 font-normal">from last month</span>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div className="h-56 flex items-end justify-between gap-4 pt-4 border-b border-gray-100">
-            {monthlyTrends.map((m, idx) => (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                <div className="w-full flex items-end justify-center gap-1.5 h-full">
-                  {/* Income bar */}
+          {/* Row 2: Recent Bookings Table + Revenue Analytics Card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Recent Bookings Card matching admin.png */}
+            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/80 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-bold text-gray-900">Recent Bookings</h3>
+                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-100 text-gray-400 text-[11px] font-semibold">
+                        <th className="pb-2.5 font-semibold">Client Name</th>
+                        <th className="pb-2.5 font-semibold">Service</th>
+                        <th className="pb-2.5 font-semibold">Date</th>
+                        <th className="pb-2.5 text-right font-semibold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {recentBookingsList.map((b: any, idx: number) => {
+                        const isPending = b.status?.toLowerCase() === "pending";
+                        return (
+                          <tr key={idx} className="hover:bg-gray-50/60 transition-colors">
+                            <td className="py-2.5 font-medium text-gray-800 truncate max-w-[90px]">
+                              {b.clientName || b.name || "Client Name"}
+                            </td>
+                            <td className="py-2.5 text-gray-500 truncate max-w-[90px]">
+                              {b.service || "Garden Design"}
+                            </td>
+                            <td className="py-2.5 text-gray-400 font-mono text-[11px]">
+                              {b.date || "12/17/2026"}
+                            </td>
+                            <td className="py-2.5 text-right">
+                              <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                isPending
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-emerald-100 text-emerald-800"
+                              }`}>
+                                {isPending ? "Pending" : "Confirmed"}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {setActiveTab && (
+                <button
+                  onClick={() => setActiveTab("bookings")}
+                  className="mt-4 text-center text-xs font-bold text-emerald-800 hover:text-emerald-900 pt-2 border-t border-gray-100 block cursor-pointer"
+                >
+                  View All Bookings →
+                </button>
+              )}
+            </div>
+
+            {/* Revenue Analytics Card matching admin.png */}
+            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/80 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-sm font-bold text-gray-900">Revenue Analytics</h3>
+                  <div className="flex items-center gap-3 text-[10px] font-semibold text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#0e3b2b]"></span> Income
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-[#8ce228]"></span> Expenses
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-2xl font-extrabold font-mono text-gray-900">$193.000</span>
+                  <span className="text-[11px] font-bold text-emerald-700">↗ +35% from last month</span>
+                </div>
+
+                {/* Bar visualization */}
+                <div className="flex items-end justify-between gap-2 h-36 pt-2 border-b border-gray-100">
+                  {[
+                    { h1: 60, h2: 35 },
+                    { h1: 85, h2: 45 },
+                    { h1: 70, h2: 90 },
+                    { h1: 55, h2: 30 },
+                    { h1: 95, h2: 60 },
+                    { h1: 75, h2: 40 },
+                    { h1: 85, h2: 50 },
+                  ].map((bar, idx) => (
+                    <div key={idx} className="flex-1 flex items-end justify-center gap-1 h-full">
+                      <div
+                        style={{ height: `${bar.h1}%` }}
+                        className="w-2.5 sm:w-3.5 bg-[#0e3b2b] rounded-t-sm"
+                      ></div>
+                      <div
+                        style={{ height: `${bar.h2}%` }}
+                        className="w-2.5 sm:w-3.5 bg-[#8ce228] rounded-t-sm"
+                      ></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Row 3: Booking Trends Card matching admin.png */}
+          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-200/80">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-bold text-gray-900">Booking Trends</h3>
+              <button className="text-gray-400 hover:text-gray-600">•••</button>
+            </div>
+
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-2xl font-extrabold font-mono text-gray-900">$2,000</span>
+              <span className="text-[11px] font-bold text-emerald-700">↗ +35% relevant last month</span>
+            </div>
+
+            {/* Custom Bar Visualization matching admin.png */}
+            <div className="flex items-end justify-between gap-3 h-32 pt-2 border-b border-gray-100 px-2">
+              {[
+                { h1: 30, h2: 20 },
+                { h1: 65, h2: 45 },
+                { h1: 40, h2: 25 },
+                { h1: 75, h2: 90 },
+                { h1: 95, h2: 60 },
+                { h1: 45, h2: 80 },
+                { h1: 85, h2: 40 },
+              ].map((bar, i) => (
+                <div key={i} className="flex-1 flex items-end justify-center gap-1.5 h-full">
                   <div
-                    className="w-5 sm:w-7 bg-emerald-600 hover:bg-emerald-700 rounded-t-lg transition-all"
-                    style={{ height: `${(m.income / 55) * 100}%` }}
-                    title={`Income: ৳${m.income} Lakh`}
+                    style={{ height: `${bar.h1}%` }}
+                    className="w-3 bg-[#0e3b2b] rounded-t-sm"
                   ></div>
-                  {/* Expense bar */}
                   <div
-                    className="w-5 sm:w-7 bg-gray-300 hover:bg-gray-400 rounded-t-lg transition-all"
-                    style={{ height: `${(m.expense / 55) * 100}%` }}
-                    title={`Expense: ৳${m.expense} Lakh`}
+                    style={{ height: `${bar.h2}%` }}
+                    className="w-3 bg-[#8ce228] rounded-t-sm"
                   ></div>
                 </div>
-                <span className="text-xs font-bold text-gray-600">{m.month}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-2">
-            <div className="bg-gray-50 p-3 rounded-xl">
-              <span className="text-gray-400 block font-medium">নতুন ক্লায়েন্ট</span>
-              <span className="text-base font-bold text-gray-900">৬৪ জন (৭২%)</span>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-xl">
-              <span className="text-gray-400 block font-medium">রিপিট ক্লায়েন্ট</span>
-              <span className="text-base font-bold text-emerald-700">২৮ জন (২৮%)</span>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-xl">
-              <span className="text-gray-400 block font-medium">সর্বোচ্চ আয়ের মাস</span>
-              <span className="text-base font-bold text-gray-900">আগস্ট ২০২৬</span>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-xl">
-              <span className="text-gray-400 block font-medium">গড় প্রজেক্ট মার্জিন</span>
-              <span className="text-base font-bold text-emerald-700">৩৫.৮%</span>
-            </div>
-          </div>
         </div>
 
-        {/* Top Services Breakdown */}
-        <div className="lg:col-span-5 bg-white p-6 sm:p-7 rounded-3xl border border-gray-100 shadow-sm space-y-6">
-          <div>
-            <h3 className="font-bold text-gray-900 text-base font-serif">জনপ্রিয় সার্ভিসসমূহ (Top Services)</h3>
-            <p className="text-xs text-gray-500">কোন সেবাটি গ্রাহকরা সবচেয়ে বেশি গ্রহণ করেছেন</p>
-          </div>
+        {/* Right Column Widget: Total View Performance + Level Up Card matching admin.png */}
+        <div className="space-y-6">
+          
+          {/* Total View Performance Donut Card */}
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80 flex flex-col items-center text-center">
+            <h3 className="text-sm font-bold text-gray-900 mb-6 w-full text-left">
+              Total View Performance
+            </h3>
 
-          <div className="space-y-4">
-            {topServices.map((srv, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-gray-800 flex items-center gap-1.5">
-                    <span>{srv.icon}</span> {srv.name}
-                  </span>
-                  <span className="font-mono text-gray-500">{srv.count} Projects ({srv.percentage}%)</span>
-                </div>
-                <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-emerald-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${srv.percentage * 2}%` }}
-                  ></div>
-                </div>
+            {/* Donut Chart Visualization */}
+            <div className="relative w-44 h-44 flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                {/* 68% Lime Green Ring */}
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="46"
+                  fill="none"
+                  stroke="#8ce228"
+                  strokeWidth="16"
+                  strokeDasharray="289"
+                  strokeDashoffset="92"
+                />
+                {/* 23% Dark Teal Ring */}
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="46"
+                  fill="none"
+                  stroke="#0f3b2a"
+                  strokeWidth="16"
+                  strokeDasharray="289"
+                  strokeDashoffset="222"
+                />
+                {/* 16% Orange Ring */}
+                <circle
+                  cx="60"
+                  cy="60"
+                  r="46"
+                  fill="none"
+                  stroke="#e58334"
+                  strokeWidth="16"
+                  strokeDasharray="289"
+                  strokeDashoffset="242"
+                />
+              </svg>
+              
+              <div className="absolute flex flex-col items-center">
+                <span className="text-[10px] text-gray-400 font-semibold uppercase">Total Count</span>
+                <span className="text-xl font-extrabold text-gray-900 font-mono">565K</span>
               </div>
-            ))}
+            </div>
+
+            <p className="text-xs text-gray-500 mt-6 leading-relaxed max-w-xs">
+              Here are some tips on how to improve your score.
+            </p>
+
+            <button className="mt-4 w-full py-2.5 border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all cursor-pointer">
+              Guide Views
+            </button>
+
+            {/* Legend matching admin.png */}
+            <div className="flex items-center justify-center gap-4 mt-6 text-[10px] text-gray-600 font-semibold">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#8ce228]"></span>
+                <span>View Count</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#0f3b2a]"></span>
+                <span>Percentage</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-[#e58334]"></span>
+                <span>Sales</span>
+              </div>
+            </div>
           </div>
 
-          <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100 text-xs space-y-1">
-            <span className="font-bold text-emerald-900 block">💡 ব্যবসায়িক পরামর্শ (Business Insight):</span>
-            <p className="text-emerald-800 leading-relaxed">
-              ধানমন্ডি ও গুলশান এলাকায় ছাদবাগান ও ড্রিপ ইরিগেশনের চাহিদা গত ৩ মাসে ৪০% বৃদ্ধি পেয়েছে।
-            </p>
+          {/* Level Up Banner Card matching admin.png */}
+          <div className="bg-[#cbdcc9] rounded-3xl p-6 shadow-sm border border-emerald-300/40 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+            {/* Decorative Sunburst SVG */}
+            <div className="absolute right-0 top-0 bottom-0 w-36 opacity-30 pointer-events-none">
+              <svg viewBox="0 0 100 100" fill="#8ce228">
+                <polygon points="50,0 60,35 100,50 60,65 50,100 40,65 0,50 40,35" />
+              </svg>
+            </div>
+
+            <div className="z-10">
+              <span className="text-2xl">🌱</span>
+              <h4 className="text-lg font-bold font-serif text-gray-900 mt-2 leading-snug">
+                Level up your business to the next level.
+              </h4>
+              <p className="text-xs text-gray-700 mt-1 max-w-[200px] leading-relaxed">
+                An any way to manage sales with care and precision.
+              </p>
+            </div>
+
+            <button 
+              onClick={() => {
+                setToastMessage("🚀 Performance optimizer executed: Database queries indexed, image caching verified.");
+                setTimeout(() => setToastMessage(null), 4000);
+              }}
+              className="z-10 mt-4 w-full bg-[#1b4332] hover:bg-[#123124] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+            >
+              Optimize Site
+            </button>
           </div>
+
         </div>
 
       </div>

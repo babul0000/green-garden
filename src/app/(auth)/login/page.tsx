@@ -25,8 +25,10 @@ export default function Login() {
         setSuccess(true);
         const role = result.user?.role?.toUpperCase();
         let destination = "/client-dashboard";
-        if (role === "ADMIN" || role === "EDITOR" || role === "MODERATOR") {
+        if (role === "ADMIN" || role === "EDITOR") {
           destination = "/admin";
+        } else if (role === "MODERATOR") {
+          destination = "/moderator";
         } else if (role === "EMPLOYEE") {
           destination = "/employee-portal";
         }

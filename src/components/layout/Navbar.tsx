@@ -183,6 +183,8 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     href={
                       user.role?.toLowerCase() === "admin" || user.role?.toLowerCase() === "editor" 
                         ? "/admin" 
+                        : user.role?.toLowerCase() === "moderator"
+                        ? "/moderator"
                         : user.role?.toLowerCase() === "employee"
                         ? "/employee-portal"
                         : "/client-dashboard"
