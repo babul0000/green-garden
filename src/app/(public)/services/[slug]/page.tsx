@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 
 const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
   .split("||")[0]
@@ -15,55 +16,16 @@ const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: R
 
 interface IServiceDetail {
   label: string;
+  category?: string;
   icon?: string;
+  pricing?: string;
   desc?: string;
+  features?: string[];
   benefits?: string[];
   process?: { title: string; text: string }[];
   faqs?: { q: string; a: string }[];
+  bannerImage?: string;
 }
-
-const SERVICES_STATIC: Record<string, IServiceDetail> = {
-  "rooftop-gardening": {
-    label: "Rooftop Gardening Setup",
-    icon: "🌇",
-    desc: "Turnkey concrete-to-paradise solutions. Includes waterproofing, load matching, and auto-drip grids.",
-    benefits: [
-      "Reduces concrete surface heat by up to 15°C",
-      "Supplies fresh organic home-grown fruits and herbs",
-      "Increases property value and building lifespan",
-      "Reduces dust particles and improves ambient air quality"
-    ],
-    process: [
-      { title: "Waterproofing & Leak Test", text: "Multi-layer chemical coatings followed by a 48-hour flood test to secure concrete." },
-      { title: "Lightweight Substrate Fill", text: "Mixing organic cocopeat, vermicompost, and expanded clay instead of heavy clay soil." },
-      { title: "Irrigation & Drainage Setup", text: "Installing sub-surface drainage cells and Wi-Fi automated drip lines." },
-      { title: "Planting & Design Layout", text: "Strategic planting of subtropical shrubs, flowers, and fruit trees." }
-    ],
-    faqs: [
-      { q: "Is my roof strong enough for a lawn?", a: "Our structural engineer calculates the weight threshold. For older roofs, we use lightweight raised container gardens." }
-    ]
-  },
-  "vertical-garden": {
-    label: "Vertical Wall Greenery",
-    icon: "🍃",
-    desc: "High-density breathing wall systems for indoor aesthetics or hot outside facades.",
-    benefits: [
-      "Saves floor footprint while maximizing leaf area",
-      "Acts as a natural sound insulation barrier",
-      "Improves indoor humidity and cognitive focus",
-      "Stunning corporate aesthetic branding"
-    ],
-    process: [
-      { title: "Aluminum Framing Mount", text: "Affixing a rust-proof aluminum frame with a PVC layer to keep moisture away from concrete walls." },
-      { title: "Felt Grow Pockets", text: "Stapling premium geotextile double felt pockets to hold root systems." },
-      { title: "Automatic Fertigation", text: "Placing drip emitters connected to a fertilizer dosing pump." },
-      { title: "Plant Selection", text: "Placing ferns, money plants, and indoor foliage matching sun intensity." }
-    ],
-    faqs: [
-      { q: "How are vertical walls watered?", a: "They are connected to an automated drip line that triggers watering for 2-3 minutes daily." }
-    ]
-  }
-};
 
 export default function ServiceDetailsPage() {
   const params = useParams();
@@ -74,34 +36,43 @@ export default function ServiceDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   // Form inputs
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
 
     const fetchService = async () => {
       try {
-        const res = await fetchProxy("http://localhost:5000/api/services");
+        // Try direct slug fetch
+        const res = await fetchProxy(`http://localhost:5000/api/services/${slug}`);
         if (res.ok) {
-          const data: any[] = await res.json();
-          const matched = data.find(s => s.slug === slug);
-          if (matched) {
+          const data = await res.json();
+          if (data && data.label) {
             setService({
-              label: matched.label || matched.title || "",
-              icon: matched.icon || "🌱",
-              desc: matched.desc || matched.description || "",
-              benefits: matched.benefits || [
-                "Expert horticulturist selection",
-                "Water-saving drip lines",
-                "Guaranteed waterproofing integration"
+              label: data.label,
+              category: data.category,
+              icon: data.icon || "🌿",
+              pricing: data.pricing || "কোটেশন অনুযায়ী",
+              desc: data.desc || data.description || "",
+              features: Array.isArray(data.features) ? data.features : [],
+              benefits: Array.isArray(data.benefits) && data.benefits.length > 0 ? data.benefits : [
+                "অভিজ্ঞ হর্টিকালচারিস্ট ও ল্যান্ডস্কেপ আর্কিটেক্ট দ্বারা ডিজাইন",
+                "আন্তর্জাতিক মানের ড্রেনেজ ও প্রিমিয়াম ম্যাটেরিয়ালস",
+                "১০০% কাস্টমার স্যাটিসফ্যাকশন ও ফ্রি সাইট ভিজিট পরামর্শ"
               ],
-              process: matched.process || [
-                { title: "1. Consult & Plan", text: "We survey your layout and sun levels." },
-                { title: "2. Mobilize & Plant", text: "Our staff installs substrates and plants." }
+              process: Array.isArray(data.process) && data.process.length > 0 ? data.process : [
+                { title: "১. সাইট সার্ভে ও আলোচনা", text: "আমাদের টিম আপনার লোকেশন পরিদর্শন করে মাপ ও সম্ভাবনা যাচাই করেন।" },
+                { title: "২. ডিজাইন ও খরচ অনুমোদন", text: "ক্লায়েন্টকে পছন্দসই লেআউট ও কোটেশন প্রদান করা হয়।" },
+                { title: "৩. বাস্তবায়ন ও হ্যান্ডওভার", text: "সুনির্দিষ্ট সময়ের মধ্যে প্রজেক্ট সম্পন্ন করে লাইভ বুঝিয়ে দেওয়া হয়।" }
               ],
-              faqs: matched.faqs || []
+              faqs: Array.isArray(data.faqs) && data.faqs.length > 0 ? data.faqs : [
+                { q: "এই কাজের ক্ষেত্রে কি কোনো ওয়ারেন্টি থাকে?", a: "হ্যাঁ, আমরা গাছ প্রতিস্থাপন এবং ড্রেনেজ ও ওয়াটারপ্রুফিংয়ের উপর নির্দিষ্ট মেয়াদী গ্যারান্টি প্রদান করি।" }
+              ],
+              bannerImage: data.bannerImage || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop"
             });
             setLoading(false);
             return;
@@ -111,84 +82,188 @@ export default function ServiceDetailsPage() {
         console.warn("Backend unavailable, falling back to static services detail:", err);
       }
 
-      // Static fallback
-      const staticMatched = SERVICES_STATIC[slug] || {
-        label: slug.replace(/-/g, " ").toUpperCase(),
-        icon: "🌱",
-        desc: "Premium customized landscaping and garden installation service designed for modern homes and commercial spaces.",
-        benefits: ["Expert horticulturist selection", "Water-saving drip lines", "Guaranteed waterproofing integration"],
-        process: [
-          { title: "1. Consult & Plan", text: "We survey your layout and sun levels." },
-          { title: "2. Mobilize & Plant", text: "Our staff installs substrates and plants." }
+      // Fallback
+      setService({
+        label: slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+        category: "Garden Services",
+        icon: "🌿",
+        pricing: "কোটেশন অনুযায়ী",
+        desc: "এ আর গ্রিন গার্ডেনের প্রিমিয়াম ল্যান্ডস্কেপিং সেবা। আপনার বাড়ি বা প্রতিষ্ঠানের প্রতিটি কোণে নিয়ে আসুন জীবন্ত সবুজের সৌন্দর্য।",
+        features: ["100% Quality Guaranteed", "Custom Architectural Design", "Dedicated Gardener Support"],
+        benefits: [
+          "সম্পূর্ণ পরিবেশবান্ধব ও দৃষ্টিনন্দন সবুজায়ন",
+          "পরিকল্পিত পানি নিষ্কাশন ও গাছ নির্বাচন",
+          "দীর্ঘমেয়াদী রক্ষণাবেক্ষণ সহায়তা"
         ],
-        faqs: []
-      };
-      setService(staticMatched);
+        process: [
+          { title: "১. পরামর্শ ও সাইট ভিজিট", text: "আপনার জায়গা অনুযায়ী বিশেষজ্ঞ মতামত প্রদান।" },
+          { title: "২. বাস্তবায়ন", text: "আমাদের পেশাদার কর্মীবাহিনী দ্বারা নিখুঁত রূপদান।" }
+        ],
+        faqs: [
+          { q: "কীভাবে বুকিং করব?", a: "নিচের ফর্মে ফোন নম্বর প্রদান করুন অথবা সরাসরি ফোন বা হোয়াটসঅ্যাপ করুন।" }
+        ],
+        bannerImage: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=1200&auto=format&fit=crop"
+      });
       setLoading(false);
     };
 
     fetchService();
   }, [slug]);
 
-  const handleSubmitQuote = (e: React.FormEvent) => {
+  const handleSubmitQuote = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!service) return;
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        clientName: name.trim() || "Website Visitor",
+        clientEmail: `${phone.trim()}@guest.argreengarden.com`,
+        phone: phone.trim(),
+        service: service.label,
+        message: message.trim() || `Inquiry for ${service.label} via slug detail page`,
+        budgetRange: service.pricing || "Negotiable"
+      };
+
+      const res = await fetchProxy("http://localhost:5000/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSubmittedRef(data.id || "BOOK-" + Math.floor(100000 + Math.random() * 900000));
+      } else {
+        setSubmittedRef("REF-" + Date.now().toString().slice(-6));
+      }
+    } catch {
+      setSubmittedRef("REF-" + Date.now().toString().slice(-6));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading || !service) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <span className="w-8 h-8 border-3 border-primary-green/20 border-t-primary-green rounded-full animate-spin"></span>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+        <span className="w-10 h-10 border-4 border-emerald-200 border-t-emerald-700 rounded-full animate-spin"></span>
+        <p className="text-xs text-gray-500 font-medium">সার্ভিস বিস্তারিত লোড হচ্ছে...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6 relative">
-      <div className="max-w-5xl mx-auto flex flex-col gap-16">
+    <div className="bg-gradient-to-b from-emerald-50/30 via-white to-white text-gray-900 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-12">
         
-        {/* Banner Section */}
-        <div className="bg-[#1a3020] text-white p-8 md:p-12 rounded-[32px] flex flex-col md:flex-row justify-between items-center gap-8 shadow-xl animate-fade-in-up">
-          <div className="flex flex-col gap-4 text-center md:text-left">
-            <span className="text-4xl md:text-5xl">{service.icon}</span>
-            <h1 className="text-3xl md:text-4xl font-serif font-bold">{service.label}</h1>
-            <p className="text-xs md:text-sm text-white/70 max-w-xl leading-relaxed">{service.desc}</p>
+        {/* Navigation Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          <Link href="/" className="hover:text-emerald-700">হোম</Link>
+          <span>/</span>
+          <Link href="/services" className="hover:text-emerald-700">সার্ভিস ক্যাটালগ</Link>
+          <span>/</span>
+          <span className="text-emerald-800 font-semibold">{service.label}</span>
+        </div>
+
+        {/* Hero Banner Section */}
+        <div className="relative rounded-[32px] overflow-hidden shadow-2xl bg-emerald-950 text-white p-8 sm:p-12">
+          {service.bannerImage && (
+            <div className="absolute inset-0 opacity-25">
+              <img
+                src={service.bannerImage}
+                alt={service.label}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <div className="inline-flex items-center gap-2 bg-emerald-800/80 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-semibold text-emerald-200 border border-emerald-700">
+                <span>{service.icon}</span>
+                <span>{service.category || "Professional Landscaping"}</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-white leading-tight">
+                {service.label}
+              </h1>
+              <p className="text-sm md:text-base text-emerald-100 leading-relaxed">
+                {service.desc}
+              </p>
+              <div className="text-sm font-semibold text-emerald-300">
+                আনুমানিক বাজেট: <span className="text-white font-bold">{service.pricing}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-auto">
+              <a 
+                href="#quote-form-section"
+                className="bg-white text-emerald-900 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full hover:bg-emerald-50 transition-all shadow-lg text-center whitespace-nowrap"
+              >
+                অনলাইন বুকিং করুন →
+              </a>
+              <a
+                href={`https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20want%20to%20consult%20about%20${encodeURIComponent(service.label)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#25D366] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-full hover:bg-[#20bd5a] transition-all shadow text-center flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                <span>💬</span> WhatsApp পরামর্শ
+              </a>
+            </div>
           </div>
-          <a 
-            href="#quote-form-section"
-            className="bg-white text-[#1a3020] font-bold text-xs md:text-sm px-6 py-3 rounded-full hover:bg-sage-pastel transition-colors whitespace-nowrap"
-          >
-            Get Free Quote
-          </a>
         </div>
 
         {/* Benefits & Step Process */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-          {/* Left Column: Benefits */}
-          <div className="bg-white/80 border border-foreground/5 p-6 md:p-8 rounded-3xl shadow-sm flex flex-col gap-5">
-            <h3 className="font-serif font-bold text-lg text-[#1a3020] border-b border-foreground/5 pb-2">Key Advantages</h3>
-            <ul className="flex flex-col gap-3">
-              {(service.benefits || []).map((benefit, idx) => (
-                <li key={idx} className="flex gap-2 text-xs md:text-sm text-foreground/75 items-start">
-                  <span className="text-primary-green">✓</span>
-                  <span>{benefit}</span>
-                </li>
-              ))}
-            </ul>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Left Column: Benefits & Features */}
+          <div className="bg-white border border-emerald-100 p-6 sm:p-8 rounded-3xl shadow-sm space-y-6">
+            <div>
+              <h3 className="font-serif font-bold text-lg text-gray-900 border-b border-gray-100 pb-3 flex items-center gap-2">
+                <span>⭐</span> এই সেবার বিশেষ সুবিধাসমূহ
+              </h3>
+              <ul className="space-y-3 pt-4">
+                {(service.benefits || []).map((benefit, idx) => (
+                  <li key={idx} className="flex gap-3 text-xs sm:text-sm text-gray-700 items-start">
+                    <span className="text-emerald-700 font-bold">✓</span>
+                    <span className="leading-relaxed">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {service.features && service.features.length > 0 && (
+              <div className="pt-2 border-t border-gray-100">
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
+                  টেকনিক্যাল স্পেসিফিকেশন:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {service.features.map((f, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs bg-emerald-50 text-emerald-800 px-3 py-1 rounded-lg border border-emerald-200 font-medium"
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right Column: Steps */}
-          <div className="flex flex-col gap-6">
-            <h3 className="font-serif font-bold text-lg text-[#1a3020]">Implementation Workflow</h3>
-            <div className="flex flex-col gap-4">
+          <div className="space-y-4">
+            <h3 className="font-serif font-bold text-lg text-gray-900 flex items-center gap-2">
+              <span>📋</span> প্রজেক্ট বাস্তবায়নের ধারাবাহিক ধাপ
+            </h3>
+            <div className="space-y-3">
               {(service.process || []).map((step, idx) => (
-                <div key={idx} className="flex gap-4 items-start bg-sage-light/20 p-4 rounded-2xl border border-primary-green/5">
-                  <span className="font-mono text-primary-green font-bold text-sm bg-white w-6 h-6 rounded-full flex items-center justify-center shadow-sm">
+                <div key={idx} className="flex gap-4 items-start bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">
+                  <span className="font-mono text-emerald-800 font-bold text-sm bg-white w-7 h-7 rounded-full flex items-center justify-center shadow-sm shrink-0 border border-emerald-200">
                     {idx + 1}
                   </span>
                   <div>
-                    <h4 className="font-bold text-xs md:text-sm text-[#1a3020]">{step.title}</h4>
-                    <p className="text-[11px] md:text-xs text-foreground/60 mt-1 leading-relaxed">{step.text}</p>
+                    <h4 className="font-bold text-sm text-gray-900">{step.title}</h4>
+                    <p className="text-xs text-gray-600 mt-1 leading-relaxed">{step.text}</p>
                   </div>
                 </div>
               ))}
@@ -196,50 +271,85 @@ export default function ServiceDetailsPage() {
           </div>
         </div>
 
-        {/* Quote Form pre-filled */}
-        <div id="quote-form-section" className="bg-[#f8faf9] border border-foreground/5 p-8 rounded-[32px] max-w-xl mx-auto w-full text-center flex flex-col gap-6 shadow-sm">
-          <div>
-            <h3 className="font-serif font-bold text-lg text-[#1a3020]">Consultation Callback Form</h3>
-            <p className="text-xs text-foreground/50 mt-1">Submit your phone and query relating to <b>{service.label}</b>. Our agronomist will schedule a call.</p>
+        {/* Consultation Callback Form */}
+        <div id="quote-form-section" className="bg-white border border-emerald-100 p-8 sm:p-10 rounded-[32px] max-w-xl mx-auto w-full shadow-lg space-y-6">
+          <div className="text-center space-y-2">
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full uppercase">
+              সরাসরি যোগাযোগ
+            </span>
+            <h3 className="font-serif font-bold text-2xl text-gray-900">
+              ফ্রি কনসাল্টেশন ও সাইট ভিজিট ফর্ম
+            </h3>
+            <p className="text-xs text-gray-500">
+              <b>{service.label}</b> সম্পর্কে জানতে আপনার ফোন নম্বর দিন। আমাদের সিনিয়র বিশেষজ্ঞ বিনামূল্যে মতামত প্রদান করবেন।
+            </p>
           </div>
 
-          {submitted ? (
-            <div className="bg-primary-green/10 text-primary-green text-xs font-bold p-4 rounded-xl">
-              ✓ Request received successfully. We will call you shortly!
+          {submittedRef ? (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-950 p-6 rounded-2xl text-center space-y-3">
+              <div className="w-12 h-12 bg-emerald-700 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                ✓
+              </div>
+              <h4 className="font-bold text-base">আপনার অনুরোধ গৃহীত হয়েছে!</h4>
+              <p className="text-xs text-emerald-700">
+                বুকিং ট্র্যাকিং আইডি: <b>{submittedRef}</b>
+              </p>
+              <p className="text-xs text-gray-600">
+                শীঘ্রই আমাদের কাস্টমার সার্ভিস প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।
+              </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmitQuote} className="flex flex-col gap-4 text-left">
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-foreground/60 uppercase">Phone Number</label>
+            <form onSubmit={handleSubmitQuote} className="space-y-4">
+              <div>
+                <label className="text-[11px] font-bold text-gray-700 uppercase block mb-1">আপনার নাম</label>
+                <input 
+                  type="text"
+                  placeholder="যেমন: ড. মাহফুজুর রহমান"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:outline-none focus:border-emerald-600 bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-gray-700 uppercase block mb-1">ফোন নম্বর *</label>
                 <input 
                   type="tel"
                   required
                   placeholder="017XXXXXXXX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="bg-white border border-foreground/10 py-2.5 px-3 rounded-xl text-xs focus:outline-none focus:border-primary-green"
+                  className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:outline-none focus:border-emerald-600 bg-white"
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-foreground/60 uppercase">Details (Optional)</label>
+              <div>
+                <label className="text-[11px] font-bold text-gray-700 uppercase block mb-1">আপনার স্পেস ও প্রয়োজনীয়তা (ঐচ্ছিক)</label>
                 <textarea 
                   rows={3}
-                  placeholder="Describe your space size, waterproofing state..."
+                  placeholder="ছাদের সাইজ, ড্রেনেজ অবস্থা বা যেকোনো বিশেষ পছন্দের বিবরণ..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className="bg-white border border-foreground/10 py-2.5 px-3 rounded-xl text-xs focus:outline-none focus:border-primary-green resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 py-2.5 px-3.5 rounded-xl text-xs focus:outline-none focus:border-emerald-600 resize-none bg-white"
                 />
               </div>
 
               <button
                 type="submit"
-                className="bg-primary-green hover:bg-primary-green-dark text-white font-bold text-xs py-3 rounded-xl transition-all cursor-pointer text-center"
+                disabled={isSubmitting}
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-3.5 rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-50"
               >
-                Submit Consultation Request
+                {isSubmitting ? "পাঠানো হচ্ছে..." : "কনসাল্টেশন রিকোয়েস্ট পাঠান →"}
               </button>
             </form>
           )}
+
+          <div className="text-center pt-2 border-t border-gray-100">
+            <span className="text-xs text-gray-400">সরাসরি কল করতে পারেন: </span>
+            <a href="tel:01620692449" className="text-xs font-bold text-emerald-800 hover:underline">
+              01620692449
+            </a>
+          </div>
         </div>
 
       </div>
