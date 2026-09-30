@@ -17,134 +17,279 @@ export default function Contact() {
 
     setIsSubmitting(true);
     try {
-      // Send to backend message API if available
-      await fetch("/api/messages", {
+      const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: contactName,
           phone: contactPhone,
-          location: contactLocation,
-          service: serviceType,
-          message: contactMessage,
+          subject: `${serviceType} Consultation - ${contactLocation || "Dhaka"}`,
+          message: `${contactMessage ? contactMessage + "\n" : ""}Location: ${contactLocation || "Dhaka"}\nService: ${serviceType}`,
         }),
-      }).catch(() => null);
+      });
 
-      setContactSubmitted(true);
+      if (res.ok) {
+        setContactSubmitted(true);
+      } else {
+        const data = await res.json();
+        alert("Message sending failed: " + (data.error || "Please verify your input"));
+      }
+    } catch (err: any) {
+      alert("Network error sending message: " + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50/70">
+    <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-white text-[#121813] border-b border-stone-300">
       <div className="max-w-7xl mx-auto space-y-12">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100 px-3.5 py-1 rounded-full">
-            যোগাযোগ ও অবস্থান
-          </span>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
-            Contact & Location
-          </h2>
-          <p className="text-sm md:text-base text-gray-600">
-            আমাদের অফিসে সরাসরি ভিজিট করুন অথবা ফোনে ও হোয়াটসঅ্যাপে আপনার ল্যান্ডস্কেপিং নিয়ে আলোচনা করুন।
-          </p>
+        
+        {/* Shma Header */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#2B4D33] font-bold block mb-2">
+                Studio Headquarters • যোগাযোগ ও অবস্থান
+              </span>
+              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#121813]">
+                Contact & <span className="font-bold text-[#2B4D33]">Studio Consultation</span>
+              </h2>
+            </div>
+            <p className="font-sans text-xs sm:text-sm text-[#75787B] max-w-md leading-relaxed">
+              Visit our Dhanmondi studio or schedule an on-site architectural consultation with our landscape architects and certified tree doctors.
+            </p>
+          </div>
+          
+          <div className="w-full h-[1px] bg-stone-300"></div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Official Company Address, Contacts & Actions */}
-          <div className="lg:col-span-5 bg-white p-7 sm:p-9 rounded-3xl border border-emerald-100 shadow-sm space-y-6">
-            <div>
-              <div className="inline-block bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1 rounded-lg">
-                Professional Landscape Company
-              </div>
-              <h3 className="text-2xl font-serif font-bold text-gray-900 mt-2">A R Green Garden</h3>
-              <p className="text-xs text-gray-500 mt-1">
-                Website + CRM + Project Management + Employee + Accounting + Automation
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          
+          {/* Left Column: Studio Headquarters, Phone, Hours (5 cols) */}
+          <div className="lg:col-span-5 bg-[#F7F6F2] p-8 sm:p-10 rounded-[32px] border border-stone-300 space-y-6 shadow-sm">
+            <div className="space-y-2">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] bg-[#E4E2D7] text-[#121813] px-3 py-1 rounded-full font-bold inline-block">
+                Dhaka Headquarters
+              </span>
+              <h3 className="font-display text-2xl font-bold text-[#121813]">
+                A R Green Garden
+              </h3>
+              <p className="font-mono text-xs text-[#75787B]">
+                Landscape Architecture, Tree Doctor Clinic & Automation
               </p>
             </div>
 
-            <div className="space-y-4 text-sm text-gray-700">
-              {/* Address */}
-              <div className="flex items-start gap-3.5">
+            <div className="space-y-4 font-sans text-xs sm:text-sm text-stone-700">
+              {/* Studio Address */}
+              <div className="flex items-start gap-3.5 p-3.5 bg-white rounded-2xl border border-stone-200">
                 <span className="text-xl shrink-0">📍</span>
                 <div>
-                  <strong className="block text-gray-900 text-xs uppercase tracking-wider">অফিস ঠিকানা:</strong>
-                  <p className="text-sm text-gray-700 mt-0.5">42/A, Road 9/A, Dhanmondi, Dhaka, Bangladesh</p>
+                  <strong className="block font-mono text-[11px] uppercase tracking-wider text-[#75787B]">
+                    Studio Address:
+                  </strong>
+                  <p className="text-stone-900 font-semibold mt-0.5">
+                    42/A, Road 9/A, Dhanmondi, Dhaka-1209, Bangladesh
+                  </p>
                 </div>
               </div>
 
-              {/* Phone */}
-              <div className="flex items-start gap-3.5">
+              {/* Phone Hotline */}
+              <div className="flex items-start gap-3.5 p-3.5 bg-white rounded-2xl border border-stone-200">
                 <span className="text-xl shrink-0">📞</span>
                 <div>
-                  <strong className="block text-gray-900 text-xs uppercase tracking-wider">হটলাইন / মোবাইল:</strong>
-                  <a href="tel:01620692449" className="text-emerald-700 font-bold hover:underline text-base mt-0.5 inline-block">
+                  <strong className="block font-mono text-[11px] uppercase tracking-wider text-[#75787B]">
+                    Direct Hotline:
+                  </strong>
+                  <a
+                    href="tel:01620692449"
+                    className="text-[#2B4D33] font-mono text-base font-bold hover:underline mt-0.5 inline-block"
+                  >
                     01620692449
                   </a>
                 </div>
               </div>
 
-              {/* WhatsApp */}
-              <div className="flex items-start gap-3.5">
+              {/* WhatsApp Direct */}
+              <div className="flex items-start gap-3.5 p-3.5 bg-white rounded-2xl border border-stone-200">
                 <span className="text-xl shrink-0">💬</span>
                 <div>
-                  <strong className="block text-gray-900 text-xs uppercase tracking-wider">হোয়াটসঅ্যাপ চ্যাট:</strong>
-                  <a 
-                    href="https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20need%20landscape%20consultation" 
-                    target="_blank" 
+                  <strong className="block font-mono text-[11px] uppercase tracking-wider text-[#75787B]">
+                    WhatsApp Instant Chat:
+                  </strong>
+                  <a
+                    href="https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20landscape%20project."
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="text-emerald-700 font-semibold hover:underline text-sm mt-0.5 inline-block"
+                    className="text-[#25D366] font-mono text-xs font-bold hover:underline mt-0.5 inline-block"
                   >
-                    +880 1620692449 (Click to Chat)
+                    +880 1620-692449 (Click to Chat)
                   </a>
                 </div>
               </div>
 
-              {/* Working Hours */}
-              <div className="flex items-start gap-3.5">
-                <span className="text-xl shrink-0">⏰</span>
+              {/* Business Hours */}
+              <div className="flex items-start gap-3.5 p-3.5 bg-white rounded-2xl border border-stone-200">
+                <span className="text-xl shrink-0">🕒</span>
                 <div>
-                  <strong className="block text-gray-900 text-xs uppercase tracking-wider">অফিস সময়:</strong>
-                  <p className="text-xs text-gray-600 mt-0.5">শনিবার — বৃহস্পতিবার: সকাল ৯:০০ — রাত ৮:০০</p>
+                  <strong className="block font-mono text-[11px] uppercase tracking-wider text-[#75787B]">
+                    Studio Hours:
+                  </strong>
+                  <p className="text-stone-900 font-mono text-xs mt-0.5">
+                    Saturday – Thursday: 9:00 AM – 8:00 PM
+                  </p>
+                  <p className="text-[11px] text-[#75787B] mt-0.5">
+                    Friday: On-Call Tree Doctor Emergency Team Available
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Direct Quick Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-gray-100">
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap gap-2 pt-2">
               <a
                 href="tel:01620692449"
-                className="py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-semibold text-center shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                className="px-5 py-2.5 bg-[#18221A] hover:bg-[#2B4D33] text-white rounded-full font-mono text-xs uppercase tracking-wider font-semibold transition-all shadow"
               >
-                <span>📞</span> Call
+                Call Hotline
               </a>
-
               <a
-                href="https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20want%20to%20consult%20about%20my%20garden."
+                href="https://wa.me/8801620692449"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="py-2.5 px-3 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl text-xs font-semibold text-center shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                className="px-5 py-2.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-full font-mono text-xs uppercase tracking-wider font-semibold transition-all shadow"
               >
-                <span>💬</span> WhatsApp
-              </a>
-
-              <a
-                href="https://maps.google.com/?q=42/A+Road+9/A+Dhanmondi+Dhaka"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2.5 px-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-1.5 transition-all"
-              >
-                <span>🧭</span> Direction
+                WhatsApp Us
               </a>
             </div>
 
-            {/* Embedded Google Maps View */}
-            <div className="rounded-2xl overflow-hidden border border-gray-200 aspect-[16/9] shadow-inner relative">
+          </div>
+
+          {/* Right Column: Architectural Consultation Booking Form & Map (7 cols) */}
+          <div className="lg:col-span-7 space-y-8">
+            
+            {/* Consultation Booking Form */}
+            <div className="bg-[#F7F6F2] p-8 sm:p-10 rounded-[32px] border border-stone-300 shadow-sm space-y-6">
+              <div>
+                <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#2B4D33] font-bold block mb-1">
+                  Schedule Studio Consultation
+                </span>
+                <h3 className="font-display text-xl font-bold text-[#121813]">
+                  Book an On-Site Landscape Assessment
+                </h3>
+              </div>
+
+              {contactSubmitted ? (
+                <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center space-y-2">
+                  <span className="text-3xl">🌿</span>
+                  <h4 className="font-display text-lg font-bold text-emerald-900">
+                    ধন্যবাদ! আপনার মেসেজটি সফলভাবে পাঠানো হয়েছে।
+                  </h4>
+                  <p className="font-sans text-xs text-emerald-700">
+                    আমাদের প্রধান ল্যান্ডস্কেপ আর্কিটেক্ট শীঘ্রই আপনার সাথে ফোনে যোগাযোগ করবেন।
+                  </p>
+                  <button
+                    onClick={() => setContactSubmitted(false)}
+                    className="mt-3 px-4 py-2 bg-emerald-800 text-white rounded-full font-mono text-xs font-semibold cursor-pointer"
+                  >
+                    Send Another Inquiry
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="font-mono text-xs uppercase tracking-wider text-[#75787B] block">
+                        Your Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="e.g. Engr. Zahid Hasan"
+                        className="w-full px-4 py-3 bg-white rounded-xl border border-stone-300 focus:outline-none focus:border-[#2B4D33] text-sm text-[#121813]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-xs uppercase tracking-wider text-[#75787B] block">
+                        Phone Number *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        placeholder="017XXXXXXXX"
+                        className="w-full px-4 py-3 bg-white rounded-xl border border-stone-300 focus:outline-none focus:border-[#2B4D33] text-sm text-[#121813]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="font-mono text-xs uppercase tracking-wider text-[#75787B] block">
+                        Location / Site Area
+                      </label>
+                      <input
+                        type="text"
+                        value={contactLocation}
+                        onChange={(e) => setContactLocation(e.target.value)}
+                        placeholder="e.g. Road 9/A, Dhanmondi, Dhaka"
+                        className="w-full px-4 py-3 bg-white rounded-xl border border-stone-300 focus:outline-none focus:border-[#2B4D33] text-sm text-[#121813]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-mono text-xs uppercase tracking-wider text-[#75787B] block">
+                        Service Required
+                      </label>
+                      <select
+                        value={serviceType}
+                        onChange={(e) => setServiceType(e.target.value)}
+                        className="w-full px-4 py-3 bg-white rounded-xl border border-stone-300 focus:outline-none focus:border-[#2B4D33] text-sm text-[#121813]"
+                      >
+                        <option value="Rooftop Garden">Rooftop Garden Setup (100% Waterproof)</option>
+                        <option value="Vertical Green Wall">Vertical Living Green Wall</option>
+                        <option value="Residential Landscape">Residential Villa Landscaping</option>
+                        <option value="Commercial Landscape">Corporate Office / Campus Biophilia</option>
+                        <option value="Tree Doctor Consultation">Tree Doctor & Plant Clinic</option>
+                        <option value="Smart Irrigation">Automated Smart Drip Irrigation</option>
+                        <option value="Garden Maintenance">Scheduled Maintenance Package</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-xs uppercase tracking-wider text-[#75787B] block">
+                      Project Notes / Special Requirements
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={contactMessage}
+                      onChange={(e) => setContactMessage(e.target.value)}
+                      placeholder="Please specify approx area (e.g. 2,500 sq.ft rooftop), building floor, preferred design style..."
+                      className="w-full px-4 py-3 bg-white rounded-xl border border-stone-300 focus:outline-none focus:border-[#2B4D33] text-sm text-[#121813] resize-none"
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 bg-[#18221A] hover:bg-[#2B4D33] text-white font-mono text-xs uppercase tracking-widest font-bold rounded-full transition-all shadow cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Submitting Request..." : "Request Architectural Consultation"}
+                  </button>
+                </form>
+              )}
+            </div>
+
+            {/* Interactive Dhanmondi Google Map Frame */}
+            <div className="rounded-[32px] overflow-hidden border border-stone-300 shadow-sm aspect-[16/8] bg-stone-200 relative">
               <iframe
-                title="A R Green Garden Location Dhanmondi"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.023243171881!2d90.370500!3d23.746500!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b1a8d00001%3A0x280e56d787019672!2sRoad%209%2FA%2C%20Dhanmondi%2C%20Dhaka%201209!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"
+                title="A R Green Garden Studio Location - Dhanmondi Dhaka"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3652.1287959062327!2d90.3725!3d23.7428!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b7a3a9a1d1%3A0x1c8b3f8d9b1c!2sRoad%209%2FA%2C%20Dhanmondi%2C%20Dhaka%201209!5e0!3m2!1sen!2sbd!4v1700000000000!5m2!1sen!2sbd"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -153,125 +298,11 @@ export default function Contact() {
                 referrerPolicy="no-referrer-when-downgrade"
               ></iframe>
             </div>
+
           </div>
 
-          {/* Right Column: Free Consultation Callback Form */}
-          <div className="lg:col-span-7 bg-white p-7 sm:p-9 rounded-3xl border border-emerald-100 shadow-sm">
-            {contactSubmitted ? (
-              <div className="text-center py-14 flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-3xl">
-                  ✓
-                </div>
-                <h3 className="text-2xl font-serif font-bold text-gray-900">ধন্যবাদ! আপনার রিকোয়েস্ট সফল হয়েছে</h3>
-                <p className="text-gray-600 text-sm max-w-md">
-                  আপনার তথ্য আমাদের সিস্টেমে সংরক্ষিত হয়েছে। আমাদের প্রধান ল্যান্ডস্কেপ টিম দ্রুতই আপনার <strong>{contactPhone}</strong> নম্বরে যোগাযোগ করবে।
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setContactSubmitted(false);
-                    setContactName("");
-                    setContactPhone("");
-                    setContactLocation("");
-                    setContactMessage("");
-                  }}
-                  className="mt-3 text-xs font-semibold text-emerald-700 hover:underline cursor-pointer"
-                >
-                  আরেকটি কনসালটেশন রিকোয়েস্ট পাঠান
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <h3 className="text-xl font-serif font-bold text-gray-900">ফ্রি কনসালটেশন বা হোম ভিজিট রিকোয়েস্ট</h3>
-                  <p className="text-xs text-gray-500 mt-1">
-                    ফর্মটি পূরণ করুন; আমাদের বিশেষজ্ঞ টিম বিনামূল্যে প্রাথমিক পরামর্শ প্রদান করবে।
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">আপনার নাম *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. তানভীর আহমেদ"
-                      value={contactName}
-                      onChange={(e) => setContactName(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 py-3 px-4 rounded-xl text-xs focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">মোবাইল নম্বর *</label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="01XXXXXXXXX"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 py-3 px-4 rounded-xl text-xs focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">সাইট লোকেশন (এলাকা)</label>
-                    <input
-                      type="text"
-                      placeholder="যেমন: ধানমন্ডি, গুলশান, উত্তরা"
-                      value={contactLocation}
-                      onChange={(e) => setContactLocation(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 py-3 px-4 rounded-xl text-xs focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">আগ্রহের সার্ভিস</label>
-                    <select
-                      value={serviceType}
-                      onChange={(e) => setServiceType(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 text-gray-900 py-3 px-4 rounded-xl text-xs focus:outline-none focus:border-emerald-600 focus:bg-white transition-all cursor-pointer"
-                    >
-                      <option value="Rooftop Garden">Rooftop Garden (ছাদ বাগান)</option>
-                      <option value="Residential Landscape">Residential Landscape (আবাসিক ল্যান্ডস্কেপ)</option>
-                      <option value="Vertical Garden">Vertical Green Wall (ভার্টিক্যাল গার্ডেন)</option>
-                      <option value="Tree Doctor Service">Tree Doctor / গাছের চিকিৎসা</option>
-                      <option value="Smart Irrigation">Smart Irrigation (অটো ড্রিপ ইরিগেশন)</option>
-                      <option value="Garden Maintenance">Garden Maintenance (নিয়মিত পরিচর্যা)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">বিস্তারিত বিবরণ / প্রশ্ন</label>
-                  <textarea
-                    rows={4}
-                    placeholder="আপনার ছাদের মাপ, ব্যালকনির সাইজ বা গাছের সমস্যা সম্পর্কে সংক্ষেপে লিখুন..."
-                    value={contactMessage}
-                    onChange={(e) => setContactMessage(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 py-3 px-4 rounded-xl text-xs focus:outline-none focus:border-emerald-600 focus:bg-white transition-all resize-none"
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-                >
-                  {isSubmitting ? (
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  ) : (
-                    <>
-                      <span>📨</span> ফ্রি কনসালটেশন সাবমিট করুন
-                    </>
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
         </div>
+
       </div>
     </section>
   );

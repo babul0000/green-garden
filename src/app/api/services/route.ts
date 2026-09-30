@@ -33,11 +33,10 @@ export async function POST(req: Request) {
         slug: calculatedSlug,
         category: category || "Landscape Design",
         desc: desc || null,
-        longContent: longContent || null,
         icon: icon || null,
-        banner: banner || null,
+        bannerImage: banner || body.bannerImage || null,
         pricing: pricing || null,
-        features: features || [],
+        features: Array.isArray(features) ? features : [],
       },
     });
 

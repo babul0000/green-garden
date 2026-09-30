@@ -73,12 +73,12 @@ export default function BlogsTab({
               <p className="text-xs text-slate-400 italic bg-[#f8faf9] p-6 rounded-2xl text-center">No comments written for this post.</p>
             ) : (
               selectedBlogComments.comments?.map(c => (
-                <div key={c._id} className="bg-[#f8faf9] border border-slate-100 p-4 rounded-[20px] text-xs flex justify-between items-center">
+                <div key={c.id || c._id} className="bg-[#f8faf9] border border-slate-100 p-4 rounded-[20px] text-xs flex justify-between items-center">
                   <div>
                     <span className="font-bold text-[#0c1911] block">{c.name}</span>
                     <p className="text-slate-600 leading-relaxed mt-1">{c.text}</p>
                   </div>
-                  <button type="button" onClick={() => handleDeleteComment(selectedBlogComments._id, c._id)} className="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer">
+                  <button type="button" onClick={() => handleDeleteComment(selectedBlogComments.id || selectedBlogComments._id, c.id || c._id)} className="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer">
                     Delete Comment
                   </button>
                 </div>
@@ -167,7 +167,7 @@ export default function BlogsTab({
             <h4 className="font-sans font-bold text-sm text-[#06120c]">Published Blogs ({blogs.length})</h4>
             <div className="flex flex-col gap-2">
               {blogs.map(b => (
-                <div key={b._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors text-xs">
+                <div key={b.id || b._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors text-xs">
                   <div>
                     <span className="font-bold text-[#06120c] block">{b.title}</span>
                     <span className="text-[10px] text-slate-400 block mt-0.5">Category: {b.category} • Comments count: <b>{b.comments?.length || 0}</b></span>
@@ -175,7 +175,7 @@ export default function BlogsTab({
                   <div className="flex gap-3">
                     <button type="button" onClick={() => setSelectedBlogComments(b)} className="text-amber-600 hover:underline font-bold cursor-pointer">Comments</button>
                     <button type="button" onClick={() => handleEditBlogClick(b)} className="text-[#8fc63f] hover:underline font-bold cursor-pointer">Edit</button>
-                    <button type="button" onClick={() => handleDeleteBlog(b._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
+                    <button type="button" onClick={() => handleDeleteBlog(b.id || b._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
                   </div>
                 </div>
               ))}

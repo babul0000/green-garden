@@ -75,7 +75,7 @@ export default function BookingsTab({ bookings = [], handleUpdateBooking, handle
                 </tr>
               ) : (
                 bookings.map(b => (
-                  <tr key={b._id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                  <tr key={b.id || b._id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 font-semibold text-[#0c1911]">
                       {b.clientName}
                       <span className="block text-[10px] font-normal text-slate-400 mt-0.5">{b.clientEmail} • {b.phone}</span>
@@ -85,7 +85,7 @@ export default function BookingsTab({ bookings = [], handleUpdateBooking, handle
                     <td className="py-4">
                       <select 
                         value={b.assignedStaff || "Unassigned"}
-                        onChange={(e) => handleUpdateBooking(b._id, b.status, e.target.value)}
+                        onChange={(e) => handleUpdateBooking(b.id || b._id, b.status, e.target.value)}
                         className="bg-white border border-slate-200 py-1.5 px-2.5 rounded-xl text-[10px] focus:outline-none text-slate-700 font-semibold"
                       >
                         <option value="Unassigned">Unassigned</option>
@@ -104,21 +104,21 @@ export default function BookingsTab({ bookings = [], handleUpdateBooking, handle
                     <td className="py-4 text-right flex gap-1.5 justify-end items-center h-full">
                       <button 
                         type="button"
-                        onClick={() => handleUpdateBooking(b._id, "Confirmed", b.assignedStaff || "Ar. Sultana Yasmin")}
+                        onClick={() => handleUpdateBooking(b.id || b._id, "Confirmed", b.assignedStaff || "Ar. Sultana Yasmin")}
                         className="bg-[#8fc63f]/10 hover:bg-[#8fc63f] text-emerald-800 hover:text-white px-2.5 py-1.5 rounded-xl text-[9px] font-bold transition-all cursor-pointer"
                       >
                         Confirm
                       </button>
                       <button 
                         type="button"
-                        onClick={() => handleUpdateBooking(b._id, "Completed", b.assignedStaff || "Ar. Sultana Yasmin")}
+                        onClick={() => handleUpdateBooking(b.id || b._id, "Completed", b.assignedStaff || "Ar. Sultana Yasmin")}
                         className="bg-[#06120c] hover:bg-black text-[#8fc63f] px-2.5 py-1.5 rounded-xl text-[9px] font-bold transition-all cursor-pointer"
                       >
                         Complete
                       </button>
                       <button 
                         type="button"
-                        onClick={() => handleDeleteBooking(b._id)}
+                        onClick={() => handleDeleteBooking(b.id || b._id)}
                         className="text-red-500 hover:text-red-700 px-1 py-1 text-xs cursor-pointer"
                       >
                         🗑️

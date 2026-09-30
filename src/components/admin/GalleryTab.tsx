@@ -150,7 +150,7 @@ export default function GalleryTab({
         <h4 className="font-sans font-bold text-sm text-[#06120c]">Gallery Showcase Images ({gallery.length})</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {gallery.map(g => (
-            <div key={g._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors text-xs">
+            <div key={g.id || g._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors text-xs">
               <div className="flex items-center gap-3">
                 {g.imageUrl && (
                   <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 relative">
@@ -165,7 +165,7 @@ export default function GalleryTab({
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={() => handleEditGalleryClick(g)} className="text-[#8fc63f] hover:underline font-bold cursor-pointer">Edit</button>
-                <button type="button" onClick={() => handleDeleteGallery(g._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
+                <button type="button" onClick={() => handleDeleteGallery(g.id || g._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
               </div>
             </div>
           ))}

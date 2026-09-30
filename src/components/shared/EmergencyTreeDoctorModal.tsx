@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 export default function EmergencyTreeDoctorModal() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
@@ -13,14 +15,29 @@ export default function EmergencyTreeDoctorModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState("");
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setPhotoPreview(URL.createObjectURL(file));
+
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.url) {
+            setUploadedPhotoUrl(data.url);
+          }
+        }
+      } catch (err) {
+        console.error("Photo upload error:", err);
+      }
     }
   };
 
@@ -39,7 +56,7 @@ export default function EmergencyTreeDoctorModal() {
           location,
           treeName,
           problem,
-          treePhotoUrl: photoPreview,
+          treePhotoUrl: uploadedPhotoUrl || photoPreview || null,
           preferredVisitTime: "🚨 EMERGENCY (জরুরি ভিত্তিতে)",
           isEmergency: true,
         }),
@@ -48,33 +65,45 @@ export default function EmergencyTreeDoctorModal() {
       if (res.ok) {
         setIsSubmitted(true);
       } else {
-        alert("Failed to register emergency request. Please call hotline directly.");
+        const data = await res.json();
+        alert("Failed to register emergency request: " + (data.error || "Please call hotline directly."));
       }
-    } catch {
-      setIsSubmitted(true);
+    } catch (err: any) {
+      alert("Network error: " + err.message + ". Please call hotline directly at 01620692449.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  useEffect(() => {
+    const handleOpen = () => {
+      setIsOpen(true);
+      setIsSubmitted(false);
+    };
+    window.addEventListener("open-tree-doctor", handleOpen);
+    return () => window.removeEventListener("open-tree-doctor", handleOpen);
+  }, []);
+
   return (
     <>
-      {/* Floating Emergency Action Pill */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
-        <button
-          onClick={() => {
-            setIsOpen(true);
-            setIsSubmitted(false);
-          }}
-          className="group relative flex items-center gap-2.5 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-full shadow-2xl hover:shadow-red-600/50 transition-all duration-300 hover:scale-105 border-2 border-white/80 cursor-pointer animate-pulse"
-        >
-          <span className="text-base">🚨</span>
-          <span>Emergency Tree Doctor</span>
-          <span className="hidden sm:inline bg-red-800/80 px-2 py-0.5 rounded-full text-[10px] uppercase font-mono">
-            জরুরি সেবা
-          </span>
-        </button>
-      </div>
+      {/* Floating Emergency Action Pill (Hidden on Homepage for 100% Shma Clean Parity) */}
+      {pathname !== "/" && (
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+          <button
+            onClick={() => {
+              setIsOpen(true);
+              setIsSubmitted(false);
+            }}
+            className="group relative flex items-center gap-2.5 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-full shadow-2xl hover:shadow-red-600/50 transition-all duration-300 hover:scale-105 border-2 border-white/80 cursor-pointer animate-pulse"
+          >
+            <span className="text-base">🚨</span>
+            <span>Emergency Tree Doctor</span>
+            <span className="hidden sm:inline bg-red-800/80 px-2 py-0.5 rounded-full text-[10px] uppercase font-mono">
+              জরুরি সেবা
+            </span>
+          </button>
+        </div>
+      )}
 
       {/* Emergency Modal */}
       {isOpen && (

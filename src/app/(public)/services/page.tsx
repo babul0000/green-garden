@@ -3,15 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
 
 interface IServiceItem {
   id?: string;
@@ -419,7 +410,7 @@ export default function ServicesPage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetchProxy("http://localhost:5000/api/services");
+        const res = await fetch("/api/services");
         if (res.ok) {
           const dbServices: any[] = await res.json();
           if (Array.isArray(dbServices) && dbServices.length > 0) {
@@ -467,7 +458,7 @@ export default function ServicesPage() {
           }
         }
       } catch (err) {
-        console.warn("Could not fetch DB services, using rich masterplan defaults:", err);
+        console.error("Could not fetch DB services:", err);
       }
     };
 
@@ -492,7 +483,7 @@ export default function ServicesPage() {
         message: clientMessage.trim() || `Booked for service: ${bookingModalService.title}. Preferred Date: ${bookingDate || 'Earliest available'}`
       };
 
-      const res = await fetchProxy("http://localhost:5000/api/bookings", {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -502,11 +493,11 @@ export default function ServicesPage() {
         const data = await res.json();
         setBookingSuccess(data.id || "BOOK-" + Math.floor(100000 + Math.random() * 900000));
       } else {
-        // Fallback reference code
-        setBookingSuccess("REF-" + Date.now().toString().slice(-6));
+        const err = await res.json();
+        alert("Booking failed: " + (err.error || "Please check inputs"));
       }
-    } catch {
-      setBookingSuccess("REF-" + Date.now().toString().slice(-6));
+    } catch (err: any) {
+      alert("Network error submitting booking: " + err.message);
     } finally {
       setIsSubmitting(false);
     }

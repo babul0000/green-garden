@@ -54,3 +54,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  return POST(req);
+}

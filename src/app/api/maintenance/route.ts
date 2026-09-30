@@ -141,3 +141,58 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, status, assignedStaffId, notes } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Schedule ID is required" }, { status: 400 });
+    }
+
+    const updated = await prisma.maintenanceSchedule.update({
+      where: { id },
+      data: {
+        ...(status ? { status } : {}),
+        ...(assignedStaffId !== undefined ? { assignedStaffId: assignedStaffId || null } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+      },
+      include: {
+        assignedStaff: { select: { name: true, employeeId: true, designation: true } },
+      },
+    });
+
+    return NextResponse.json({ success: true, schedule: updated });
+  } catch (error: any) {
+    console.error("Error updating maintenance schedule:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Schedule ID is required" }, { status: 400 });
+    }
+
+    await prisma.maintenanceSchedule.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting maintenance schedule:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+

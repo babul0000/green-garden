@@ -3,15 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
 
 interface GalleryProject {
   id: string;
@@ -278,7 +269,7 @@ export default function GalleryPage() {
   useEffect(() => {
     const fetchDbProjects = async () => {
       try {
-        const res = await fetchProxy("http://localhost:5000/api/projects");
+        const res = await fetch("/api/projects");
         if (res.ok) {
           const dbProjects: any[] = await res.json();
           if (Array.isArray(dbProjects) && dbProjects.length > 0) {

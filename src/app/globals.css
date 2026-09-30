@@ -1,30 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap');
 
 @import "tailwindcss";
 
 :root {
-  --background: #f8faf7;
-  --foreground: #142418;
-  --primary-green: #3f6044;
-  --primary-green-dark: #2c4330;
-  --primary-green-light: #7b9c80;
-  --sage-pastel: #e2f0d9;
-  --sage-light: #edf4e8;
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  /* Shma Signature Architectural Palette */
+  --shma-linen: #E4E2D7;
+  --shma-linen-light: #F7F6F2;
+  --shma-linen-muted: #ECEAE2;
+  --shma-linen-dark: #D6D2C4;
+  --shma-dark: #121813;
+  --shma-dark-card: #18221A;
+  --shma-dark-soft: #212C23;
+  --shma-earth: #3D1916;
+  --shma-ochre: #DAB200;
+  --shma-terracotta: #C85A32;
+  --shma-green: #2B4D33;
+  --shma-green-light: #447750;
+  --shma-muted: #75787B;
+  
+  --background: #F7F6F2;
+  --foreground: #121813;
+  
+  /* Fonts */
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-accent: 'Syne', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
 }
 
 @theme inline {
+  --color-shma-linen: var(--shma-linen);
+  --color-shma-linen-light: var(--shma-linen-light);
+  --color-shma-linen-muted: var(--shma-linen-muted);
+  --color-shma-linen-dark: var(--shma-linen-dark);
+  --color-shma-dark: var(--shma-dark);
+  --color-shma-dark-card: var(--shma-dark-card);
+  --color-shma-dark-soft: var(--shma-dark-soft);
+  --color-shma-earth: var(--shma-earth);
+  --color-shma-ochre: var(--shma-ochre);
+  --color-shma-terracotta: var(--shma-terracotta);
+  --color-shma-green: var(--shma-green);
+  --color-shma-green-light: var(--shma-green-light);
+  --color-shma-muted: var(--shma-muted);
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary-green: var(--primary-green);
-  --color-primary-green-dark: var(--primary-green-dark);
-  --color-primary-green-light: var(--primary-green-light);
-  --color-sage-pastel: var(--sage-pastel);
-  --color-sage-light: var(--sage-light);
   
-  --font-serif: var(--font-serif);
+  --font-display: var(--font-display);
+  --font-accent: var(--font-accent);
   --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
@@ -32,47 +57,86 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
-/* Custom scrollbar */
+/* Custom Architectural Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--sage-light);
+  background: #E4E2D7;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--primary-green-light);
-  border-radius: 4px;
+  background: #2B4D33;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-green);
+  background: #18221A;
 }
 
-/* Custom glassmorphism classes */
+/* Architectural Utilities */
+.shma-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.shma-title {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.shma-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(228, 226, 215, 0.8);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shma-card:hover {
+  border-color: rgba(43, 77, 51, 0.3);
+  box-shadow: 0 20px 40px -15px rgba(18, 24, 19, 0.08);
+}
+
+.shma-card-linen {
+  background: #E4E2D7;
+  border: 1px solid #D6D2C4;
+}
+
+.shma-card-dark {
+  background: #18221A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Glassmorphism */
 .glass-header {
-  background: rgba(248, 250, 247, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(63, 96, 68, 0.08);
+  background: rgba(247, 246, 242, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(214, 210, 196, 0.5);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(63, 96, 68, 0.06);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(228, 226, 215, 0.6);
 }
 
-/* Keyframe animations */
+/* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -95,4 +159,110 @@ h1, h2, h3, h4, h5, h6 {
 .animation-delay-300 {
   animation-delay: 300ms;
 }
+
+/* Shma Animated Manifesto Key Styles */
+.animated_container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #e4e2d7;
+  transition: background-color 0.5s ease;
+  cursor: pointer;
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+}
+.inner_container {
+  max-width: 1380px;
+  margin: auto;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.animated_content {
+  position: absolute;
+  left: 10%;
+  max-width: 50%;
+  padding-top: 5rem;
+  z-index: 10;
+}
+.animated_content > h1.animated_title {
+  font-size: 96px;
+  font-weight: 200;
+  line-height: 1.12;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.animated_title .enable,
+.animated_title .change {
+  color: #333;
+  display: block;
+  margin-right: 0.25rem;
+}
+.animated_title .for-text,
+.animated_title .a-better-earth {
+  color: #333;
+}
+.animated_title.final-style {
+  font-size: 2.8rem !important;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 26rem;
+  column-gap: 12px;
+  line-height: 1.2;
+}
+.animated_title.final-style .enable,
+.animated_title.final-style .change {
+  display: inline-block;
+}
+.animated_description {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #061a32;
+  font-family: 'Open Sans', Arial, sans-serif;
+  max-width: 600px;
+  opacity: 0;
+  transform: translateY(20px);
+  text-align: left;
+}
+.image-container {
+  position: absolute;
+  top: 50%;
+  right: 0%;
+  transform: translateY(-50%);
+  width: 520px;
+  height: 300px;
+  opacity: 0;
+  z-index: 5;
+}
+.image-container img,
+.image-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 768px) {
+  .animated_content > h1.animated_title {
+    font-size: 52px;
+    margin-bottom: 1.5rem;
+  }
+  .animated_content {
+    max-width: 92vw;
+    padding-top: 2rem;
+  }
+  .image-container {
+    max-width: 100%;
+    width: 100%;
+    right: 0;
+    top: 70%;
+    height: 220px;
+  }
+  .animated_title.final-style {
+    max-width: 100%;
+    font-size: 2rem !important;
+  }
+}
+
 

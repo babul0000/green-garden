@@ -146,3 +146,60 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, name, designation, department, status, salary, skills, personalPhone, personalAddress } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Employee ID is required" }, { status: 400 });
+    }
+
+    const updated = await prisma.employee.update({
+      where: { id },
+      data: {
+        ...(name ? { name } : {}),
+        ...(designation ? { designation } : {}),
+        ...(department ? { department } : {}),
+        ...(status ? { status } : {}),
+        ...(salary !== undefined ? { salary: parseFloat(salary) } : {}),
+        ...(Array.isArray(skills) ? { skills } : {}),
+        ...(personalPhone !== undefined ? { personalPhone } : {}),
+        ...(personalAddress !== undefined ? { personalAddress } : {}),
+      },
+    });
+
+    return NextResponse.json({ success: true, employee: updated });
+  } catch (error: any) {
+    console.error("Error updating employee:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Employee ID is required" }, { status: 400 });
+    }
+
+    await prisma.attendance.deleteMany({ where: { employeeId: id } });
+    await prisma.projectAssignment.deleteMany({ where: { employeeId: id } });
+    await prisma.employee.delete({ where: { id } });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting employee:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+

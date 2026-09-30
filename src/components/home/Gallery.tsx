@@ -1,120 +1,204 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
+interface GalleryProject {
+  id: string;
+  title: string;
+  category: string;
+  location: string;
+  image: string;
+  badge: string;
+  area?: string;
+}
+
+const defaultShowcaseProjects: GalleryProject[] = [
+  {
+    id: "1",
+    title: "Dhanmondi Sky Retreat Penthouse Forest",
+    category: "Rooftop Garden",
+    location: "Road 9/A, Dhanmondi, Dhaka",
+    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+    badge: "100% Leakproof",
+    area: "3,800 sq.ft",
+  },
+  {
+    id: "2",
+    title: "Gulshan Corporate Living Vertical Wall",
+    category: "Vertical Wall",
+    location: "Gulshan Avenue, Dhaka",
+    image: "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=800&auto=format&fit=crop",
+    badge: "Commercial Biophilia",
+    area: "4,200 sq.ft",
+  },
+  {
+    id: "3",
+    title: "Banani Royal Residence Lawn & Mood Lights",
+    category: "Residential",
+    location: "Road 11, Banani, Dhaka",
+    image: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=800&auto=format&fit=crop",
+    badge: "Luxury Estate",
+    area: "5,500 sq.ft",
+  },
+  {
+    id: "4",
+    title: "Sreemangal Tea Valley Resort Oasis",
+    category: "Resort",
+    location: "Sreemangal, Sylhet",
+    image: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=800&auto=format&fit=crop",
+    badge: "Eco-Park Masterplan",
+    area: "2.5 Acres",
+  },
+  {
+    id: "5",
+    title: "Uttara Zen Terrace Japanese Garden",
+    category: "Residential",
+    location: "Sector 4, Uttara, Dhaka",
+    image: "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=800&auto=format&fit=crop",
+    badge: "Zen Garden",
+    area: "2,200 sq.ft",
+  },
+  {
+    id: "6",
+    title: "Bashundhara R/A Fountain & Lighting Plaza",
+    category: "Water Feature",
+    location: "Block I, Bashundhara, Dhaka",
+    image: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=800&auto=format&fit=crop",
+    badge: "Public Water Cascade",
+    area: "6,500 sq.ft",
+  },
+];
+
 export default function Gallery() {
-  const showcaseProjects = [
-    {
-      title: "Dhanmondi Sky Retreat Luxury Penthouse",
-      category: "Rooftop Garden",
-      location: "Road 9/A, Dhanmondi",
-      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=600&auto=format&fit=crop",
-      badge: "Before/After Available"
-    },
-    {
-      title: "Gulshan Corporate Living Vertical Wall",
-      category: "Vertical Garden",
-      location: "Gulshan Avenue, Dhaka",
-      image: "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=600&auto=format&fit=crop",
-      badge: "Commercial"
-    },
-    {
-      title: "Banani Royal Residence Lawn & Mood Lights",
-      category: "Residential",
-      location: "Road 11, Banani",
-      image: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=600&auto=format&fit=crop",
-      badge: "Luxury"
-    },
-    {
-      title: "Sreemangal Tea Valley Resort Oasis",
-      category: "Resort",
-      location: "Sreemangal, Sylhet",
-      image: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=600&auto=format&fit=crop",
-      badge: "Eco-Park"
-    },
-    {
-      title: "Uttara Zen Terrace Japanese Garden",
-      category: "Luxury",
-      location: "Sector 4, Uttara",
-      image: "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=600&auto=format&fit=crop",
-      badge: "Zen Garden"
-    },
-    {
-      title: "Bashundhara R/A Fountain & Lighting Plaza",
-      category: "Fountain & Lighting",
-      location: "Block I, Bashundhara",
-      image: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=600&auto=format&fit=crop",
-      badge: "Water Feature"
-    }
-  ];
+  const [showcaseProjects, setShowcaseProjects] = useState<GalleryProject[]>(defaultShowcaseProjects);
+  const [filter, setFilter] = useState<string>("All");
+
+  const filterOptions = ["All", "Rooftop Garden", "Vertical Wall", "Residential", "Resort", "Water Feature"];
+
+  useEffect(() => {
+    fetch("/api/projects")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.slice(0, 6).map((p: any, idx: number) => ({
+            id: p.id || String(idx),
+            title: p.name,
+            category: p.category || "Residential",
+            location: p.location || "Dhaka, Bangladesh",
+            image: p.afterImage || (p.images && p.images[0]) || p.beforeImage || defaultShowcaseProjects[idx]?.image || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+            badge: p.status === "COMPLETED" ? "Completed" : "Active Site",
+            area: p.area || "Custom Area",
+          }));
+          setShowcaseProjects(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const filtered =
+    filter === "All"
+      ? showcaseProjects
+      : showcaseProjects.filter((p) => p.category.toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <section id="gallery" className="py-20 px-4 sm:px-6 lg:px-8 bg-emerald-50/30">
-      <div className="max-w-7xl mx-auto flex flex-col gap-12">
+    <section id="gallery" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-white text-[#121813] border-b border-stone-300">
+      <div className="max-w-7xl mx-auto space-y-12">
         
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto flex flex-col gap-3">
-          <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full self-center border border-emerald-200">
-            আমাদের কাজ • Project Showcase
-          </span>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
-            বাস্তবায়িত ল্যান্ডস্কেপ গ্যালারি
-          </h2>
-          <div className="w-16 h-1 bg-emerald-600 mx-auto rounded-full"></div>
-          <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-            ঢাকাসহ সারা দেশে আমাদের সম্পন্ন হওয়া আন্তর্জাতিক মানের ছাদবাগান, লিভিং গ্রিন ওয়াল ও রেসিডেন্সিয়াল প্রকল্পের নির্বাচিত ছবি।
-          </p>
+        {/* Shma Header */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#2B4D33] font-bold block mb-2">
+                Project Gallery • বাস্তবায়িত ল্যান্ডস্কেপ
+              </span>
+              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#121813]">
+                Selected <span className="font-bold text-[#2B4D33]">Works</span>
+              </h2>
+            </div>
+            <p className="font-sans text-xs sm:text-sm text-[#75787B] max-w-md leading-relaxed">
+              Explore our curated portfolio of residential rooftops, corporate living biospheres, and resort masterplans crafted with ecological precision.
+            </p>
+          </div>
+          
+          <div className="w-full h-[1px] bg-stone-300"></div>
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex flex-wrap gap-2">
+          {filterOptions.map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setFilter(opt)}
+              className={`px-4 py-1.5 rounded-full font-mono text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                filter === opt
+                  ? "bg-[#18221A] text-white font-bold shadow-sm"
+                  : "bg-[#F7F6F2] text-[#75787B] hover:text-[#121813] border border-stone-300"
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {showcaseProjects.map((item, idx) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filtered.map((item) => (
             <Link
-              key={idx}
+              key={item.id}
               href="/gallery"
-              className="group relative aspect-[16/11] rounded-3xl overflow-hidden bg-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block"
+              className="group bg-[#F7F6F2] rounded-3xl overflow-hidden border border-stone-300 hover:border-[#2B4D33] transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col justify-between"
             >
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              
-              {/* Gradient Dark Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
-              
-              {/* Top Badges */}
-              <div className="absolute top-4 left-4 flex gap-2">
-                <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-emerald-900 text-[11px] font-bold rounded-full shadow-sm">
-                  {item.category}
-                </span>
-                <span className="px-2.5 py-1 bg-emerald-800/90 text-white text-[10px] font-semibold rounded-full shadow-sm">
-                  {item.badge}
-                </span>
+              {/* Image Frame */}
+              <div className="relative aspect-[16/11] overflow-hidden bg-stone-200">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"></div>
+
+                {/* Badges */}
+                <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                  <span className="font-mono text-[10px] uppercase tracking-wider px-3 py-1 bg-white/95 text-stone-900 rounded-full font-bold shadow">
+                    {item.category}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 bg-[#2B4D33] text-white rounded-full font-semibold shadow">
+                    {item.badge}
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 left-4 right-4 text-white">
+                  <span className="font-mono text-[11px] text-emerald-300 block">
+                    📍 {item.location}
+                  </span>
+                </div>
               </div>
 
-              {/* Bottom Content */}
-              <div className="absolute bottom-5 left-5 right-5 text-white space-y-1 z-10">
-                <span className="text-[11px] text-emerald-300 font-medium flex items-center gap-1">
-                  <span>📍</span> {item.location}
-                </span>
-                <h4 className="text-base font-bold font-serif leading-snug group-hover:text-emerald-200 transition-colors">
+              {/* Title & Details */}
+              <div className="p-6 space-y-3">
+                <h3 className="font-display text-lg font-bold text-[#121813] leading-snug group-hover:text-[#2B4D33] transition-colors">
                   {item.title}
-                </h4>
-                <span className="text-xs text-white/70 inline-flex items-center gap-1 pt-1 font-semibold group-hover:translate-x-1 transition-transform">
-                  সম্পূর্ণ গ্যালারি দেখুন →
-                </span>
+                </h3>
+                <div className="pt-2 border-t border-stone-200 flex items-center justify-between text-xs font-mono text-[#75787B]">
+                  <span>{item.area || "Custom Scope"}</span>
+                  <span className="text-[#2B4D33] font-bold group-hover:translate-x-1 transition-transform">
+                    Explore Gallery →
+                  </span>
+                </div>
               </div>
+
             </Link>
           ))}
         </div>
 
-        {/* View All CTA */}
-        <div className="text-center pt-2">
+        {/* View Full Filterable Gallery CTA */}
+        <div className="text-center pt-4">
           <Link
             href="/gallery"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-[#18221A] hover:bg-[#2B4D33] text-white font-mono text-xs uppercase tracking-widest font-bold rounded-full shadow-lg hover:shadow-xl transition-all"
           >
-            <span>🖼️</span> ১৭টি ক্যাটাগরির ফিল্টারযুক্ত সম্পূর্ণ গ্যালারি দেখুন <span>→</span>
+            <span>🖼️</span> View Complete 17-Category Gallery & Blueprints <span>→</span>
           </Link>
         </div>
 

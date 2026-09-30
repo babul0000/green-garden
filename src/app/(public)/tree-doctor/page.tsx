@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
@@ -13,9 +13,16 @@ export default function TreeDoctorPage() {
   const [problem, setProblem] = useState("");
   const [preferredVisitTime, setPreferredVisitTime] = useState("Morning (10:00 AM - 1:00 PM)");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isEmergency, setIsEmergency] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("emergency=true")) {
+      setIsEmergency(true);
+    }
+  }, []);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,7 +55,7 @@ export default function TreeDoctorPage() {
           problem,
           preferredVisitTime,
           treePhotoUrl: photoPreview,
-          isEmergency: false,
+          isEmergency: Boolean(isEmergency),
           userId: user?.id,
         }),
       });
@@ -153,6 +160,35 @@ export default function TreeDoctorPage() {
               <p className="text-xs text-gray-500 mt-1">
                 গাছের সমস্যা বিস্তারিত জানান; আমাদের বিশেষজ্ঞ টিম অন-সাইট পরিদর্শনে এসে সমাধান প্রদান করবেন।
               </p>
+            </div>
+
+            {/* Emergency Priority Toggle Banner */}
+            <div
+              onClick={() => setIsEmergency(!isEmergency)}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+                isEmergency
+                  ? "bg-red-50 border-red-400 ring-2 ring-red-100 shadow-sm"
+                  : "bg-emerald-50/60 border-emerald-200 hover:bg-emerald-50"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{isEmergency ? "🚨" : "🩺"}</span>
+                <div>
+                  <h4 className={`text-xs font-bold ${isEmergency ? "text-red-900" : "text-emerald-900"}`}>
+                    {isEmergency ? "জরুরি সেবা সক্রিয় (High Priority Emergency Visit)" : "নরমাল ভিজিট বুকিং"}
+                  </h4>
+                  <p className="text-[11px] text-gray-500">
+                    {isEmergency
+                      ? "আমাদের জরুরি দল তাৎক্ষণিক অন-সাইট চিকিৎসায় সর্বোচ্চ অগ্রাধিকার দেবে।"
+                      : "জরুরিভাবে গাছ বাঁচানোর প্রয়োজন হলে ক্লিক করে ইমার্জেন্সি মোড অন করুন।"}
+                  </p>
+                </div>
+              </div>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                isEmergency ? "bg-red-600 text-white" : "bg-gray-200 text-gray-500"
+              }`}>
+                {isEmergency ? "✓" : "+"}
+              </div>
             </div>
 
             {isSuccess ? (

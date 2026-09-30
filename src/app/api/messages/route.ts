@@ -21,9 +21,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, email, phone, subject, message } = body;
 
-    if (!name || !email || !message) {
+    const effectiveEmail = email || (phone ? `${phone.replace(/[^0-9]/g, "")}@client.greengarden` : "anonymous@client.greengarden");
+
+    if (!name || (!email && !phone) || !message) {
       return NextResponse.json(
-        { error: "Name, email, and message are required." },
+        { error: "Name, contact information (phone or email), and message are required." },
         { status: 400 }
       );
     }
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
     const newMessage = await prisma.contactMessage.create({
       data: {
         name,
-        email,
+        email: effectiveEmail,
         phone: phone || null,
         subject: subject || "General Inquiry",
         message,
@@ -42,7 +44,7 @@ export async function POST(req: Request) {
     await prisma.notification.create({
       data: {
         title: `📩 নতুন কন্টাক্ট মেসেজ: ${name}`,
-        message: `${name} (${email}) একটি বার্তা পাঠিয়েছেন: "${message.slice(0, 80)}..."`,
+        message: `${name} (${phone || effectiveEmail}) একটি বার্তা পাঠিয়েছেন: "${message.slice(0, 80)}..."`,
         type: "REQUEST",
         link: "/admin",
       },

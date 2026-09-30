@@ -32,7 +32,7 @@ export default function CareersTab({
             <p className="text-xs text-slate-400 italic bg-[#f8faf9] p-6 rounded-2xl text-center">No messages in inbox.</p>
           ) : (
             messages.map((m: any) => (
-              <div key={m._id} className="bg-[#f8faf9] border border-slate-100 p-5 rounded-[20px] text-xs flex justify-between items-start">
+              <div key={m.id || m._id} className="bg-[#f8faf9] border border-slate-100 p-5 rounded-[20px] text-xs flex justify-between items-start">
                 <div className="flex-grow min-w-0 pr-4">
                   <div className="flex justify-between items-center text-[9px] text-slate-400 uppercase tracking-wider mb-2">
                     <span>From: <b>{m.name}</b> ({m.email})</span>
@@ -41,7 +41,7 @@ export default function CareersTab({
                   {m.subject && <span className="block font-bold text-[#0c1911] mb-1.5">Subject: {m.subject}</span>}
                   <p className="text-slate-600 leading-relaxed bg-white border border-slate-100 p-3 rounded-xl">{m.message}</p>
                 </div>
-                <button type="button" onClick={() => handleDeleteMessage(m._id)} className="text-red-500 hover:text-red-700 text-xs font-bold p-1 cursor-pointer">
+                <button type="button" onClick={() => handleDeleteMessage(m.id || m._id)} className="text-red-500 hover:text-red-700 text-xs font-bold p-1 cursor-pointer">
                   🗑️
                 </button>
               </div>
@@ -62,7 +62,7 @@ export default function CareersTab({
             <p className="text-xs text-slate-400 italic bg-[#f8faf9] p-6 rounded-2xl text-center">No candidates submitted CVs.</p>
           ) : (
             careers.map((car: any) => (
-              <div key={car._id} className="bg-[#f8faf9] border border-slate-100 p-5 rounded-[20px] text-xs flex justify-between items-start">
+              <div key={car.id || car._id} className="bg-[#f8faf9] border border-slate-100 p-5 rounded-[20px] text-xs flex justify-between items-start">
                 <div>
                   <span className="font-bold text-[#0c1911] text-sm block">{car.name}</span>
                   <span className="block text-[10px] text-slate-400 mt-0.5">Email: {car.email} • Phone: {car.phone}</span>
@@ -75,7 +75,7 @@ export default function CareersTab({
                       <button
                         key={state}
                         type="button"
-                        onClick={() => handleUpdateCareerStatus(car._id, state)}
+                        onClick={() => handleUpdateCareerStatus(car.id || car._id, state)}
                         className={`px-2.5 py-1 rounded-lg text-[9px] font-bold border transition-colors cursor-pointer ${
                           car.status === state
                             ? "bg-[#0c1911] text-[#8ac343] border-[#0c1911]"
@@ -98,7 +98,7 @@ export default function CareersTab({
                     }`}>
                       {car.status}
                     </span>
-                    <button type="button" onClick={() => handleDeleteCareer(car._id)} className="text-red-500 hover:text-red-700 text-xs font-bold p-1 cursor-pointer">
+                    <button type="button" onClick={() => handleDeleteCareer(car.id || car._id)} className="text-red-500 hover:text-red-700 text-xs font-bold p-1 cursor-pointer">
                       🗑️
                     </button>
                   </div>

@@ -18,16 +18,22 @@ export async function POST(req: Request) {
       doctorReport,
     } = body;
 
-    if (!projectId || !plantName) {
+    let targetProjectId = projectId;
+    if (!targetProjectId) {
+      const defaultProj = await prisma.project.findFirst();
+      if (defaultProj) targetProjectId = defaultProj.id;
+    }
+
+    if (!targetProjectId || !plantName) {
       return NextResponse.json(
-        { error: "Project ID and Plant Name are required." },
+        { error: "A valid Project and Plant Name are required." },
         { status: 400 }
       );
     }
 
     const record = await prisma.plantHealthRecord.create({
       data: {
-        projectId,
+        projectId: targetProjectId,
         plantName,
         photoUrl: photoUrl || null,
         plantingDate: plantingDate ? new Date(plantingDate) : null,
@@ -79,3 +85,27 @@ export async function GET(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Record ID is required" }, { status: 400 });
+    }
+
+    await prisma.plantHealthRecord.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting plant health record:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+

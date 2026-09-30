@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 interface NavbarProps {
@@ -9,370 +10,308 @@ interface NavbarProps {
 
 export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  
-  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const handleMouseEnter = (dropdownName: string) => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Prevent background scrolling when menu popup is active
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-    setActiveDropdown(dropdownName);
-  };
-
-  const handleMouseLeave = () => {
-    closeTimeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null);
-    }, 300); // 300ms safety window
-  };
-
-  // Mobile sub-menus state
-  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
-  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
-  const [mobilePackagesOpen, setMobilePackagesOpen] = useState(false);
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#1a3020] border-b border-white/5 w-full transition-all duration-300 shadow-md">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-2">
-          <span className="text-xl md:text-2xl font-serif font-bold tracking-tight text-white flex items-center gap-1.5">
-            <span className="inline-block w-2.5 h-6 bg-white rounded-full"></span>
-            A R Green Garden
-          </span>
-        </a>
-
-        {/* Desktop Nav Links (Pill-shaped with dropdowns matching baganbariltd.com) */}
-        <nav className="hidden md:flex items-center gap-5 bg-white/10 backdrop-blur-md rounded-full px-6 py-2 border border-white/5 shadow-inner">
+    <>
+      {/* EXACT SHMA FLOATING / TRANSPARENT HEADER */}
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+          isScrolled
+            ? "bg-white/95 backdrop-blur-md shadow-sm py-4 border-b border-black/5 text-[#323232]"
+            : "bg-transparent py-6 text-white"
+        }`}
+      >
+        <div className="max-w-[1380px] mx-auto px-6 sm:px-10 flex items-center justify-between">
           
-          {/* Home */}
-          <a href="/" className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2">Home</a>
-          
-          {/* About Us (Dropdown) */}
-          <div 
-            className="relative"
-            onMouseEnter={() => handleMouseEnter("about")}
-            onMouseLeave={handleMouseLeave}
-          >
-            <button className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2 py-1 flex items-center gap-1 focus:outline-none cursor-pointer">
-              About Us
-              <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {activeDropdown === "about" && (
-              <div className="absolute left-0 pt-2 w-52 bg-transparent z-50 animate-fade-in-up">
-                <div className="bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5">
-                  <a href="/about" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Our Story</a>
-                  <a href="/about#mission" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Mission & Vision</a>
-                  <a href="/about#directors" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Board of Directors</a>
-                  <a href="/testimonials" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Our Testimonials</a>
-                </div>
+          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon */}
+          <div className="w-1/3 flex items-center justify-start">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
+              aria-label="Open Navigation Menu"
+            >
+              <div className="flex flex-col gap-1.5 w-7">
+                <span
+                  className={`w-full h-[1.5px] transition-all duration-300 ${
+                    isScrolled ? "bg-[#323232]" : "bg-white"
+                  }`}
+                ></span>
+                <span
+                  className={`w-full h-[1.5px] transition-all duration-300 ${
+                    isScrolled ? "bg-[#323232]" : "bg-white"
+                  }`}
+                ></span>
+                <span
+                  className={`w-full h-[1.5px] transition-all duration-300 ${
+                    isScrolled ? "bg-[#323232]" : "bg-white"
+                  }`}
+                ></span>
               </div>
-            )}
+            </button>
           </div>
 
-          {/* Portfolio */}
-          <a href="/gallery" className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2">Our Portfolio</a>
-
-          {/* Services (Dropdown) */}
-          <div 
-            className="relative"
-            onMouseEnter={() => handleMouseEnter("services")}
-            onMouseLeave={handleMouseLeave}
-          >
-            <button className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2 py-1 flex items-center gap-1 focus:outline-none cursor-pointer">
-              Services
-              <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {activeDropdown === "services" && (
-              <div className="absolute left-0 pt-2 w-60 bg-transparent z-50 animate-fade-in-up">
-                <div className="bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5 max-h-[350px] overflow-y-auto custom-scrollbar">
-                  <a href="/services/landscape-design" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Landscape Design</a>
-                  <a href="/services/landscape-consultancy" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Landscape Consultancy</a>
-                  <a href="/services/commercial-landscape" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Commercial Landscape</a>
-                  <a href="/services/residential-landscape" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Residential Landscape</a>
-                  <a href="/services/rooftop-gardening" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Rooftop Gardening</a>
-                  <a href="/services/vertical-garden" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Vertical Garden</a>
-                  <a href="/services/garden-maintenance" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Maintenance</a>
-                  <a href="/services/hardscaping" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Hardscaping</a>
-                  <a href="/services/garden-lighting" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Lighting</a>
-                  <a href="/services/drip-irrigation" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Drip Irrigation</a>
-                  <a href="/services/water-fountain" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Water Fountain</a>
-                  <a href="/services/swimming-pool" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Swimming Pool</a>
-                </div>
-              </div>
-            )}
+          {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
+          <div className="w-1/3 flex items-center justify-center text-center">
+            <Link href="/" className="group inline-block">
+              <span className="font-display font-extralight text-xl sm:text-2xl md:text-[26px] tracking-[0.25em] uppercase transition-colors">
+                A R GREEN GARDEN
+              </span>
+            </Link>
           </div>
 
-          {/* Packages (Dropdown) */}
-          <div 
-            className="relative"
-            onMouseEnter={() => handleMouseEnter("packages")}
-            onMouseLeave={handleMouseLeave}
-          >
-            <button className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2 py-1 flex items-center gap-1 focus:outline-none cursor-pointer">
-              Packages
-              <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {activeDropdown === "packages" && (
-              <div className="absolute left-0 pt-2 w-64 bg-transparent z-50 animate-fade-in-up">
-                <div className="bg-white text-foreground rounded-2xl shadow-xl border border-foreground/5 py-2.5">
-                  <a href="/faq" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">FAQ Help Desk</a>
-                  <a href="/before-after" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Before & After Slider</a>
-                  <a href="/services#packages" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Garden Maintenance Service</a>
-                  <a href="/services#packages-rooftop" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Rooftop Gardening Package</a>
-                  <a href="/services#packages-terrace" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Terrace & Verandah Package</a>
-                  <a href="/services#packages-corporate" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Corporate Gardening Package</a>
-                  <a href="/services#packages-gifts" className="block px-4 py-2 text-xs md:text-sm hover:bg-sage-light transition-colors font-medium text-foreground/80 hover:text-primary-green">Gifts</a>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Blog */}
-          <a href="/blog" className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2">Blog</a>
-
-          {/* Contact */}
-          <a href="/contact" className="text-white/80 hover:text-white transition-colors text-[14px] font-semibold px-2">Contact Us</a>
-        </nav>
-
-        {/* Right Side Tools & Auth Pill */}
-        <div className="hidden md:flex items-center gap-5">
-          {/* Shopping Cart Icon with Yellow Badge */}
-          <a href="/shop" className="relative text-white cursor-pointer hover:text-white/80 p-2 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span className="absolute top-1 right-1 w-4 h-4 bg-yellow-400 text-[#1a3020] rounded-full text-[9px] font-extrabold flex items-center justify-center border border-[#1a3020]">
-              0
-            </span>
-          </a>
-
-          {/* Auth Dynamic Account Pill */}
-          {user ? (
-            <div className="relative">
-              <button 
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-full py-1.5 pl-2 pr-4 flex items-center gap-2 cursor-pointer transition-all focus:outline-none"
+          {/* Column 3: Exact Shma Social Icons & Hotline */}
+          <div className="w-1/3 flex items-center justify-end gap-4 sm:gap-6">
+            <div className="hidden sm:flex items-center gap-4">
+              {/* Facebook */}
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="Facebook"
               >
-                <div className="w-7 h-7 bg-sage-pastel text-[#1a3020] rounded-full flex items-center justify-center font-bold text-xs uppercase font-sans">
-                  {user.name ? user.name[0] : "U"}
-                </div>
-                <span className="text-[14px] font-medium text-white select-none">
-                  {user.name ? user.name.split(" ")[0] : "Account"}
-                </span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
+                  <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
                 </svg>
+              </a>
+
+              {/* Instagram */}
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="Instagram"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
+                </svg>
+              </a>
+
+              {/* LinkedIn */}
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="LinkedIn"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                  <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
+                </svg>
+              </a>
+
+              {/* YouTube */}
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="YouTube"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 576 512">
+                  <path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"></path>
+                </svg>
+              </a>
+            </div>
+
+            <a
+              href="tel:01620692449"
+              className="text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b border-current pb-0.5"
+            >
+              01620692449
+            </a>
+          </div>
+
+        </div>
+      </header>
+
+      {/* EXACT SHMA POPUP 2433: FULL-HEIGHT SLIDE-IN DRAWER MENU */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-[100] flex">
+          {/* Backdrop Overlay */}
+          <div
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity"
+          ></div>
+
+          {/* Left Slide Menu Container: Exact Shma Background #6f7375 */}
+          <div className="relative w-full max-w-[480px] bg-[#6f7375] text-white h-full overflow-y-auto px-8 sm:px-12 py-10 flex flex-col justify-between z-10 shadow-2xl animate-fade-in-up">
+            
+            {/* Top Close Hamburger */}
+            <div className="flex justify-between items-center mb-8">
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="group flex items-center p-2 -ml-2 text-white hover:opacity-70 cursor-pointer focus:outline-none"
+                aria-label="Close Navigation Menu"
+              >
+                <div className="flex flex-col gap-1.5 w-7">
+                  <span className="w-full h-[1.5px] bg-white"></span>
+                  <span className="w-full h-[1.5px] bg-white"></span>
+                  <span className="w-full h-[1.5px] bg-white"></span>
+                </div>
               </button>
 
-              {/* Dropdown Menu */}
-              {userDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-foreground/5 py-2 z-50 text-foreground animate-fade-in-up">
-                  <div className="px-4 py-2 border-b border-foreground/5 text-left">
-                    <p className="text-xs text-foreground/50">Signed in as</p>
-                    <p className="text-sm font-semibold text-foreground truncate">{user.email}</p>
-                  </div>
-                  <a 
-                    href={
-                      user.role?.toLowerCase() === "admin" || user.role?.toLowerCase() === "editor" 
-                        ? "/admin" 
-                        : user.role?.toLowerCase() === "moderator"
-                        ? "/moderator"
-                        : user.role?.toLowerCase() === "employee"
-                        ? "/employee-portal"
-                        : "/client-dashboard"
-                    }
-                    onClick={() => setUserDropdownOpen(false)}
-                    className="block text-left px-4 py-2.5 text-sm hover:bg-sage-light transition-colors font-medium text-primary-green"
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="text-white hover:opacity-70 text-2xl p-1 cursor-pointer focus:outline-none"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Navigation Links (Matching Shma exact hierarchy) */}
+            <div className="space-y-6 my-auto">
+              
+              {/* Primary Large Links (Project, Process, People) */}
+              <div className="space-y-3 font-display font-light">
+                <div>
+                  <a
+                    href="#projects"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-4xl sm:text-[44px] font-light hover:text-[#dedad2] transition-colors flex items-baseline justify-between leading-tight"
                   >
-                    Dashboard
+                    <span>Project</span>
+                    <span className="text-sm font-sans text-white/60 tracking-normal font-normal">প্রকল্পসমূহ</span>
                   </a>
-                  <button 
-                    onClick={async () => {
-                      setUserDropdownOpen(false);
-                      await logout();
-                    }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium cursor-pointer"
+                </div>
+                <div>
+                  <a
+                    href="#process"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-4xl sm:text-[44px] font-light hover:text-[#dedad2] transition-colors flex items-baseline justify-between leading-tight"
                   >
-                    Sign Out
+                    <span>Process</span>
+                    <span className="text-sm font-sans text-white/60 tracking-normal font-normal">কর্মপদ্ধতি</span>
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#activities"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-4xl sm:text-[44px] font-light hover:text-[#dedad2] transition-colors flex items-baseline justify-between leading-tight"
+                  >
+                    <span>People</span>
+                    <span className="text-sm font-sans text-white/60 tracking-normal font-normal">আমাদের দল</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Secondary Medium Links */}
+              <div className="space-y-2.5 font-display font-light pt-4 border-t border-white/20">
+                <div>
+                  <a
+                    href="#container"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-2xl sm:text-[25px] font-light text-white/90 hover:text-white transition-colors flex items-center justify-between"
+                  >
+                    <span>About</span>
+                    <span className="text-xs font-sans text-white/50 font-normal">পরিচিতি</span>
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#service"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-2xl sm:text-[25px] font-light text-white/90 hover:text-white transition-colors flex items-center justify-between"
+                  >
+                    <span>Service</span>
+                    <span className="text-xs font-sans text-white/50 font-normal">সেবাসমূহ</span>
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#activities"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-2xl sm:text-[25px] font-light text-white/90 hover:text-white transition-colors flex items-center justify-between"
+                  >
+                    <span>Research</span>
+                    <span className="text-xs font-sans text-white/50 font-normal">গবেষণা ও প্রকাশনা</span>
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#newsletter"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-2xl sm:text-[25px] font-light text-white/90 hover:text-white transition-colors flex items-center justify-between"
+                  >
+                    <span>Contact</span>
+                    <span className="text-xs font-sans text-white/50 font-normal">যোগাযোগ</span>
+                  </a>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/design-garden"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-lg sm:text-[20px] font-light text-[#dedad2] hover:text-white transition-colors block"
+                  >
+                    <span>3D Garden Wizard 🎨</span>
+                    <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
+                      থ্রিডি গার্ডেন ক্যালকুলেটর ও কাস্টম ডিজাইন
+                    </span>
+                  </Link>
+                </div>
+                <div>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent("open-tree-doctor"));
+                    }}
+                    className="text-lg sm:text-[20px] font-light text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
+                  >
+                    <span>Emergency Tree Doctor 🚨</span>
+                    <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
+                      জরুরি বৃক্ষ চিকিৎসা, রোগ নির্ণয় ও সার্জারি
+                    </span>
                   </button>
                 </div>
-              )}
+              </div>
+
             </div>
-          ) : (
-            <div className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-full py-1.5 px-4 flex items-center gap-3 transition-all text-white text-[14px] font-semibold">
-              <a href="/login" className="hover:text-white/80 transition-colors">
-                Login
-              </a>
-              <span className="w-[1px] h-3 bg-white/20"></span>
-              <a href="/register" className="hover:text-white/80 transition-colors">
-                Register
-              </a>
+
+            {/* Bottom Studio Info (Exact Shma 2-column layout) */}
+            <div className="pt-6 border-t border-white/20 text-xs font-sans text-white/80 grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-semibold text-white">A R Green Garden Co., Ltd.</p>
+                <p className="text-[11px] text-white/70">ল্যান্ডস্কেপ আর্কিটেকচার স্টুডিও</p>
+                <p className="pt-1 text-[11px] leading-relaxed text-white/60">
+                  ৪২/এ, রোড ৯/এ, ধানমন্ডি,<br />
+                  ঢাকা-১২০৯, বাংলাদেশ
+                </p>
+              </div>
+              <div className="text-[11px] leading-relaxed">
+                <p className="font-semibold text-white">হটলাইন: ০১৬২০-৬৯২৪৪৯</p>
+                <p className="pt-1 text-white/70">admin@argreengarden.com</p>
+                <p className="text-white/70">contact@argreengarden.com</p>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* Mobile menu button */}
-        <button 
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-white focus:outline-none"
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </button>
-      </div>
-
-      {/* Mobile Navigation Dropdown (Supporting collapsible dropdown accordions) */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#1a3020] absolute top-20 left-0 w-full px-6 py-6 flex flex-col gap-4 border-t border-white/5 shadow-lg text-white max-h-[calc(100vh-80px)] overflow-y-auto">
-          
-          {/* Home */}
-          <a href="/" onClick={() => setMobileMenuOpen(false)} className="py-2 text-[16px] font-medium border-b border-white/5 hover:text-white/80 transition-colors">Home</a>
-          
-          {/* About Us Collapsible */}
-          <div className="flex flex-col border-b border-white/5">
-            <button 
-              onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
-              className="py-2 text-[16px] font-medium hover:text-white/80 transition-colors flex items-center justify-between w-full"
-            >
-              <span>About Us</span>
-              <span>{mobileAboutOpen ? "−" : "+"}</span>
-            </button>
-            {mobileAboutOpen && (
-              <div className="pl-4 pb-2 flex flex-col gap-2 text-sm text-white/70">
-                <a href="/about" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Our Story</a>
-                <a href="/about#mission" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Mission & Vision</a>
-                <a href="/about#directors" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Board of Directors</a>
-                <a href="/about#clients" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Our Clients</a>
-              </div>
-            )}
-          </div>
-
-          {/* Portfolio */}
-          <a href="/gallery" onClick={() => setMobileMenuOpen(false)} className="py-2 text-[16px] font-medium border-b border-white/5 hover:text-white/80 transition-colors">Our Portfolio</a>
-
-          {/* Services Collapsible */}
-          <div className="flex flex-col border-b border-white/5">
-            <button 
-              onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-              className="py-2 text-[16px] font-medium hover:text-white/80 transition-colors flex items-center justify-between w-full"
-            >
-              <span>Services</span>
-              <span>{mobileServicesOpen ? "−" : "+"}</span>
-            </button>
-            {mobileServicesOpen && (
-              <div className="pl-4 pb-2 flex flex-col gap-2 text-sm text-white/70 max-h-[200px] overflow-y-auto custom-scrollbar">
-                <a href="/services#design" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Landscape Design</a>
-                <a href="/services#consultancy" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Landscape Consultancy</a>
-                <a href="/services#commercial" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Commercial Landscape</a>
-                <a href="/services#residential" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Residential Landscape</a>
-                <a href="/services#rooftop" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Rooftop Gardening</a>
-                <a href="/services#vertical" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Vertical Garden</a>
-                <a href="/services#maintenance" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Garden Maintenance</a>
-                <a href="/services#hardscaping" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Hardscaping</a>
-                <a href="/services#lighting" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Garden Lighting</a>
-                <a href="/services#irrigation" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Drip Irrigation</a>
-                <a href="/services#fountain" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Water Fountain</a>
-                <a href="/services#pool" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Swimming Pool</a>
-              </div>
-            )}
-          </div>
-
-          {/* Packages Collapsible */}
-          <div className="flex flex-col border-b border-white/5">
-            <button 
-              onClick={() => setMobilePackagesOpen(!mobilePackagesOpen)}
-              className="py-2 text-[16px] font-medium hover:text-white/80 transition-colors flex items-center justify-between w-full"
-            >
-              <span>Packages</span>
-              <span>{mobilePackagesOpen ? "−" : "+"}</span>
-            </button>
-            {mobilePackagesOpen && (
-              <div className="pl-4 pb-2 flex flex-col gap-2 text-sm text-white/70">
-                <a href="/services#packages" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Garden Maintenance Service</a>
-                <a href="/services#packages-rooftop" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Rooftop Gardening Package</a>
-                <a href="/services#packages-terrace" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Terrace & Verandah Package</a>
-                <a href="/services#packages-corporate" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Corporate Gardening Package</a>
-                <a href="/services#packages-gifts" onClick={() => setMobileMenuOpen(false)} className="py-1.5 hover:text-white">Gifts</a>
-              </div>
-            )}
-          </div>
-
-          {/* Blog */}
-          <a href="/blog" onClick={() => setMobileMenuOpen(false)} className="py-2 text-[16px] font-medium border-b border-white/5 hover:text-white/80 transition-colors">Blog</a>
-
-          {/* Contact */}
-          <a href="/contact" onClick={() => setMobileMenuOpen(false)} className="py-2 text-[16px] font-medium hover:text-white/80 transition-colors">Contact Us</a>
-          
-          <div className="flex flex-col gap-3 mt-4">
-            <button 
-              onClick={() => { 
-                setMobileMenuOpen(false); 
-                if (onOpenEstimator) onOpenEstimator(); 
-              }}
-              className="w-full text-center border border-white/20 text-white hover:bg-white/5 py-3 rounded-full text-[15px] font-medium transition-all"
-            >
-              Cost Calculator
-            </button>
-            
-            {user ? (
-              <div className="flex flex-col gap-2">
-                <span className="text-center text-[14px] text-white/60 font-medium py-1">
-                  Hi, {user.name} ({user.role || "client"})
-                </span>
-                <a 
-                  href={user.role === "admin" || user.role === "editor" ? "/admin" : "/client-dashboard"}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center border border-white/20 text-white py-3.5 rounded-full text-[15px] font-semibold transition-all"
-                >
-                  Dashboard
-                </a>
-                <button 
-                  onClick={async () => {
-                    setMobileMenuOpen(false);
-                    await logout();
-                  }}
-                  className="w-full text-center bg-red-600/20 text-red-400 py-3.5 rounded-full text-[15px] font-semibold hover:bg-red-600/30 transition-all cursor-pointer"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <a 
-                  href="/login" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center border border-white/20 text-white py-3.5 rounded-full text-[15px] font-semibold transition-all"
-                >
-                  Login
-                </a>
-                <a 
-                  href="/register" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center bg-white text-[#1a3020] py-3.5 rounded-full text-[15px] font-semibold hover:bg-white/90 transition-all"
-                >
-                  Register
-                </a>
-              </div>
-            )}
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

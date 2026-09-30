@@ -4,15 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { IBlog } from "@/types";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
 
 export default function BlogDetailsPage() {
   const params = useParams();
@@ -31,7 +22,7 @@ export default function BlogDetailsPage() {
   const fetchBlogDetails = async () => {
     if (!slug) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/blogs/${slug}`);
+      const res = await fetch(`/api/blogs/${slug}`);
       if (res.ok) {
         setBlog(await res.json());
       } else {
@@ -68,7 +59,8 @@ export default function BlogDetailsPage() {
     setSubmitting(true);
 
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/blogs/${blog._id}/comments`, {
+      const blogId = blog.id || blog._id;
+      const res = await fetch(`/api/blogs/${blogId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: commentName, text: commentText })

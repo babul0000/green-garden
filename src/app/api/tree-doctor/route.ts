@@ -83,3 +83,57 @@ export async function GET() {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, status, assignedDoctorId } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Tree Doctor Request ID is required" }, { status: 400 });
+    }
+
+    const updated = await prisma.treeDoctorRequest.update({
+      where: { id },
+      data: {
+        ...(status ? { status } : {}),
+        ...(assignedDoctorId !== undefined ? { assignedDoctorId: assignedDoctorId || null } : {}),
+      },
+      include: {
+        assignedDoctor: true,
+      },
+    });
+
+    return NextResponse.json({ success: true, request: updated });
+  } catch (error: any) {
+    console.error("Error updating tree doctor request:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Request ID is required" }, { status: 400 });
+    }
+
+    await prisma.treeDoctorRequest.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting tree doctor request:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+

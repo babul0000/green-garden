@@ -4,16 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import type { IProject } from "@/types";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
-
 export default function ProjectDetailsPage() {
   const params = useParams();
   const rawSlug = params?.slug;
@@ -27,18 +17,17 @@ export default function ProjectDetailsPage() {
 
     const fetchProject = async () => {
       try {
-        const res = await fetchProxy("http://localhost:5000/api/projects");
+        const res = await fetch(`/api/projects/${slug}`);
         if (res.ok) {
-          const data: IProject[] = await res.json();
-          const matched = data.find(p => p.slug === slug);
-          if (matched) {
-            setProject(matched);
+          const data = await res.json();
+          if (data && data.name) {
+            setProject(data);
             setLoading(false);
             return;
           }
         }
       } catch (err) {
-        console.warn("Backend project fetch failed, using fallback:", err);
+        console.error("Backend project fetch error:", err);
       }
 
       // Static Fallback

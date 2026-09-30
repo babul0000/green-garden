@@ -82,3 +82,54 @@ export async function GET() {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, status, adminNotes } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Request ID is required" }, { status: 400 });
+    }
+
+    const updated = await prisma.designGardenRequest.update({
+      where: { id },
+      data: {
+        ...(status ? { status } : {}),
+        ...(adminNotes !== undefined ? { adminNotes } : {}),
+      },
+    });
+
+    return NextResponse.json({ success: true, request: updated });
+  } catch (error: any) {
+    console.error("Error updating design request:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Request ID is required" }, { status: 400 });
+    }
+
+    await prisma.designGardenRequest.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Error deleting design request:", error);
+    return NextResponse.json(
+      { error: error?.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+

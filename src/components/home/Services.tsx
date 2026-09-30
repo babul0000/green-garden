@@ -1,151 +1,267 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
+interface ServiceItem {
+  number: string;
+  title: string;
+  bengaliTitle: string;
+  category: string;
+  slug: string;
+  pricing: string;
+  desc: string;
+  icon: string;
+  image: string;
+  deliverables: string[];
+}
+
+const defaultFeaturedServices: ServiceItem[] = [
+  {
+    number: "01",
+    title: "Landscape Architecture & Masterplanning",
+    bengaliTitle: "ল্যান্ডস্কেপ স্থাপত্য ও মাস্টারপ্ল্যানিং",
+    category: "Landscape Design",
+    slug: "landscape-design",
+    pricing: "৳৫০,০০০ থেকে শুরু",
+    desc: "ব্যক্তিগত ভিলা, রিসোর্ট ও করপোরেট ক্যাম্পাসের জন্য আর্কিটেকচারাল 2D/3D প্ল্যানিং, সাইট গ্র্যাডিং ও প্রাকৃতিক আলোকবিন্যাস।",
+    icon: "🏛️",
+    image: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["2D Cad Layouts", "3D Photorealistic Renders", "Plant Palette Spec"],
+  },
+  {
+    number: "02",
+    title: "Rooftop Garden & Penthouse Ecosystems",
+    bengaliTitle: "রুফটপ গার্ডেন ও ছাদবাগান বাস্তবায়ন",
+    category: "Garden Services",
+    slug: "rooftop-gardening",
+    pricing: "৳১,৫০,০০০ থেকে শুরু",
+    desc: "১০০% ওয়াটারপ্রুফ মেমব্রেন, জার্মান ড্রেনেজ সেল ও হালকা পার্লাইট-ভার্মিকুলাইট সয়েল মিডিয়ায় ছাদকে নিরাপদ সবুজ আশ্রয়ে রূপান্তর।",
+    icon: "🌇",
+    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["Leakproof Warranty", "Automated Irrigation", "Bespoke Pergola"],
+  },
+  {
+    number: "03",
+    title: "Vertical Living Green Walls",
+    bengaliTitle: "ভার্টিক্যাল গ্রিন ওয়াল ও জীবন্ত দেয়াল",
+    category: "Garden Services",
+    slug: "vertical-garden",
+    pricing: "৳৪৫০ - ৬৫০ / sqft",
+    desc: "বাণিজ্যিক ও আবাসিক দেয়ালের জন্য স্বয়ংক্রিয় হাইড্রোপনিক ফেল্ট ও মডিউলার পকেট সিস্টেম। বাতাস বিশুদ্ধকরণ ও অ্যাকোস্টিক নয়েজ শোষণ।",
+    icon: "🍃",
+    image: "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["Hydroponic Fertigation", "NASA Air-Purifiers", "Subtle Downlights"],
+  },
+  {
+    number: "04",
+    title: "Tree Doctor & Plant Pathology Clinic",
+    bengaliTitle: "ট্রি ডক্টর ক্লিনিক ও উদ্ভিদের চিকিৎসা",
+    category: "Plant Health",
+    slug: "tree-doctor",
+    pricing: "৳১,৫০০ / ভিজিট",
+    desc: "গাছের পাতা পোড়া, কান্ড পচা, উইপোকা বা ছত্রাক আক্রমণ নির্ণয় ও কৃষিবিদদের মাধ্যমে অন-সাইট সার্জারি ও জৈব প্রতিষেধক।",
+    icon: "🩺",
+    image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["On-site Diagnosis", "Foliar Nutrition Spray", "Root Surgery"],
+  },
+  {
+    number: "05",
+    title: "Smart Automated Drip Irrigation",
+    bengaliTitle: "স্মার্ট অটোমেটেড সেচ ব্যবস্থা",
+    category: "Irrigation",
+    slug: "smart-irrigation",
+    pricing: "৳২৫,০০০ থেকে শুরু",
+    desc: "ওয়াইফাই ও টাইমার নিয়ন্ত্রিত ড্রিপ ইরিগেশন — প্রতিটি গাছের গোড়ায় নিয়মিত পানি পৌঁছে ৭০% পানি সাশ্রয় করে ও শ্রম হ্রাস করে।",
+    icon: "💧",
+    image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["WiFi Smart Timers", "Pressure Compensating Emitters", "Zero Water Wastage"],
+  },
+  {
+    number: "06",
+    title: "Water Features, Fountains & Pergolas",
+    bengaliTitle: "ফোয়ারা, ওয়াটার ক্যাস্কেড ও পারগোলা",
+    category: "Hardscaping",
+    slug: "water-fountain",
+    pricing: "৳৪০,০০০ থেকে শুরু",
+    desc: "প্রাকৃতিক পাথর ও কাচের ওয়াটারফল, রিফ্লেক্টিভ পুল, কাঠের পারগোলা ও সানকেন লাউঞ্জ যা ল্যান্ডস্কেপে তৈরি করে বিশেষ প্রশান্তি।",
+    icon: "⛲",
+    image: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["Submersible Pumps", "Underwater Lighting", "Weatherproof Timber"],
+  },
+  {
+    number: "07",
+    title: "Scheduled Horticultural Maintenance",
+    bengaliTitle: "গার্ডেন নিয়মিত পরিচর্যা ও মালী সেবা",
+    category: "Maintenance",
+    slug: "garden-maintenance",
+    pricing: "৳৩,০০০ / মাস থেকে",
+    desc: "অভিজ্ঞ মালী ও হর্টিকালচারিস্টদের নিয়মিত পরিদর্শন, প্রুনিং, জৈব কম্পোস্ট প্রয়োগ, পেস্ট কন্ট্রোল ও লন মোয়িং সেবা।",
+    icon: "🌿",
+    image: "https://images.unsplash.com/photo-1592417817098-8f3d6910985c?q=80&w=800&auto=format&fit=crop",
+    deliverables: ["Weekly Visits", "Organic Fertilization", "Weed & Pest Shield"],
+  },
+];
+
 export default function Services() {
-  const featuredServices = [
-    {
-      title: "Rooftop Garden Setup",
-      bengaliTitle: "রুফটপ গার্ডেন (ছাদবাগান)",
-      category: "Garden Services",
-      slug: "rooftop-gardening",
-      pricing: "৳১,৫০,০০০ থেকে শুরু",
-      desc: "১০০% ওয়াটারপ্রুফ মেমব্রেন, আধুনিক ড্রেনেজ সেল ও হালকা সয়েল মিডিয়ায় কংক্রিটের ছাদকে সবুজ স্বর্গে রূপান্তর।",
-      icon: "🌇",
-      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      title: "Vertical Green Living Wall",
-      bengaliTitle: "ভার্টিক্যাল গ্রিন ওয়াল",
-      category: "Garden Services",
-      slug: "vertical-garden",
-      pricing: "৳৪৫০ - ৬৫০ / sqft",
-      desc: "ঘরের দেয়াল বা বাণিজ্যিক ভবনের বহির্ভাগে জীবিত গাছের উচ্চ ঘনত্বের জীবন্ত দেয়ালবাগান ও অটো ফার্টিগেশন।",
-      icon: "🍃",
-      image: "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      title: "Residential Landscape Design",
-      bengaliTitle: "রেসিডেন্সিয়াল ল্যান্ডস্কেপ",
-      category: "Landscape Design",
-      slug: "residential-landscape",
-      pricing: "৳৫০,০০০ থেকে শুরু",
-      desc: "ব্যক্তিগত বাড়ি ও ভিলার চারপাশের জন্য আর্কিটেকচারাল 2D/3D মাস্টারপ্ল্যান, লন সোফিং ও পাথওয়ে লাইটিং।",
-      icon: "🏡",
-      image: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      title: "Tree Doctor & Plant Clinic",
-      bengaliTitle: "ট্রি ডক্টর ও প্ল্যান্ট হেলথ",
-      category: "Plant Health",
-      slug: "tree-doctor",
-      pricing: "৳১,৫০০ / ভিজিট",
-      desc: "গাছের পাতা পোড়া, কান্ড পচা, উইপোকা বা ছত্রাক সংক্রমণ নির্ণয় ও বিশেষজ্ঞ এগ্রোনমিস্টের অন-সাইট চিকিৎসা।",
-      icon: "🩺",
-      image: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      title: "Smart Automated Drip Irrigation",
-      bengaliTitle: "স্মার্ট অটোমেটেড সেচ ব্যবস্থা",
-      category: "Irrigation",
-      slug: "smart-irrigation",
-      pricing: "৳২৫,০০০ থেকে শুরু",
-      desc: "ওয়াইফাই ও টাইমার নিয়ন্ত্রিত ড্রিপ ইরিগেশন — প্রতিটি গাছের গোড়ায় নিয়মিত পানি পৌঁছে ৭০% পানি সাশ্রয় করে।",
-      icon: "💧",
-      image: "https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      title: "Scheduled Garden Maintenance",
-      bengaliTitle: "গার্ডেন মেইনটেন্যান্স প্যাকেজ",
-      category: "Maintenance",
-      slug: "garden-maintenance",
-      pricing: "৳৪,০০০ / মাস থেকে",
-      desc: "অভিজ্ঞ মালী ও সুপারভাইজারের নিয়মিত পরিচর্যা, লন কাটিং, প্রুনিং এবং অর্গানিক কেঁচো সার প্রয়োগ।",
-      icon: "✂️",
-      image: "https://images.unsplash.com/photo-1592417817098-8f3d6910985b?q=80&w=600&auto=format&fit=crop"
-    }
-  ];
+  const [servicesList, setServicesList] = useState<ServiceItem[]>(defaultFeaturedServices);
+
+  useEffect(() => {
+    fetch("/api/services")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.slice(0, 7).map((s: any, idx: number) => ({
+            number: String(idx + 1).padStart(2, "0"),
+            title: s.label || defaultFeaturedServices[idx]?.title || "Landscape Discipline",
+            bengaliTitle: s.label,
+            category: s.category || "Landscape Design",
+            slug: s.slug || s.label.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+            pricing: s.pricing || defaultFeaturedServices[idx]?.pricing || "কোটেশন অনুযায়ী",
+            desc: s.desc || defaultFeaturedServices[idx]?.desc || "AR Green Garden-এর প্রফেশনাল ল্যান্ডস্কেপিং সেবা।",
+            icon: s.icon || defaultFeaturedServices[idx]?.icon || "🌱",
+            image: s.bannerImage || defaultFeaturedServices[idx]?.image || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+            deliverables: defaultFeaturedServices[idx]?.deliverables || ["Full Consultation", "Turnkey Build", "Warranty Included"],
+          }));
+          setServicesList(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
-    <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-emerald-50/20 to-white">
-      <div className="max-w-7xl mx-auto flex flex-col gap-12">
+    <section id="services" className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-[#F7F6F2] text-[#121813] border-b border-stone-300">
+      <div className="max-w-7xl mx-auto space-y-12">
         
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto flex flex-col gap-3">
-          <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full self-center border border-emerald-200">
-            আমাদের সেবা • What We Offer
-          </span>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900">
-            প্রিমিয়াম ল্যান্ডস্কেপিং সার্ভিসেস
-          </h2>
-          <div className="w-16 h-1 bg-emerald-600 mx-auto rounded-full"></div>
-          <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-            ৭টি প্রধান ক্যাটাগরির আওতায় ব্যক্তিগত বাড়ি, করপোরেট প্রতিষ্ঠান ও রুফটপ প্রকল্পের পূর্ণাঙ্গ ডিজাইন, বাস্তবায়ন ও পরিচর্যা।
-          </p>
+        {/* Shma Header: Architectural Disciplines */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#2B4D33] font-bold block mb-2">
+                Disciplines & Services • আমাদের সেবাসমূহ
+              </span>
+              <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#121813]">
+                Comprehensive <span className="font-bold text-[#2B4D33]">Landscape Services</span>
+              </h2>
+            </div>
+            <p className="font-sans text-xs sm:text-sm text-[#75787B] max-w-md leading-relaxed">
+              From residential penthouses to sprawling corporate campuses, we offer end-to-end masterplanning, clinical tree care, and turnkey construction.
+            </p>
+          </div>
+          
+          <div className="w-full h-[1px] bg-stone-300"></div>
         </div>
 
-        {/* Cards Grid */}
+        {/* 7 Disciplines Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredServices.map((srv, idx) => (
+          {servicesList.map((service) => (
             <div
-              key={idx}
-              className="bg-white rounded-3xl overflow-hidden border border-emerald-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between group"
+              key={service.slug}
+              className="bg-white rounded-3xl border border-stone-300 overflow-hidden flex flex-col justify-between hover:border-[#2B4D33] transition-all duration-300 shadow-sm hover:shadow-xl group"
             >
               <div>
-                {/* Image Banner */}
-                <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                {/* Media Image */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
                   <img
-                    src={srv.image}
-                    alt={srv.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute top-3 left-3 bg-emerald-900/80 backdrop-blur-md text-white text-[11px] font-semibold px-3 py-1 rounded-full flex items-center gap-1.5">
-                    <span>{srv.icon}</span>
-                    <span>{srv.category}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  
+                  {/* Category & Number Pills */}
+                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+                    <span className="font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 bg-white/95 text-stone-900 rounded-full font-bold shadow">
+                      {service.category}
+                    </span>
+                    <span className="font-mono text-xs font-bold text-white px-2 py-0.5 bg-black/60 backdrop-blur-md rounded-full">
+                      {service.number}
+                    </span>
                   </div>
-                  <div className="absolute bottom-3 right-3 bg-white/95 text-emerald-900 text-[11px] font-bold px-3 py-1 rounded-full shadow">
-                    {srv.pricing}
+
+                  {/* Pricing Badge */}
+                  <div className="absolute bottom-3 left-4 text-white font-mono text-xs font-semibold">
+                    {service.pricing}
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 space-y-2">
-                  <h3 className="text-lg font-bold font-serif text-gray-900 group-hover:text-emerald-800 transition-colors">
-                    {srv.bengaliTitle}
-                  </h3>
-                  <span className="text-xs text-gray-400 block">{srv.title}</span>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed pt-1">
-                    {srv.desc}
+                {/* Card Content */}
+                <div className="p-6 space-y-3">
+                  <div className="flex items-center gap-2 text-2xl">
+                    <span>{service.icon}</span>
+                    <h3 className="font-display text-lg font-bold text-[#121813] leading-snug group-hover:text-[#2B4D33] transition-colors">
+                      {service.title}
+                    </h3>
+                  </div>
+                  <h4 className="font-sans text-xs font-bold text-[#2B4D33]">
+                    {service.bengaliTitle}
+                  </h4>
+                  <p className="font-sans text-xs text-[#75787B] leading-relaxed">
+                    {service.desc}
                   </p>
+
+                  {/* Deliverables */}
+                  <div className="pt-2 flex flex-wrap gap-1.5">
+                    {service.deliverables.map((del, i) => (
+                      <span
+                        key={i}
+                        className="font-mono text-[10px] bg-[#E4E2D7] text-[#121813] px-2.5 py-0.5 rounded-full"
+                      >
+                        • {del}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Action Link */}
-              <div className="p-6 pt-0 border-t border-gray-50 flex items-center justify-between text-xs mt-3">
+              {/* Card Footer Actions */}
+              <div className="p-6 pt-0 border-t border-stone-100 flex items-center justify-between mt-4">
                 <Link
-                  href={`/services/${srv.slug}`}
-                  className="text-emerald-700 font-bold hover:underline flex items-center gap-1"
+                  href={`/services#${service.slug}`}
+                  className="font-mono text-xs uppercase tracking-wider font-semibold text-[#2B4D33] hover:text-[#121813] transition-colors"
                 >
-                  বিস্তারিত জানুন <span>→</span>
+                  View Details →
                 </Link>
-                <Link
-                  href={`/contact?service=${encodeURIComponent(srv.title)}`}
-                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold shadow-sm transition-all"
+                <button
+                  onClick={() => {
+                    const el = document.getElementById("estimator");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                    else window.location.href = "/design-garden";
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-[#18221A] text-white hover:bg-[#2B4D33] font-mono text-[11px] uppercase tracking-wider transition-all cursor-pointer"
                 >
-                  বুকিং করুন
-                </Link>
+                  Book Service
+                </button>
               </div>
+
             </div>
           ))}
         </div>
 
-        {/* View All CTA */}
-        <div className="text-center pt-4">
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-          >
-            <span>🌿</span> সকল ৭টি ক্যাটাগরির সার্ভিস ক্যাটালগ দেখুন <span>→</span>
-          </Link>
+        {/* View Full Catalog Strip */}
+        <div className="p-6 sm:p-8 bg-[#E4E2D7] rounded-3xl border border-stone-300 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center sm:text-left">
+            <h4 className="font-display text-xl font-bold text-[#121813]">
+              Need a Custom Turnkey Landscape Solution?
+            </h4>
+            <p className="font-sans text-xs sm:text-sm text-[#75787B]">
+              আমাদের রেজিস্টার্ড আর্কিটেক্ট ও প্ল্যান্ট ডক্টরদের সাথে সাইট ভিজিট ও মাস্টারপ্ল্যানের জন্য যোগাযোগ করুন।
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/services"
+              className="px-6 py-3 bg-[#18221A] hover:bg-[#2B4D33] text-white font-mono text-xs uppercase tracking-wider font-bold rounded-full transition-all shadow"
+            >
+              Browse Full Services Catalog
+            </Link>
+            <a
+              href="tel:01620692449"
+              className="px-5 py-3 bg-white hover:bg-stone-50 border border-stone-300 text-[#121813] font-mono text-xs uppercase tracking-wider font-bold rounded-full transition-all"
+            >
+              Call 01620692449
+            </a>
+          </div>
         </div>
 
       </div>

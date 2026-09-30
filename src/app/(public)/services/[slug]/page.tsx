@@ -4,15 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
 
 interface IServiceDetail {
   label: string;
@@ -47,8 +38,7 @@ export default function ServiceDetailsPage() {
 
     const fetchService = async () => {
       try {
-        // Try direct slug fetch
-        const res = await fetchProxy(`http://localhost:5000/api/services/${slug}`);
+        const res = await fetch(`/api/services/${slug}`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.label) {
@@ -125,7 +115,7 @@ export default function ServiceDetailsPage() {
         budgetRange: service.pricing || "Negotiable"
       };
 
-      const res = await fetchProxy("http://localhost:5000/api/bookings", {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -135,10 +125,11 @@ export default function ServiceDetailsPage() {
         const data = await res.json();
         setSubmittedRef(data.id || "BOOK-" + Math.floor(100000 + Math.random() * 900000));
       } else {
-        setSubmittedRef("REF-" + Date.now().toString().slice(-6));
+        const err = await res.json();
+        alert("Booking failed: " + (err.error || "Please check inputs"));
       }
-    } catch {
-      setSubmittedRef("REF-" + Date.now().toString().slice(-6));
+    } catch (err: any) {
+      alert("Network error submitting booking: " + err.message);
     } finally {
       setIsSubmitting(false);
     }

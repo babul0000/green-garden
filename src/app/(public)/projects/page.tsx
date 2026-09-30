@@ -3,16 +3,6 @@
 import React, { useState, useEffect } from "react";
 import type { IProject } from "@/types";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
-
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +12,7 @@ export default function ProjectsPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetchProxy("http://localhost:5000/api/projects");
+        const res = await fetch("/api/projects");
         if (res.ok) {
           const data = await res.json();
           setProjects(data);

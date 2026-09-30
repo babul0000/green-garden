@@ -12,6 +12,7 @@ export interface IUser {
 }
 
 export interface IService {
+  id?: string;
   _id?: string;
   label?: string;
   title?: string;
@@ -39,8 +40,8 @@ export interface ITestimonial {
 }
 
 export interface IProject {
-  _id?: string;
   id?: string;
+  _id?: string;
   name: string;
   title?: string;
   slug: string;
@@ -62,6 +63,7 @@ export interface IProject {
 }
 
 export interface IGalleryItem {
+  id?: string;
   _id?: string;
   imageUrl: string;
   beforeImageUrl?: string;
@@ -73,6 +75,7 @@ export interface IGalleryItem {
 }
 
 export interface IBlogComment {
+  id?: string;
   _id?: string;
   name?: string;
   user?: string;
@@ -83,6 +86,7 @@ export interface IBlogComment {
 }
 
 export interface IBlog {
+  id?: string;
   _id?: string;
   title: string;
   slug: string;
@@ -96,6 +100,7 @@ export interface IBlog {
 }
 
 export interface IBooking {
+  id?: string;
   _id?: string;
   clientName?: string;
   clientEmail?: string;
@@ -116,6 +121,7 @@ export interface IBooking {
 }
 
 export interface IReview {
+  id?: string;
   _id?: string;
   name: string;
   rating: number;
@@ -129,6 +135,7 @@ export interface IReview {
 }
 
 export interface ICareerApplication {
+  id?: string;
   _id?: string;
   name: string;
   email: string;
@@ -155,6 +162,7 @@ export interface ICartItem extends IProduct {
 }
 
 export interface IMessage {
+  id?: string;
   _id?: string;
   name: string;
   email: string;

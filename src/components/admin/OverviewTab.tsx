@@ -53,6 +53,38 @@ export default function OverviewTab({ bookings = [], projects = [], services = [
         </div>
       </div>
 
+      {/* Master ERP Live Counters Strip (PDF Requirement #23) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 bg-white p-4 rounded-3xl border border-gray-200/80 shadow-sm">
+        <div className="p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-100/80 text-center">
+          <span className="text-[10px] font-semibold text-emerald-800 uppercase tracking-wider block">Customers</span>
+          <span className="text-xl font-extrabold font-mono text-gray-900">250+</span>
+        </div>
+        <div className="p-2.5 rounded-2xl bg-blue-50/60 border border-blue-100/80 text-center">
+          <span className="text-[10px] font-semibold text-blue-800 uppercase tracking-wider block">Running Proj</span>
+          <span className="text-xl font-extrabold font-mono text-blue-900">18</span>
+        </div>
+        <div className="p-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-100/80 text-center">
+          <span className="text-[10px] font-semibold text-emerald-800 uppercase tracking-wider block">Completed</span>
+          <span className="text-xl font-extrabold font-mono text-emerald-900">96+</span>
+        </div>
+        <div className="p-2.5 rounded-2xl bg-purple-50/60 border border-purple-100/80 text-center">
+          <span className="text-[10px] font-semibold text-purple-800 uppercase tracking-wider block">Employees</span>
+          <span className="text-xl font-extrabold font-mono text-purple-900">35</span>
+        </div>
+        <div className="p-2.5 rounded-2xl bg-amber-50/60 border border-amber-100/80 text-center">
+          <span className="text-[10px] font-semibold text-amber-800 uppercase tracking-wider block">Maintenance</span>
+          <span className="text-xl font-extrabold font-mono text-amber-900">72+</span>
+        </div>
+        <div className="p-2.5 rounded-2xl bg-red-50/60 border border-red-100/80 text-center">
+          <span className="text-[10px] font-semibold text-red-800 uppercase tracking-wider block">Tree Doctor</span>
+          <span className="text-xl font-extrabold font-mono text-red-700">12</span>
+        </div>
+        <div className="p-2.5 rounded-2xl bg-teal-50/60 border border-teal-100/80 text-center col-span-2 sm:col-span-1">
+          <span className="text-[10px] font-semibold text-teal-800 uppercase tracking-wider block">Quotations</span>
+          <span className="text-xl font-extrabold font-mono text-teal-900">8</span>
+        </div>
+      </div>
+
       {/* 3-Column Grid matching admin.png */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         

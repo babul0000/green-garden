@@ -203,14 +203,14 @@ export default function ProjectsTab({
         <h4 className="font-serif font-bold text-sm text-[#0c1911]">Published Projects</h4>
         <div className="flex flex-col gap-2">
           {projects.map(p => (
-            <div key={p._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8ac343]/30 transition-colors text-xs">
+            <div key={p.id || p._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8ac343]/30 transition-colors text-xs">
               <div>
                 <span className="font-bold text-[#0c1911] block">{p.name}</span>
                 <span className="text-[10px] text-slate-400 block mt-0.5">Category: {p.category} • Location: {p.location} {p.featured && "• 🌟 Featured"}</span>
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={() => handleEditProjectClick(p)} className="text-[#8ac343] hover:underline font-bold cursor-pointer">Edit</button>
-                <button type="button" onClick={() => handleDeleteProject(p._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
+                <button type="button" onClick={() => handleDeleteProject(p.id || p._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
               </div>
             </div>
           ))}

@@ -181,7 +181,7 @@ export default function ServicesTab({
         <h4 className="font-sans font-bold text-sm text-[#06120c]">Existing Offerings ({services.length})</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {services.map(s => (
-            <div key={s._id} className="bg-white border border-slate-100 p-5 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors">
+            <div key={s.id || s._id} className="bg-white border border-slate-100 p-5 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{s.icon || "🌱"}</span>
                 <div>
@@ -192,7 +192,7 @@ export default function ServicesTab({
               </div>
               <div className="flex gap-3 text-xs shrink-0 ml-3">
                 <button type="button" onClick={() => handleEditServiceClick(s)} className="text-[#8fc63f] hover:underline font-bold cursor-pointer">Edit</button>
-                <button type="button" onClick={() => handleDeleteService(s._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
+                <button type="button" onClick={() => handleDeleteService(s.id || s._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
               </div>
             </div>
           ))}

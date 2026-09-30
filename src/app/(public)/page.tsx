@@ -1,47 +1,41 @@
 "use client";
 
 import React from "react";
-import Hero from "@/components/home/Hero";
-import Services from "@/components/home/Services";
-import BeforeAfterSection from "@/components/home/BeforeAfterSection";
-import Gallery from "@/components/home/Gallery";
-import DesignYourGardenWizard from "@/components/home/DesignYourGardenWizard";
-import TeamPreview from "@/components/home/TeamPreview";
-import ReviewsSection from "@/components/home/ReviewsSection";
-import WhyUs from "@/components/home/WhyUs";
-import Contact from "@/components/home/Contact";
+import ShmaHeroVideo from "@/components/home/ShmaHeroVideo";
+import ShmaAnimatedManifesto from "@/components/home/ShmaAnimatedManifesto";
+import ShmaHighlightProjects from "@/components/home/ShmaHighlightProjects";
+import ShmaServicesFlip from "@/components/home/ShmaServicesFlip";
+import ShmaProcess from "@/components/home/ShmaProcess";
+import ShmaCampaign from "@/components/home/ShmaCampaign";
+import ShmaRecentActivities from "@/components/home/ShmaRecentActivities";
+import ShmaLife from "@/components/home/ShmaLife";
 
 export default function Home() {
   return (
     <>
-      {/* 1. Hero Section with Bengali Headline, Subheadline & 5 CTAs */}
-      <Hero />
+      {/* 1. Full-Screen Cinematic Video Hero (100vh) */}
+      <ShmaHeroVideo />
 
-      {/* 2. আমাদের সেবা (Our Services Portfolio) */}
-      <Services />
+      {/* 2. GSAP 4-State Animated Manifesto Container ("ENABLE CHANGE FOR A BETTER EARTH") */}
+      <ShmaAnimatedManifesto />
 
-      {/* 3. Featured Projects & Gallery Showcase */}
-      <Gallery />
+      {/* 3. Highlight Project Showcase (Staggered 2-Column Editorial Grid with Authentic Video Loops) */}
+      <ShmaHighlightProjects />
 
-      {/* 4. Before & After Interactive Transformation Slider */}
-      <BeforeAfterSection />
+      {/* 4. 3D Flip-Box Service Section (Clean Beige Cards) */}
+      <ShmaServicesFlip />
 
-      {/* 5. "Design Your Garden" Interactive 6-Step Multi-Stage Wizard */}
-      <div id="estimator" className="px-4">
-        <DesignYourGardenWizard />
-      </div>
+      {/* 5. Process: A Thoughtful Journey to Transformative Solutions */}
+      <ShmaProcess />
 
-      {/* 6. Our Professional Team (Tree Doctors, Architects, Horticulturists) */}
-      <TeamPreview />
+      {/* 6. Campaign Swiper Banner ("A R GREEN GARDEN 10 TH Participating in the future") */}
+      <ShmaCampaign />
 
-      {/* 7. Customer Reviews & Ratings */}
-      <ReviewsSection />
+      {/* 7. Recent Activities (5-Column Photo Stream of Studio Lectures & Exhibitions) */}
+      <ShmaRecentActivities />
 
-      {/* 8. Why A R Green Garden (কেন এ আর গ্রিন গার্ডেন?) */}
-      <WhyUs />
-
-      {/* 9. Contact & Location (42/A Dhanmondi, Google Map, Call, WhatsApp, Directions) */}
-      <Contact />
+      {/* 8. Studio Life (Architectural Culture & Community Hub Manifesto) */}
+      <ShmaLife />
     </>
   );
 }

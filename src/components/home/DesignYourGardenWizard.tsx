@@ -67,14 +67,29 @@ export default function DesignYourGardenWizard() {
     }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState("");
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSitePhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setSitePhotoPreview(URL.createObjectURL(file));
+
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.url) {
+            setUploadedPhotoUrl(data.url);
+          }
+        }
+      } catch (err) {
+        console.error("Photo upload error:", err);
+      }
     }
   };
 
@@ -96,7 +111,7 @@ export default function DesignYourGardenWizard() {
           spaceType,
           designStyle,
           features,
-          sitePhotoUrl: sitePhotoPreview,
+          sitePhotoUrl: uploadedPhotoUrl || sitePhotoPreview || null,
           approxArea,
           budgetRange,
           userId: user?.id,
@@ -108,12 +123,10 @@ export default function DesignYourGardenWizard() {
         setReferenceCode(data.referenceCode || "ARG-2026");
         setIsSuccess(true);
       } else {
-        alert(data.error || "Submission failed. Please try again.");
+        alert("Submission error: " + (data.error || "Please verify your input."));
       }
-    } catch {
-      // Local fallback in case network issues
-      setReferenceCode(`ARG-${Math.floor(1000 + Math.random() * 9000)}`);
-      setIsSuccess(true);
+    } catch (err: any) {
+      alert("Network error submitting design request: " + err.message);
     } finally {
       setIsSubmitting(false);
     }

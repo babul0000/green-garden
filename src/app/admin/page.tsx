@@ -23,15 +23,13 @@ import RolesTab from "@/components/admin/RolesTab";
 import ContentTab from "@/components/admin/ContentTab";
 import ReviewsTab from "@/components/admin/ReviewsTab";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
+// Import ERP Masterplan Components (Steps 4 - 10)
+import DesignRequestsTab from "@/components/admin/DesignRequestsTab";
+import TreeDoctorTab from "@/components/admin/TreeDoctorTab";
+import EmployeesTab from "@/components/admin/EmployeesTab";
+import MaintenanceSchedulerTab from "@/components/admin/MaintenanceSchedulerTab";
+import FinanceInventoryTab from "@/components/admin/FinanceInventoryTab";
+import DigitalServiceCardTab from "@/components/admin/DigitalServiceCardTab";
 
 export default function AdminPage() {
   const { user, loading: isPending } = useAuth();
@@ -66,12 +64,12 @@ export default function AdminPage() {
   const [careers, setCareers] = useState<ICareerApplication[]>([]);
   const [settings, setSettings] = useState<ISetting>({
     title: "AR Green Garden",
-    phone: "01712345678",
+    phone: "01620692449",
     email: "info@argreengarden.com",
-    address: "Dhanmondi, Dhaka",
+    address: "42/A, Road 9/A, Dhanmondi, Dhaka",
     fbPage: "https://facebook.com/argreengarden",
     youtube: "https://youtube.com/argreengarden",
-    themeColor: "#1a3020",
+    themeColor: "#15803d",
     seoDescription: "Premium Landscaping & Garden Design website in Bangladesh"
   });
 
@@ -120,51 +118,53 @@ export default function AdminPage() {
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [settingsSuccess, setSettingsSuccess] = useState(false);
 
+  const norm = (arr: any) =>
+    Array.isArray(arr) ? arr.map((x: any) => ({ ...x, _id: x.id || x._id, id: x.id || x._id })) : [];
+
   const fetchData = async () => {
     try {
       // Bookings
-      const resBookings = await fetchProxy("http://localhost:5000/api/bookings");
-      if (resBookings.ok) setBookings(await resBookings.json());
+      const resBookings = await fetch("/api/bookings");
+      if (resBookings.ok) setBookings(norm(await resBookings.json()));
 
       // Projects
-      const resProjects = await fetchProxy("http://localhost:5000/api/projects");
-      if (resProjects.ok) setProjects(await resProjects.json());
+      const resProjects = await fetch("/api/projects");
+      if (resProjects.ok) setProjects(norm(await resProjects.json()));
 
       // Gallery
-      const resGallery = await fetchProxy("http://localhost:5000/api/gallery");
-      if (resGallery.ok) setGallery(await resGallery.json());
+      const resGallery = await fetch("/api/gallery");
+      if (resGallery.ok) setGallery(norm(await resGallery.json()));
 
       // Blogs
-      const resBlogs = await fetchProxy("http://localhost:5000/api/blogs");
-      if (resBlogs.ok) setBlogs(await resBlogs.json());
+      const resBlogs = await fetch("/api/blogs");
+      if (resBlogs.ok) setBlogs(norm(await resBlogs.json()));
 
       // Services
-      const resServices = await fetchProxy("http://localhost:5000/api/services");
-      if (resServices.ok) setServices(await resServices.json());
+      const resServices = await fetch("/api/services");
+      if (resServices.ok) setServices(norm(await resServices.json()));
 
       // Messages
-      const resMsg = await fetchProxy("http://localhost:5000/api/messages");
-      if (resMsg.ok) setMessages(await resMsg.json());
+      const resMsg = await fetch("/api/messages");
+      if (resMsg.ok) setMessages(norm(await resMsg.json()));
 
       // Careers
-      const resCar = await fetchProxy("http://localhost:5000/api/careers");
-      if (resCar.ok) setCareers(await resCar.json());
+      const resCar = await fetch("/api/careers");
+      if (resCar.ok) setCareers(norm(await resCar.json()));
 
       // Settings
-      const resSettings = await fetchProxy("http://localhost:5000/api/settings");
+      const resSettings = await fetch("/api/settings");
       if (resSettings.ok) {
         const data = await resSettings.json();
         if (data?.value) setSettings(data.value);
       }
-
     } catch (error) {
-      console.warn("Backend data fetch failed, using mock fallbacks:", error);
+      console.error("Database fetch failed:", error);
     }
   };
 
   useEffect(() => {
-    const userRole = (sessionData?.user as any)?.role;
-    if (sessionData?.user && (userRole === "admin" || userRole === "editor")) {
+    const userRole = String((sessionData?.user as any)?.role || "").toUpperCase();
+    if (sessionData?.user && (userRole === "ADMIN" || userRole === "EDITOR" || userRole === "MODERATOR")) {
       fetchData();
     }
   }, [sessionData]);
@@ -172,24 +172,34 @@ export default function AdminPage() {
   // --- BOOKING OPERATIONS ---
   const handleUpdateBooking = async (id: string, status: string, staff: string) => {
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/bookings/${id}`, {
+      const res = await fetch(`/api/bookings/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, assignedStaff: staff })
       });
-      if (res.ok) fetchData();
-    } catch {
-      setBookings(prev => prev.map(b => b._id === id ? { ...b, status: status as any, assignedStaff: staff } : b));
+      if (res.ok) {
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to update booking: " + (err.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      alert("Network error updating booking: " + err.message);
     }
   };
 
   const handleDeleteBooking = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this booking?")) return;
+    if (!id || !confirm("Are you sure you want to delete this booking?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/bookings/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setBookings(prev => prev.filter(b => b._id !== id));
+      const res = await fetch(`/api/bookings/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to delete booking: " + (err.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      alert("Network error deleting booking: " + err.message);
     }
   };
 
@@ -198,21 +208,22 @@ export default function AdminPage() {
     e.preventDefault();
     const payload = customPayload || {
       label: serviceLabel,
-      slug: serviceLabel.toLowerCase().replace(/ /g, "-"),
+      slug: serviceLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       desc: serviceDesc,
       icon: serviceIcon
     };
 
     try {
+      const srvId = editingService?.id || editingService?._id;
       let res;
-      if (editingService && editingService._id) {
-        res = await fetchProxy(`http://localhost:5000/api/services/${editingService._id}`, {
+      if (srvId) {
+        res = await fetch(`/api/services/${srvId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetchProxy("http://localhost:5000/api/services", {
+        res = await fetch("/api/services", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -223,10 +234,13 @@ export default function AdminPage() {
         setServiceDesc("");
         setServiceIcon("🌱");
         setEditingService(null);
-        fetchData();
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to save service: " + (err.error || "Server error"));
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert("Network error saving service: " + err.message);
     }
   };
 
@@ -237,13 +251,19 @@ export default function AdminPage() {
     setServiceIcon(srv.icon || "🌱");
   };
 
-  const handleDeleteService = async (id: string) => {
+  const handleDeleteService = async (id?: string) => {
+    if (!id) return;
     if (!confirm("Delete this service?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/services/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setServices(prev => prev.filter(s => s._id !== id));
+      const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to delete service: " + (err.error || "Server error"));
+      }
+    } catch (err: any) {
+      alert("Network error deleting service: " + err.message);
     }
   };
 
@@ -252,33 +272,29 @@ export default function AdminPage() {
     e.preventDefault();
     const payload = {
       name: projName,
-      slug: projName.toLowerCase().replace(/ /g, "-"),
-      client: projClient,
+      slug: projName.toLowerCase().replace(/[^a-z0-9]+/g, "-") + `-${Date.now()}`,
+      clientName: projClient,
       category: projCategory,
-      imageUrl: projUrl || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
       location: projLocation,
-      duration: projDuration,
-      budgetRange: projBudget,
-      challenges: projChallenges,
-      solution: projSolution,
-      clientTestimonial: {
-        name: projTestimonialName,
-        text: projTestimonialText,
-        rating: 5
-      },
+      afterImage: projUrl || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      images: projUrl ? [projUrl] : [],
+      budget: projBudget ? parseFloat(projBudget) : null,
+      notes: `${projChallenges ? "Challenges: " + projChallenges : ""} ${projSolution ? "Solution: " + projSolution : ""}`.trim(),
+      description: projSolution || projChallenges || `Project located in ${projLocation}`,
       featured: projFeatured
     };
 
     try {
+      const projId = editingProject?.id || editingProject?._id;
       let res;
-      if (editingProject && editingProject._id) {
-        res = await fetchProxy(`http://localhost:5000/api/projects/${editingProject._id}`, {
+      if (projId) {
+        res = await fetch(`/api/projects/${projId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetchProxy("http://localhost:5000/api/projects", {
+        res = await fetch("/api/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -286,10 +302,13 @@ export default function AdminPage() {
       }
       if (res.ok) {
         resetProjectForm();
-        fetchData();
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to save project: " + (err.error || "Server error"));
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert("Network error saving project: " + err.message);
     }
   };
 
@@ -312,12 +331,12 @@ export default function AdminPage() {
   const handleEditProjectClick = (proj: IProject) => {
     setEditingProject(proj);
     setProjName(proj.name || proj.title || "");
-    setProjClient(proj.client || "");
+    setProjClient(proj.client || (proj as any).clientName || "");
     setProjCategory(proj.category || "Residential");
-    setProjUrl(proj.imageUrl || "");
+    setProjUrl(proj.imageUrl || (proj as any).afterImage || "");
     setProjLocation(proj.location || "");
     setProjDuration(proj.duration || "");
-    setProjBudget(proj.budgetRange || "");
+    setProjBudget(proj.budgetRange || (proj as any).budget ? String((proj as any).budget) : "");
     setProjChallenges(proj.challenges || "");
     setProjSolution(proj.solution || "");
     setProjTestimonialName(proj.clientTestimonial?.name || "");
@@ -325,13 +344,19 @@ export default function AdminPage() {
     setProjFeatured(proj.featured || false);
   };
 
-  const handleDeleteProject = async (id: string) => {
+  const handleDeleteProject = async (id?: string) => {
+    if (!id) return;
     if (!confirm("Delete this project case study?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/projects/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setProjects(prev => prev.filter(p => p._id !== id));
+      const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to delete project: " + (err.error || "Server error"));
+      }
+    } catch (err: any) {
+      alert("Network error deleting project: " + err.message);
     }
   };
 
@@ -347,15 +372,16 @@ export default function AdminPage() {
     };
 
     try {
+      const galId = editingGallery?.id || editingGallery?._id;
       let res;
-      if (editingGallery && editingGallery._id) {
-        res = await fetchProxy(`http://localhost:5000/api/gallery/${editingGallery._id}`, {
+      if (galId) {
+        res = await fetch(`/api/gallery/${galId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetchProxy("http://localhost:5000/api/gallery", {
+        res = await fetch("/api/gallery", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -367,10 +393,13 @@ export default function AdminPage() {
         setGalBeforeUrl("");
         setGalCaption("");
         setEditingGallery(null);
-        fetchData();
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to save gallery item: " + (err.error || "Server error"));
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert("Network error saving gallery item: " + err.message);
     }
   };
 
@@ -383,13 +412,19 @@ export default function AdminPage() {
     setGalCaption(g.caption || "");
   };
 
-  const handleDeleteGallery = async (id: string) => {
+  const handleDeleteGallery = async (id?: string) => {
+    if (!id) return;
     if (!confirm("Delete this photo?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/gallery/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setGallery(prev => prev.filter(g => g._id !== id));
+      const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to delete gallery item: " + (err.error || "Server error"));
+      }
+    } catch (err: any) {
+      alert("Network error deleting gallery item: " + err.message);
     }
   };
 
@@ -398,7 +433,7 @@ export default function AdminPage() {
     e.preventDefault();
     const payload = {
       title: blogTitle,
-      slug: blogTitle.toLowerCase().replace(/ /g, "-"),
+      slug: blogTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       author: sessionData?.user?.name || "Admin",
       coverImage: blogUrl,
       category: blogCategory,
@@ -407,15 +442,16 @@ export default function AdminPage() {
     };
 
     try {
+      const blogId = editingBlog?.id || editingBlog?._id;
       let res;
-      if (editingBlog && editingBlog._id) {
-        res = await fetchProxy(`http://localhost:5000/api/blogs/${editingBlog._id}`, {
+      if (blogId) {
+        res = await fetch(`/api/blogs/${blogId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetchProxy("http://localhost:5000/api/blogs", {
+        res = await fetch("/api/blogs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -426,10 +462,13 @@ export default function AdminPage() {
         setBlogUrl("");
         setBlogContent("");
         setEditingBlog(null);
-        fetchData();
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to save blog post: " + (err.error || "Server error"));
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert("Network error saving blog post: " + err.message);
     }
   };
 
@@ -441,26 +480,31 @@ export default function AdminPage() {
     setBlogContent(b.content);
   };
 
-  const handleDeleteBlog = async (id: string) => {
+  const handleDeleteBlog = async (id?: string) => {
+    if (!id) return;
     if (!confirm("Delete this blog post?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/blogs/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setBlogs(prev => prev.filter(b => b._id !== id));
+      const res = await fetch(`/api/blogs/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchData();
+      } else {
+        const err = await res.json();
+        alert("Failed to delete blog post: " + (err.error || "Server error"));
+      }
+    } catch (err: any) {
+      alert("Network error deleting blog post: " + err.message);
     }
   };
 
   const handleDeleteComment = async (blogId: string, commentId: string) => {
     if (!confirm("Delete this comment?")) return;
-    const targetBlog = blogs.find(b => b._id === blogId);
+    const targetBlog = blogs.find(b => (b.id || b._id) === blogId);
     if (!targetBlog || !targetBlog.comments) return;
 
-    // Filter out the deleted comment
-    const updatedComments = targetBlog.comments.filter(c => c._id !== commentId);
+    const updatedComments = targetBlog.comments.filter(c => (c.id || c._id) !== commentId);
     
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/blogs/${blogId}`, {
+      const res = await fetch(`/api/blogs/${blogId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comments: updatedComments })
@@ -468,9 +512,9 @@ export default function AdminPage() {
       if (res.ok) {
         const freshBlog = await res.json();
         setSelectedBlogComments(freshBlog);
-        fetchData();
+        await fetchData();
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
     }
   };
@@ -478,35 +522,35 @@ export default function AdminPage() {
   // --- CAREER APPLICATION STATUS ---
   const handleUpdateCareerStatus = async (id: string, status: string) => {
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/careers/${id}`, {
+      const res = await fetch(`/api/careers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
       });
-      if (res.ok) fetchData();
-    } catch {
-      setCareers(prev => prev.map(c => c._id === id ? { ...c, status: status as any } : c));
+      if (res.ok) await fetchData();
+    } catch (err: any) {
+      alert("Failed to update application: " + err.message);
     }
   };
 
-  const handleDeleteCareer = async (id: string) => {
-    if (!confirm("Delete this job application record?")) return;
+  const handleDeleteCareer = async (id?: string) => {
+    if (!id || !confirm("Delete this job application record?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/careers/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setCareers(prev => prev.filter(c => c._id !== id));
+      const res = await fetch(`/api/careers/${id}`, { method: "DELETE" });
+      if (res.ok) await fetchData();
+    } catch (err: any) {
+      alert("Failed to delete application: " + err.message);
     }
   };
 
   // --- INBOX MESSAGE OPERATIONS ---
-  const handleDeleteMessage = async (id: string) => {
-    if (!confirm("Delete this contact message?")) return;
+  const handleDeleteMessage = async (id?: string) => {
+    if (!id || !confirm("Delete this contact message?")) return;
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/messages/${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
-    } catch {
-      setMessages(prev => prev.filter(m => m._id !== id));
+      const res = await fetch(`/api/messages/${id}`, { method: "DELETE" });
+      if (res.ok) await fetchData();
+    } catch (err: any) {
+      alert("Failed to delete message: " + err.message);
     }
   };
 
@@ -517,16 +561,20 @@ export default function AdminPage() {
     setSettingsSuccess(false);
 
     try {
-      const res = await fetchProxy("http://localhost:5000/api/settings", {
+      const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings)
       });
       if (res.ok) {
         setSettingsSuccess(true);
+        setTimeout(() => setSettingsSuccess(false), 4000);
+      } else {
+        const err = await res.json();
+        alert("Failed to save settings: " + (err.error || "Server error"));
       }
-    } catch {
-      setSettingsSuccess(true); // mock success
+    } catch (err: any) {
+      alert("Error saving settings: " + err.message);
     } finally {
       setSettingsSaving(false);
     }
@@ -738,6 +786,36 @@ export default function AdminPage() {
           {/* TAB 13: REVIEWS */}
           {activeTab === "reviews" && (
             <ReviewsTab />
+          )}
+
+          {/* TAB 14: DESIGN REQUESTS (STEP 4) */}
+          {activeTab === "design-requests" && (
+            <DesignRequestsTab setActiveTab={handleTabChange} />
+          )}
+
+          {/* TAB 15: TREE DOCTOR & PLANT HEALTH (STEPS 5 & 6) */}
+          {activeTab === "tree-doctor" && (
+            <TreeDoctorTab />
+          )}
+
+          {/* TAB 16: EMPLOYEES & ATTENDANCE (STEP 7) */}
+          {activeTab === "employees" && (
+            <EmployeesTab />
+          )}
+
+          {/* TAB 17: RUNNING PROJECTS & MAINTENANCE (STEP 8) */}
+          {activeTab === "maintenance" && (
+            <MaintenanceSchedulerTab />
+          )}
+
+          {/* TAB 18: FINANCE, INVENTORY & P&L (STEP 9) */}
+          {activeTab === "finance" && (
+            <FinanceInventoryTab />
+          )}
+
+          {/* TAB 19: DIGITAL SERVICE CARD (STEP 10) */}
+          {activeTab === "service-card" && (
+            <DigitalServiceCardTab />
           )}
         </div>
       </main>

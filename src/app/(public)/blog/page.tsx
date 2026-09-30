@@ -3,15 +3,6 @@
 import React, { useState, useEffect } from "react";
 import type { IBlog } from "@/types";
 
-const cleanApiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-  .split("||")[0]
-  .trim();
-
-const fetchProxy = ((originalFetch) => (url: string | URL | Request, options?: RequestInit) => 
-  typeof url === "string" && url.startsWith("http://localhost:5000") 
-    ? originalFetch(url.replace("http://localhost:5000", cleanApiUrl), options) 
-    : originalFetch(url, options)
-)(globalThis.fetch);
 
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<IBlog[]>([]);
@@ -31,7 +22,7 @@ export default function BlogPage() {
 
   const fetchBlogs = async () => {
     try {
-      const res = await fetchProxy("http://localhost:5000/api/blogs");
+      const res = await fetch("/api/blogs");
       if (res.ok) {
         const data = await res.json();
         setBlogs(data);
@@ -83,7 +74,8 @@ export default function BlogPage() {
     setCommentSubmitting(true);
 
     try {
-      const res = await fetchProxy(`http://localhost:5000/api/blogs/${activeBlog._id}/comments`, {
+      const blogId = activeBlog.id || activeBlog._id;
+      const res = await fetch(`/api/blogs/${blogId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: commentName, text: commentText })
