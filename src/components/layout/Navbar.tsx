@@ -177,10 +177,20 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     ? "/moderator"
                     : "/client-dashboard"
                 }
-                className="px-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-500/30"
+                title={user.name ? `Logged in as ${user.name}` : "Dashboard"}
               >
-                <span>📊</span>
-                <span>{t("ড্যাশবোর্ড", "Dashboard")}</span>
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-emerald-950 border border-white/60 flex items-center justify-center shrink-0 shadow-inner">
+                  <img
+                    src={
+                      user.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=064e3b&color=ffffff&bold=true&size=64`
+                    }
+                    alt={user.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="tracking-wide">Dashboard</span>
               </Link>
             ) : (
               <Link
@@ -363,11 +373,21 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               <div className="pt-3 border-t border-white/20">
                 {user ? (
                   <div className="flex items-center justify-between bg-black/25 p-3 rounded-2xl">
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-white">{user.name}</p>
-                      <p className="text-[10px] text-emerald-300 font-mono uppercase tracking-wider">
-                        {user.role}
-                      </p>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-950 border border-emerald-400/40 shrink-0 flex items-center justify-center shadow-inner">
+                        <img
+                          src={
+                            user.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=064e3b&color=ffffff&bold=true&size=64`
+                          }
+                          alt={user.name || "User"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <p className="text-xs font-bold text-white truncate max-w-[110px]">{user.name}</p>
+                        <p className="text-[10px] text-emerald-300 font-mono uppercase tracking-wider">{user.role}</p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Link
@@ -383,7 +403,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                         onClick={() => setMenuOpen(false)}
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
                       >
-                        {t("ড্যাশবোর্ড", "Dashboard")}
+                        Dashboard
                       </Link>
                       <button
                         onClick={() => {
