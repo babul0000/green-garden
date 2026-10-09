@@ -45,10 +45,10 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             : "bg-transparent py-6 text-white"
         }`}
       >
-        <div className="max-w-[1380px] mx-auto px-6 sm:px-10 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4">
           
-          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon */}
-          <div className="w-1/3 flex items-center justify-start gap-3">
+          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Language Switcher */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <button
               onClick={() => setMenuOpen(true)}
               className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
@@ -72,23 +72,11 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                 ></span>
               </div>
             </button>
-          </div>
 
-          {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
-          <div className="w-1/3 flex items-center justify-center text-center">
-            <Link href="/" className="group inline-block">
-              <span className="font-display font-extralight text-xl sm:text-2xl md:text-[26px] tracking-[0.25em] uppercase transition-colors">
-                A R GREEN GARDEN
-              </span>
-            </Link>
-          </div>
-
-          {/* Column 3: Language Switcher, Social Icons & Hotline */}
-          <div className="w-1/3 flex items-center justify-end gap-3 sm:gap-5">
             {/* Language Switcher Pill Toggle */}
             <button
               onClick={toggleLanguage}
-              className={`text-xs font-mono tracking-wider px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
+              className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
                 isScrolled
                   ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
                   : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
@@ -103,8 +91,21 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                 EN
               </span>
             </button>
+          </div>
 
-            <div className="hidden md:flex items-center gap-4">
+          {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
+          <div className="flex-1 flex items-center justify-center text-center px-2">
+            <Link href="/" className="group inline-block whitespace-nowrap">
+              <span className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] tracking-[0.16em] sm:tracking-[0.22em] uppercase transition-colors">
+                A R GREEN GARDEN
+              </span>
+            </Link>
+          </div>
+
+          {/* Column 3: Hotline, WhatsApp & Dashboard */}
+          <div className="flex items-center justify-end gap-2 sm:gap-3.5 shrink-0">
+            {/* Social Icons - visible on large monitors to prevent crowding */}
+            <div className="hidden xl:flex items-center gap-3.5">
               {/* Facebook */}
               <a
                 href="https://facebook.com"
@@ -145,14 +146,15 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               </a>
             </div>
 
+            {/* Hotline Phone */}
             <a
               href="tel:01883012641"
-              className="text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b border-current pb-0.5 whitespace-nowrap hidden sm:inline"
+              className="text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b border-current pb-0.5 whitespace-nowrap hidden lg:inline"
             >
               ০১88৩-০১২৬৪১
             </a>
 
-            {/* Direct WhatsApp Business Action */}
+            {/* Direct WhatsApp Action */}
             <a
               href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
               target="_blank"
