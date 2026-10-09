@@ -1,83 +1,101 @@
 "use client";
 
 import React from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ActivityItem {
   id: string;
-  title: string;
-  bnTitle: string;
+  titleBn: string;
+  titleEn: string;
+  subtitleBn: string;
+  subtitleEn: string;
   image: string;
-  date: string;
+  dateBn: string;
+  dateEn: string;
 }
 
 const activities: ActivityItem[] = [
   {
     id: "act-1",
-    title: "Campus Gathering & Ecological Landscape Workshop",
-    bnTitle: "বুয়েট স্থাপত্য বিভাগের সাথে মাইক্রোক্লাইমেট গবেষণা",
+    titleBn: "বুয়েট স্থাপত্য বিভাগের সাথে মাইক্রোক্লাইমেট গবেষণা",
+    titleEn: "Microclimate Landscape Research with BUET Architecture",
+    subtitleBn: "নগর তাপমাত্রা হ্রাস ও বায়োফিলিক নকশার প্রভাব নিয়ে যৌথ সমীক্ষা",
+    subtitleEn: "Joint study evaluating urban heat island reduction & biophilia",
     image: "https://shmadesigns.com/wp-content/uploads/2025/06/IMG_0246-800x600.jpg",
-    date: "September 2026 • সেপ্টেম্বর ২০২৬",
+    dateBn: "সেপ্টেম্বর ২০২৬",
+    dateEn: "September 2026",
   },
   {
     id: "act-2",
-    title: "Landscape Architecture Annual Summit & Keynote",
-    bnTitle: "ধানমন্ডি পেন্টহাউস প্রজেক্ট সফল হস্তান্তর ও কমিশন",
+    titleBn: "ধানমন্ডি পেন্টহাউস বায়োফিলিক গার্ডেন হস্তান্তর",
+    titleEn: "Completion of Dhanmondi Penthouse Bio-Terrace",
+    subtitleBn: "৩,৮০০ বর্গফুটের রুফটপ ফরেস্ট ও ওয়াটারপ্রুফ ড্রেনেজ প্রকল্প সফল সম্পন্ন",
+    subtitleEn: "3,800 sq.ft rooftop forest with multi-layer waterproof drainage",
     image: "https://shmadesigns.com/wp-content/uploads/2025/06/IMG_1020-800x600.jpg",
-    date: "August 2026 • আগস্ট ২০২৬",
+    dateBn: "আগস্ট ২০২৬",
+    dateEn: "August 2026",
   },
   {
     id: "act-3",
-    title: "Public Lecture on Climate Resilient Urban Strategies",
-    bnTitle: "গুলশানে হেরিটেজ গাছের সফল সার্জারি ও ট্রি ক্লিনিক",
+    titleBn: "গুলশানে হেরিটেজ গাছের সফল সার্জারি ও ট্রি ক্লিনিক",
+    titleEn: "Heritage Tree Surgery & Clinical Care in Gulshan",
+    subtitleBn: "অন-কল ট্রি ডক্টর টিম দ্বারা শতবর্ষী দুর্লভ রেইনট্রির জীবন রক্ষা",
+    subtitleEn: "Emergency arborist team rescued a diseased century-old rain tree",
     image: "https://shmadesigns.com/wp-content/uploads/2025/06/1-11-800x534.jpg",
-    date: "July 2026 • জুলাই ২০২৬",
+    dateBn: "জুলাই ২০২৬",
+    dateEn: "July 2026",
   },
   {
     id: "act-4",
-    title: "Façade Biophilic Installation Opening Ceremony",
-    bnTitle: "গ্রিন ওয়াল ও ভার্টিক্যাল গার্ডেন প্রদর্শনী",
+    titleBn: "ঢাকা ক্লাইমেট আর্কিটেকচার সামিটে মূল প্রবন্ধ উপস্থাপন",
+    titleEn: "Keynote at Dhaka Climate Architecture Summit",
+    subtitleBn: "ভার্টিক্যাল গ্রিন ওয়াল ও রেইনওয়াটার হারভেস্টিং কৌশল প্রদর্শনী",
+    subtitleEn: "Showcasing living wall engineering and stormwater harvesting",
     image: "https://shmadesigns.com/wp-content/uploads/2025/06/S__10559556-800x600.jpg",
-    date: "June 2026 • জুন ২০২৬",
+    dateBn: "জুন ২০২৬",
+    dateEn: "June 2026",
   },
   {
     id: "act-5",
-    title: "Community Pocket Park Co-Design Showcase",
-    bnTitle: "কমিউনিটি পকেট পার্ক ডিজাইন ও সামাজিক সম্মেলন",
+    titleBn: "কমিউনিটি ছাদবাগান ও ড্রিপ সেচ প্রশিক্ষণ কর্মশালা",
+    titleEn: "Community Rooftop & Drip Irrigation Workshop",
+    subtitleBn: "গৃহমালিক ও প্রকৃতিপ্রেমীদের জন্য আধুনিক বাগান ব্যবস্থাপনার হাতে-কলমে প্রশিক্ষণ",
+    subtitleEn: "Hands-on masterclass for home gardeners on organic soils and micro-drip",
     image: "https://shmadesigns.com/wp-content/uploads/2025/06/IMG_9771-800x600.jpg",
-    date: "May 2026 • মে ২০২৬",
+    dateBn: "মে ২০২৬",
+    dateEn: "May 2026",
   },
 ];
 
 export default function ShmaRecentActivities() {
+  const { language, t } = useLanguage();
+
   return (
     <section id="activities" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
       
-      {/* Exact Shma Header */}
+      {/* Header */}
       <div className="mb-14">
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Recent Activities
+              {t("সাম্প্রতিক কার্যক্রম", "Recent Activities")}
             </h2>
-            <span className="font-sans text-sm sm:text-base text-[#75787b] font-normal">
-              • সাম্প্রতিক কার্যক্রম ও ইভেন্ট
-            </span>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            Studio News & Events
+            {t("স্টুডিও নিউজ ও ইভেন্ট", "Studio News & Events")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
-      {/* 5-Column Photo Stream matching Shma */}
+      {/* 5-Column Photo Stream */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
         {activities.map((item) => (
           <div key={item.id} className="space-y-3 group cursor-pointer">
             <div className="aspect-[3/4] overflow-hidden bg-stone-100 relative">
               <img
                 src={item.image}
-                alt={item.title}
+                alt={language === "bn" ? item.titleBn : item.titleEn}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
@@ -88,13 +106,13 @@ export default function ShmaRecentActivities() {
             </div>
             <div className="space-y-1">
               <p className="font-sans text-[11px] text-[#75787b] font-light">
-                {item.date}
+                {language === "bn" ? item.dateBn : item.dateEn}
               </p>
-              <h3 className="font-sans text-xs sm:text-[13px] font-medium text-[#3d2e17] leading-snug line-clamp-1 group-hover:text-[#5a9dff] transition-colors">
-                {item.title}
+              <h3 className="font-sans text-xs sm:text-[13px] font-medium text-[#3d2e17] leading-snug line-clamp-2 group-hover:text-[#5a9dff] transition-colors">
+                {language === "bn" ? item.titleBn : item.titleEn}
               </h3>
               <p className="font-sans text-[11px] text-[#75787b] leading-tight line-clamp-2">
-                {item.bnTitle}
+                {language === "bn" ? item.subtitleBn : item.subtitleEn}
               </p>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface GalleryProject {
   id: string;
@@ -71,6 +72,7 @@ const defaultShowcaseProjects: GalleryProject[] = [
 ];
 
 export default function Gallery() {
+  const { language, t } = useLanguage();
   const [showcaseProjects, setShowcaseProjects] = useState<GalleryProject[]>(defaultShowcaseProjects);
   const [filter, setFilter] = useState<string>("All");
 
@@ -110,7 +112,7 @@ export default function Gallery() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#2B4D33] font-bold block mb-2">
-                Project Gallery • বাস্তবায়িত ল্যান্ডস্কেপ
+                {t("বাস্তবায়িত ল্যান্ডস্কেপ গ্যালারি", "Project Gallery Portfolio")}
               </span>
               <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#121813]">
                 Selected <span className="font-bold text-[#2B4D33]">Works</span>

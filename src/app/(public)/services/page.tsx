@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 
 interface IServiceItem {
@@ -26,6 +27,7 @@ interface ServiceCategory {
 }
 
 export default function ServicesPage() {
+  const { lang, t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("landscape-design");
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -542,21 +544,26 @@ export default function ServicesPage() {
         {/* Header Section */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full border border-emerald-200">
-            🌿 আমাদের সকল সেবা • Complete Services Catalog
+            {t("🌿 Complete Services Catalog", "🌿 Complete Services Catalog")}
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
             A R Green Garden <br />
-            <span className="text-emerald-700 italic font-medium">৭টি প্রধান ক্যাটাগরির পূর্ণাঙ্গ সেবা</span>
+            <span className="text-emerald-700 italic font-medium">
+              {t("7 Core Architectural Landscape Disciplines", "7 Core Architectural Landscape Disciplines")}
+            </span>
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            আন্তর্জাতিক মানের ল্যান্ডস্কেপ ডিজাইন, ১০০% ওয়াটারপ্রুফ ছাদবাগান, লিভিং গ্রিন ওয়াল, আধুনিক অটো ইরিগেশন, এবং বিশেষজ্ঞ ট্রি ডক্টর চিকিৎসা — আপনার বাগান সাজাতে সবকিছু এক ছাদের নিচে।
+            {t(
+              "আন্তর্জাতিক মানের ল্যান্ডস্কেপ ডিজাইন, ১০০% ওয়াটারপ্রুফ ছাদবাগান, লিভিং গ্রিন ওয়াল, আধুনিক অটো ইরিগেশন, এবং বিশেষজ্ঞ ট্রি ডক্টর চিকিৎসা — আপনার বাগান সাজাতে সবকিছু এক ছাদের নিচে।",
+              "International standard landscape architecture, 100% leakproof rooftop gardens, living green walls, smart automated drip irrigation, and dedicated botanical tree doctor care — all under one roof."
+            )}
           </p>
 
           {/* Live Search Bar */}
           <div className="max-w-xl mx-auto pt-3 relative">
             <input
               type="text"
-              placeholder="যেকোনো সেবা খুঁজুন (যেমন: Rooftop, Tree Doctor, Drip, ফাউন্টেন)..."
+              placeholder={t("Search services (e.g. Rooftop, Tree Doctor, Drip, Fountain)...", "Search services (e.g. Rooftop, Tree Doctor, Drip, Fountain)...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-10 py-3.5 bg-white rounded-full border border-emerald-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 shadow-sm transition-all"
@@ -577,13 +584,17 @@ export default function ServicesPage() {
         {searchFilteredServices !== null && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between text-xs sm:text-sm text-emerald-900">
             <span>
-              <b>"{searchQuery}"</b> এর জন্য মোট <b>{searchFilteredServices.length}</b>টি সেবা পাওয়া গেছে
+              {lang === "bn" ? (
+                <><b>"{searchQuery}"</b> এর জন্য মোট <b>{searchFilteredServices.length}</b>টি সেবা পাওয়া গেছে</>
+              ) : (
+                <>Found <b>{searchFilteredServices.length}</b> services matching <b>"{searchQuery}"</b></>
+              )}
             </span>
             <button
               onClick={() => setSearchQuery("")}
               className="text-emerald-700 font-bold underline cursor-pointer"
             >
-              সকল ক্যাটাগরি দেখুন
+              {t("সকল ক্যাটাগরি দেখুন", "View All Categories")}
             </button>
           </div>
         )}
@@ -604,7 +615,7 @@ export default function ServicesPage() {
                   }`}
                 >
                   <span className="text-base">{cat.icon}</span>
-                  <span>{cat.bengaliName}</span>
+                  <span>{cat.name}</span>
                 </button>
               );
             })}
@@ -617,7 +628,9 @@ export default function ServicesPage() {
             <div className="space-y-2 text-center sm:text-left">
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-3xl">{currentCat.icon}</span>
-                <h2 className="text-xl sm:text-2xl font-serif font-bold">{currentCat.bengaliName}</h2>
+                <h2 className="text-xl sm:text-2xl font-serif font-bold">
+                  {currentCat.name}
+                </h2>
               </div>
               <p className="text-xs sm:text-sm text-emerald-100 max-w-2xl leading-relaxed">
                 {currentCat.desc}
@@ -630,7 +643,7 @@ export default function ServicesPage() {
               }}
               className="px-6 py-3 bg-white text-emerald-900 hover:bg-emerald-50 rounded-full text-xs font-bold whitespace-nowrap shadow transition-all cursor-pointer"
             >
-              💬 ফ্রি কনসাল্টেশন বুক করুন
+              {t("💬 ফ্রি কনসাল্টেশন বুক করুন", "💬 Book Free Consultation")}
             </button>
           </div>
         )}
@@ -646,9 +659,8 @@ export default function ServicesPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-bold text-gray-900 text-lg font-serif group-hover:text-emerald-800 transition-colors">
-                      {srv.bengaliTitle}
+                      {srv.title}
                     </h3>
-                    <span className="text-xs text-gray-400 block mt-0.5">{srv.title}</span>
                   </div>
                   <span className="text-2xl p-2.5 bg-emerald-50 rounded-2xl text-emerald-800">
                     {srv.icon || currentCat.icon}
@@ -661,7 +673,7 @@ export default function ServicesPage() {
 
                 <div className="space-y-1.5 pt-2">
                   <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider block">
-                    ফিচার ও সুবিধাসমূহ:
+                    {t("ফিচার ও সুবিধাসমূহ:", "Key Features:")}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {srv.features.map((f, fIdx) => (
@@ -680,14 +692,18 @@ export default function ServicesPage() {
               <div className="pt-5 mt-5 border-t border-gray-100 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-gray-400 uppercase font-semibold block">আনুমানিক খরচ</span>
-                    <span className="text-xs font-bold text-emerald-800">{srv.pricing || "কোটেশন অনুযায়ী"}</span>
+                    <span className="text-[10px] text-gray-400 uppercase font-semibold block">
+                      {t("আনুমানিক খরচ", "Estimated Cost")}
+                    </span>
+                    <span className="text-xs font-bold text-emerald-800">
+                      {srv.pricing || (lang === "bn" ? "কোটেশন অনুযায়ী" : "Custom Quote")}
+                    </span>
                   </div>
                   <Link
                     href={`/services/${srv.slug}`}
                     className="text-xs text-emerald-700 font-semibold hover:underline flex items-center gap-1"
                   >
-                    বিস্তারিত দেখুন <span>→</span>
+                    {t("বিস্তারিত দেখুন", "Learn More")} <span>→</span>
                   </Link>
                 </div>
 
@@ -699,11 +715,11 @@ export default function ServicesPage() {
                     }}
                     className="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all text-center cursor-pointer"
                   >
-                    বুকিং করুন
+                    {t("বুকিং করুন", "Book Service")}
                   </button>
 
                   <a
-                    href={`https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20am%20interested%20in%20your%20service:%20${encodeURIComponent(srv.title)}`}
+                    href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20am%20interested%20in%20your%20service:%20${encodeURIComponent(srv.title)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold transition-all text-center flex items-center justify-center gap-1"
@@ -732,7 +748,7 @@ export default function ServicesPage() {
                   {bookingModalService.category}
                 </span>
                 <h3 className="text-xl font-serif font-bold text-gray-900">
-                  {bookingModalService.bengaliTitle}
+                  {bookingModalService.title}
                 </h3>
                 <p className="text-xs text-gray-500">
                   আপনার তথ্য প্রদান করুন। আমাদের ল্যান্ডস্কেপ এক্সপার্ট সরাসরি আপনার সাথে যোগাযোগ করবেন।
@@ -744,7 +760,9 @@ export default function ServicesPage() {
                   <div className="w-12 h-12 bg-emerald-700 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                     ✓
                   </div>
-                  <h4 className="font-bold text-base">আপনার বুকিং সফলভাবে গ্রহণ করা হয়েছে!</h4>
+                  <h4 className="font-bold text-base">
+                    {t("Booking Request Successfully Received!", "Booking Request Successfully Received!")}
+                  </h4>
                   <p className="text-xs text-emerald-700">
                     রেফারেন্স ট্র্যাকিং আইডি: <b>{bookingSuccess}</b>
                   </p>
@@ -833,8 +851,12 @@ export default function ServicesPage() {
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto space-y-6 pt-10">
           <div className="text-center space-y-2">
-            <h3 className="text-2xl font-serif font-bold text-gray-900">সাধারণ কিছু প্রশ্নোত্তর (FAQ)</h3>
-            <p className="text-xs text-gray-500">আপনার যেকোনো প্রশ্ন থাকলে সরাসরি জেনে নিন</p>
+            <h3 className="text-2xl font-serif font-bold text-gray-900">
+              {t("Frequently Asked Questions (FAQ)", "Frequently Asked Questions (FAQ)")}
+            </h3>
+            <p className="text-xs text-gray-500">
+              {t("Find immediate answers to common questions about our services", "Find immediate answers to common questions about our services")}
+            </p>
           </div>
 
           <div className="space-y-3">

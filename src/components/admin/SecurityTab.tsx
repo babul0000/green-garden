@@ -8,32 +8,49 @@ interface SecurityTabProps {
 
 export default function SecurityTab({ sessionData }: SecurityTabProps) {
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] border border-slate-100 shadow-sm flex flex-col gap-6 animate-fade-in-up">
+    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl text-[#E4E2D7] flex flex-col gap-6 animate-fade-in-up">
       <div>
-        <h3 className="font-serif font-bold text-lg text-[#0c1911]">Security Control</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Manage administrative credentials, permissions and active session logs.</p>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-400 mb-2">
+          🛡️ Enterprise Security
+        </div>
+        <h3 className="font-sans font-bold text-xl text-[#E4E2D7]">সিকিউরিটি ও অ্যাক্সেস কন্ট্রোল</h3>
+        <p className="text-xs text-white/50 mt-1">প্রশাসনিক ক্রেডেনশিয়ালস, অথেনটিকেশন সেশন এবং রোল-বেসড এক্সেস পর্যবেক্ষণ করুন।</p>
       </div>
 
-      <div className="bg-[#f8faf9] p-6 rounded-[24px] border border-slate-200/60 max-w-xl text-xs flex flex-col gap-4">
-        <div className="flex justify-between items-center border-b border-slate-200/60 pb-3">
-          <span className="font-bold text-slate-500">Active Admin Session:</span>
-          <span className="bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full uppercase text-[9px] border border-emerald-100">Active</span>
+      <div className="bg-black/40 p-6 sm:p-8 rounded-2xl border border-white/10 max-w-2xl text-xs flex flex-col gap-5">
+        <div className="flex justify-between items-center border-b border-white/10 pb-4">
+          <span className="font-mono text-xs uppercase tracking-wider text-emerald-400 font-bold">অ্যাক্টিভ সেশন স্ট্যাটাস</span>
+          <span className="bg-emerald-500/20 text-emerald-300 font-mono font-bold px-3 py-1 rounded-full uppercase text-[10px] border border-emerald-500/30 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            ACTIVE SESSION
+          </span>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="font-bold text-slate-500">User Identification:</span>
-          <span className="text-[#0c1911] font-semibold">{sessionData?.user?.name || "Fandaww Punx"}</span>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1 p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">ইউজার নাম (User Name)</span>
+            <span className="text-white font-semibold text-sm">{sessionData?.user?.name || "A R Green Garden Admin"}</span>
+          </div>
+
+          <div className="flex flex-col gap-1 p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">অ্যাডমিন ইমেইল (Email Address)</span>
+            <span className="text-white font-semibold text-sm font-mono">{sessionData?.user?.email || "admin@argreengarden.com"}</span>
+          </div>
+
+          <div className="flex flex-col gap-1 p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">অথরিটি রোল (Access Role)</span>
+            <span className="text-emerald-400 font-bold font-mono text-sm uppercase tracking-wider">{sessionData?.user?.role || "SUPER_ADMIN"}</span>
+          </div>
+
+          <div className="flex flex-col gap-1 p-3.5 bg-white/[0.03] rounded-xl border border-white/5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-white/50">এনক্রিপশন প্রোটোকল</span>
+            <span className="text-emerald-400 font-bold font-mono text-xs">TLS 1.3 / NextAuth JWT 256</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-1">
-          <span className="font-bold text-slate-500">Email Address:</span>
-          <span className="text-[#0c1911] font-semibold">{sessionData?.user?.email || "fandaww6@gmail.com"}</span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="font-bold text-slate-500">Workspace Authority Level:</span>
-          <span className="text-[#8ac343] font-bold uppercase tracking-wider">{sessionData?.user?.role || "Admin"}</span>
-        </div>
-        <div className="border-t border-slate-200/60 pt-4 mt-2">
-          <p className="text-[10px] text-slate-400 leading-normal">
-            This control panel uses secure MongoDB database connection and encryption keys. Permissions are synced using NextAuth credentials.
+
+        <div className="border-t border-white/10 pt-4 mt-2">
+          <p className="text-[11px] text-white/50 leading-relaxed font-sans">
+            এই কন্ট্রোল প্যানেলটি নিরাপদ NextAuth ক্রেডেনশিয়াল ভেরিফিকেশন, ক্রিপ্টোগ্রাফিক সল্ট হ্যাশিং এবং রিয়েল-টাইম রোল-বেসড পারমিশন মেকানিজম দ্বারা সুরক্ষিত। সকল অ্যাডমিন অ্যাক্টিভিটি কঠোরভাবে পর্যবেক্ষণ ও অডিট করা হয়।
           </p>
         </div>
       </div>

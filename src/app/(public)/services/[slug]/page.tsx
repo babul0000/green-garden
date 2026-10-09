@@ -193,7 +193,7 @@ export default function ServiceDetailsPage() {
                 অনলাইন বুকিং করুন →
               </a>
               <a
-                href={`https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20want%20to%20consult%20about%20${encodeURIComponent(service.label)}`}
+                href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20want%20to%20consult%20about%20${encodeURIComponent(service.label)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-full hover:bg-[#20bd5a] transition-all shadow text-center flex items-center justify-center gap-2 whitespace-nowrap"
@@ -337,8 +337,8 @@ export default function ServiceDetailsPage() {
 
           <div className="text-center pt-2 border-t border-gray-100">
             <span className="text-xs text-gray-400">সরাসরি কল করতে পারেন: </span>
-            <a href="tel:01620692449" className="text-xs font-bold text-emerald-800 hover:underline">
-              01620692449
+            <a href="tel:01883012641" className="text-xs font-bold text-emerald-800 hover:underline">
+              01883012641
             </a>
           </div>
         </div>

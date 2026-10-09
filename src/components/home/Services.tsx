@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ServiceItem {
   number: string;
@@ -104,6 +105,7 @@ const defaultFeaturedServices: ServiceItem[] = [
 ];
 
 export default function Services() {
+  const { language, t } = useLanguage();
   const [servicesList, setServicesList] = useState<ServiceItem[]>(defaultFeaturedServices);
 
   useEffect(() => {
@@ -138,7 +140,7 @@ export default function Services() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#2B4D33] font-bold block mb-2">
-                Disciplines & Services • আমাদের সেবাসমূহ
+                {t("Disciplines & Services", "Disciplines & Services")}
               </span>
               <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-[#121813]">
                 Comprehensive <span className="font-bold text-[#2B4D33]">Landscape Services</span>
@@ -256,10 +258,10 @@ export default function Services() {
               Browse Full Services Catalog
             </Link>
             <a
-              href="tel:01620692449"
+              href="tel:01883012641"
               className="px-5 py-3 bg-white hover:bg-stone-50 border border-stone-300 text-[#121813] font-mono text-xs uppercase tracking-wider font-bold rounded-full transition-all"
             >
-              Call 01620692449
+              Call 01883012641
             </a>
           </div>
         </div>

@@ -64,7 +64,7 @@ export default function AdminPage() {
   const [careers, setCareers] = useState<ICareerApplication[]>([]);
   const [settings, setSettings] = useState<ISetting>({
     title: "AR Green Garden",
-    phone: "01620692449",
+    phone: "01883012641",
     email: "info@argreengarden.com",
     address: "42/A, Road 9/A, Dhanmondi, Dhaka",
     fbPage: "https://facebook.com/argreengarden",
@@ -586,14 +586,18 @@ export default function AdminPage() {
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <span className="w-10 h-10 border-4 border-primary-green/20 border-t-primary-green rounded-full animate-spin"></span>
+      <div className="flex items-center justify-center min-h-screen bg-[#121A14]">
+        <span className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin"></span>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#f4f6f5] text-slate-800 font-sans min-h-screen flex flex-col md:flex-row relative">
+    <div className="bg-[#121A14] text-[#E4E2D7] font-sans min-h-screen flex flex-col md:flex-row relative overflow-hidden studio-portal-dark">
+      {/* Background Architectural Ambient Grid & Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(#243A2A_1px,transparent_1px)] [background-size:32px_32px] opacity-35 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-950/30 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-900/15 rounded-full blur-3xl pointer-events-none"></div>
       
       {/* 1. LEFT SIDEBAR */}
       <Sidebar 
@@ -604,7 +608,7 @@ export default function AdminPage() {
       />
 
       {/* 2. MAIN CONTENT AREA */}
-      <main className="flex-grow flex flex-col min-w-0">
+      <main className="flex-grow flex flex-col min-w-0 relative z-10">
         
         {/* Top Header */}
         <Header 
@@ -614,7 +618,7 @@ export default function AdminPage() {
         />
 
         {/* Content Body Grid */}
-        <div className="flex-grow p-8 flex flex-col gap-6">
+        <div className="flex-grow p-6 sm:p-8 flex flex-col gap-6">
 
           {/* TAB 1: OVERVIEW / DASHBOARD */}
           {activeTab === "analytics" && (

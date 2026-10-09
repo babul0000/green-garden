@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
+  const { language, setLanguage, t } = useLanguage();
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -15,7 +17,7 @@ export default function Footer() {
   return (
     <footer id="newsletter" className="relative w-full text-white">
       
-      {/* ================= PART 1: EXACT SHMA NEWSLETTER SECTION WITH BILINGUAL TOUCH ================= */}
+      {/* ================= PART 1: NEWSLETTER SECTION ================= */}
       <div className="relative w-full py-20 px-6 sm:px-10 bg-[#16202c] overflow-hidden">
         {/* Background Image Overlay */}
         <div className="absolute inset-0 w-full h-full opacity-25">
@@ -29,29 +31,31 @@ export default function Footer() {
         <div className="relative z-10 max-w-[1380px] mx-auto space-y-8">
           <div className="space-y-2">
             <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[50px] text-white leading-tight">
-              Join Our Community and Be Part of the Conversation!
+              {t("Join Our Community & Be Part of the Vision", "Join Our Community & Be Part of the Vision")}
             </h2>
             <p className="font-sans text-sm sm:text-base text-white/80 font-normal">
-              আমাদের সবুজ কমিউনিটিতে যোগ দিন—নিয়মিত ল্যান্ডস্কেপ আর্কিটেকচার আপডেট, গার্ডেনিং পরামর্শ ও গবেষণা পেতে যুক্ত হোন।
+              {t(
+                "নিয়মিত ল্যান্ডস্কেপ স্থাপত্য আপডেট, ছাদবাগানের আধুনিক টিপস ও গবেষণা পেতে ইমেইল সাবস্ক্রাইব করুন।",
+                "Receive monthly landscape architecture case studies, biophilic tips, and ecological insights."
+              )}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
-            {/* Input Fields with Bilingual Placeholders */}
+            {/* Input Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <input
                   type="text"
                   required
-                  placeholder="First Name • নাম"
+                  placeholder={t("আপনার নাম", "First Name")}
                   className="w-full bg-white text-[#323232] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a9dff]"
                 />
               </div>
               <div>
                 <input
                   type="text"
-                  required
-                  placeholder="Last Name • পদবী"
+                  placeholder={t("মোবাইল নম্বর", "Phone Number")}
                   className="w-full bg-white text-[#323232] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a9dff]"
                 />
               </div>
@@ -59,41 +63,37 @@ export default function Footer() {
                 <input
                   type="email"
                   required
-                  placeholder="Email • ইমেইল ঠিকানা"
+                  placeholder={t("ইমেইল ঠিকানা", "Email Address")}
                   className="w-full bg-white text-[#323232] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a9dff]"
                 />
               </div>
             </div>
 
-            {/* Area of Interest Checkboxes with Bilingual Options */}
+            {/* Area of Interest Checkboxes */}
             <div className="space-y-3">
               <span className="font-sans text-xs uppercase tracking-wider text-white/80 block">
-                Area of interest • আগ্রহের বিষয়সমূহ
+                {t("আপনার আগ্রহের বিষয়সমূহ:", "Areas of Interest:")}
               </span>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-xs sm:text-sm font-light text-white/90">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="rounded accent-[#5a9dff]" defaultChecked />
-                  <span>Project • নতুন প্রকল্প</span>
+                  <span>{t("নতুন প্রকল্প", "New Project")}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="rounded accent-[#5a9dff]" />
-                  <span>General • সাধারণ তথ্য</span>
+                  <span>{t("ছাদবাগান ও ড্রেনেজ", "Rooftop Garden")}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="rounded accent-[#5a9dff]" />
-                  <span>Press • গণমাধ্যম ও মিডিয়া</span>
+                  <span>{t("ভার্টিক্যাল গ্রিন ওয়াল", "Vertical Living Wall")}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="rounded accent-[#5a9dff]" />
-                  <span>Activity • ইভেন্ট ও সেমিনার</span>
+                  <span>{t("বৃক্ষ চিকিৎসা ও ট্রি ক্লিনিক", "Tree Doctor & Surgery")}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" className="rounded accent-[#5a9dff]" />
-                  <span>Tree Doctor • বৃক্ষ ক্লিনিক ও চিকিৎসা</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="rounded accent-[#5a9dff]" />
-                  <span>Speaking • পরামর্শ ও বক্তৃতা</span>
+                  <span>{t("স্মার্ট সেচ প্রযুক্তি", "Smart Drip Irrigation")}</span>
                 </label>
               </div>
             </div>
@@ -104,14 +104,16 @@ export default function Footer() {
                 type="submit"
                 className="px-10 py-3 rounded-full bg-[#dedad2] hover:bg-white text-[#3d2e17] font-sans text-sm tracking-wide transition-all shadow-md cursor-pointer font-medium"
               >
-                {submitted ? "ধন্যবাদ! আমরা শীঘ্রই যোগাযোগ করব।" : "Join Now • সাবস্ক্রাইব করুন"}
+                {submitted
+                  ? t("ধন্যবাদ! আমরা শীঘ্রই যোগাযোগ করব।", "Thank you! We will reach out soon.")
+                  : t("সাবস্ক্রাইব করুন", "Subscribe Now")}
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      {/* ================= PART 2: EXACT SHMA DEEP NAVY FOOTER ================= */}
+      {/* ================= PART 2: FOOTER NAVIGATION & COORDINATES ================= */}
       <div className="w-full bg-[#041a2e] text-white/80 py-16 px-6 sm:px-10 border-t border-white/10">
         <div className="max-w-[1380px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 sm:gap-14 items-start">
           
@@ -123,34 +125,38 @@ export default function Footer() {
                   A R GREEN GARDEN
                 </span>
                 <span className="font-mono text-[10px] tracking-[0.28em] text-white/60 uppercase mt-1">
-                  LANDSCAPE ARCHITECTURE • ল্যান্ডস্কেপ স্থাপত্য
+                  {t("LANDSCAPE ARCHITECTURE STUDIO", "LANDSCAPE ARCHITECTURE STUDIO")}
                 </span>
               </div>
             </Link>
-            <p className="text-xs text-white/60 font-light leading-relaxed max-w-sm pt-2">
-              বাংলাদেশজুড়ে আধুনিক ল্যান্ডস্কেপ আর্কিটেকচার, ছাদ বাগান, বায়োফিলিক ইন্টেরিয়র ও সার্টিফাইড বৃক্ষ চিকিৎসা সেবা প্রদানে আমরা নিবেদিতপ্রাণ।
+            <p className="text-xs text-white/70 font-light leading-relaxed max-w-sm pt-2">
+              {t(
+                "বাংলাদেশজুড়ে আধুনিক ল্যান্ডস্কেপ আর্কিটেকচার, ছাদ বাগান, বায়োফিলিক ইন্টেরিয়র ও সার্টিফাইড বৃক্ষ চিকিৎসা সেবা প্রদানে আমরা নিবেদিতপ্রাণ।",
+                "Dedicated to sustainable landscape architecture, biophilic living walls, and expert tree clinic services across Bangladesh."
+              )}
             </p>
           </div>
 
           {/* Col 2: Company Coordinates (3 cols) */}
           <div className="md:col-span-3 space-y-3 text-xs font-sans font-light leading-relaxed">
             <h4 className="font-sans font-bold text-white uppercase tracking-wider text-xs">
-              A R GREEN GARDEN CO., LTD.
+              {t("STUDIO COORDINATES", "STUDIO COORDINATES")}
             </h4>
             <div className="space-y-1 text-white/70">
-              <p>৪২/এ, রোড ৯/এ, ধানমন্ডি,</p>
-              <p>ঢাকা-১২০৯, বাংলাদেশ</p>
-              <p className="pt-1 text-white/90 font-medium">হটলাইন: ০১৬২০-৬৯২৪৪৯</p>
-              <p>E: admin@argreengarden.com</p>
-            </div>
-
-            {/* Affiliate Logos / Badges */}
-            <div className="pt-3 flex items-center gap-4 text-[11px] font-mono text-white/50">
-              <span className="hover:text-white transition-colors">so-en</span>
-              <span>•</span>
-              <span className="hover:text-white transition-colors">we!park</span>
-              <span>•</span>
-              <span className="hover:text-white transition-colors">City Cracker</span>
+              <p>{t("৪২/এ, রোড ৯/এ, ধানমন্ডি,", "42/A, Road 9/A, Dhanmondi,")}</p>
+              <p>{t("ঢাকা-১২০৯, বাংলাদেশ", "Dhaka-1209, Bangladesh")}</p>
+              <p className="pt-1 text-white/95 font-medium">
+                {t("হটলাইন: ০১৮৮৩-০১২৬৪১", "Hotline: 01883012641")}
+              </p>
+              <a
+                href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline font-mono font-bold mt-1"
+              >
+                <span>💬</span> WhatsApp: +880 1883-012641
+              </a>
+              <p className="pt-1">E: admin@argreengarden.com</p>
             </div>
           </div>
 
@@ -158,9 +164,11 @@ export default function Footer() {
           <div className="md:col-span-3 space-y-4 text-xs font-sans font-light leading-relaxed">
             <div className="space-y-1">
               <h4 className="font-sans font-bold text-white uppercase tracking-wider text-xs">
-                NEW BUSINESS/PROJECT • নতুন প্রজেক্ট :
+                {t("NEW PROJECTS & INQUIRIES", "NEW PROJECTS & INQUIRIES")}
               </h4>
-              <p className="text-white/70">নতুন প্রকল্পের নকশা ও পরামর্শের জন্য ইমেইল করুন:</p>
+              <p className="text-white/70">
+                {t("নতুন প্রকল্পের জন্য ইমেইল করুন:", "For new commissions and designs:")}
+              </p>
               <a href="mailto:project@argreengarden.com" className="text-white hover:text-[#5a9dff] transition-colors">
                 project@argreengarden.com
               </a>
@@ -168,17 +176,40 @@ export default function Footer() {
 
             <div className="space-y-1 pt-1">
               <h4 className="font-sans font-bold text-white uppercase tracking-wider text-xs">
-                PRESS & MEDIA • গণমাধ্যম ও প্রেস :
+                {t("TREE DOCTOR & PRESS", "TREE DOCTOR & PRESS")}
               </h4>
-              <p className="text-white/70">প্রেস ও মিডিয়া তথ্যের জন্য ইমেইল করুন:</p>
+              <p className="text-white/70">
+                {t("জরুরি সেবা ও গণমাধ্যম যোগাযোগ:", "Emergency arboriculture and media:")}
+              </p>
               <a href="mailto:pr@argreengarden.com" className="text-white hover:text-[#5a9dff] transition-colors">
-                pr@argreengarden.com
+                doctor@argreengarden.com
               </a>
             </div>
           </div>
 
-          {/* Col 4: Social Icons & Copyright (2 cols) */}
-          <div className="md:col-span-2 flex flex-col justify-between h-full space-y-8 text-right md:items-end">
+          {/* Col 4: Social Icons & Language Switcher (2 cols) */}
+          <div className="md:col-span-2 flex flex-col justify-between h-full space-y-6 text-right md:items-end">
+            {/* Language Switcher in Footer */}
+            <div className="flex items-center gap-2 border border-white/20 rounded-full px-3 py-1 text-xs">
+              <button
+                onClick={() => setLanguage("bn")}
+                className={`transition-colors cursor-pointer ${
+                  language === "bn" ? "font-bold text-white underline" : "text-white/60 hover:text-white"
+                }`}
+              >
+                বাংলা
+              </button>
+              <span className="text-white/40">|</span>
+              <button
+                onClick={() => setLanguage("en")}
+                className={`transition-colors cursor-pointer ${
+                  language === "en" ? "font-bold text-white underline" : "text-white/60 hover:text-white"
+                }`}
+              >
+                English
+              </button>
+            </div>
+
             {/* Social SVGs */}
             <div className="flex items-center gap-4 text-white">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="Facebook">
@@ -196,15 +227,10 @@ export default function Footer() {
                   <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
                 </svg>
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="YouTube">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 576 512">
-                  <path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"></path>
-                </svg>
-              </a>
             </div>
 
             <p className="text-[11px] text-white/50">
-              © 2026 A R Green Garden • সর্বস্বত্ব সংরক্ষিত
+              {t("© ২০২৬ এ আর গ্রিন গার্ডেন • সর্বস্বত্ব সংরক্ষিত", "© 2026 A R Green Garden. All rights reserved.")}
             </p>
           </div>
 

@@ -107,6 +107,8 @@ model Project {
   startDate          DateTime?
   deadline           DateTime?
   completionDate     DateTime?
+  warrantyMonths     Int?                  @default(12)
+  warrantyExpiryDate DateTime?
   beforeImage        String?
   afterImage         String?
   wipImages          String[]
@@ -123,6 +125,7 @@ model Project {
   quotations         Quotation[]
   invoices           Invoice[]
   reviews            Review[]
+  serviceCard        DigitalServiceCard?
 
   @@map("projects")
 }
@@ -472,5 +475,31 @@ model ContactMessage {
   createdAt DateTime @default(now())
 
   @@map("contact_messages")
+}
+
+model DigitalServiceCard {
+  id                   String    @id @default(cuid())
+  projectCode          String    @unique
+  projectName          String
+  clientName           String
+  clientPhone          String
+  location             String
+  handoverDate         DateTime  @default(now())
+  warrantyMonths       Int       @default(12)
+  warrantyExpiryDate   DateTime
+  servicesIncluded     String[]
+  plantedFlora         String[]
+  maintenanceFrequency String    @default("Weekly")
+  nextFollowUpDate     DateTime?
+  leadArchitect        String?   @default("Ar. Tanvir Chowdhury")
+  doctorHotline        String?   @default("01883012641")
+  status               String    @default("ACTIVE") // ACTIVE, EXPIRED, RENEWED
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  projectId            String?   @unique
+  project              Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@map("digital_service_cards")
 }
 

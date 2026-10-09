@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 
 interface GalleryProject {
@@ -21,6 +22,7 @@ interface GalleryProject {
 }
 
 export default function GalleryPage() {
+  const { lang, t } = useLanguage();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
@@ -350,14 +352,19 @@ export default function GalleryPage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full border border-emerald-200">
-            🌿 আমাদের কাজ • Project Gallery Portfolio
+            {t("🌿 আমাদের কাজ ও প্রজেক্ট গ্যালারি", "🌿 Signature Project Portfolio")}
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
             A R Green Garden <br />
-            <span className="text-emerald-700 italic font-medium">প্রিমিয়াম প্রজেক্ট শোকেস ও গ্যালারি</span>
+            <span className="text-emerald-700 italic font-medium">
+              {t("প্রিমিয়াম প্রজেক্ট শোকেস ও গ্যালারি", "Landscape Masterworks & Portfolio")}
+            </span>
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            ধানমন্ডি, গুলশান, বনানী, উত্তরা ও শ্রীমঙ্গলসহ সারা দেশে আমাদের বাস্তবায়িত ছাদবাগান, লিভিং গ্রিন ওয়াল, বিলাসবহুল ভিলা ও করপোরেট ল্যান্ডস্কেপের সচিত্র রূপান্তর।
+            {t(
+              "ধানমন্ডি, গুলশান, বনানী, উত্তরা ও শ্রীমঙ্গলসহ সারা দেশে আমাদের বাস্তবায়িত ছাদবাগান, লিভিং গ্রিন ওয়াল, বিলাসবহুল ভিলা ও করপোরেট ল্যান্ডস্কেপের সচিত্র রূপান্তর।",
+              "Showcasing signature rooftop gardens, living biophilic walls, luxury private villas, and corporate ecosystems crafted across Dhanmondi, Gulshan, Banani, and all over Bangladesh."
+            )}
           </p>
 
           {/* Location & Title Search */}
@@ -461,7 +468,7 @@ export default function GalleryPage() {
                 {/* Card Details */}
                 <div className="p-6 space-y-2">
                   <h3 className="font-bold text-gray-900 text-lg font-serif group-hover:text-emerald-800 transition-colors">
-                    {p.bengaliName}
+                    {p.name}
                   </h3>
                   <p className="text-xs text-gray-500 flex items-center gap-1">
                     <span>📍</span> {p.location}
@@ -494,9 +501,14 @@ export default function GalleryPage() {
         {filteredProjects.length === 0 && (
           <div className="text-center py-16 bg-white rounded-3xl border border-gray-100 space-y-3">
             <span className="text-4xl block">🌿</span>
-            <h4 className="font-serif font-bold text-gray-800 text-lg">কোনো প্রজেক্ট পাওয়া যায়নি</h4>
+            <h4 className="font-serif font-bold text-gray-800 text-lg">
+              {t("No Projects Found", "No Projects Found")}
+            </h4>
             <p className="text-gray-500 text-xs max-w-sm mx-auto">
-              আপনার ফিল্টার অথবা সার্চ কি-ওয়ার্ডের সাথে কোনো প্রজেক্ট মেলেনি। অনুগ্রহ করে অন্য ফিল্টার চেষ্টা করুন।
+              {t(
+                "আপনার ফিল্টার অথবা সার্চ কি-ওয়ার্ডের সাথে কোনো প্রজেক্ট মেলেনি। অনুগ্রহ করে অন্য ফিল্টার চেষ্টা করুন।",
+                "No projects matched your criteria. Please try different filters or search terms."
+              )}
             </p>
             <button
               onClick={() => {
@@ -505,7 +517,7 @@ export default function GalleryPage() {
               }}
               className="mt-2 px-5 py-2.5 bg-emerald-700 text-white text-xs font-semibold rounded-full shadow hover:bg-emerald-800 cursor-pointer"
             >
-              সব প্রজেক্ট দেখুন
+              {t("সব প্রজেক্ট দেখুন", "View All Projects")}
             </button>
           </div>
         )}
@@ -529,11 +541,11 @@ export default function GalleryPage() {
                     {selectedProject.projectType}
                   </span>
                   <span className="text-xs text-gray-500 font-medium">
-                    স্ট্যাটাস: <strong className="text-emerald-700">{selectedProject.status === "Completed" ? "সম্পন্ন" : "চলমান"}</strong> ({selectedProject.completionDate})
+                    Status: <strong className="text-emerald-700">{selectedProject.status}</strong> ({selectedProject.completionDate})
                   </span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mt-2">
-                  {selectedProject.bengaliName}
+                  {selectedProject.name}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 flex items-center gap-1">
                   <span>📍</span> {selectedProject.location}
@@ -545,9 +557,11 @@ export default function GalleryPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
-                      <span>🔄</span> Before & After Transformation (পূর্বে ও পরে স্লাইডার)
+                      <span>🔄</span> {t("রূপান্তরের পূর্বাপর স্লাইডার", "Before & After Transformation")}
                     </span>
-                    <span className="text-[11px] text-gray-400">স্লাইডারটি ডানে-বামে ড্র্যাগ করুন</span>
+                    <span className="text-[11px] text-gray-400">
+                      {t("স্লাইডারটি ডানে-বামে ড্র্যাগ করুন", "Drag the slider left or right")}
+                    </span>
                   </div>
                   <div className="relative aspect-[16/10] rounded-2xl overflow-hidden select-none shadow-md border border-gray-200">
                     <img
@@ -556,7 +570,7 @@ export default function GalleryPage() {
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                     <div className="absolute top-3 right-3 bg-emerald-800 text-white px-3 py-1 rounded-md text-xs font-bold shadow">
-                      AFTER (পরে)
+                      {t("পরবর্তী রূপ", "AFTER")}
                     </div>
 
                     <div
@@ -570,7 +584,7 @@ export default function GalleryPage() {
                         style={{ width: "100%", height: "100%" }}
                       />
                       <div className="absolute top-3 left-3 bg-black/70 text-white px-3 py-1 rounded-md text-xs font-bold shadow">
-                        BEFORE (পূর্বে)
+                        {t("পূর্ববর্তী রূপ", "BEFORE")}
                       </div>
                     </div>
 
@@ -623,7 +637,9 @@ export default function GalleryPage() {
 
               {/* Description */}
               <div className="space-y-2 bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
-                <h4 className="font-bold text-sm text-gray-900 font-serif">প্রকল্পের বিস্তারিত বিবরণ ও বৈশিষ্ট্য</h4>
+                <h4 className="font-bold text-sm text-gray-900 font-serif">
+                  {t("প্রকল্পের বিস্তারিত বিবরণ ও বৈশিষ্ট্য", "Project Details & Specifications")}
+                </h4>
                 <p className="text-xs md:text-sm text-gray-700 leading-relaxed">
                   {selectedProject.description}
                 </p>
@@ -635,15 +651,15 @@ export default function GalleryPage() {
                   href={`/contact?projectRef=${encodeURIComponent(selectedProject.name)}`}
                   className="flex-1 text-center py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-xl shadow transition-all"
                 >
-                  এই ধরণের প্রজেক্ট করাতে ফ্রি কোটেশন নিন →
+                  {t("এই ধরণের প্রজেক্ট করাতে ফ্রি কোটেশন নিন →", "Get Free Quotation for This Project →")}
                 </Link>
                 <a
-                  href={`https://wa.me/8801620692449?text=Hello%20AR%20Green%20Garden,%20I%20saw%20project:%20${encodeURIComponent(selectedProject.name)}%20and%20want%20to%20consult.`}
+                  href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20saw%20project:%20${encodeURIComponent(selectedProject.name)}%20and%20want%20to%20consult.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-3.5 px-6 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-semibold rounded-xl shadow text-center flex items-center justify-center gap-1.5"
                 >
-                  <span>💬</span> WhatsApp চ্যাট
+                  <span>💬</span> {t("হোয়াটসঅ্যাপ চ্যাট", "WhatsApp Chat")}
                 </a>
               </div>
             </div>

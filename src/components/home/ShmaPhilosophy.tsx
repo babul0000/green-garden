@@ -2,67 +2,69 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PhilosophyPillar {
   number: string;
-  title: string;
-  bengaliTitle: string;
-  tagline: string;
-  description: string;
-  bengaliDescription: string;
+  titleBn: string;
+  titleEn: string;
+  descBn: string;
+  descEn: string;
   metric: string;
-  metricLabel: string;
+  metricLabelBn: string;
+  metricLabelEn: string;
   icon: string;
 }
 
 const pillars: PhilosophyPillar[] = [
   {
     number: "01",
-    title: "Biophilic Urbanism & Microclimates",
-    bengaliTitle: "বায়োফিলিক আরবান রূপরেখা",
-    tagline: "Reconnecting human well-being with living nature",
-    description: "Dhaka's concrete density produces intense urban heat islands. We counteract this by designing multi-strata plant canopies that filter PM2.5 particulates, absorb acoustic noise, and reduce surrounding ambient temperatures by 3°C to 5°C.",
-    bengaliDescription: "ঢাকার তীব্র কংক্রিট তাপদাহ কমাতে আমরা সৃষ্টি করি স্তরভিত্তিক উদ্ভিদ স্তর, যা বাতাসে অক্সিজেন বৃদ্ধি করে এবং আশপাশের তাপমাত্রা ৩° থেকে ৫° সেলসিয়াস পর্যন্ত কমায়।",
+    titleBn: "বায়োফিলিক নগর ও মাইক্রোক্লাইমেট রূপরেখা",
+    titleEn: "Biophilic Urbanism & Microclimates",
+    descBn: "ঢাকার তীব্র কংক্রিট তাপদাহ কমাতে আমরা সৃষ্টি করি স্তরভিত্তিক জীবন্ত সবুজ উদ্ভিদের বলয়, যা বাতাসে অক্সিজেন বৃদ্ধি করে এবং আশপাশের তাপমাত্রা ৩° থেকে ৫° সেলসিয়াস পর্যন্ত কমায়।",
+    descEn: "Dhaka's concrete density creates intense urban heat islands. We counteract this by designing multi-layer plant canopies that filter dust, absorb noise, and reduce surrounding temperature by 3°C to 5°C.",
     metric: "3° - 5°C",
-    metricLabel: "Ambient Temperature Drop",
+    metricLabelBn: "তাপমাত্রা হ্রাস ক্ষমতা",
+    metricLabelEn: "Ambient Temperature Drop",
     icon: "🍃",
   },
   {
     number: "02",
-    title: "100% Zero-Leak Structural Hydraulics",
-    bengaliTitle: "শতভাগ ওয়াটারপ্রুফিং ও ড্রেনেজ ইঞ্জিনিয়ারিং",
-    tagline: "Structural protection with multi-tier membrane integrity",
-    description: "Rooftop landscaping requires rigorous civil and hydraulic engineering. We deploy elastomeric waterproofing membranes, high-density dimple drainage cells, and lightweight non-compacting organic substrate mixes to guarantee decades of building safety.",
-    bengaliDescription: "জার্মান প্রযুক্তির ড্রেনেজ সেল, ফিল্টার ফ্যাব্রিক ও এলাস্টোমেরিক মেমব্রেনের মাধ্যমে ভবনের ছাদকে পানি চুইয়ে পড়া থেকে সম্পূর্ণ নিরাপদ রাখা হয়।",
+    titleBn: "শতভাগ ওয়াটারপ্রুফিং ও ড্রেনেজ ইঞ্জিনিয়ারিং",
+    titleEn: "100% Zero-Leak Structural Hydraulics",
+    descBn: "জার্মান প্রযুক্তির ড্রেনেজ সেল, ফিল্টার ফ্যাব্রিক ও আধুনিক এলাস্টোমেরিক মেমব্রেনের মাধ্যমে ভবনের ছাদকে পানি চুইয়ে পড়া থেকে সম্পূর্ণ নিরাপদ ও দীর্ঘস্থায়ী রাখা হয়।",
+    descEn: "Deploying elastomeric membranes, high-density dimple drainage cells, and lightweight non-compacting organic substrates to guarantee decades of building safety.",
     metric: "100%",
-    metricLabel: "Waterproofing Guarantee",
+    metricLabelBn: "ওয়াটারপ্রুফিং নিশ্চয়তা",
+    metricLabelEn: "Waterproofing Guarantee",
     icon: "🛡️",
   },
   {
     number: "03",
-    title: "Tree Doctor Clinical Healthcare",
-    bengaliTitle: "বিশেষজ্ঞ ট্রি ডক্টর ও উদ্ভিদের রোগতত্ত্ব",
-    tagline: "Scientific botany, disease surgery & nutrient revival",
-    description: "Every tree is a living companion. Our agronomists and plant doctors conduct on-site root inspection, fungal diagnosis, trunk surgery, and soil pH optimization, ensuring plants thrive throughout changing seasons.",
-    bengaliDescription: "গাছের পাতা হলুদ হওয়া, শিকড় পচা কিংবা ছত্রাক আক্রমণ—আমাদের রেজিস্টার্ড কৃষিবিদ অন-সাইট ডায়াগনস্টিক ভিজিট করে প্রেসক্রিপশন ও চিকিৎসা প্রদান করেন।",
+    titleBn: "বিশেষজ্ঞ ট্রি ডক্টর ও উদ্ভিদের ক্লিনিক্যাল সেবা",
+    titleEn: "Tree Doctor Clinical Healthcare",
+    descBn: "গাছের পাতা হলুদ হওয়া, শিকড় পচন কিংবা ছত্রাক আক্রমণ—আমাদের রেজিস্টার্ড কৃষিবিদ অন-সাইট ডায়াগনস্টিক ভিজিট করে কার্যকর প্রেসক্রিপশন ও সার্জারি প্রদান করেন।",
+    descEn: "Our agronomists conduct on-site root inspection, fungal diagnosis, trunk surgery, and soil pH optimization to ensure trees flourish across changing seasons.",
     metric: "2,400+",
-    metricLabel: "Trees Successfully Treated",
+    metricLabelBn: "চিকিৎসাপ্রাপ্ত গাছপালা",
+    metricLabelEn: "Trees Successfully Treated",
     icon: "🩺",
   },
   {
     number: "04",
-    title: "Smart Micro-Drip Irrigation Systems",
-    bengaliTitle: "স্মার্ট অটোমেটেড মাইক্রো-ড্রিপ ইরিগেশন",
-    tagline: "Precision hydraulics delivering drops where needed",
-    description: "Water scarcity demands intelligence. Our automated drip networks use WiFi timers, soil moisture probes, and root-zone emitters to deliver calibrated moisture, reducing water consumption by 70% while eliminating manual labor.",
-    bengaliDescription: "স্মার্টফোন নিয়ন্ত্রিত স্বয়ংক্রিয় সেচ ব্যবস্থা—যা ৭০% পানি সাশ্রয় করে প্রতিটি গাছের গোড়ায় প্রয়োজনমাফিক আর্দ্রতা পৌঁছে দেয়।",
+    titleBn: "স্মার্ট অটোমেটেড মাইক্রো-ড্রিপ ইরিগেশন",
+    titleEn: "Smart Micro-Drip Irrigation Systems",
+    descBn: "স্মার্টফোন ও ওয়াইফাই নিয়ন্ত্রিত স্বয়ংক্রিয় সেচ ব্যবস্থা—যা ৭০% পানি সাশ্রয় করে প্রতিটি গাছের গোড়ায় স্বয়ংক্রিয়ভাবে প্রয়োজনমাফিক আর্দ্রতা পৌঁছে দেয়।",
+    descEn: "Automated drip networks using WiFi timers, soil moisture probes, and root-zone emitters to deliver calibrated moisture, reducing water consumption by 70%.",
     metric: "70%",
-    metricLabel: "Water Consumption Saved",
+    metricLabelBn: "পানি সাশ্রয় শতকরা হার",
+    metricLabelEn: "Water Saved via Automation",
     icon: "💧",
   },
 ];
 
 export default function ShmaPhilosophy() {
+  const { language, t } = useLanguage();
   const [activePillar, setActivePillar] = useState<number>(0);
 
   const current = pillars[activePillar];
@@ -80,15 +82,17 @@ export default function ShmaPhilosophy() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <span className="font-mono text-xs uppercase tracking-[0.25em] text-emerald-400 font-bold block mb-2">
-                Studio Philosophy • আমাদের মূল দর্শন
+                {t("আমাদের মূল দর্শন", "Studio Philosophy")}
               </span>
               <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white">
-                Resilience, Ecology & <br />
-                <span className="font-extrabold text-[#E4E2D7]">Architectural Precision</span>
+                {t("পরিবেশবান্ধব স্থাপত্য ও স্থায়িত্বের মেলবন্ধন", "Resilience, Ecology & Architectural Precision")}
               </h2>
             </div>
             <p className="font-sans text-xs sm:text-sm text-white/70 max-w-md leading-relaxed">
-              Inspired by global landscape architecture studios like Shma, AR Green Garden combines botanical science, ecological biodiversity, and structural engineering.
+              {t(
+                "এ আর গ্রিন গার্ডেন উদ্ভিদ বিজ্ঞান, জীববৈচিত্র্য এবং আধুনিক স্ট্রাকচারাল ইঞ্জিনিয়ারিংয়ের মেলবন্ধনে বিশ্বমানের ল্যান্ডস্কেপ সৃষ্টি করে।",
+                "A R Green Garden blends botanical science, ecological biodiversity, and structural engineering for world-class landscapes."
+              )}
             </p>
           </div>
           
@@ -116,11 +120,8 @@ export default function ShmaPhilosophy() {
                   </span>
                   <div>
                     <h4 className="font-display text-base font-bold text-white">
-                      {p.title.split("&")[0]}
+                      {language === "bn" ? p.titleBn : p.titleEn}
                     </h4>
-                    <span className="text-xs text-white/50 block font-sans">
-                      {p.bengaliTitle}
-                    </span>
                   </div>
                 </div>
                 <span className="text-xl">{p.icon}</span>
@@ -134,22 +135,16 @@ export default function ShmaPhilosophy() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-emerald-400 font-bold px-3 py-1 bg-emerald-950/60 rounded-full border border-emerald-500/30">
-                  Pillar {current.number} • Architectural Standard
+                  {t(`দর্শন ${current.number}`, `Pillar ${current.number}`)}
                 </span>
                 <span className="text-3xl">{current.icon}</span>
               </div>
 
               <h3 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight">
-                {current.title}
+                {language === "bn" ? current.titleBn : current.titleEn}
               </h3>
-              <p className="font-sans text-sm font-semibold text-emerald-300">
-                {current.bengaliTitle}
-              </p>
               <p className="font-sans text-sm text-white/80 leading-relaxed">
-                {current.description}
-              </p>
-              <p className="font-sans text-xs sm:text-sm text-white/60 bg-white/5 p-4 rounded-xl border border-white/10 leading-relaxed">
-                {current.bengaliDescription}
+                {language === "bn" ? current.descBn : current.descEn}
               </p>
             </div>
 
@@ -160,7 +155,7 @@ export default function ShmaPhilosophy() {
                   {current.metric}
                 </span>
                 <p className="font-mono text-xs text-white/60 uppercase tracking-wider">
-                  {current.metricLabel}
+                  {language === "bn" ? current.metricLabelBn : current.metricLabelEn}
                 </p>
               </div>
 
@@ -169,13 +164,13 @@ export default function ShmaPhilosophy() {
                   href="/services"
                   className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs uppercase tracking-wider font-semibold rounded-full transition-all shadow"
                 >
-                  Explore Services
+                  {t("সেবাসমূহ দেখুন", "Explore Services")}
                 </Link>
                 <Link
                   href="/tree-doctor"
                   className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-mono text-xs uppercase tracking-wider font-semibold rounded-full transition-all"
                 >
-                  Tree Clinic
+                  {t("ট্রি ক্লিনিক", "Tree Clinic")}
                 </Link>
               </div>
             </div>

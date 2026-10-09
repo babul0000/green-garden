@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface PublicEmployee {
   id: string;
@@ -18,6 +19,7 @@ interface PublicEmployee {
 }
 
 export default function PublicTeamPage() {
+  const { language, t } = useLanguage();
   const [team, setTeam] = useState<PublicEmployee[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -105,14 +107,16 @@ export default function PublicTeamPage() {
         {/* Page Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>👥</span> আমাদের পেশাদার টিম • Professional Landscape Team
+            <span>👥</span> {t("আমাদের বিশেষজ্ঞ টিম", "Professional Landscape Team")}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            Meet the Experts Behind <br />
-            <span className="text-emerald-700 italic font-medium">A R Green Garden</span>
+            {t("এ আর গ্রিন গার্ডেনের মূল চালিকাশক্তি", "Meet the Experts Behind A R Green Garden")}
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            অভিজ্ঞ ল্যান্ডস্কেপ আর্কিটেক্ট, সার্টিফাইড ট্রি ডক্টর এবং দক্ষ হাইড্রোলিক ইঞ্জিনিয়ারদের সমন্বয়ে আমাদের নিবেদিত কর্মীদল।
+            {t(
+              "অভিজ্ঞ ল্যান্ডস্কেপ আর্কিটেক্ট, সার্টিফাইড ট্রি ডক্টর এবং দক্ষ হাইড্রোলিক ইঞ্জিনিয়ারদের সমন্বয়ে আমাদের নিবেদিত কর্মীদল।",
+              "A dedicated team of experienced landscape architects, certified plant doctors, and hydraulic engineers."
+            )}
           </p>
         </div>
 

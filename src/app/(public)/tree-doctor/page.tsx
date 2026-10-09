@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function TreeDoctorPage() {
   const { user } = useAuth();
+  const { language, t } = useLanguage();
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [location, setLocation] = useState("");
@@ -107,14 +109,16 @@ export default function TreeDoctorPage() {
         {/* Page Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>🩺</span> গাছ বিশেষজ্ঞ ক্লিনিক • Tree Doctor Healthcare
+            <span>🩺</span> {t("Tree Doctor Clinical Healthcare", "Tree Doctor Clinical Healthcare")}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            ট্রি ডক্টর সার্ভিস ও <br />
-            <span className="text-emerald-700 italic font-medium">প্ল্যান্ট হেলথ কেয়ার</span>
+            {t("Tree Doctor Service & Plant Health Care", "Tree Doctor Service & Plant Health Care")}
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            গাছের যেকোনো রোগ নির্ণয়, পোকা দমন, পুষ্টির ঘাটতি পূরণ ও জরুরি ট্রিটমেন্টে আমাদের অভিজ্ঞ এগ্রোনমিস্ট ও ট্রি ডক্টর টিম রয়েছে আপনার পাশে।
+            {t(
+              "গাছের যেকোনো রোগ নির্ণয়, পোকা দমন, পুষ্টির ঘাটতি পূরণ ও জরুরি ট্রিটমেন্টে আমাদের অভিজ্ঞ এগ্রোনমিস্ট ও ট্রি ডক্টর টিম রয়েছে আপনার পাশে।",
+              "Our experienced agronomists and plant pathology specialists diagnose tree diseases, eliminate pests, and revive plant vitality."
+            )}
           </p>
         </div>
 
@@ -122,10 +126,10 @@ export default function TreeDoctorPage() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-emerald-100 shadow-sm space-y-6">
           <div className="text-center space-y-1">
             <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">
-              চিকিৎসা সেবা প্রক্রিয়া (Workflow)
+              {t("Clinical Care Workflow", "Clinical Care Workflow")}
             </span>
             <h3 className="text-xl font-serif font-bold text-gray-900">
-              কীভাবে ট্রি ডক্টর কাজ করে?
+              {t("How Tree Doctor Clinic Operates", "How Tree Doctor Clinic Operates")}
             </h3>
           </div>
 
@@ -155,7 +159,7 @@ export default function TreeDoctorPage() {
             <div>
               <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Book a Tree Doctor Visit</span>
               <h2 className="text-2xl font-serif font-bold text-gray-900 mt-1">
-                ট্রি ডক্টর ভিজিট বুকিং ফর্ম
+                {t("Tree Doctor Visit Booking Form", "Tree Doctor Visit Booking Form")}
               </h2>
               <p className="text-xs text-gray-500 mt-1">
                 গাছের সমস্যা বিস্তারিত জানান; আমাদের বিশেষজ্ঞ টিম অন-সাইট পরিদর্শনে এসে সমাধান প্রদান করবেন।
@@ -175,7 +179,7 @@ export default function TreeDoctorPage() {
                 <span className="text-2xl">{isEmergency ? "🚨" : "🩺"}</span>
                 <div>
                   <h4 className={`text-xs font-bold ${isEmergency ? "text-red-900" : "text-emerald-900"}`}>
-                    {isEmergency ? "জরুরি সেবা সক্রিয় (High Priority Emergency Visit)" : "নরমাল ভিজিট বুকিং"}
+                    {isEmergency ? "Emergency Service Active (High Priority Visit)" : "Standard Visit Booking"}
                   </h4>
                   <p className="text-[11px] text-gray-500">
                     {isEmergency
@@ -196,13 +200,15 @@ export default function TreeDoctorPage() {
                 <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-3xl mx-auto">
                   ✓
                 </div>
-                <h3 className="text-2xl font-serif font-bold text-gray-900">বুকিং সফল হয়েছে!</h3>
+                <h3 className="text-2xl font-serif font-bold text-gray-900">
+                  {t("Booking Request Successful!", "Booking Request Successful!")}
+                </h3>
                 <p className="text-xs sm:text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
                   ধন্যবাদ! আমাদের সিনিয়র ট্রি ডক্টর টিম আপনার দেওয়া নম্বরে <strong>({phone})</strong> ফোন করে ভিজিটের সময়সূচি চূড়ান্ত করবে।
                 </p>
                 <div className="pt-2 flex justify-center gap-3">
                   <a
-                    href="tel:01620692449"
+                    href="tel:01883012641"
                     className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow"
                   >
                     📞 জরুরি হলে সরাসরি কল করুন
@@ -323,9 +329,11 @@ export default function TreeDoctorPage() {
           {/* Right Info Card */}
           <div className="lg:col-span-5 bg-emerald-50/60 p-7 sm:p-9 rounded-3xl border border-emerald-100 space-y-6">
             <div>
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest">বিশেষজ্ঞ পরামর্শ</span>
+              <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest">
+                {t("Expert Arborist Consultation", "Expert Arborist Consultation")}
+              </span>
               <h3 className="text-xl font-serif font-bold text-gray-900 mt-1">
-                কেন ট্রি ডক্টর প্রয়োজন?
+                {t("Why Choose Tree Doctor Service?", "Why Choose Tree Doctor Service?")}
               </h3>
             </div>
 
@@ -350,13 +358,15 @@ export default function TreeDoctorPage() {
 
             {/* Quick Hotline */}
             <div className="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-sm space-y-3">
-              <span className="text-[11px] font-bold text-emerald-800 uppercase block">জরুরি হটলাইন সেবা</span>
+              <span className="text-[11px] font-bold text-emerald-800 uppercase block">
+                {t("Emergency Arborist Hotline", "Emergency Arborist Hotline")}
+              </span>
               <p className="text-xs text-gray-600">গাছের তাৎক্ষণিক জটিলতায় সরাসরি কথা বলুন আমাদের এগ্রোনমিস্টের সাথে:</p>
               <a
-                href="tel:01620692449"
+                href="tel:01883012641"
                 className="block text-center py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm"
               >
-                📞 কল করুন: 01620692449
+                📞 কল করুন: 01883012641
               </a>
             </div>
           </div>
@@ -367,10 +377,10 @@ export default function TreeDoctorPage() {
         <div className="space-y-8 pt-8 border-t border-gray-200">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100 px-3.5 py-1 rounded-full">
-              ডিজিটাল মেডিকেল হিস্ট্রি • Plant Health Record
+              {t("Digital Plant Health Records", "Digital Plant Health Records")}
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900">
-              গুরুত্বপূর্ণ গাছের হেলথ রেকর্ড সিস্টেম
+              {t("Digital Plant Medical Record System", "Digital Plant Medical Record System")}
             </h2>
             <p className="text-xs sm:text-sm text-gray-600">
               ভবিষ্যতে যেকোনো সমস্যা হলে পূর্বের ইতিহাস, সার, কাটাই-ছাঁটাই ও ট্রিটমেন্ট হিস্ট্রি এক ক্লিকে দেখার সুবিধা।

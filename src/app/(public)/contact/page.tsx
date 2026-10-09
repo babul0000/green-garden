@@ -63,7 +63,7 @@ export default function ContactPage() {
 
             <div className="flex flex-col gap-3 mt-4 pt-6 border-t border-foreground/5 text-sm font-semibold">
               <a 
-                href="https://wa.me/8801700000000" 
+                href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden." 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl transition-colors shadow-sm"

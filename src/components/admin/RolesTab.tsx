@@ -29,23 +29,23 @@ export default function RolesTab() {
   };
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[24px] border border-slate-100 shadow-sm flex flex-col gap-6 animate-fade-in-up">
+    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7]">
       <div>
-        <h3 className="font-sans font-bold text-lg text-[#06120c]">Roles & Permissions</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Define role permission matrix values for dashboard views, settings configs and database edits.</p>
+        <h3 className="font-sans font-bold text-lg text-white">রোল ও পারমিশন • Roles & Permissions</h3>
+        <p className="text-xs text-stone-400 mt-0.5">Define role permission matrix values for dashboard views, settings configs and database edits.</p>
       </div>
 
-      <div className="overflow-x-auto w-full">
+      <div className="overflow-x-auto w-full rounded-2xl border border-white/10 bg-black/30">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px] pb-3">
-              <th className="pb-3">Permission Access Point</th>
-              <th className="pb-3 text-center">Super Admin</th>
-              <th className="pb-3 text-center">Editor</th>
-              <th className="pb-3 text-center">Support Staff</th>
+            <tr className="border-b border-white/10 bg-white/[0.04] text-stone-400 font-bold font-mono uppercase tracking-wider text-[10px]">
+              <th className="py-3.5 px-4">Permission Access Point</th>
+              <th className="py-3.5 px-4 text-center">Super Admin</th>
+              <th className="py-3.5 px-4 text-center">Editor</th>
+              <th className="py-3.5 px-4 text-center">Support Staff</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/5">
             {(
               [
                 { key: "dashboard", label: "Access Analytics & Overview Studio" },
@@ -56,30 +56,30 @@ export default function RolesTab() {
                 { key: "settings", label: "Edit backend settings and theme colors" }
               ] as const
             ).map(p => (
-              <tr key={p.key} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
-                <td className="py-4 font-semibold text-slate-700">{p.label}</td>
-                <td className="py-4 text-center">
+              <tr key={p.key} className="hover:bg-white/[0.02] transition-colors">
+                <td className="py-4 px-4 font-semibold text-stone-200">{p.label}</td>
+                <td className="py-4 px-4 text-center">
                   <input 
                     type="checkbox" 
                     checked={permissions.admin[p.key]} 
                     onChange={() => togglePermission("admin", p.key)}
-                    className="w-4 h-4 accent-[#91cd3d] rounded cursor-pointer"
+                    className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
                   />
                 </td>
-                <td className="py-4 text-center">
+                <td className="py-4 px-4 text-center">
                   <input 
                     type="checkbox" 
                     checked={permissions.editor[p.key]} 
                     onChange={() => togglePermission("editor", p.key)}
-                    className="w-4 h-4 accent-[#91cd3d] rounded cursor-pointer"
+                    className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
                   />
                 </td>
-                <td className="py-4 text-center">
+                <td className="py-4 px-4 text-center">
                   <input 
                     type="checkbox" 
                     checked={permissions.support[p.key]} 
                     onChange={() => togglePermission("support", p.key)}
-                    className="w-4 h-4 accent-[#91cd3d] rounded cursor-pointer"
+                    className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
                   />
                 </td>
               </tr>
@@ -88,9 +88,9 @@ export default function RolesTab() {
         </table>
       </div>
 
-      <div className="bg-[#f8faf9] p-4 rounded-xl border border-slate-200/40 text-[10px] text-slate-400 mt-2">
+      <div className="bg-black/30 p-4 rounded-xl border border-white/10 text-xs text-stone-400 mt-2">
         <p className="leading-relaxed">
-          <b>Note:</b> Changes made here apply instantly to all current user sessions matching the selected role types. Ensure permissions align with project workflow standards.
+          <b className="text-emerald-400 font-mono">Note:</b> Changes made here apply instantly to all current user sessions matching the selected role types. Ensure permissions align with project workflow standards.
         </p>
       </div>
     </div>

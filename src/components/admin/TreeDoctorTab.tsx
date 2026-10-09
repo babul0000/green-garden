@@ -210,15 +210,15 @@ export default function TreeDoctorTab() {
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up font-sans">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-gray-200/80 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#18221A]/85 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-lg">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-2">
-            <span>🩺</span> ধাপ ৫ ও ৬ • Tree Doctor & Plant Health Record System
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold mb-2">
+            <span>🩺</span> ট্রি ডক্টর ও প্ল্যান্ট হেলথ • Clinical Care
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 tracking-tight">
-            ট্রি ডক্টর বুকিং পাইপলাইন ও গাছের ডিজিটাল হেলথ রেকর্ড
+          <h2 className="text-xl sm:text-2xl font-bold font-serif text-white tracking-tight">
+            Tree Doctor Pipeline & Digital Plant Health Records
           </h2>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-stone-400 mt-1">
             জরুরি গাছের চিকিৎসা, ভিজিট অ্যাসাইনমেন্ট, রোগের ইতিহাস এবং ডিজিটাল প্রেসক্রিপশন ট্র্যাক করুন।
           </p>
         </div>
@@ -226,20 +226,20 @@ export default function TreeDoctorTab() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveSubTab("requests")}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all cursor-pointer ${
               activeSubTab === "requests"
-                ? "bg-[#06120c] text-[#91cd3d] shadow-sm"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-emerald-500 text-stone-950 font-bold shadow-md shadow-emerald-500/20"
+                : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10"
             }`}
           >
             🩺 ট্রি ডক্টর বুকিংস ({requests.length})
           </button>
           <button
             onClick={() => setActiveSubTab("records")}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold font-mono transition-all cursor-pointer ${
               activeSubTab === "records"
-                ? "bg-[#06120c] text-[#91cd3d] shadow-sm"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-emerald-500 text-stone-950 font-bold shadow-md shadow-emerald-500/20"
+                : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10"
             }`}
           >
             🌱 প্ল্যান্ট হেলথ রেকর্ড ({records.length})
@@ -249,19 +249,19 @@ export default function TreeDoctorTab() {
 
       {/* Emergency Alert Banner if any */}
       {emergencyCount > 0 && activeSubTab === "requests" && (
-        <div className="bg-red-50 border-2 border-red-300 rounded-3xl p-4 flex items-center justify-between animate-pulse">
+        <div className="bg-rose-950/40 border border-rose-500/40 rounded-3xl p-4 flex items-center justify-between animate-pulse">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🚨</span>
             <div>
-              <h4 className="text-xs font-bold text-red-900">
+              <h4 className="text-xs font-bold text-rose-200">
                 জরুরি সতর্কতা: {emergencyCount}টি ইমার্জেন্সি ট্রি ডক্টর রিকোয়েস্ট পেন্ডিং আছে!
               </h4>
-              <p className="text-[11px] text-red-700">আক্রান্ত গাছের দ্রুত চিকিৎসা নিশ্চিত করতে তাৎক্ষণিক ডাক্তার অ্যাসাইন করুন।</p>
+              <p className="text-[11px] text-rose-300">আক্রান্ত গাছের দ্রুত চিকিৎসা নিশ্চিত করতে তাৎক্ষণিক ডাক্তার অ্যাসাইন করুন।</p>
             </div>
           </div>
           <button
             onClick={() => setFilterEmergencyOnly(!filterEmergencyOnly)}
-            className="px-3.5 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition-all cursor-pointer"
+            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
           >
             {filterEmergencyOnly ? "সব দেখুন" : "শুধু ইমার্জেন্সি ফিল্টার"}
           </button>
@@ -272,24 +272,24 @@ export default function TreeDoctorTab() {
       {activeSubTab === "requests" && (
         <div className="space-y-4">
           {loading ? (
-            <div className="p-16 flex flex-col items-center justify-center bg-white rounded-3xl border border-gray-200">
-              <span className="w-8 h-8 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
-              <p className="text-xs text-gray-500 mt-3 font-semibold">ট্রি ডক্টর রিকোয়েস্ট লোড হচ্ছে...</p>
+            <div className="p-16 flex flex-col items-center justify-center bg-[#18221A]/85 backdrop-blur-xl rounded-3xl border border-white/10">
+              <span className="w-8 h-8 border-3 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
+              <p className="text-xs text-stone-400 mt-3 font-semibold">ট্রি ডক্টর রিকোয়েস্ট লোড হচ্ছে...</p>
             </div>
           ) : filteredRequests.length === 0 ? (
-            <div className="p-16 text-center bg-white rounded-3xl border border-gray-200 text-gray-500">
+            <div className="p-16 text-center bg-[#18221A]/85 backdrop-blur-xl rounded-3xl border border-white/10 text-stone-400">
               <span className="text-4xl block mb-2">🩺</span>
-              <p className="font-semibold text-sm">কোনো ট্রি ডক্টর রিকোয়েস্ট পাওয়া যায়নি।</p>
+              <p className="font-semibold text-sm text-white">কোনো ট্রি ডক্টর রিকোয়েস্ট পাওয়া যায়নি।</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredRequests.map((req) => (
                 <div
                   key={req.id}
-                  className={`bg-white rounded-3xl p-5 border shadow-sm transition-all flex flex-col justify-between ${
+                  className={`bg-[#18221A]/90 backdrop-blur-xl rounded-3xl p-5 border shadow-lg transition-all flex flex-col justify-between ${
                     req.isEmergency
-                      ? "border-red-400 ring-2 ring-red-100"
-                      : "border-gray-200 hover:border-emerald-400"
+                      ? "border-rose-500/60 ring-1 ring-rose-500/30"
+                      : "border-white/10 hover:border-emerald-500/40"
                   }`}
                 >
                   <div className="space-y-4">
@@ -297,33 +297,33 @@ export default function TreeDoctorTab() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         {req.isEmergency && (
-                          <span className="inline-block bg-red-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full mb-1">
+                          <span className="inline-block bg-rose-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full mb-1">
                             🚨 EMERGENCY VISIT
                           </span>
                         )}
-                        <h3 className="font-bold text-gray-900 text-base font-serif">{req.treeName}</h3>
-                        <p className="text-xs text-gray-500">ক্লায়েন্ট: <span className="font-semibold text-gray-800">{req.clientName}</span></p>
+                        <h3 className="font-bold text-white text-base font-serif">{req.treeName}</h3>
+                        <p className="text-xs text-stone-400">ক্লায়েন্ট: <span className="font-semibold text-stone-200">{req.clientName}</span></p>
                       </div>
 
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                         {req.status}
                       </span>
                     </div>
 
                     {/* Problem Description */}
-                    <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100 text-xs space-y-1.5">
+                    <div className="bg-black/35 p-3 rounded-2xl border border-white/10 text-xs space-y-1.5">
                       <div>
-                        <span className="text-gray-400 text-[10px] block">সমস্যা (Problem):</span>
-                        <p className="font-semibold text-red-900 leading-snug">{req.problem}</p>
+                        <span className="text-stone-400 text-[10px] block">সমস্যা (Problem):</span>
+                        <p className="font-semibold text-rose-300 leading-snug">{req.problem}</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-200/50 text-[11px]">
+                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/10 text-[11px]">
                         <div>
-                          <span className="text-gray-400 text-[10px] block">লোকেশন:</span>
-                          <span className="font-medium text-gray-700">{req.location}</span>
+                          <span className="text-stone-400 text-[10px] block">লোকেশন:</span>
+                          <span className="font-medium text-stone-200">{req.location}</span>
                         </div>
                         <div>
-                          <span className="text-gray-400 text-[10px] block">পছন্দের সময়:</span>
-                          <span className="font-medium text-gray-700">{req.preferredVisitTime || "যে কোনো সময়"}</span>
+                          <span className="text-stone-400 text-[10px] block">পছন্দের সময়:</span>
+                          <span className="font-medium text-stone-200">{req.preferredVisitTime || "যে কোনো সময়"}</span>
                         </div>
                       </div>
                     </div>
@@ -332,7 +332,7 @@ export default function TreeDoctorTab() {
                     {req.treePhotoUrl && (
                       <div
                         onClick={() => setSelectedPhoto(req.treePhotoUrl || null)}
-                        className="relative group rounded-xl overflow-hidden aspect-[16/9] border border-gray-200 cursor-pointer bg-gray-100"
+                        className="relative group rounded-xl overflow-hidden aspect-[16/9] border border-white/10 cursor-pointer bg-black/40"
                       >
                         <img src={req.treePhotoUrl} alt={req.treeName} className="w-full h-full object-cover group-hover:scale-105 transition-all" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all">
@@ -343,15 +343,15 @@ export default function TreeDoctorTab() {
 
                     {/* Doctor Assignment Selection */}
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">দায়িত্বপ্রাপ্ত ডাক্তার:</label>
+                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">দায়িত্বপ্রাপ্ত ডাক্তার:</label>
                       <select
                         value={req.assignedDoctor?.id || ""}
                         onChange={(e) => handleDoctorAssign(req.id, e.target.value)}
-                        className="w-full bg-emerald-50/50 border border-emerald-200 text-emerald-900 font-semibold py-2 px-3 rounded-xl text-xs focus:outline-none"
+                        className="w-full bg-black/50 border border-white/15 text-stone-200 font-semibold py-2 px-3 rounded-xl text-xs focus:outline-none focus:border-emerald-400"
                       >
-                        <option value="">-- ডাক্তার নির্বাচন করুন --</option>
+                        <option value="" className="bg-[#18221A] text-white">-- ডাক্তার নির্বাচন করুন --</option>
                         {doctors.map((d) => (
-                          <option key={d.id} value={d.id}>
+                          <option key={d.id} value={d.id} className="bg-[#18221A] text-white">
                             👨‍⚕️ {d.name} ({d.designation})
                           </option>
                         ))}
@@ -360,17 +360,17 @@ export default function TreeDoctorTab() {
 
                     {/* Workflow Stage Tracker */}
                     <div className="space-y-1 pt-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">স্টেজ আপডেট করুন:</label>
+                      <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">স্টেজ আপডেট করুন:</label>
                       <div className="grid grid-cols-3 gap-1">
                         {stages.map((st) => (
                           <button
                             key={st.key}
                             type="button"
                             onClick={() => handleStageChange(req.id, st.key)}
-                            className={`py-1.5 px-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center ${
+                            className={`py-1.5 px-1 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer text-center ${
                               req.status === st.key
-                                ? "bg-emerald-700 text-white shadow-sm"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                ? "bg-emerald-500 text-stone-950 shadow-sm"
+                                : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10"
                             }`}
                           >
                             {st.key}
@@ -381,12 +381,12 @@ export default function TreeDoctorTab() {
                   </div>
 
                   {/* Actions Bottom */}
-                  <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-xs font-mono text-gray-500">{req.clientPhone}</span>
+                  <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
+                    <span className="text-xs font-mono text-stone-300">{req.clientPhone}</span>
                     <div className="flex gap-2">
                       <a
                         href={`tel:${req.clientPhone}`}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-emerald-400 border border-white/10 text-xs font-semibold transition-colors flex items-center gap-1"
                       >
                         📞 কল করুন
                       </a>
@@ -394,13 +394,13 @@ export default function TreeDoctorTab() {
                         href={`https://wa.me/${req.clientPhone.replace(/[^0-9]/g, "")}?text=Hello%20${encodeURIComponent(req.clientName)},%20AR%20Green%20Garden%20Tree%20Doctor%20Team%20contacting%20regarding%20${encodeURIComponent(req.treeName)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-[#25D366] text-white text-xs font-semibold hover:bg-[#20bd5a] transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 border border-[#25D366]/20 text-xs font-semibold transition-colors flex items-center gap-1"
                       >
                         💬 চ্যাট
                       </a>
                       <button
                         onClick={() => handleDeleteTreeDoctor(req.id)}
-                        className="p-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer text-xs"
+                        className="p-1.5 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition-colors cursor-pointer text-xs"
                         title="মুছে ফেলুন"
                       >
                         🗑️
@@ -417,14 +417,14 @@ export default function TreeDoctorTab() {
       {/* SUBTAB 2: PLANT HEALTH RECORD SYSTEM */}
       {activeSubTab === "records" && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-200/80 shadow-sm">
+          <div className="flex justify-between items-center bg-[#18221A]/85 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-md">
             <div>
-              <h3 className="font-bold text-gray-900 text-sm font-serif">গাছের ডিজিটাল হেলথ রেকর্ড ডাটাবেজ</h3>
-              <p className="text-xs text-gray-500">ভবিষ্যতে যেকোনো গাছের সমস্যা হলে পূর্বের মেডিকেল হিস্ট্রি এক ক্লিকে দেখার সুবিধা।</p>
+              <h3 className="font-bold text-white text-sm font-serif">গাছের ডিজিটাল হেলথ রেকর্ড ডাটাবেজ</h3>
+              <p className="text-xs text-stone-400">ভবিষ্যতে যেকোনো গাছের সমস্যা হলে পূর্বের মেডিকেল হিস্ট্রি এক ক্লিকে দেখার সুবিধা।</p>
             </div>
             <button
               onClick={() => setIsAddingRecord(!isAddingRecord)}
-              className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold cursor-pointer transition-all shadow-sm"
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-bold cursor-pointer transition-all shadow-md"
             >
               {isAddingRecord ? "✕ বন্ধ করুন" : "+ নতুন হেলথ রেকর্ড যুক্ত করুন"}
             </button>
@@ -432,98 +432,98 @@ export default function TreeDoctorTab() {
 
           {/* New Record Modal / Form */}
           {isAddingRecord && (
-            <form onSubmit={handleCreateRecord} className="bg-white p-6 rounded-3xl border border-emerald-300 shadow-md space-y-4 animate-fade-in-up">
-              <h4 className="font-bold text-emerald-900 text-sm border-b pb-2">নতুন গাছের হেলথ রেকর্ড এন্ট্রি</h4>
+            <form onSubmit={handleCreateRecord} className="bg-[#18221A] p-6 rounded-3xl border border-white/15 shadow-2xl space-y-4 animate-fade-in-up">
+              <h4 className="font-bold text-emerald-400 text-sm border-b border-white/10 pb-2">নতুন গাছের হেলথ রেকর্ড এন্ট্রি</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">গাছের নাম (Plant Name) *</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">গাছের নাম (Plant Name) *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Thai Amrapali Mango / Ficus Benjamina"
                     value={recPlantName}
                     onChange={(e) => setRecPlantName(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">লোকেশন (Location) *</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">লোকেশন (Location) *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Rooftop Orchard, Gulshan-2"
                     value={recLocation}
                     onChange={(e) => setRecLocation(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">গাছের ছবি URL</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">গাছের ছবি URL</label>
                   <input
                     type="url"
                     placeholder="https://images.unsplash.com/..."
                     value={recPhotoUrl}
                     onChange={(e) => setRecPhotoUrl(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">রোগের ইতিহাস (Disease History)</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">রোগের ইতিহাস (Disease History)</label>
                   <input
                     type="text"
                     placeholder="e.g. Anthracnose Fungal Leaf Spot / Mealybug"
                     value={recDisease}
                     onChange={(e) => setRecDisease(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">প্রদত্ত চিকিৎসা (Applied Treatment)</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">প্রদত্ত চিকিৎসা (Applied Treatment)</label>
                   <input
                     type="text"
                     placeholder="e.g. Carbendazim spray 2ml/L + Neem Oil"
                     value={recTreatment}
                     onChange={(e) => setRecTreatment(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">সারের শিডিউল (Fertilizer Schedule)</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">সারের শিডিউল (Fertilizer Schedule)</label>
                   <input
                     type="text"
                     placeholder="e.g. Vermicompost 500g + NPK slow release"
                     value={recFertilizer}
                     onChange={(e) => setRecFertilizer(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">প্রুনিং বিবরণ (Pruning Log)</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">প্রুনিং বিবরণ (Pruning Log)</label>
                   <input
                     type="text"
                     placeholder="e.g. Canopy thinning on 15 July"
                     value={recPruning}
                     onChange={(e) => setRecPruning(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-gray-700 block mb-1">পরবর্তী মেইনটেন্যান্স তারিখ</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">পরবর্তী মেইনটেন্যান্স তারিখ</label>
                   <input
                     type="date"
                     value={recNextDate}
                     onChange={(e) => setRecNextDate(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div className="sm:col-span-2 md:col-span-3">
-                  <label className="font-semibold text-gray-700 block mb-1">ডাক্তার ভিজিট রিপোর্ট ও পরামর্শ (Doctor Notes)</label>
+                  <label className="font-semibold text-stone-300 font-mono block mb-1">ডাক্তার ভিজিট রিপোর্ট ও পরামর্শ (Doctor Notes)</label>
                   <textarea
                     rows={2}
                     placeholder="e.g. ছত্রাক সম্পূর্ণরূপে নিয়ন্ত্রণে। আগামী সিজনে প্রচুর মুকুল আসার অনুকূল অবস্থা রয়েছে।"
                     value={recDoctorNotes}
                     onChange={(e) => setRecDoctorNotes(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-600"
+                    className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
               </div>
@@ -531,13 +531,13 @@ export default function TreeDoctorTab() {
                 <button
                   type="button"
                   onClick={() => setIsAddingRecord(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 rounded-xl text-xs font-semibold cursor-pointer"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-700 text-white rounded-xl text-xs font-bold hover:bg-emerald-800 transition-all cursor-pointer shadow-md"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md"
                 >
                   ✓ সেভ করুন
                 </button>
@@ -550,29 +550,29 @@ export default function TreeDoctorTab() {
             {records.map((rec) => (
               <div
                 key={rec.id}
-                className="bg-white rounded-3xl p-5 border border-gray-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                className="bg-[#18221A]/90 backdrop-blur-xl rounded-3xl p-5 border border-white/10 hover:border-emerald-500/40 shadow-lg transition-all flex flex-col justify-between space-y-4"
               >
                 <div className="flex items-start gap-4">
                   {rec.photoUrl && (
                     <div
                       onClick={() => setSelectedPhoto(rec.photoUrl || null)}
-                      className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-gray-200 bg-gray-50 cursor-pointer"
+                      className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-white/10 bg-black/40 cursor-pointer"
                     >
                       <img src={rec.photoUrl} alt={rec.plantName} className="w-full h-full object-cover" />
                     </div>
                   )}
                   <div className="flex-grow">
-                    <span className="text-[10px] font-mono text-gray-400 block">{rec.location}</span>
-                    <h4 className="font-bold text-gray-900 text-base font-serif">{rec.plantName}</h4>
+                    <span className="text-[10px] font-mono text-stone-400 block">{rec.location}</span>
+                    <h4 className="font-bold text-white text-base font-serif">{rec.plantName}</h4>
                     {rec.nextMaintenanceDate && (
-                      <span className="inline-block mt-1 bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      <span className="inline-block mt-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
                         পরবর্তী ভিজিট: {rec.nextMaintenanceDate}
                       </span>
                     )}
                   </div>
                   <button
                     onClick={() => handleDeletePlantRecord(rec.id)}
-                    className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer text-xs h-fit"
+                    className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 transition-colors cursor-pointer text-xs h-fit"
                     title="রেকর্ড মুছুন"
                   >
                     🗑️
@@ -580,29 +580,29 @@ export default function TreeDoctorTab() {
                 </div>
 
                 {/* Medical History Breakdown */}
-                <div className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 text-xs space-y-2">
+                <div className="bg-black/35 p-3.5 rounded-2xl border border-white/10 text-xs space-y-2">
                   {rec.diseaseHistory && (
                     <div>
-                      <span className="text-gray-400 text-[10px] block font-bold">রোগের ইতিহাস (Disease):</span>
-                      <p className="text-red-800 font-medium">{rec.diseaseHistory}</p>
+                      <span className="text-stone-400 text-[10px] block font-bold">রোগের ইতিহাস (Disease):</span>
+                      <p className="text-rose-300 font-medium">{rec.diseaseHistory}</p>
                     </div>
                   )}
                   {rec.treatment && (
                     <div>
-                      <span className="text-gray-400 text-[10px] block font-bold">চিকিৎসা (Treatment):</span>
-                      <p className="text-emerald-900 font-medium">{rec.treatment}</p>
+                      <span className="text-stone-400 text-[10px] block font-bold">চিকিৎসা (Treatment):</span>
+                      <p className="text-emerald-300 font-medium">{rec.treatment}</p>
                     </div>
                   )}
                   {rec.fertilizer && (
                     <div>
-                      <span className="text-gray-400 text-[10px] block font-bold">সার প্রয়োগ (Fertilizer):</span>
-                      <p className="text-gray-700">{rec.fertilizer}</p>
+                      <span className="text-stone-400 text-[10px] block font-bold">সার প্রয়োগ (Fertilizer):</span>
+                      <p className="text-stone-300">{rec.fertilizer}</p>
                     </div>
                   )}
                   {rec.doctorReport && (
-                    <div className="pt-1 border-t border-gray-200/60">
-                      <span className="text-emerald-700 text-[10px] block font-bold">ডাক্তার রিপোর্ট:</span>
-                      <p className="text-gray-800 italic">"{rec.doctorReport}"</p>
+                    <div className="pt-1 border-t border-white/10">
+                      <span className="text-emerald-400 text-[10px] block font-bold">ডাক্তার রিপোর্ট:</span>
+                      <p className="text-stone-300 italic">"{rec.doctorReport}"</p>
                     </div>
                   )}
                 </div>
@@ -614,8 +614,8 @@ export default function TreeDoctorTab() {
 
       {/* Photo Lightbox Modal */}
       {selectedPhoto && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="relative max-w-2xl w-full bg-white rounded-3xl overflow-hidden p-3 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative max-w-2xl w-full bg-[#18221A] border border-white/15 rounded-3xl overflow-hidden p-3 shadow-2xl">
             <button
               onClick={() => setSelectedPhoto(null)}
               className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-black/70 text-white flex items-center justify-center font-bold text-sm cursor-pointer hover:bg-black"

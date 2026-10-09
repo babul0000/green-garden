@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function BeforeAfterPage() {
+  const { lang, t } = useLanguage();
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,11 +34,18 @@ export default function BeforeAfterPage() {
     <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6 relative">
       <div className="max-w-4xl mx-auto flex flex-col gap-12 text-center">
         <div>
-          <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">Visual transformation</span>
-          <h1 className="text-3xl md:text-5xl font-serif font-bold text-[#1a3020] mt-3">Before & After Slider</h1>
+          <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">
+            {t("বাস্তব রূপান্তরের গল্প", "Visual Transformation")}
+          </span>
+          <h1 className="text-3xl md:text-5xl font-serif font-bold text-[#1a3020] mt-3">
+            {t("রূপান্তরের পূর্বাপর স্লাইডার", "Before & After Slider")}
+          </h1>
           <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded mt-3"></div>
           <p className="text-xs md:text-sm text-foreground/75 mt-3 max-w-xl mx-auto">
-            Interact with our slider by dragging the bar sideways to view complete garden conversions.
+            {t(
+              "স্লাইডারটি ডানে-বামে সরিয়ে ছাদ ও ল্যান্ডস্কেপ প্রজেক্টের জাদুকরী রূপান্তর পর্যবেক্ষণ করুন।",
+              "Interact with our slider by dragging the bar sideways to view complete garden conversions."
+            )}
           </p>
         </div>
 
@@ -55,7 +64,7 @@ export default function BeforeAfterPage() {
               onContextMenu={e => e.preventDefault()}
             />
             <span className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg">
-              Empty Concrete Roof
+              {t("পূর্ববর্তী রূপ: খালি কংক্রিট ছাদ", "Empty Concrete Roof")}
             </span>
           </div>
 
@@ -71,10 +80,10 @@ export default function BeforeAfterPage() {
               onContextMenu={e => e.preventDefault()}
             />
             <span className="absolute bottom-4 right-4 bg-primary-green/85 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg">
-              AR Green Garden
+              A R Green Garden
             </span>
             <span className="absolute bottom-4 left-4 bg-primary-green/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg z-20">
-              Transform Finished
+              {t("পরবর্তী রূপ: জীবন্ত বাগান", "Living Garden Complete")}
             </span>
           </div>
 

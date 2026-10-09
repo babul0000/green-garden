@@ -88,23 +88,23 @@ export default function UsersTab() {
   };
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[24px] border border-slate-100 shadow-sm flex flex-col gap-6 animate-fade-in-up">
+    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7]">
       <div>
-        <h3 className="font-sans font-bold text-lg text-[#06120c]">User Management</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Control platform users, access authority, and administrative staff list.</p>
+        <h3 className="font-sans font-bold text-lg text-white">ইউজার ম্যানেজমেন্ট • User Management</h3>
+        <p className="text-xs text-stone-400 mt-0.5">Control platform users, access authority, and administrative staff list.</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleCreateUser} className="bg-[#f8faf9] p-6 rounded-[20px] border border-slate-200/60 flex flex-col gap-4">
-        <h4 className="font-bold text-xs text-[#06120c] uppercase tracking-wider">Register New System User</h4>
+      <form onSubmit={handleCreateUser} className="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+        <h4 className="font-bold text-xs text-emerald-300 uppercase tracking-wider font-mono">Register New System User</h4>
         
         {success && (
-          <div className="bg-emerald-50 text-emerald-600 text-xs font-semibold p-3 rounded-xl border border-emerald-100">
+          <div className="bg-emerald-500/10 text-emerald-300 text-xs font-semibold p-3 rounded-xl border border-emerald-500/25">
             ✓ User registered successfully!
           </div>
         )}
         {error && (
-          <div className="bg-red-50 text-red-600 text-xs font-semibold p-3 rounded-xl border border-red-100">
+          <div className="bg-rose-500/10 text-rose-300 text-xs font-semibold p-3 rounded-xl border border-rose-500/25">
             ⚠️ {error}
           </div>
         )}
@@ -116,7 +116,7 @@ export default function UsersTab() {
             placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
           />
           <input 
             type="email" 
@@ -124,22 +124,22 @@ export default function UsersTab() {
             placeholder="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
           />
           <select 
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-700"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs font-semibold text-white focus:border-emerald-400 focus:outline-none"
           >
-            <option value="client">Client (Default)</option>
-            <option value="admin">Super Admin</option>
-            <option value="editor">Editor</option>
-            <option value="moderator">Moderator</option>
+            <option value="client" className="bg-[#121A14] text-white">Client (Default)</option>
+            <option value="admin" className="bg-[#121A14] text-white">Super Admin</option>
+            <option value="editor" className="bg-[#121A14] text-white">Editor</option>
+            <option value="moderator" className="bg-[#121A14] text-white">Moderator</option>
           </select>
           <button 
             type="submit" 
             disabled={loading}
-            className="bg-[#06120c] hover:bg-black text-[#8fc63f] font-bold text-xs py-2.5 rounded-xl cursor-pointer shadow-sm transition-all"
+            className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold font-mono text-xs py-2.5 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
           >
             {loading ? "Registering..." : "Add User"}
           </button>
@@ -147,39 +147,39 @@ export default function UsersTab() {
       </form>
 
       {/* Users List */}
-      <div className="flex flex-col gap-2 mt-2">
-        <h4 className="font-sans font-bold text-sm text-[#06120c]">Platform Users ({users.length})</h4>
-        <div className="overflow-x-auto w-full">
+      <div className="flex flex-col gap-3 mt-2">
+        <h4 className="font-sans font-bold text-sm text-white font-mono">Platform Users ({users.length})</h4>
+        <div className="overflow-x-auto w-full rounded-2xl border border-white/10 bg-black/30">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[9px] pb-2">
-                <th className="pb-2">Name</th>
-                <th className="pb-2">Email</th>
-                <th className="pb-2">Role Status</th>
-                <th className="pb-2 text-right">Actions</th>
+              <tr className="border-b border-white/10 bg-white/[0.04] text-stone-400 font-bold font-mono uppercase tracking-wider text-[10px]">
+                <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Email</th>
+                <th className="py-3 px-4">Role Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {users.map(u => (
-                <tr key={u.id || u._id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
-                  <td className="py-3 font-semibold text-[#06120c]">{u.name}</td>
-                  <td className="py-3 text-slate-500">{u.email}</td>
-                  <td className="py-3">
+                <tr key={u.id || u._id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="py-3.5 px-4 font-semibold text-white">{u.name}</td>
+                  <td className="py-3.5 px-4 text-stone-300 font-mono">{u.email}</td>
+                  <td className="py-3.5 px-4">
                     <select 
                       value={u.role}
                       onChange={(e) => handleUpdateRole(u.id || u._id, e.target.value)}
-                      className="bg-white border border-slate-200 py-1 px-2 rounded-lg text-[10px] font-semibold text-slate-700"
+                      className="bg-black/50 border border-white/15 py-1 px-2.5 rounded-lg text-xs font-semibold text-white focus:border-emerald-400 focus:outline-none"
                     >
-                      <option value="client">Client</option>
-                      <option value="admin">Super Admin</option>
-                      <option value="editor">Editor</option>
-                      <option value="moderator">Moderator</option>
+                      <option value="client" className="bg-[#121A14]">Client</option>
+                      <option value="admin" className="bg-[#121A14]">Super Admin</option>
+                      <option value="editor" className="bg-[#121A14]">Editor</option>
+                      <option value="moderator" className="bg-[#121A14]">Moderator</option>
                     </select>
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-3.5 px-4 text-right">
                     <button 
                       onClick={() => handleDeleteUser(u.id || u._id)}
-                      className="text-red-500 hover:text-red-700 font-semibold px-2 cursor-pointer"
+                      className="text-rose-400 hover:text-rose-300 font-semibold px-2 cursor-pointer transition-colors"
                     >
                       Remove 🗑️
                     </button>

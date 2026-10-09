@@ -2,8 +2,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ShmaAnimatedManifesto() {
+  const { language } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const enableRef = useRef<HTMLSpanElement>(null);
   const changeRef = useRef<HTMLSpanElement>(null);
@@ -18,12 +20,18 @@ export default function ShmaAnimatedManifesto() {
 
   const [animationStarted, setAnimationStarted] = useState(false);
 
-  const textContent = {
+  const textContent = language === "bn" ? {
+    enable: "টেকসই",
+    change: "পরিবর্তন",
+    for_text: "সবুজ",
+    a_better_earth: "বাংলাদেশের তরে",
+    description: "একটি সবুজ, সজীব ও টেকসই বাংলাদেশ বিনির্মাণের প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে এ আর গ্রিন গার্ডেন শহুরে ধূসর কংক্রিটকে রূপান্তর করে জীবন্ত ইকোসিস্টেমে। আমাদের স্থাপত্য পরিকল্পনা তাপমাত্রা হ্রাস করে, জীববৈচিত্র্য রক্ষা করে এবং নাগরিক জীবনে আনে স্নিগ্ধ প্রকৃতির পরম ছোঁয়া।",
+  } : {
     enable: "ENABLE",
     change: "CHANGE",
     for_text: "FOR",
     a_better_earth: "A BETTER EARTH",
-    description: `A R Green Garden envisions a better earth where sustainability, nature, and architectural resilience are paramount. একটি সবুজ, সজীব ও বাসযোগ্য পৃথিবীর প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে আমরা শহুরে ধূসর কংক্রিটকে রূপান্তর করি জীবন্ত ইকোসিস্টেমে। Our designs enhance life, foster microclimate cooling, and create lasting ecological harmony for people and our planet.`,
+    description: "A R Green Garden envisions a climate-resilient Bangladesh where sustainability, ecological design, and architectural biophilia thrive together. Through scientific planting, stormwater hydrology, and green architecture, we transform urban concrete into living sanctuaries that cool our cities and restore lasting ecological harmony.",
   };
 
   const states = {
@@ -165,10 +173,10 @@ export default function ShmaAnimatedManifesto() {
           
           <div ref={contentRef} className="animated_content">
             <h1 ref={titleRef} className="animated_title">
-              <span ref={enableRef} className="enable">ENABLE</span>
-              <span ref={changeRef} className="change">CHANGE</span>
-              <span ref={forTextRef} className="for-text">FOR</span>
-              <span ref={earthRef} className="a-better-earth"> A BETTER EARTH</span>
+              <span ref={enableRef} className="enable">{textContent.enable}</span>
+              <span ref={changeRef} className="change">{textContent.change}</span>
+              <span ref={forTextRef} className="for-text">{textContent.for_text}</span>
+              <span ref={earthRef} className="a-better-earth"> {textContent.a_better_earth}</span>
             </h1>
             <p ref={descRef} className="animated_description" suppressHydrationWarning>
               {textContent.description}

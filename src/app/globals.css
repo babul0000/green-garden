@@ -265,4 +265,94 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Studio Architectural Portal & Dashboard Unified System */
+.studio-portal-dark {
+  color: #E4E2D7;
+}
+
+.studio-portal-dark .bg-white {
+  background-color: rgba(24, 34, 26, 0.88);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #E4E2D7;
+}
+
+.studio-portal-dark .bg-gray-50,
+.studio-portal-dark .bg-gray-100,
+.studio-portal-dark .bg-gray-200,
+.studio-portal-dark .bg-slate-50,
+.studio-portal-dark .bg-slate-100,
+.studio-portal-dark .bg-slate-200,
+.studio-portal-dark .bg-\[\#f8faf9\] {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #E4E2D7 !important;
+}
+
+.studio-portal-dark .text-gray-900,
+.studio-portal-dark .text-slate-900,
+.studio-portal-dark .text-slate-800,
+.studio-portal-dark .text-gray-800,
+.studio-portal-dark .text-\[\#06120c\],
+.studio-portal-dark .text-\[\#0c1911\],
+.studio-portal-dark .text-\[\#121813\] {
+  color: #FFFFFF !important;
+}
+
+.studio-portal-dark .text-gray-700,
+.studio-portal-dark .text-slate-700,
+.studio-portal-dark .text-slate-600 {
+  color: rgba(228, 226, 215, 0.85) !important;
+}
+
+.studio-portal-dark .text-gray-600,
+.studio-portal-dark .text-gray-500,
+.studio-portal-dark .text-slate-500,
+.studio-portal-dark .text-slate-400 {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.studio-portal-dark .border-gray-100,
+.studio-portal-dark .border-gray-200,
+.studio-portal-dark .border-gray-300,
+.studio-portal-dark .border-slate-100,
+.studio-portal-dark .border-slate-200 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.studio-portal-dark input,
+.studio-portal-dark select,
+.studio-portal-dark textarea {
+  background-color: rgba(12, 22, 16, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #FFFFFF !important;
+}
+
+.studio-portal-dark input::placeholder,
+.studio-portal-dark textarea::placeholder {
+  color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.studio-portal-dark input:focus,
+.studio-portal-dark select:focus,
+.studio-portal-dark textarea:focus {
+  border-color: #34d399 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #34d399 !important;
+}
+
+.studio-portal-dark table th {
+  color: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.studio-portal-dark table td {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  color: #E4E2D7 !important;
+}
+
+.studio-portal-dark table tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+
 

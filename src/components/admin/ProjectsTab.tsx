@@ -69,15 +69,15 @@ export default function ProjectsTab({
   resetProjectForm
 }: ProjectsTabProps) {
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] border border-slate-100 shadow-sm flex flex-col gap-6 animate-fade-in-up">
+    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7]">
       <div>
-        <h3 className="font-serif font-bold text-lg text-[#0c1911]">Statistics (Case Studies Editor)</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Edit portfolio items, location specs, client details, challenges, solutions, and testimonials.</p>
+        <h3 className="font-serif font-bold text-lg text-white">প্রজেক্ট পোর্টফোলিও ও কেস স্টাডিজ • Portfolio & Case Studies</h3>
+        <p className="text-xs text-stone-400 mt-0.5">Edit portfolio items, location specs, client details, challenges, solutions, and testimonials.</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleCreateOrUpdateProject} className="bg-[#f8faf9] p-6 rounded-[24px] border border-slate-200/60 flex flex-col gap-4">
-        <h4 className="font-bold text-xs text-[#0c1911] uppercase tracking-wider">
+      <form onSubmit={handleCreateOrUpdateProject} className="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+        <h4 className="font-bold text-xs text-emerald-300 uppercase tracking-wider font-mono">
           {editingProject ? `Edit Case Study: ${editingProject.name}` : "Publish New Completed Project"}
         </h4>
         
@@ -88,23 +88,23 @@ export default function ProjectsTab({
             placeholder="Project Name"
             value={projName}
             onChange={(e) => setProjName(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <input 
             type="text" 
             placeholder="Client Name"
             value={projClient}
             onChange={(e) => setProjClient(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <select 
             value={projCategory}
             onChange={(e) => setProjCategory(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-700"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs font-semibold text-white focus:outline-none focus:border-emerald-400"
           >
-            <option>Residential</option>
-            <option>Commercial</option>
-            <option>Villa</option>
+            <option className="bg-[#121A14]">Residential</option>
+            <option className="bg-[#121A14]">Commercial</option>
+            <option className="bg-[#121A14]">Villa</option>
           </select>
         </div>
 
@@ -114,14 +114,14 @@ export default function ProjectsTab({
             placeholder="Photo Image URL"
             value={projUrl}
             onChange={(e) => setProjUrl(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <input 
             type="text" 
             placeholder="Location (e.g. Banani, Dhaka)"
             value={projLocation}
             onChange={(e) => setProjLocation(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <div className="flex gap-2">
             <input 
@@ -129,14 +129,14 @@ export default function ProjectsTab({
               placeholder="Duration (e.g. 3 Weeks)"
               value={projDuration}
               onChange={(e) => setProjDuration(e.target.value)}
-              className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs flex-1 text-slate-800 focus:outline-none focus:border-[#0c1911]"
+              className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs flex-1 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 font-mono"
             />
             <input 
               type="text" 
               placeholder="Budget (e.g. 4 Lakhs)"
               value={projBudget}
               onChange={(e) => setProjBudget(e.target.value)}
-              className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs flex-1 text-slate-800 focus:outline-none focus:border-[#0c1911]"
+              className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs flex-1 text-white placeholder-white/30 focus:outline-none focus:border-emerald-400 font-mono"
             />
           </div>
         </div>
@@ -147,50 +147,50 @@ export default function ProjectsTab({
             placeholder="Challenges description..."
             value={projChallenges}
             onChange={(e) => setProjChallenges(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs resize-none text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs resize-none text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <textarea 
             rows={2}
             placeholder="Solution description..."
             value={projSolution}
             onChange={(e) => setProjSolution(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs resize-none text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs resize-none text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-200/40 pt-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/10 pt-3">
           <input 
             type="text" 
             placeholder="Client Testimonial Name"
             value={projTestimonialName}
             onChange={(e) => setProjTestimonialName(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <input 
             type="text" 
             placeholder="Client Testimonial Review Text"
             value={projTestimonialText}
             onChange={(e) => setProjTestimonialText(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#0c1911]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-4">
-          <label className="flex items-center gap-2 text-xs font-semibold text-[#0c1911] cursor-pointer">
+          <label className="flex items-center gap-2 text-xs font-semibold text-stone-300 cursor-pointer">
             <input 
               type="checkbox" 
               checked={projFeatured} 
               onChange={(e) => setProjFeatured(e.target.checked)}
-              className="w-4 h-4 rounded accent-[#0c1911]"
+              className="w-4 h-4 rounded accent-emerald-500"
             />
             <span>Feature this project case study on homepage?</span>
           </label>
           <div className="flex gap-2 self-end">
-            <button type="submit" className="bg-[#0c1911] hover:bg-black text-[#8ac343] font-bold text-xs py-2.5 px-6 rounded-xl cursor-pointer shadow-sm">
+            <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold font-mono text-xs py-2.5 px-6 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/20 transition-all">
               {editingProject ? "Update Project" : "Publish Project"}
             </button>
             {editingProject && (
-              <button type="button" onClick={resetProjectForm} className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl cursor-pointer">
+              <button type="button" onClick={resetProjectForm} className="bg-white/10 hover:bg-white/20 text-white font-bold font-mono text-xs py-2.5 px-4 rounded-xl cursor-pointer transition-all">
                 Cancel
               </button>
             )}
@@ -199,18 +199,18 @@ export default function ProjectsTab({
       </form>
 
       {/* List Projects */}
-      <div className="flex flex-col gap-2 mt-2">
-        <h4 className="font-serif font-bold text-sm text-[#0c1911]">Published Projects</h4>
+      <div className="flex flex-col gap-3 mt-2">
+        <h4 className="font-serif font-bold text-sm text-white font-mono">Published Projects ({projects.length})</h4>
         <div className="flex flex-col gap-2">
           {projects.map(p => (
-            <div key={p.id || p._id} className="bg-white border border-slate-100 p-4 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8ac343]/30 transition-colors text-xs">
+            <div key={p.id || p._id} className="bg-black/30 border border-white/10 p-4 rounded-2xl flex justify-between items-center shadow-lg hover:border-emerald-500/40 transition-colors text-xs">
               <div>
-                <span className="font-bold text-[#0c1911] block">{p.name}</span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">Category: {p.category} • Location: {p.location} {p.featured && "• 🌟 Featured"}</span>
+                <span className="font-bold text-white block">{p.name}</span>
+                <span className="text-[10px] text-stone-400 block mt-0.5 font-mono">Category: {p.category} • Location: {p.location} {p.featured && "• 🌟 Featured"}</span>
               </div>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => handleEditProjectClick(p)} className="text-[#8ac343] hover:underline font-bold cursor-pointer">Edit</button>
-                <button type="button" onClick={() => handleDeleteProject(p.id || p._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
+              <div className="flex gap-3 font-mono">
+                <button type="button" onClick={() => handleEditProjectClick(p)} className="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer">Edit</button>
+                <button type="button" onClick={() => handleDeleteProject(p.id || p._id)} className="text-rose-400 hover:text-rose-300 font-bold cursor-pointer">Delete</button>
               </div>
             </div>
           ))}

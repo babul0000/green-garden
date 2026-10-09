@@ -69,15 +69,15 @@ export default function ServicesTab({
   };
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] border border-slate-100 shadow-sm flex flex-col gap-6 animate-fade-in-up">
+    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7]">
       <div>
-        <h3 className="font-sans font-bold text-lg text-[#06120c]">Services catalog (Branding & CRUD)</h3>
-        <p className="text-xs text-slate-400 mt-0.5">Configure landing pages offering cards, banner images, and specific SEO page metadata tags.</p>
+        <h3 className="font-sans font-bold text-lg text-white">সার্ভিস ক্যাটালগ • Services Catalog</h3>
+        <p className="text-xs text-stone-400 mt-0.5">Configure landing pages offering cards, banner images, and specific SEO page metadata tags.</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} autoComplete="off" className="bg-[#f8faf9] p-6 rounded-[24px] border border-slate-200/60 flex flex-col gap-4">
-        <h4 className="font-bold text-xs text-[#06120c] uppercase tracking-wider">
+      <form onSubmit={handleSubmit} autoComplete="off" className="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+        <h4 className="font-bold text-xs text-emerald-300 uppercase tracking-wider font-mono">
           {editingService ? `Edit Details: ${editingService.label || editingService.title}` : "Add New Offering Product"}
         </h4>
         
@@ -89,7 +89,7 @@ export default function ServicesTab({
             placeholder="Service Name (e.g. Lawn Gardening)"
             value={serviceLabel}
             onChange={(e) => setServiceLabel(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#06120c]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <input 
             type="text" 
@@ -98,7 +98,7 @@ export default function ServicesTab({
             placeholder="Icon Emoji (e.g. 🏡)"
             value={serviceIcon}
             onChange={(e) => setServiceIcon(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-center text-slate-800 focus:outline-none focus:border-[#06120c]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-center text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
           <input 
             type="text" 
@@ -106,7 +106,7 @@ export default function ServicesTab({
             placeholder="Banner Image URL (Optional)"
             value={banner}
             onChange={(e) => setBanner(e.target.value)}
-            className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#06120c]"
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
           />
         </div>
         
@@ -117,15 +117,15 @@ export default function ServicesTab({
           placeholder="Service description details..."
           value={serviceDesc}
           onChange={(e) => setServiceDesc(e.target.value)}
-          className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs resize-none text-slate-800 focus:outline-none focus:border-[#06120c]"
+          className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs resize-none text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
         />
 
         {/* Collapsible SEO Section */}
-        <div className="border-t border-slate-200/60 pt-3">
+        <div className="border-t border-white/10 pt-3">
           <button 
             type="button" 
             onClick={() => setShowSeo(!showSeo)} 
-            className="text-[11px] font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
+            className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer font-mono"
           >
             <span>{showSeo ? "▼ Hide" : "▶ Show"} SEO Metadata Settings</span>
           </button>
@@ -138,7 +138,7 @@ export default function ServicesTab({
                 placeholder="SEO Title Tag"
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
-                className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800"
+                className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
               />
               <input 
                 type="text" 
@@ -146,7 +146,7 @@ export default function ServicesTab({
                 placeholder="SEO Keywords (comma separated)"
                 value={seoKeywords}
                 onChange={(e) => setSeoKeywords(e.target.value)}
-                className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800"
+                className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
               />
               <input 
                 type="text" 
@@ -154,21 +154,21 @@ export default function ServicesTab({
                 placeholder="SEO Meta Description"
                 value={seoDescription}
                 onChange={(e) => setSeoDescription(e.target.value)}
-                className="bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs text-slate-800"
+                className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
               />
             </div>
           )}
         </div>
 
         <div className="flex gap-2 self-end">
-          <button type="submit" className="bg-[#06120c] hover:bg-black text-[#8fc63f] font-bold text-xs py-2.5 px-6 rounded-xl cursor-pointer shadow-sm">
+          <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold font-mono text-xs py-2.5 px-6 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/20 transition-all">
             {editingService ? "Save Service" : "Add Service"}
           </button>
           {editingService && (
             <button 
               type="button" 
               onClick={() => { setEditingService(null); setServiceLabel(""); setServiceDesc(""); }} 
-              className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl cursor-pointer"
+              className="bg-white/10 hover:bg-white/20 text-white font-bold font-mono text-xs py-2.5 px-4 rounded-xl cursor-pointer transition-all"
             >
               Cancel
             </button>
@@ -177,22 +177,22 @@ export default function ServicesTab({
       </form>
 
       {/* List Services */}
-      <div className="flex flex-col gap-2 mt-2">
-        <h4 className="font-sans font-bold text-sm text-[#06120c]">Existing Offerings ({services.length})</h4>
+      <div className="flex flex-col gap-3 mt-2">
+        <h4 className="font-sans font-bold text-sm text-white font-mono">Existing Offerings ({services.length})</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {services.map(s => (
-            <div key={s.id || s._id} className="bg-white border border-slate-100 p-5 rounded-[20px] flex justify-between items-center shadow-sm hover:border-[#8fc63f]/30 transition-colors">
+            <div key={s.id || s._id} className="bg-black/30 border border-white/10 p-5 rounded-2xl flex justify-between items-center shadow-lg hover:border-emerald-500/40 transition-colors">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{s.icon || "🌱"}</span>
                 <div>
-                  <span className="font-bold text-[#06120c] text-xs block">{s.label || s.title}</span>
-                  <span className="block text-[10px] text-slate-400 mt-0.5 leading-normal max-w-[180px]">{s.desc || s.description}</span>
-                  {(s as any).seoTitle && <span className="inline-block bg-slate-50 text-slate-400 border border-slate-100 text-[8px] font-mono rounded px-1.5 py-0.5 mt-2">SEO Configured</span>}
+                  <span className="font-bold text-white text-xs block">{s.label || s.title}</span>
+                  <span className="block text-[11px] text-stone-400 mt-0.5 leading-normal max-w-[220px]">{s.desc || s.description}</span>
+                  {(s as any).seoTitle && <span className="inline-block bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono rounded px-2 py-0.5 mt-2">SEO Configured</span>}
                 </div>
               </div>
-              <div className="flex gap-3 text-xs shrink-0 ml-3">
-                <button type="button" onClick={() => handleEditServiceClick(s)} className="text-[#8fc63f] hover:underline font-bold cursor-pointer">Edit</button>
-                <button type="button" onClick={() => handleDeleteService(s.id || s._id)} className="text-red-500 hover:underline font-bold cursor-pointer">Delete</button>
+              <div className="flex gap-3 text-xs shrink-0 ml-3 font-mono">
+                <button type="button" onClick={() => handleEditServiceClick(s)} className="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer">Edit</button>
+                <button type="button" onClick={() => handleDeleteService(s.id || s._id)} className="text-rose-400 hover:text-rose-300 font-bold cursor-pointer">Delete</button>
               </div>
             </div>
           ))}

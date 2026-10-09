@@ -121,6 +121,22 @@ export async function POST(req: Request) {
       },
     });
 
+    // Trigger WhatsApp Automated Invoice Notification
+    if (clientPhone) {
+      try {
+        const { sendWhatsAppInvoiceAlert } = await import("@/services/whatsapp");
+        await sendWhatsAppInvoiceAlert({
+          clientName,
+          clientPhone,
+          invoiceNumber,
+          amount: total,
+          dueAmount: due,
+        });
+      } catch (waErr: any) {
+        console.warn("Failed to dispatch WhatsApp invoice alert:", waErr?.message);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       quotation,

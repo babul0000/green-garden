@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface AIConsultationAnalysis {
   recommendedGardenType: string;
@@ -17,6 +18,7 @@ interface AIConsultationAnalysis {
 }
 
 export default function AIToolsPage() {
+  const { lang, t } = useLanguage();
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [spaceType, setSpaceType] = useState("Rooftop");
   const [sunlightHours, setSunlightHours] = useState("Direct Sunlight (5-6 hours)");
@@ -88,7 +90,7 @@ export default function AIToolsPage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>🤖</span> AI Garden Consultant • কৃত্রিম বুদ্ধিমত্তা চালিত পরামর্শক
+            <span>🤖</span> {t("এআই গার্ডেন কনসালটেন্ট", "AI Garden Consultant")}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
             AI ল্যান্ডস্কেপ ও গার্ডেন <br />
@@ -273,10 +275,10 @@ export default function AIToolsPage() {
                   Book Professional Consultation →
                 </Link>
                 <a
-                  href="tel:01620692449"
+                  href="tel:01883012641"
                   className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl transition-all"
                 >
-                  📞 01620692449
+                  📞 01883012641
                 </a>
               </div>
             </div>

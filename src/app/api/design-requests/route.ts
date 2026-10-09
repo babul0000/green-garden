@@ -54,6 +54,21 @@ export async function POST(req: Request) {
       },
     });
 
+    // Send Real-time Email Alert via Gmail SMTP
+    try {
+      const { sendConsultationAlert } = await import("@/lib/email");
+      await sendConsultationAlert({
+        clientName: name,
+        clientPhone: phone,
+        clientEmail: email,
+        spaceType: `${spaceType} (${designStyle})`,
+        budget: budgetRange,
+        notes: `রেফারেন্স কোড: ${refCode}, এরিয়া: ${approxArea || "স্ট্যান্ডার্ড"}`,
+      });
+    } catch (mailErr: any) {
+      console.warn("Failed to dispatch email alert for design request:", mailErr?.message);
+    }
+
     return NextResponse.json({
       success: true,
       referenceCode: refCode,

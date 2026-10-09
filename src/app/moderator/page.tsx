@@ -19,7 +19,7 @@ export default function ModeratorPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
-  // Initial pending queue matching modaretor.png
+  // Initial pending queue
   const [items, setItems] = useState<PendingItem[]>([
     {
       id: "mod-1",
@@ -91,25 +91,35 @@ export default function ModeratorPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#e8ece9] flex p-3 md:p-6 font-sans text-gray-800">
+    <div className="min-h-screen bg-[#121A14] text-[#E4E2D7] relative overflow-hidden flex p-3 md:p-6 font-sans studio-portal-dark">
+      {/* Background Architectural Ambient Grid & Glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(#243A2A_1px,transparent_1px)] [background-size:32px_32px] opacity-35 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-950/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-900/20 rounded-full blur-3xl pointer-events-none"></div>
+
       {/* Outer Rounded Container */}
-      <div className="w-full max-w-[1600px] mx-auto bg-[#eef1ee] rounded-[36px] shadow-2xl border border-gray-300/40 flex overflow-hidden min-h-[920px]">
+      <div className="w-full max-w-[1600px] mx-auto bg-[#18221A]/85 backdrop-blur-2xl rounded-[36px] shadow-2xl border border-white/10 flex overflow-hidden min-h-[920px] relative z-10">
         
-        {/* ================= LEFT SIDEBAR (Dark Forest Green) ================= */}
-        <aside className="w-64 bg-[#081c14] text-white flex flex-col justify-between p-6 shrink-0">
+        {/* ================= LEFT SIDEBAR ================= */}
+        <aside className="w-64 bg-[#0d1610]/95 backdrop-blur-xl border-r border-white/10 text-white flex flex-col justify-between p-6 shrink-0">
           <div>
             {/* Logo */}
             <div className="flex items-center gap-3 mb-10">
-              <div className="w-9 h-9 rounded-full bg-emerald-700/80 flex items-center justify-center text-lg shadow-inner border border-emerald-500/30">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-lg shadow-inner text-emerald-400">
                 🌿
               </div>
-              <span className="text-base font-serif font-bold tracking-tight text-emerald-100">
-                A R Green Garden
-              </span>
+              <div>
+                <span className="text-base font-display font-bold tracking-tight text-[#E4E2D7] block leading-none">
+                  A R Green Garden
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest mt-1 block">
+                  Moderator Studio
+                </span>
+              </div>
             </div>
 
             {/* Menu Label */}
-            <div className="text-[10px] uppercase font-bold tracking-widest text-emerald-300/60 mb-4 px-2">
+            <div className="text-[10px] font-mono uppercase font-bold tracking-widest text-white/40 mb-4 px-2">
               Menu
             </div>
 
@@ -179,19 +189,20 @@ export default function ModeratorPage() {
                     onClick={() => setActiveMenu(item.id)}
                     className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-semibold transition-all cursor-pointer relative ${
                       isActive
-                        ? "text-[#8ce228] bg-white/10 shadow-sm"
-                        : "text-gray-300 hover:text-white hover:bg-white/5"
+                        ? "text-stone-950 bg-emerald-400 font-bold shadow-lg shadow-emerald-500/20"
+                        : "text-white/70 hover:text-white hover:bg-white/5"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      {isActive && (
-                        <span className="absolute -left-6 top-2.5 bottom-2.5 w-1.5 bg-[#8ce228] rounded-r-full"></span>
-                      )}
                       <span>{item.icon}</span>
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#8ce228]/20 text-[#8ce228] border border-[#8ce228]/40">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold ${
+                        isActive
+                          ? "bg-stone-950 text-emerald-300"
+                          : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                      }`}>
                         {item.badge}
                       </span>
                     )}
@@ -201,14 +212,14 @@ export default function ModeratorPage() {
             </nav>
           </div>
 
-          {/* Footer User Profile (matching modaretor.png) */}
-          <div className="pt-6 border-t border-emerald-900/60 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-emerald-800 border border-emerald-600/40 flex items-center justify-center font-bold text-sm text-emerald-200">
+          {/* Footer User Profile */}
+          <div className="pt-6 border-t border-white/10 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl overflow-hidden bg-emerald-950 border border-emerald-500/40 flex items-center justify-center font-bold text-sm text-emerald-300 shadow-inner">
               {user?.name ? user.name[0] : "R"}
             </div>
-            <div className="flex flex-col text-left">
-              <span className="text-[11px] text-gray-400 font-medium">Super Admin:</span>
-              <span className="text-xs font-bold text-white truncate max-w-[140px]">
+            <div className="flex flex-col text-left min-w-0">
+              <span className="text-[10px] font-mono text-white/40 uppercase tracking-wider">Moderator:</span>
+              <span className="text-xs font-bold text-[#E4E2D7] truncate max-w-[140px]">
                 {user?.name || "Rahman Khan"}
               </span>
             </div>
@@ -218,15 +229,15 @@ export default function ModeratorPage() {
         {/* ================= MAIN CONTENT AREA ================= */}
         <main className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto">
           
-          {/* Topbar matching modaretor.png */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-gray-300/60">
+          {/* Topbar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-white/10">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold font-serif text-gray-900 tracking-tight">
-                Moderator Panel
+              <h1 className="text-xl sm:text-2xl font-display font-bold text-[#E4E2D7] tracking-tight">
+                Moderator Studio
               </h1>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                Live Queue
+              </span>
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -237,9 +248,9 @@ export default function ModeratorPage() {
                   placeholder="Search anything in system..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/80 border border-gray-300 rounded-full px-4 py-2 pl-9 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700 shadow-sm"
+                  className="w-full bg-black/40 border border-white/15 rounded-full px-4 py-2 pl-9 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-emerald-400 transition-all shadow-sm"
                 />
-                <svg className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-3.5 h-3.5 text-white/40 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -247,25 +258,24 @@ export default function ModeratorPage() {
               {/* Action Buttons */}
               <button 
                 title="Notifications"
-                className="w-9 h-9 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-600 hover:text-emerald-800 shadow-sm transition-all cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white shadow-sm transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
               </button>
 
-              <button className="bg-[#0b281b] hover:bg-[#061810] text-white text-xs font-bold px-4 py-2 rounded-full flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
-                <span>Add new item</span>
-                <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">+</span>
+              <button className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 text-xs font-bold font-mono px-4 py-2 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer hover:scale-[1.02]">
+                <span>+ Add Item</span>
               </button>
             </div>
           </div>
 
           {/* Action Notification Toast */}
           {actionNotice && (
-            <div className="mt-4 p-3 bg-emerald-100 border border-emerald-400 text-emerald-900 rounded-2xl text-xs font-semibold animate-fade-in-up flex justify-between items-center">
+            <div className="mt-4 p-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 rounded-2xl text-xs font-semibold animate-fade-in-up flex justify-between items-center">
               <span>{actionNotice}</span>
-              <button onClick={() => setActionNotice(null)} className="text-emerald-700 font-bold cursor-pointer">✕</button>
+              <button onClick={() => setActionNotice(null)} className="text-emerald-400 font-bold cursor-pointer">✕</button>
             </div>
           )}
 
@@ -277,9 +287,9 @@ export default function ModeratorPage() {
               
               {/* Header Title */}
               <div>
-                <h2 className="text-xl font-bold font-serif text-gray-900">Content Queue</h2>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  An easy way to manage sales with care and precision.
+                <h2 className="text-xl font-bold font-sans text-[#E4E2D7]">কন্টেন্ট ও মডারেশন কিউ</h2>
+                <p className="text-xs text-white/50 mt-0.5">
+                  ব্যবহারকারীদের সাবমিট করা ব্লগ, রিভিউ, গ্যালারি ও কেরিয়ার আবেদনসমূহ যাচাই ও অনুমোদন করুন।
                 </p>
               </div>
 
@@ -294,81 +304,81 @@ export default function ModeratorPage() {
                   </div>
                   <div className="mt-3">
                     <div className="text-3xl font-extrabold tracking-tight font-mono text-white">
-                      ${stats.overviewTotal}
+                      ৳{stats.overviewTotal}
                     </div>
                   </div>
                 </div>
 
                 {/* Moderation Status Card */}
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-200/80 flex flex-col justify-between min-h-[140px]">
-                  <span className="text-xs font-bold text-gray-800">Moderation Status</span>
+                <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 rounded-3xl shadow-xl border border-white/10 flex flex-col justify-between min-h-[140px]">
+                  <span className="text-xs font-bold text-emerald-400 font-mono uppercase tracking-wider">Moderation Status</span>
                   
                   <div className="space-y-2 mt-2">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                        <span className="text-gray-600 font-medium">Pending Blogs:</span>
+                        <span className="text-white/60 font-medium">Pending Blogs:</span>
                       </div>
-                      <span className="font-bold text-gray-900 font-mono">{stats.pendingBlogs}</span>
+                      <span className="font-bold text-white font-mono">{stats.pendingBlogs}</span>
                     </div>
 
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
-                        <span className="text-gray-600 font-medium">Pending Reviews:</span>
+                        <span className="text-white/60 font-medium">Pending Reviews:</span>
                       </div>
-                      <span className="font-bold text-gray-900 font-mono">{stats.pendingReviews}</span>
+                      <span className="font-bold text-white font-mono">{stats.pendingReviews}</span>
                     </div>
 
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
-                        <span className="text-gray-600 font-medium">Awaiting Approval:</span>
+                        <span className="text-white/60 font-medium">Awaiting Approval:</span>
                       </div>
-                      <span className="font-bold text-gray-900 font-mono">{stats.awaitingApproval}</span>
+                      <span className="font-bold text-white font-mono">{stats.awaitingApproval}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Pending Items Table Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80">
+              <div className="bg-[#18221A]/85 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/10">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-bold text-gray-900">Pending Items</h3>
-                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                  <h3 className="text-sm font-bold text-[#E4E2D7]">পেন্ডিং কন্টেন্ট কিউ</h3>
+                  <span className="text-xs font-mono text-emerald-400">{filteredItems.length} টি আইটেম</span>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-gray-100 text-gray-500 font-semibold">
-                        <th className="pb-3 font-semibold">Item Type</th>
-                        <th className="pb-3 font-semibold">Content Title</th>
-                        <th className="pb-3 font-semibold">Submitted By</th>
-                        <th className="pb-3 font-semibold">Date</th>
-                        <th className="pb-3 text-right font-semibold">Actions</th>
+                      <tr className="border-b border-white/10 text-white/50 font-mono uppercase text-[10px]">
+                        <th className="pb-3 font-semibold">ধরণ</th>
+                        <th className="pb-3 font-semibold">কন্টেন্ট শিরোনাম</th>
+                        <th className="pb-3 font-semibold">প্রেরক</th>
+                        <th className="pb-3 font-semibold">তারিখ</th>
+                        <th className="pb-3 text-right font-semibold">অ্যাকশন</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-white/5">
                       {filteredItems.map((item) => (
-                        <tr key={item.id} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="py-3 font-medium text-gray-800">
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              item.type === "Blog" ? "bg-amber-100 text-amber-800" :
-                              item.type === "Review" ? "bg-purple-100 text-purple-800" :
-                              item.type === "Gallery" ? "bg-emerald-100 text-emerald-800" :
-                              "bg-sky-100 text-sky-800"
+                        <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="py-3 font-medium">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                              item.type === "Blog" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" :
+                              item.type === "Review" ? "bg-purple-500/20 text-purple-300 border border-purple-500/30" :
+                              item.type === "Gallery" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" :
+                              "bg-sky-500/20 text-sky-300 border border-sky-500/30"
                             }`}>
                               {item.type}
                             </span>
                           </td>
-                          <td className="py-3 text-gray-700 max-w-xs truncate font-medium">
+                          <td className="py-3 text-white max-w-xs truncate font-medium">
                             {item.title}
                           </td>
-                          <td className="py-3 text-gray-500 text-[11px]">
+                          <td className="py-3 text-white/60 text-[11px]">
                             {item.submittedBy}
                           </td>
-                          <td className="py-3 text-gray-500 font-mono text-[11px]">
+                          <td className="py-3 text-white/50 font-mono text-[11px]">
                             {item.date}
                           </td>
                           <td className="py-3 text-right">
@@ -376,20 +386,20 @@ export default function ModeratorPage() {
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
                                   onClick={() => handleApprove(item.id, item.title)}
-                                  className="px-3 py-1 bg-[#195b3e] hover:bg-[#11402b] text-white rounded-lg text-[11px] font-bold shadow-sm transition-all cursor-pointer"
+                                  className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-lg text-[11px] font-mono font-bold shadow-md transition-all cursor-pointer"
                                 >
                                   Approve
                                 </button>
                                 <button
                                   onClick={() => handleReject(item.id, item.title)}
-                                  className="px-3 py-1 bg-[#ba3832] hover:bg-[#962c27] text-white rounded-lg text-[11px] font-bold shadow-sm transition-all cursor-pointer"
+                                  className="px-3 py-1 bg-red-600/80 hover:bg-red-500 text-white rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer"
                                 >
                                   Reject
                                 </button>
                               </div>
                             ) : (
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                item.status === "APPROVED" ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                                item.status === "APPROVED" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-red-500/20 text-red-300 border border-red-500/30"
                               }`}>
                                 {item.status}
                               </span>
@@ -402,17 +412,17 @@ export default function ModeratorPage() {
                 </div>
               </div>
 
-              {/* Moderation Activity Weekly Bar Chart (matching modaretor.png) */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80">
+              {/* Moderation Activity Weekly Bar Chart */}
+              <div className="bg-[#18221A]/85 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/10">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-bold text-gray-900">Moderation Activity</h3>
-                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                  <h3 className="text-sm font-bold text-[#E4E2D7]">মডারেশন অ্যাক্টিভিটি ট্রেন্ডস</h3>
+                  <span className="text-[10px] font-mono text-emerald-400">সাপ্তাহিক ট্র্যাকিং</span>
                 </div>
 
                 {/* Custom Bar Visualization with Y-axis scale */}
                 <div className="flex items-end gap-6 h-52 pt-4 px-2">
                   {/* Y-axis markers */}
-                  <div className="flex flex-col justify-between h-full text-[10px] text-gray-400 font-mono pb-6">
+                  <div className="flex flex-col justify-between h-full text-[10px] text-white/40 font-mono pb-6">
                     <span>500</span>
                     <span>400</span>
                     <span>300</span>
@@ -422,7 +432,7 @@ export default function ModeratorPage() {
                   </div>
 
                   {/* Day Columns */}
-                  <div className="flex-1 flex justify-around items-end h-full pb-6 border-b border-gray-200">
+                  <div className="flex-1 flex justify-around items-end h-full pb-6 border-b border-white/10">
                     {[
                       { day: "Mon", h1: 45, h2: 70 },
                       { day: "Tue", h1: 35, h2: 95 },
@@ -437,15 +447,15 @@ export default function ModeratorPage() {
                           {/* Dark Green Bar */}
                           <div
                             style={{ height: `${bar.h1}%` }}
-                            className="w-3.5 bg-[#0e3b2b] rounded-t-sm transition-all group-hover:brightness-125"
+                            className="w-3.5 bg-emerald-800 rounded-t-sm transition-all group-hover:brightness-125"
                           ></div>
                           {/* Light Lime Bar */}
                           <div
                             style={{ height: `${bar.h2}%` }}
-                            className="w-3.5 bg-[#8ce228] rounded-t-sm transition-all group-hover:brightness-110"
+                            className="w-3.5 bg-emerald-400 rounded-t-sm transition-all group-hover:brightness-110"
                           ></div>
                         </div>
-                        <span className="text-[11px] font-semibold text-gray-500">{bar.day}</span>
+                        <span className="text-[11px] font-mono text-white/50">{bar.day}</span>
                       </div>
                     ))}
                   </div>
@@ -457,12 +467,12 @@ export default function ModeratorPage() {
             <div className="space-y-6">
               
               {/* Total View Performance Card */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80 flex flex-col items-center text-center">
-                <h3 className="text-sm font-bold text-gray-900 mb-6 w-full text-left">
+              <div className="bg-[#18221A]/85 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/10 flex flex-col items-center text-center">
+                <h3 className="text-sm font-bold text-[#E4E2D7] mb-6 w-full text-left font-mono">
                   Total View Performance
                 </h3>
 
-                {/* Donut Chart Visualization (matching modaretor.png) */}
+                {/* Donut Chart Visualization */}
                 <div className="relative w-44 h-44 flex items-center justify-center">
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                     {/* Ring 1 (68% Lime Green) */}
@@ -471,7 +481,7 @@ export default function ModeratorPage() {
                       cy="60"
                       r="46"
                       fill="none"
-                      stroke="#8ce228"
+                      stroke="#34d399"
                       strokeWidth="16"
                       strokeDasharray="289"
                       strokeDashoffset="92"
@@ -482,7 +492,7 @@ export default function ModeratorPage() {
                       cy="60"
                       r="46"
                       fill="none"
-                      stroke="#0f3b2a"
+                      stroke="#065f46"
                       strokeWidth="16"
                       strokeDasharray="289"
                       strokeDashoffset="222"
@@ -493,7 +503,7 @@ export default function ModeratorPage() {
                       cy="60"
                       r="46"
                       fill="none"
-                      stroke="#e58334"
+                      stroke="#f59e0b"
                       strokeWidth="16"
                       strokeDasharray="289"
                       strokeDashoffset="242"
@@ -502,52 +512,52 @@ export default function ModeratorPage() {
                   
                   {/* Inside Center Text */}
                   <div className="absolute flex flex-col items-center">
-                    <span className="text-[10px] text-gray-400 font-semibold uppercase">Total Count</span>
-                    <span className="text-xl font-extrabold text-gray-900 font-mono">565K</span>
+                    <span className="text-[10px] text-white/40 font-semibold uppercase font-mono">Total Count</span>
+                    <span className="text-xl font-extrabold text-white font-mono">565K</span>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-500 mt-6 leading-relaxed max-w-xs">
-                  Here are some tips on how to improve your score and efficiency.
+                <p className="text-xs text-white/50 mt-6 leading-relaxed max-w-xs font-sans">
+                  কন্টেন্ট ভিউ ও অ্যানালিটিক্স স্কোর সরাসরি ভিজিটর এনগেজমেন্ট বৃদ্ধি করছে।
                 </p>
 
-                <button className="mt-4 w-full py-2.5 border border-gray-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all cursor-pointer">
+                <button className="mt-4 w-full py-2.5 border border-white/15 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-mono font-bold text-white transition-all cursor-pointer">
                   Guide Views
                 </button>
 
                 {/* Legend */}
-                <div className="flex items-center justify-center gap-4 mt-6 text-[10px] text-gray-600 font-semibold">
+                <div className="flex items-center justify-center gap-4 mt-6 text-[10px] text-white/60 font-semibold font-mono">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-[#8ce228]"></span>
+                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-400"></span>
                     <span>View Count</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-[#0f3b2a]"></span>
+                    <span className="w-2.5 h-2.5 rounded-sm bg-emerald-700"></span>
                     <span>Percentage</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-[#e58334]"></span>
+                    <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
                     <span>Sales</span>
                   </div>
                 </div>
               </div>
 
-              {/* Level Up Banner Card (matching modaretor.png) */}
-              <div className="bg-[#cbdcc9] rounded-3xl p-6 shadow-sm border border-emerald-300/40 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+              {/* Level Up Banner Card */}
+              <div className="bg-gradient-to-br from-emerald-950/80 via-[#18221A] to-black rounded-3xl p-6 shadow-xl border border-emerald-500/20 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                 {/* Decorative Sunburst SVG */}
-                <div className="absolute right-0 top-0 bottom-0 w-36 opacity-30 pointer-events-none">
-                  <svg viewBox="0 0 100 100" fill="#8ce228">
+                <div className="absolute right-0 top-0 bottom-0 w-36 opacity-15 pointer-events-none">
+                  <svg viewBox="0 0 100 100" fill="#34d399">
                     <polygon points="50,0 60,35 100,50 60,65 50,100 40,65 0,50 40,35" />
                   </svg>
                 </div>
 
                 <div className="z-10">
                   <span className="text-2xl">🌱</span>
-                  <h4 className="text-lg font-bold font-serif text-gray-900 mt-2 leading-snug">
-                    Maintain up your business next level.
+                  <h4 className="text-lg font-bold font-sans text-[#E4E2D7] mt-2 leading-snug">
+                    স্টুডিও সিস্টেম অপ্টিমাইজেশন
                   </h4>
-                  <p className="text-xs text-gray-700 mt-1 max-w-[200px] leading-relaxed">
-                    An easy way to manage sales with care and precision.
+                  <p className="text-xs text-white/60 mt-1 max-w-[200px] leading-relaxed">
+                    ক্যাশ ক্লিনআপ, থাম্বনেইল কম্প্রেশন ও ডাটাবেজ ইনডেক্সিং পরিচালনা করুন।
                   </p>
                 </div>
 
@@ -556,9 +566,9 @@ export default function ModeratorPage() {
                     setActionNotice("✨ Optimization scan running: Cached pages purged, image thumbnails compressed, queries verified.");
                     setTimeout(() => setActionNotice(null), 4000);
                   }}
-                  className="z-10 mt-4 w-full bg-[#1b4332] hover:bg-[#123124] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                  className="z-10 mt-4 w-full bg-emerald-500 hover:bg-emerald-400 text-stone-950 py-2.5 rounded-xl text-xs font-mono font-bold transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
                 >
-                  Optimize Site
+                  Optimize Site Now
                 </button>
               </div>
 

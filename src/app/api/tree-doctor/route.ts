@@ -52,6 +52,37 @@ export async function POST(req: Request) {
       },
     });
 
+    // Send Real-time Email Alert via Gmail SMTP
+    try {
+      const { sendTreeDoctorEmergencyAlert } = await import("@/lib/email");
+      await sendTreeDoctorEmergencyAlert({
+        clientName,
+        clientPhone,
+        clientLocation: location || "ঢাকা",
+        problemDescription: `গাছের প্রজাতি: ${treeName}। সমস্যা: ${problem}`,
+        urgencyLevel: isEmergency ? "জরুরি ইমার্জেন্সি (Immediate Tree Doctor Needed)" : "সাধারণ রুটিন চেকআপ",
+        preferredTime: preferredVisitTime,
+      });
+    } catch (mailErr: any) {
+      console.warn("Failed to dispatch email alert for tree doctor:", mailErr?.message);
+    }
+
+    // Trigger WhatsApp Automated Notification
+    try {
+      const { sendWhatsAppEmergencyTreeDoctorAlert } = await import("@/services/whatsapp");
+      await sendWhatsAppEmergencyTreeDoctorAlert({
+        clientName,
+        clientPhone,
+        location: location || "ঢাকা",
+        treeName,
+        problem,
+        doctorName: "ডাঃ মোঃ রাহিম (সিনিয়র ট্রি সার্জন)",
+        doctorPhone: "01883012641",
+      });
+    } catch (waErr: any) {
+      console.warn("Failed to dispatch WhatsApp alert for tree doctor:", waErr?.message);
+    }
+
     return NextResponse.json({
       success: true,
       message: "Tree Doctor request registered successfully.",

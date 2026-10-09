@@ -10,57 +10,44 @@ interface HeaderProps {
 
 export default function Header({ setActiveTab, setEditingService, fetchData }: HeaderProps) {
   return (
-    <header className="h-16 bg-[#06120c] border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm shrink-0 text-white">
-      <div className="flex items-center gap-1.5 cursor-pointer hover:opacity-80">
-        <span className="text-[15px] font-bold text-white">Admin Panel</span>
-        <span className="text-[9px] text-white/50">▼</span>
+    <header className="h-16 bg-[#121A14]/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-6 sm:px-8 sticky top-0 z-20 shadow-md shrink-0 text-[#E4E2D7] font-sans">
+      <div className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span className="text-[15px] font-display font-bold text-[#E4E2D7]">এডমিন কন্ট্রোল প্যানেল</span>
+        <span className="text-[10px] font-mono text-emerald-400/80 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          Studio Active
+        </span>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4 sm:gap-6">
         {/* Search Input bar */}
         <div className="relative w-64 hidden sm:block">
           <input
             type="text"
-            placeholder="Search anything in Siohioma..."
-            className="w-full pl-4 pr-10 py-1.5 border border-[#153021] rounded-full text-[11px] focus:outline-none focus:border-[#8fc63f] text-white bg-[#0e2217]/60 placeholder:text-white/30"
+            placeholder="সার্চ করুন / Search garden..."
+            className="w-full pl-4 pr-10 py-1.5 border border-white/15 rounded-full text-xs focus:outline-none focus:border-emerald-400 text-white bg-black/40 placeholder:text-white/30 transition-all"
           />
           <span className="absolute right-3.5 top-2.5 text-[10px] text-white/40">🔍</span>
         </div>
 
-        {/* Top Icons */}
-        <div className="flex gap-4 items-center text-white/60">
+        {/* Top Icons & Actions */}
+        <div className="flex gap-3 items-center text-white/70">
           <button 
             type="button"
             onClick={fetchData} 
-            className="hover:text-white cursor-pointer text-[10px] font-bold font-mono text-[#91cd3d] bg-[#0e2217] px-2.5 py-1.5 rounded-xl border border-[#153021] transition-all"
+            className="hover:text-white cursor-pointer text-xs font-bold font-mono text-emerald-400 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 transition-all flex items-center gap-1"
             title="Refresh database"
           >
-            Refresh ⟳
+            <span>⟳</span>
+            <span className="hidden sm:inline">রিফ্রেশ</span>
           </button>
           
-          <button type="button" className="hover:text-white cursor-pointer p-1.5 hover:bg-white/5 rounded-full transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-          </button>
-          <button type="button" className="hover:text-white cursor-pointer p-1.5 hover:bg-white/5 rounded-full transition-all">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="18" cy="5" r="3" />
-              <circle cx="6" cy="12" r="3" />
-              <circle cx="18" cy="19" r="3" />
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-            </svg>
-          </button>
-          
-          {/* "+ Add new product" button matching Siohioma Style */}
           <button 
-            type="button"
+            type="button" 
             onClick={() => { setActiveTab("services"); setEditingService(null); }}
-            className="bg-[#0e2217] hover:bg-[#153021] text-white border border-[#153021] text-[11px] font-bold py-1.5 px-4 rounded-full flex items-center gap-1.5 transition-all shadow-md cursor-pointer hover:scale-[1.02]"
+            className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 text-xs font-bold font-mono py-1.5 px-4 rounded-full flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer hover:scale-[1.02]"
           >
-            <span>Add new product</span>
-            <span className="bg-white/10 text-white w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-light">?</span>
+            <span>+ নতুন সার্ভিস যোগ</span>
           </button>
         </div>
       </div>

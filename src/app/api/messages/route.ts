@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // Notify Admin
+    // Notify Admin in DB
     await prisma.notification.create({
       data: {
         title: `📩 নতুন কন্টাক্ট মেসেজ: ${name}`,
@@ -49,6 +49,19 @@ export async function POST(req: Request) {
         link: "/admin",
       },
     });
+
+    // Send Real-time Email Alert via Gmail SMTP
+    try {
+      const { sendContactMessageAlert } = await import("@/lib/email");
+      await sendContactMessageAlert({
+        name,
+        email: effectiveEmail,
+        phone,
+        message,
+      });
+    } catch (mailErr: any) {
+      console.warn("Failed to dispatch email alert for contact message:", mailErr?.message);
+    }
 
     return NextResponse.json(newMessage, { status: 201 });
   } catch (error: any) {

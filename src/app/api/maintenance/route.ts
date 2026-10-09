@@ -127,6 +127,22 @@ export async function POST(req: Request) {
       smartAreaTip = `💡 Smart Area Suggestion: একই এলাকা (${location})-এ আরও ${nearbyJobs.length}টি মেইনটেন্যান্স শিডিউল রয়েছে।同一个 স্টাফকে একই দিনে পাঠালে যাতায়াত খরচ ও সময় সাশ্রয় হবে।`;
     }
 
+    // Trigger WhatsApp Automated Maintenance Reminder
+    if (clientPhone && createdSchedules.length > 0) {
+      try {
+        const { sendWhatsAppMaintenanceReminder } = await import("@/services/whatsapp");
+        await sendWhatsAppMaintenanceReminder({
+          clientName,
+          clientPhone,
+          gardenerName: "মোঃ রফিকুল ইসলাম (সিনিয়র মালি)",
+          location,
+          date: new Date(createdSchedules[0].scheduledDate).toLocaleDateString("bn-BD"),
+        });
+      } catch (waErr: any) {
+        console.warn("Failed to dispatch WhatsApp maintenance alert:", waErr?.message);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: `Successfully created ${createdSchedules.length} maintenance schedules.`,
