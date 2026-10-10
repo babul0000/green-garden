@@ -9,17 +9,122 @@ interface NavbarProps {
   onOpenEstimator?: () => void;
 }
 
+interface IMenuLink {
+  id: string;
+  titleBn: string;
+  titleEn: string;
+  url: string;
+  badge?: string;
+  isVisible: boolean;
+  order: number;
+}
+
+interface INavbarConfig {
+  logoType?: "TEXT" | "IMAGE";
+  logoText?: string;
+  logoImage?: string;
+  logoHeight?: number;
+  logoTracking?: string;
+  hotlinePhone?: string;
+  hotlineDisplay?: string;
+  hotlineVisible?: boolean;
+  whatsappNumber?: string;
+  whatsappMessage?: string;
+  whatsappVisible?: boolean;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  youtubeUrl?: string;
+  socialVisible?: boolean;
+  enableLanguageSwitch?: boolean;
+  enable3dWizardLink?: boolean;
+  enableEmergencyDoctor?: boolean;
+  menuLinks?: IMenuLink[];
+}
+
+const defaultNavbarConfig: INavbarConfig = {
+  logoType: "TEXT",
+  logoText: "A R GREEN GARDEN",
+  logoImage: "",
+  logoHeight: 28,
+  logoTracking: "0.22em",
+  hotlinePhone: "01883012641",
+  hotlineDisplay: "০১88৩-০১২৬৪১",
+  hotlineVisible: true,
+  whatsappNumber: "8801883012641",
+  whatsappMessage: "Hello A R Green Garden, I would like to consult about my garden.",
+  whatsappVisible: true,
+  facebookUrl: "https://facebook.com",
+  instagramUrl: "https://instagram.com",
+  linkedinUrl: "https://linkedin.com",
+  youtubeUrl: "https://youtube.com",
+  socialVisible: true,
+  enableLanguageSwitch: true,
+  enable3dWizardLink: true,
+  enableEmergencyDoctor: true,
+  menuLinks: [
+    { id: "1", titleBn: "প্রকল্পসমূহ", titleEn: "Projects", url: "#projects", isVisible: true, order: 1 },
+    { id: "2", titleBn: "মেথডোলজি", titleEn: "Methodology", url: "#process", isVisible: true, order: 2 },
+    { id: "3", titleBn: "আমাদের টিম", titleEn: "Our Team", url: "#activities", isVisible: true, order: 3 },
+    { id: "4", titleBn: "স্টুডিও পরিচিতি", titleEn: "About Studio", url: "#container", isVisible: true, order: 4 },
+    { id: "5", titleBn: "সার্ভিসেস", titleEn: "Services", url: "#service", isVisible: true, order: 5 },
+    { id: "6", titleBn: "সংবাদ ও ইভেন্টস", titleEn: "Recent News & Events", url: "#activities", isVisible: true, order: 6 },
+    { id: "7", titleBn: "যোগাযোগ", titleEn: "Contact Us", url: "#newsletter", isVisible: true, order: 7 },
+  ],
+};
+
 export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [config, setConfig] = useState<INavbarConfig>(defaultNavbarConfig);
 
+  // Load navbar settings from API
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value?.navbar_config) {
+            setConfig({
+              ...defaultNavbarConfig,
+              ...data.value.navbar_config,
+              menuLinks: data.value.navbar_config.menuLinks || defaultNavbarConfig.menuLinks,
+            });
+          } else if (data?.value) {
+            setConfig((prev) => ({
+              ...prev,
+              logoText: data.value.title || prev.logoText,
+              hotlinePhone: data.value.phone || prev.hotlinePhone,
+              facebookUrl: data.value.fbPage || prev.facebookUrl,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Navbar config fetch fallback to default");
+      }
+    };
+
+    loadConfig();
+
+    // Listen for live update events from admin panel
+    const handleUpdate = (e: any) => {
+      if (e.detail) {
+        setConfig((prev) => ({ ...prev, ...e.detail }));
+      }
+    };
+
+    window.addEventListener("navbar-config-updated", handleUpdate);
+    return () => window.removeEventListener("navbar-config-updated", handleUpdate);
+  }, []);
+
+  // Handle scroll detection
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
     };
-    // Initialize state immediately on mount
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -36,6 +141,13 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  const visibleMenuLinks = (config.menuLinks || defaultNavbarConfig.menuLinks!)
+    .filter((link) => link.isVisible !== false);
+
+  const whatsappLink = `https://wa.me/${config.whatsappNumber || "8801883012641"}?text=${encodeURIComponent(
+    config.whatsappMessage || "Hello A R Green Garden, I would like to consult about my garden."
+  )}`;
 
   return (
     <>
@@ -76,98 +188,124 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             </button>
 
             {/* Language Switcher Pill Toggle */}
-            <button
-              onClick={toggleLanguage}
-              className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                isScrolled
-                  ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
-                  : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
-              }`}
-              title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
-            >
-              <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
-                বাংলা
-              </span>
-              <span className="opacity-40">|</span>
-              <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-60"}>
-                EN
-              </span>
-            </button>
+            {config.enableLanguageSwitch !== false && (
+              <button
+                onClick={toggleLanguage}
+                className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
+                  isScrolled
+                    ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
+                    : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
+                }`}
+                title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
+              >
+                <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
+                  বাংলা
+                </span>
+                <span className="opacity-40">|</span>
+                <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-60"}>
+                  EN
+                </span>
+              </button>
+            )}
           </div>
 
-          {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
+          {/* Column 2: Exact Shma Centered Brand Logo (Image or Text) */}
           <div className="flex-1 flex items-center justify-center text-center px-2">
             <Link href="/" className="group inline-block whitespace-nowrap">
-              <span className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] tracking-[0.16em] sm:tracking-[0.22em] uppercase transition-colors">
-                A R GREEN GARDEN
-              </span>
+              {config.logoType === "IMAGE" && config.logoImage ? (
+                <img
+                  src={config.logoImage}
+                  alt={config.logoText || "A R Green Garden Logo"}
+                  style={{ height: `${config.logoHeight || 28}px` }}
+                  className="object-contain max-w-[260px] inline-block"
+                />
+              ) : (
+                <span
+                  className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] uppercase transition-colors"
+                  style={{ letterSpacing: config.logoTracking || "0.22em" }}
+                >
+                  {config.logoText || "A R GREEN GARDEN"}
+                </span>
+              )}
             </Link>
           </div>
 
           {/* Column 3: Hotline, WhatsApp & Dashboard */}
           <div className="flex items-center justify-end gap-2 sm:gap-3.5 shrink-0">
             {/* Social Icons - visible on large monitors to prevent crowding */}
-            <div className="hidden xl:flex items-center gap-3.5 text-inherit">
-              {/* Facebook */}
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-inherit hover:opacity-60 transition-opacity"
-                aria-label="Facebook"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
-                  <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
-                </svg>
-              </a>
+            {config.socialVisible !== false && (
+              <div className="hidden xl:flex items-center gap-3.5 text-inherit">
+                {/* Facebook */}
+                {config.facebookUrl && (
+                  <a
+                    href={config.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-inherit hover:opacity-60 transition-opacity"
+                    aria-label="Facebook"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
+                      <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
+                    </svg>
+                  </a>
+                )}
 
-              {/* Instagram */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-inherit hover:opacity-60 transition-opacity"
-                aria-label="Instagram"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
-                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
-                </svg>
-              </a>
+                {/* Instagram */}
+                {config.instagramUrl && (
+                  <a
+                    href={config.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-inherit hover:opacity-60 transition-opacity"
+                    aria-label="Instagram"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                      <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
+                    </svg>
+                  </a>
+                )}
 
-              {/* LinkedIn */}
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-inherit hover:opacity-60 transition-opacity"
-                aria-label="LinkedIn"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
-                  <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
-                </svg>
-              </a>
-            </div>
+                {/* LinkedIn */}
+                {config.linkedinUrl && (
+                  <a
+                    href={config.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-inherit hover:opacity-60 transition-opacity"
+                    aria-label="LinkedIn"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                      <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
+                    </svg>
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Hotline Phone */}
-            <a
-              href="tel:01883012641"
-              className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
-                isScrolled ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
-              }`}
-            >
-              ০১88৩-০১২৬৪১
-            </a>
+            {config.hotlineVisible !== false && (
+              <a
+                href={`tel:${config.hotlinePhone || "01883012641"}`}
+                className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
+                  isScrolled ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
+                }`}
+              >
+                {config.hotlineDisplay || config.hotlinePhone || "০১88৩-০১২৬৪১"}
+              </a>
+            )}
 
             {/* Direct WhatsApp Action */}
-            <a
-              href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <span>💬</span>
-              <span className="hidden md:inline">WhatsApp</span>
-            </a>
+            {config.whatsappVisible !== false && (
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              >
+                <span>💬</span>
+                <span className="hidden md:inline">WhatsApp</span>
+              </a>
+            )}
 
             {/* Login / Dashboard Link */}
             {user ? (
@@ -278,103 +416,54 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             {/* Navigation Links */}
             <div className="space-y-6 my-auto">
               
-              {/* Primary Large Links (Project, Process, People) */}
+              {/* Dynamic Menu Links from Database */}
               <div className="space-y-3 font-display font-light">
-                <div>
-                  <a
-                    href="#projects"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                  >
-                    {t("Projects", "Projects")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#process"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                  >
-                    {t("Methodology", "Methodology")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#activities"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                  >
-                    {t("Our Team", "Our Team")}
-                  </a>
-                </div>
+                {visibleMenuLinks.map((link) => (
+                  <div key={link.id}>
+                    <a
+                      href={link.url}
+                      onClick={() => setMenuOpen(false)}
+                      className="text-2xl sm:text-3xl md:text-[34px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
+                    >
+                      {language === "bn" ? link.titleBn : link.titleEn}
+                    </a>
+                  </div>
+                ))}
               </div>
 
-              {/* Secondary Medium Links */}
-              <div className="space-y-2.5 font-display font-light pt-4 border-t border-white/20">
-                <div>
-                  <a
-                    href="#container"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("About Studio", "About Studio")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#service"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("Services", "Services")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#activities"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("Recent News & Events", "Recent News & Events")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#newsletter"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("Contact Us", "Contact Us")}
-                  </a>
-                </div>
+              {/* Action Feature Links */}
+              <div className="space-y-3 font-display font-light pt-4 border-t border-white/20">
+                {config.enable3dWizardLink !== false && (
+                  <div>
+                    <Link
+                      href="/design-garden"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
+                    >
+                      <span>{t("3D Garden Wizard 🎨", "3D Garden Wizard 🎨")}</span>
+                      <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
+                        {t("কাস্টম ছাদবাগান বাজেট ও নকশা", "Interactive Landscape Estimator & Design")}
+                      </span>
+                    </Link>
+                  </div>
+                )}
 
-                <div className="pt-2">
-                  <Link
-                    href="/design-garden"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
-                  >
-                    <span>{t("3D Garden Wizard 🎨", "3D Garden Wizard 🎨")}</span>
-                    <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
-                      {t("কাস্টম ছাদবাগান বাজেট ও নকশা", "Interactive Landscape Estimator & Design")}
-                    </span>
-                  </Link>
-                </div>
-
-                <div>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      window.dispatchEvent(new CustomEvent("open-tree-doctor"));
-                    }}
-                    className="text-base sm:text-lg font-normal text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
-                  >
-                    <span>{t("Emergency Tree Doctor 🚨", "Emergency Tree Doctor 🚨")}</span>
-                    <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
-                      {t("অন-কল ডাক্তার ভিজিট ও রোগ নির্ণয়", "Urgent Tree Clinic, Surgery & Visit")}
-                    </span>
-                  </button>
-                </div>
+                {config.enableEmergencyDoctor !== false && (
+                  <div>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        window.dispatchEvent(new CustomEvent("open-tree-doctor"));
+                      }}
+                      className="text-base sm:text-lg font-normal text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
+                    >
+                      <span>{t("Emergency Tree Doctor 🚨", "Emergency Tree Doctor 🚨")}</span>
+                      <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
+                        {t("অন-কল ডাক্তার ভিজিট ও রোগ নির্ণয়", "Urgent Tree Clinic, Surgery & Visit")}
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Drawer Auth / Dashboard Actions */}
@@ -462,10 +551,10 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               </div>
               <div className="text-[11px] leading-relaxed">
                 <p className="font-semibold text-white">
-                  {t("হটলাইন: ০১৮৮৩-০১২৬৪১", "Hotline: 01883012641")}
+                  {t(`হটলাইন: ${config.hotlineDisplay || config.hotlinePhone || "০১৮৮৩-০১২৬৪১"}`, `Hotline: ${config.hotlinePhone || "01883012641"}`)}
                 </p>
                 <a
-                  href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+                  href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-[#25D366] text-stone-950 font-bold text-xs shadow"
@@ -482,3 +571,4 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
     </>
   );
 }
+

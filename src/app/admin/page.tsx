@@ -15,6 +15,7 @@ import GalleryTab from "@/components/admin/GalleryTab";
 import BlogsTab from "@/components/admin/BlogsTab";
 import CareersTab from "@/components/admin/CareersTab";
 import SettingsTab from "@/components/admin/SettingsTab";
+import NavbarConfigTab from "@/components/admin/NavbarConfigTab";
 import SecurityTab from "@/components/admin/SecurityTab";
 
 // Import new modular admin components
@@ -749,6 +750,11 @@ export default function AdminPage() {
             />
           )}
 
+          {/* TAB: HEADER & NAVBAR STUDIO */}
+          {activeTab === "header-nav" && (
+            <NavbarConfigTab />
+          )}
+
           {/* TAB 8: GLOBAL CONFIG */}
           {activeTab === "settings" && (
             <SettingsTab 
@@ -757,6 +763,7 @@ export default function AdminPage() {
               settingsSuccess={settingsSuccess}
               handleSaveSettings={handleSaveSettings}
               handleSettingsChange={handleSettingsChange}
+              onOpenNavbarStudio={() => handleTabChange("header-nav")}
             />
           )}
           {/* TAB 9: SECURITY */}
