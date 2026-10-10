@@ -13,15 +13,6 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   // Prevent background scrolling when menu popup is active
   useEffect(() => {
@@ -37,50 +28,28 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
   return (
     <>
-      {/* EXACT SHMA FLOATING / TRANSPARENT HEADER */}
-      <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          isScrolled
-            ? "bg-white/95 backdrop-blur-md shadow-sm py-4 border-b border-black/5 text-[#323232]"
-            : "bg-transparent py-6 text-white"
-        }`}
-      >
+      {/* PERMANENT CONSISTENT ARCHITECTURAL HEADER (NO 2-COLOR SWITCHING DIFFERENCE) */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md shadow-xs py-3.5 sm:py-4 border-b border-black/5 text-[#323232] transition-colors duration-300">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4">
           
           {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Language Switcher */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <button
               onClick={() => setMenuOpen(true)}
-              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
+              className="group flex items-center gap-2 text-[#323232] p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
               aria-label={t("মেন্যু খুলুন", "Open Navigation Menu")}
             >
               <div className="flex flex-col gap-1.5 w-7">
-                <span
-                  className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
-                  }`}
-                ></span>
-                <span
-                  className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
-                  }`}
-                ></span>
-                <span
-                  className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
-                  }`}
-                ></span>
+                <span className="w-full h-[1.5px] bg-[#323232] transition-all"></span>
+                <span className="w-full h-[1.5px] bg-[#323232] transition-all"></span>
+                <span className="w-full h-[1.5px] bg-[#323232] transition-all"></span>
               </div>
             </button>
 
             {/* Language Switcher Pill Toggle */}
             <button
               onClick={toggleLanguage}
-              className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                isScrolled
-                  ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
-                  : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
-              }`}
+              className="text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03] transition-all flex items-center gap-1.5 cursor-pointer select-none"
               title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
             >
               <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
@@ -96,7 +65,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
           {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
           <div className="flex-1 flex items-center justify-center text-center px-2">
             <Link href="/" className="group inline-block whitespace-nowrap">
-              <span className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] tracking-[0.16em] sm:tracking-[0.22em] uppercase transition-colors">
+              <span className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] tracking-[0.16em] sm:tracking-[0.22em] uppercase text-[#323232] transition-colors">
                 A R GREEN GARDEN
               </span>
             </Link>
@@ -105,7 +74,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
           {/* Column 3: Hotline, WhatsApp & Dashboard */}
           <div className="flex items-center justify-end gap-2 sm:gap-3.5 shrink-0">
             {/* Social Icons - visible on large monitors to prevent crowding */}
-            <div className="hidden xl:flex items-center gap-3.5">
+            <div className="hidden xl:flex items-center gap-3.5 text-[#323232]">
               {/* Facebook */}
               <a
                 href="https://facebook.com"
@@ -149,7 +118,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             {/* Hotline Phone */}
             <a
               href="tel:01883012641"
-              className="text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b border-current pb-0.5 whitespace-nowrap hidden lg:inline"
+              className="text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b border-[#323232]/35 text-[#323232] pb-0.5 whitespace-nowrap hidden lg:inline"
             >
               ০১88৩-০১২৬৪১
             </a>
@@ -159,7 +128,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <span>💬</span>
               <span className="hidden md:inline">WhatsApp</span>
@@ -177,7 +146,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     ? "/moderator"
                     : "/client-dashboard"
                 }
-                className="pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-500/30"
+                className="pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-600/40"
                 title={user.name ? `Logged in as ${user.name}` : "Dashboard"}
               >
                 <div className="w-5 h-5 rounded-full overflow-hidden bg-emerald-950 border border-white/60 flex items-center justify-center shrink-0 shadow-inner">
@@ -195,7 +164,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             ) : (
               <Link
                 href="/login"
-                className="px-3.5 py-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="px-3.5 py-1 bg-stone-100 hover:bg-stone-200 text-[#323232] border border-stone-300 rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
                 <span>👤</span>
                 <span>{t("লগইন", "Login")}</span>
