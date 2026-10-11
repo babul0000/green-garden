@@ -85,9 +85,8 @@ export default function Header({
         {/* Direct Landing Page Link */}
         <Link
           href="/"
-          target="_blank"
-          className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#D6D2C4] bg-white hover:bg-[#F7F6F2] text-[#121813] text-xs font-mono transition-colors shrink-0 shadow-2xs"
-          title="Open Landing Page in new tab"
+          className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full border border-[#D6D2C4] bg-white hover:bg-[#F7F6F2] text-[#121813] text-xs font-mono transition-colors shrink-0 shadow-2xs cursor-pointer"
+          title="Visit Home Page"
         >
           <span>🌐</span>
           <span className="hidden md:inline">সাইট দেখুন</span>

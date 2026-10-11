@@ -2,11 +2,20 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
   const { language, setLanguage, t } = useLanguage();
+  const pathname = usePathname();
   const [submitted, setSubmitted] = useState(false);
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +128,7 @@ export default function Footer() {
           
           {/* Col 1: Architectural Outline Vector Logo (4 cols) */}
           <div className="md:col-span-4 space-y-4">
-            <Link href="/" className="inline-block group">
+            <Link href="/" onClick={handleLogoClick} className="inline-block group">
               <div className="flex flex-col">
                 <span className="font-display font-extralight text-3xl sm:text-4xl tracking-[0.25em] uppercase text-white group-hover:text-[#5a9dff] transition-colors">
                   A R GREEN GARDEN

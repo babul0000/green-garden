@@ -271,8 +271,7 @@ export default function Sidebar({
       <div className="flex items-center justify-between pb-4 border-b border-[#D6D2C4] mb-3 px-2">
         <Link
           href="/"
-          target="_blank"
-          className="flex items-center gap-3 group focus:outline-none"
+          className="flex items-center gap-3 group focus:outline-none cursor-pointer"
           title="Visit Public Landing Page"
         >
           <div className="w-9 h-9 rounded-2xl bg-[#2B4D33] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
@@ -352,8 +351,7 @@ export default function Sidebar({
         {/* Quick Landing Page Portal Link */}
         <Link
           href="/"
-          target="_blank"
-          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/70 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group"
+          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/70 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <span>🌐</span>

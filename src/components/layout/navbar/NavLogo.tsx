@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { INavbarConfig } from "./types";
 
 interface NavLogoProps {
@@ -9,9 +10,24 @@ interface NavLogoProps {
 }
 
 export default function NavLogo({ config }: NavLogoProps) {
+  const pathname = usePathname();
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If user is already on home page, smoothly scroll to top without reloading
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="flex-1 flex items-center justify-center text-center px-2 overflow-hidden">
-      <Link href="/" className="group inline-block whitespace-nowrap focus:outline-none">
+      <Link
+        href="/"
+        onClick={handleLogoClick}
+        className="group inline-block whitespace-nowrap focus:outline-none cursor-pointer"
+        title="A R Green Garden - Home"
+      >
         {config.logoType === "IMAGE" && config.logoImage ? (
           <img
             src={config.logoImage}
