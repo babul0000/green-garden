@@ -17,71 +17,77 @@ export default function Header({
   onToggleSidebar,
 }: HeaderProps) {
   return (
-    <header className="h-20 bg-[#F4F6F4]/95 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 shrink-0 text-[#111813] font-sans">
+    <header className="h-20 bg-[#F7F6F2]/95 backdrop-blur-md border-b border-[#D6D2C4] flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 shrink-0 text-[#121813] font-sans">
       
-      {/* Left: Mobile Hamburger Trigger + Dashboard Title */}
+      {/* Left: Mobile Hamburger Trigger + Studio Title */}
       <div className="flex items-center gap-3.5">
         {/* Mobile Hamburger Trigger */}
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="md:hidden flex items-center justify-center w-10 h-10 rounded-2xl bg-white border border-stone-200/80 text-[#111813] shadow-xs hover:bg-stone-50 transition-all cursor-pointer focus:outline-none"
+          className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-[#D6D2C4] text-[#121813] shadow-xs hover:bg-[#E4E2D7] transition-all cursor-pointer focus:outline-none"
           aria-label="Open Navigation Drawer"
           title="Open Menu Drawer"
         >
           <div className="flex flex-col gap-1 w-5">
-            <span className="w-full h-[1.5px] bg-[#111813]"></span>
-            <span className="w-full h-[1.5px] bg-[#111813]"></span>
-            <span className="w-full h-[1.5px] bg-[#111813]"></span>
+            <span className="w-full h-[1.5px] bg-[#121813]"></span>
+            <span className="w-full h-[1.5px] bg-[#121813]"></span>
+            <span className="w-full h-[1.5px] bg-[#121813]"></span>
           </div>
         </button>
 
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-display font-extrabold text-[#111813] tracking-tight leading-none">
-            Dashboard
-          </h1>
-          <p className="hidden sm:block text-[11px] font-mono text-stone-500 mt-1">
-            Studio Performance & Live Ecological Operations
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-display font-light text-[#121813] tracking-[0.14em] uppercase leading-tight">
+              STUDIO DASHBOARD
+            </h1>
+            <span className="hidden sm:inline-block text-[9px] font-mono uppercase tracking-[0.2em] text-[#2B4D33] font-bold px-2 py-0.5 rounded-full bg-[#2B4D33]/10 border border-[#2B4D33]/20">
+              Live Operations
+            </span>
+          </div>
+          <p className="hidden sm:block text-[11px] font-sans font-light text-[#75787B] mt-0.5">
+            Landscape Architecture, Biophilic Living & Arboriculture Management
           </p>
         </div>
       </div>
 
-      {/* Right: Notification Bell & Dark "Add Custom Widget" Button matching AeuxGlobal */}
-      <div className="flex items-center gap-2.5 sm:gap-3.5">
+      {/* Right: Search, Database Refresh, Primary Commissions Button */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Architectural Search Bar */}
+        <div className="relative w-48 lg:w-60 hidden lg:block">
+          <input
+            type="text"
+            placeholder="প্রজেক্ট বা ক্লায়েন্ট খুঁজুন..."
+            className="w-full pl-3.5 pr-8 py-1.5 border border-[#D6D2C4] rounded-full text-xs focus:outline-none focus:border-[#2B4D33] text-[#121813] bg-white placeholder:text-[#75787B] transition-all font-sans"
+          />
+          <span className="absolute right-3 top-2 text-[10px] text-[#75787B]">🔍</span>
+        </div>
+
         {/* Database Refresh */}
         <button 
           type="button"
           onClick={fetchData} 
-          className="w-10 h-10 rounded-full bg-white hover:bg-stone-50 text-stone-700 hover:text-black border border-stone-200/80 flex items-center justify-center transition-all shadow-xs cursor-pointer text-sm"
+          className="hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#2B4D33] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center gap-1.5 shrink-0 shadow-2xs"
           title="Refresh database records"
         >
           <span>⟳</span>
+          <span className="hidden sm:inline">রিফ্রেশ</span>
         </button>
 
-        {/* Circular Notification Bell with Glow dot */}
-        <button 
-          type="button"
-          className="relative w-10 h-10 rounded-full bg-white hover:bg-stone-50 border border-stone-200/80 flex items-center justify-center transition-all shadow-xs cursor-pointer text-sm text-stone-700 hover:text-black"
-          title="Notifications"
-        >
-          <span>🔔</span>
-          <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#00E676] rounded-full border border-white"></span>
-        </button>
-
-        {/* Dark AeuxGlobal-Style Action Button: "Add Custom Widget" / "+ নতুন সার্ভিস" */}
+        {/* New Commission / Service Action */}
         <button 
           type="button" 
           onClick={() => { setActiveTab("services"); setEditingService(null); }}
-          className="bg-[#111813] hover:bg-[#1E2922] text-white text-xs font-bold font-mono py-2.5 px-4 sm:px-5 rounded-2xl flex items-center gap-2 transition-all shadow-sm cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0"
+          className="bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono tracking-wider py-1.5 px-3.5 sm:px-4 rounded-full flex items-center gap-1.5 transition-all shadow-xs cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 font-medium"
         >
           <span>+</span>
-          <span className="whitespace-nowrap">Add Custom Widget</span>
+          <span className="whitespace-nowrap">নতুন কমিশন</span>
         </button>
 
         {/* Direct Landing Page Link */}
         <Link
           href="/"
-          className="hidden lg:flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl border border-stone-200/80 bg-white hover:bg-stone-50 text-[#111813] text-xs font-mono transition-colors shrink-0 shadow-xs cursor-pointer"
+          className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#D6D2C4] bg-white hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono transition-colors shrink-0 shadow-2xs cursor-pointer"
           title="Visit Home Page"
         >
           <span>🌐</span>

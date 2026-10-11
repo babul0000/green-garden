@@ -382,19 +382,19 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-/* Studio Architectural Portal & Dashboard - Botanical Forest Theme (Luxury Light) */
+/* Studio Architectural Portal & Dashboard - Shma Designs Studio Theme (https://shmadesigns.com) */
 .studio-portal-light {
-  background-color: #F9F9F6;
-  color: #1C1917;
+  background-color: #F7F6F2;
+  color: #121813;
 }
 
 .studio-portal-light .bg-white {
   background-color: #FFFFFF !important;
-  border-color: #E7E5E4 !important;
-  color: #1C1917 !important;
+  border-color: #D6D2C4 !important;
+  color: #121813 !important;
 }
 
-/* Botanical Forest card containers & surface fallbacks */
+/* Shma Designs card containers & surface fallbacks */
 .studio-portal-light .bg-\[\#18221A\]\/85,
 .studio-portal-light .bg-\[\#18221A\],
 .studio-portal-light .bg-\[\#121A14\],
@@ -409,21 +409,21 @@ h1, h2, h3, h4, h5, h6 {
 .studio-portal-light .bg-white\/\[0\.02\],
 .studio-portal-light .bg-white\/5 {
   background-color: #FFFFFF !important;
-  border-color: #E7E5E4 !important;
-  color: #1C1917 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  border-color: #D6D2C4 !important;
+  color: #121813 !important;
+  box-shadow: 0 1px 2px rgba(18, 24, 19, 0.04);
 }
 
 .studio-portal-light .bg-gray-50,
 .studio-portal-light .bg-gray-100,
 .studio-portal-light .bg-slate-50,
 .studio-portal-light .bg-slate-100 {
-  background-color: #F9F9F6 !important;
-  border-color: #E7E5E4 !important;
-  color: #1C1917 !important;
+  background-color: #F7F6F2 !important;
+  border-color: #D6D2C4 !important;
+  color: #121813 !important;
 }
 
-/* Headings & Text hierarchy in Botanical Forest */
+/* Headings & Text hierarchy in Shma Designs */
 .studio-portal-light h1,
 .studio-portal-light h2,
 .studio-portal-light h3,
@@ -432,98 +432,98 @@ h1, h2, h3, h4, h5, h6 {
 .studio-portal-light h6,
 .studio-portal-light .text-\[\#E4E2D7\],
 .studio-portal-light .text-white {
-  color: #1C1917 !important;
+  color: #121813 !important;
 }
 
 .studio-portal-light .text-white\/80,
 .studio-portal-light .text-white\/70,
 .studio-portal-light .text-white\/60,
 .studio-portal-light .text-stone-400 {
-  color: #78716C !important;
+  color: #75787B !important;
 }
 
 .studio-portal-light .text-white\/50,
 .studio-portal-light .text-white\/40,
 .studio-portal-light .text-white\/30 {
-  color: #A8A29E !important;
+  color: #9E9F9D !important;
 }
 
-/* Border overrides - 1px Subtle Border #E7E5E4 */
+/* Border overrides - 1px Architectural Linen Border #D6D2C4 */
 .studio-portal-light .border-white\/10,
 .studio-portal-light .border-white\/15,
 .studio-portal-light .border-white\/20,
 .studio-portal-light .border-white\/5,
-.studio-portal-light .border-\[\#D6D2C4\] {
-  border-color: #E7E5E4 !important;
+.studio-portal-light .border-\[\#E7E5E4\] {
+  border-color: #D6D2C4 !important;
 }
 
-/* Primary Green Buttons (#1B4332 Deep British Forest Green) */
+/* Shma Forest Green Buttons (#2B4D33) */
 .studio-portal-light button.bg-emerald-500,
 .studio-portal-light a.bg-emerald-500,
 .studio-portal-light .bg-emerald-500:not(.badge):not(.status-dot),
-.studio-portal-light .bg-\[\#2B4D33\] {
-  background-color: #1B4332 !important;
+.studio-portal-light .bg-\[\#1B4332\] {
+  background-color: #2B4D33 !important;
   color: #FFFFFF !important;
-  box-shadow: 0 1px 3px rgba(27, 67, 50, 0.25) !important;
+  box-shadow: 0 1px 3px rgba(43, 77, 51, 0.2) !important;
 }
 
 .studio-portal-light button.bg-emerald-500:hover,
 .studio-portal-light a.bg-emerald-500:hover,
-.studio-portal-light .bg-\[\#2B4D33\]:hover {
-  background-color: #143527 !important;
+.studio-portal-light .bg-\[\#1B4332\]:hover {
+  background-color: #1E3724 !important;
 }
 
-/* Soft Accent Badges & Highlights (#D8F3DC Soft Mint Wash) */
+/* Shma Accent Badges & Highlights */
 .studio-portal-light .bg-emerald-500\/10,
 .studio-portal-light .bg-emerald-500\/20,
 .studio-portal-light .bg-emerald-100 {
-  background-color: #D8F3DC !important;
-  color: #1B4332 !important;
-  border: 1px solid #B7E4C7 !important;
+  background-color: rgba(43, 77, 51, 0.1) !important;
+  color: #2B4D33 !important;
+  border: 1px solid rgba(43, 77, 51, 0.25) !important;
 }
 
-/* Inputs, selects, textareas in Botanical Forest Light */
+/* Inputs, selects, textareas in Shma Designs Linen */
 .studio-portal-light input,
 .studio-portal-light select,
 .studio-portal-light textarea {
   background-color: #FFFFFF !important;
-  border-color: #E7E5E4 !important;
-  color: #1C1917 !important;
+  border-color: #D6D2C4 !important;
+  color: #121813 !important;
 }
 
 .studio-portal-light input::placeholder,
 .studio-portal-light textarea::placeholder {
-  color: #78716C !important;
+  color: #75787B !important;
 }
 
 .studio-portal-light input:focus,
 .studio-portal-light select:focus,
 .studio-portal-light textarea:focus {
-  border-color: #1B4332 !important;
+  border-color: #2B4D33 !important;
   background-color: #FFFFFF !important;
   outline: none !important;
-  box-shadow: 0 0 0 1px #1B4332 !important;
+  box-shadow: 0 0 0 1px #2B4D33 !important;
 }
 
-/* Tables in Botanical Forest Light */
+/* Tables in Shma Designs Linen */
 .studio-portal-light table {
   background-color: #FFFFFF !important;
 }
 
 .studio-portal-light table th {
-  color: #78716C !important;
-  background-color: #F9F9F6 !important;
-  border-color: #E7E5E4 !important;
+  color: #75787B !important;
+  background-color: #E4E2D7 !important;
+  border-color: #D6D2C4 !important;
   font-weight: 600 !important;
 }
 
 .studio-portal-light table td {
-  border-color: #E7E5E4 !important;
-  color: #1C1917 !important;
+  border-color: #E4E2D7 !important;
+  color: #121813 !important;
 }
 
 .studio-portal-light table tr:hover {
-  background-color: #F9F9F6 !important;
+  background-color: #F7F6F2 !important;
 }
 
 
