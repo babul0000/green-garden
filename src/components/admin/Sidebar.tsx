@@ -268,22 +268,22 @@ export default function Sidebar({
   const renderSidebarContent = (isMobileView = false) => (
     <div className="flex flex-col h-full justify-between">
       {/* 1. Header / Brand Bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#D6D2C4] mb-3 px-2">
+      <div className="flex items-center justify-between pb-4 border-b border-[#E7E5E4] mb-3 px-2">
         <Link
           href="/"
           className="flex items-center gap-3 group focus:outline-none cursor-pointer"
           title="Visit Public Landing Page"
         >
-          <div className="w-9 h-9 rounded-2xl bg-[#2B4D33] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
+          <div className="w-9 h-9 rounded-2xl bg-[#1B4332] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
           <div>
-            <span className="font-display font-bold text-[13px] sm:text-[14px] text-[#121813] uppercase tracking-[0.18em] block leading-tight group-hover:text-[#2B4D33] transition-colors">
+            <span className="font-display font-bold text-[13px] sm:text-[14px] text-[#1C1917] uppercase tracking-[0.18em] block leading-tight group-hover:text-[#1B4332] transition-colors">
               A R Green Garden
             </span>
-            <span className="text-[9px] font-mono text-[#2B4D33] font-semibold tracking-[0.2em] uppercase block mt-0.5">
+            <span className="text-[9px] font-mono text-[#1B4332] font-semibold tracking-[0.2em] uppercase block mt-0.5">
               Studio ERP Control
             </span>
           </div>
@@ -294,7 +294,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-[#323232] flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
+            className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-[#1C1917] flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
             aria-label="Close Sidebar"
           >
             ✕
@@ -306,7 +306,7 @@ export default function Sidebar({
       <div className="flex flex-col gap-3.5 flex-grow overflow-y-auto pr-1 custom-scrollbar">
         {menuSections.map((sec, idx) => (
           <div key={idx} className="flex flex-col gap-0.5">
-            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#323232]/55 px-3 mb-1">
+            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#78716C] px-3 mb-1">
               {sec.sectionTitle}
             </p>
             <nav className="flex flex-col gap-0.5">
@@ -315,24 +315,24 @@ export default function Sidebar({
                 return (
                   <div key={tab.id} className="relative flex items-center w-full">
                     {isSelected && (
-                      <div className="absolute left-0 w-1 h-5 bg-[#2B4D33] rounded-r-md"></div>
+                      <div className="absolute left-0 w-1 h-5 bg-[#1B4332] rounded-r-md"></div>
                     )}
                     <button
                       type="button"
                       onClick={() => handleTabClick(tab.id)}
                       className={`flex items-center gap-2.5 w-full py-2 px-3 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                         isSelected
-                          ? "text-white bg-[#2B4D33] shadow-md shadow-[#2B4D33]/25 font-bold"
-                          : "text-[#323232]/80 hover:text-[#121813] hover:bg-black/[0.05]"
+                          ? "text-white bg-[#1B4332] shadow-sm shadow-[#1B4332]/25 font-bold"
+                          : "text-[#1C1917]/80 hover:text-[#1C1917] hover:bg-black/[0.04]"
                       }`}
                     >
-                      <span className={`shrink-0 transition-colors ${isSelected ? "text-emerald-200" : "text-[#323232]/50"}`}>
+                      <span className={`shrink-0 transition-colors ${isSelected ? "text-[#D8F3DC]" : "text-[#78716C]"}`}>
                         {tab.icon}
                       </span>
                       <span className="flex-grow text-left truncate">{tab.label}</span>
                       {tab.badge !== undefined && tab.badge > 0 && (
                         <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          isSelected ? "bg-white text-[#2B4D33]" : "bg-[#C85A32] text-white"
+                          isSelected ? "bg-white text-[#1B4332]" : "bg-[#D8F3DC] text-[#1B4332] border border-[#B7E4C7]/60"
                         }`}>
                           {tab.badge}
                         </span>
@@ -347,35 +347,35 @@ export default function Sidebar({
       </div>
 
       {/* 3. Bottom Links & Admin Profile Card */}
-      <div className="mt-auto pt-3 border-t border-[#D6D2C4] flex flex-col gap-2">
+      <div className="mt-auto pt-3 border-t border-[#E7E5E4] flex flex-col gap-2">
         {/* Quick Landing Page Portal Link */}
         <Link
           href="/"
-          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/70 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
+          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white hover:bg-stone-50 text-[#1C1917] border border-[#E7E5E4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <span>🌐</span>
             <span>ল্যান্ডিং পেজ দেখুন</span>
           </div>
-          <span className="text-[11px] text-[#2B4D33] group-hover:translate-x-0.5 transition-transform">➔</span>
+          <span className="text-[11px] text-[#1B4332] group-hover:translate-x-0.5 transition-transform">➔</span>
         </Link>
 
         {/* Super Admin Info Card */}
-        <div className="flex items-center justify-between p-2 rounded-xl bg-white/80 border border-[#D6D2C4] shadow-2xs">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#E7E5E4] shadow-2xs">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#2B4D33] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
+            <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#1B4332] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
               {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <p className="text-[9px] uppercase font-mono tracking-wider text-[#2B4D33] font-bold leading-none">Super Admin</p>
-              <p className="text-xs font-bold text-[#121813] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
+              <p className="text-[9px] uppercase font-mono tracking-wider text-[#1B4332] font-bold leading-none">Super Admin</p>
+              <p className="text-xs font-bold text-[#1C1917] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => logout()}
-            className="text-stone-400 hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-stone-100 cursor-pointer text-xs"
+            className="text-[#78716C] hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-stone-100 cursor-pointer text-xs"
             title="Log Out"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -392,7 +392,7 @@ export default function Sidebar({
   return (
     <>
       {/* ================= 1. DESKTOP PERMANENT SIDEBAR (Laptop & Large Screens) ================= */}
-      <aside className="hidden md:flex md:w-[270px] bg-[#E4E2D7] text-[#323232] flex-col px-3.5 py-5 sticky top-0 h-screen shrink-0 shadow-md border-r border-[#D6D2C4] z-20 font-sans">
+      <aside className="hidden md:flex md:w-[270px] bg-[#F4F3EE] text-[#1C1917] flex-col px-3.5 py-5 sticky top-0 h-screen shrink-0 shadow-xs border-r border-[#E7E5E4] z-20 font-sans">
         {renderSidebarContent(false)}
       </aside>
 
@@ -416,7 +416,7 @@ export default function Sidebar({
 
         {/* Left Slide-out Drawer Container */}
         <aside
-          className={`relative w-[300px] max-w-[85vw] h-full bg-[#E4E2D7] text-[#323232] flex flex-col px-4 py-5 shadow-2xl border-r border-[#D6D2C4] z-10 transition-transform duration-300 ease-out font-sans ${
+          className={`relative w-[300px] max-w-[85vw] h-full bg-[#F4F3EE] text-[#1C1917] flex flex-col px-4 py-5 shadow-2xl border-r border-[#E7E5E4] z-10 transition-transform duration-300 ease-out font-sans ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >

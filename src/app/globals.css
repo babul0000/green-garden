@@ -382,19 +382,19 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-/* Studio Architectural Portal & Dashboard - Signature Light Mode */
+/* Studio Architectural Portal & Dashboard - Botanical Forest Theme (Luxury Light) */
 .studio-portal-light {
-  background-color: #F7F6F2;
-  color: #121813;
+  background-color: #F9F9F6;
+  color: #1C1917;
 }
 
 .studio-portal-light .bg-white {
   background-color: #FFFFFF !important;
-  border-color: #D6D2C4 !important;
-  color: #121813 !important;
+  border-color: #E7E5E4 !important;
+  color: #1C1917 !important;
 }
 
-/* Light mode card containers & dark class fallbacks */
+/* Botanical Forest card containers & surface fallbacks */
 .studio-portal-light .bg-\[\#18221A\]\/85,
 .studio-portal-light .bg-\[\#18221A\],
 .studio-portal-light .bg-\[\#121A14\],
@@ -409,84 +409,121 @@ h1, h2, h3, h4, h5, h6 {
 .studio-portal-light .bg-white\/\[0\.02\],
 .studio-portal-light .bg-white\/5 {
   background-color: #FFFFFF !important;
-  border-color: #E2DEC9 !important;
-  color: #121813 !important;
-  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.05);
+  border-color: #E7E5E4 !important;
+  color: #1C1917 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .studio-portal-light .bg-gray-50,
 .studio-portal-light .bg-gray-100,
 .studio-portal-light .bg-slate-50,
 .studio-portal-light .bg-slate-100 {
-  background-color: #FAF9F5 !important;
-  border-color: #E2DEC9 !important;
-  color: #121813 !important;
+  background-color: #F9F9F6 !important;
+  border-color: #E7E5E4 !important;
+  color: #1C1917 !important;
 }
 
-/* Text overrides in light mode */
+/* Headings & Text hierarchy in Botanical Forest */
+.studio-portal-light h1,
+.studio-portal-light h2,
+.studio-portal-light h3,
+.studio-portal-light h4,
+.studio-portal-light h5,
+.studio-portal-light h6,
 .studio-portal-light .text-\[\#E4E2D7\],
 .studio-portal-light .text-white {
-  color: #121813 !important;
+  color: #1C1917 !important;
 }
 
 .studio-portal-light .text-white\/80,
 .studio-portal-light .text-white\/70,
 .studio-portal-light .text-white\/60,
 .studio-portal-light .text-stone-400 {
-  color: #4A504A !important;
+  color: #78716C !important;
 }
 
 .studio-portal-light .text-white\/50,
 .studio-portal-light .text-white\/40,
 .studio-portal-light .text-white\/30 {
-  color: #727770 !important;
+  color: #A8A29E !important;
 }
 
-/* Border overrides */
+/* Border overrides - 1px Subtle Border #E7E5E4 */
 .studio-portal-light .border-white\/10,
 .studio-portal-light .border-white\/15,
 .studio-portal-light .border-white\/20,
-.studio-portal-light .border-white\/5 {
-  border-color: #E2DEC9 !important;
+.studio-portal-light .border-white\/5,
+.studio-portal-light .border-\[\#D6D2C4\] {
+  border-color: #E7E5E4 !important;
 }
 
-/* Inputs, selects, textareas in light mode */
+/* Primary Green Buttons (#1B4332 Deep British Forest Green) */
+.studio-portal-light button.bg-emerald-500,
+.studio-portal-light a.bg-emerald-500,
+.studio-portal-light .bg-emerald-500:not(.badge):not(.status-dot),
+.studio-portal-light .bg-\[\#2B4D33\] {
+  background-color: #1B4332 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(27, 67, 50, 0.25) !important;
+}
+
+.studio-portal-light button.bg-emerald-500:hover,
+.studio-portal-light a.bg-emerald-500:hover,
+.studio-portal-light .bg-\[\#2B4D33\]:hover {
+  background-color: #143527 !important;
+}
+
+/* Soft Accent Badges & Highlights (#D8F3DC Soft Mint Wash) */
+.studio-portal-light .bg-emerald-500\/10,
+.studio-portal-light .bg-emerald-500\/20,
+.studio-portal-light .bg-emerald-100 {
+  background-color: #D8F3DC !important;
+  color: #1B4332 !important;
+  border: 1px solid #B7E4C7 !important;
+}
+
+/* Inputs, selects, textareas in Botanical Forest Light */
 .studio-portal-light input,
 .studio-portal-light select,
 .studio-portal-light textarea {
-  background-color: #FAF9F5 !important;
-  border-color: #D6D2C4 !important;
-  color: #121813 !important;
+  background-color: #FFFFFF !important;
+  border-color: #E7E5E4 !important;
+  color: #1C1917 !important;
 }
 
 .studio-portal-light input::placeholder,
 .studio-portal-light textarea::placeholder {
-  color: #8C9188 !important;
+  color: #78716C !important;
 }
 
 .studio-portal-light input:focus,
 .studio-portal-light select:focus,
 .studio-portal-light textarea:focus {
-  border-color: #2B4D33 !important;
+  border-color: #1B4332 !important;
   background-color: #FFFFFF !important;
   outline: none !important;
-  box-shadow: 0 0 0 1px #2B4D33 !important;
+  box-shadow: 0 0 0 1px #1B4332 !important;
 }
 
-/* Tables in light mode */
+/* Tables in Botanical Forest Light */
+.studio-portal-light table {
+  background-color: #FFFFFF !important;
+}
+
 .studio-portal-light table th {
-  color: #4A504A !important;
-  background-color: #F5F4EE !important;
-  border-color: #E2DEC9 !important;
+  color: #78716C !important;
+  background-color: #F9F9F6 !important;
+  border-color: #E7E5E4 !important;
+  font-weight: 600 !important;
 }
 
 .studio-portal-light table td {
-  border-color: #EBE8DC !important;
-  color: #121813 !important;
+  border-color: #E7E5E4 !important;
+  color: #1C1917 !important;
 }
 
 .studio-portal-light table tr:hover {
-  background-color: #F7F6F2 !important;
+  background-color: #F9F9F6 !important;
 }
 
 

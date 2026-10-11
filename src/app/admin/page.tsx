@@ -589,18 +589,18 @@ export default function AdminPage() {
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#121A14]">
-        <span className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin"></span>
+      <div className="flex items-center justify-center min-h-screen bg-[#F9F9F6]">
+        <span className="w-10 h-10 border-4 border-[#1B4332]/20 border-t-[#1B4332] rounded-full animate-spin"></span>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#F7F6F2] text-[#121813] font-sans min-h-screen flex flex-row relative overflow-x-hidden studio-portal-light">
-      {/* Background Architectural Ambient Grid & Glow matching Landing Page Light Theme */}
-      <div className="absolute inset-0 bg-[radial-gradient(#D6D2C4_1.2px,transparent_1.2px)] [background-size:28px_28px] opacity-70 pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-[140px] pointer-events-none"></div>
-      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-stone-200/40 rounded-full blur-[150px] pointer-events-none"></div>
+    <div className="bg-[#F9F9F6] text-[#1C1917] font-sans min-h-screen flex flex-row relative overflow-x-hidden studio-portal-light">
+      {/* Background Architectural Ambient Grid & Glow matching Botanical Forest Luxury Theme */}
+      <div className="absolute inset-0 bg-[radial-gradient(#E7E5E4_1.2px,transparent_1.2px)] [background-size:28px_28px] opacity-70 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D8F3DC]/25 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-[#E7E5E4]/40 rounded-full blur-[150px] pointer-events-none"></div>
       
       {/* 1. LEFT SIDEBAR (Permanent Desktop, Slide-out Drawer on Mobile) */}
       <Sidebar 
