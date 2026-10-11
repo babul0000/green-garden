@@ -1,16 +1,59 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   sessionData?: any;
   inboxCount?: number;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCount = 0 }: SidebarProps) {
-  // Navigation Menu matching architectural dark theme & clean standard Bengali
+export default function Sidebar({
+  activeTab,
+  setActiveTab,
+  sessionData,
+  inboxCount = 0,
+  isOpen = false,
+  onClose,
+}: SidebarProps) {
+  const { logout } = useAuth();
+
+  // Prevent body scroll when mobile drawer is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Handle ESC key to close mobile drawer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  const handleTabClick = (tabId: string) => {
+    setActiveTab(tabId);
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  // Navigation Menu matching Landing Page architectural theme & clean standard Bengali
   const menuSections: {
     sectionTitle: string;
     items: { id: string; label: string; icon: React.ReactNode; badge?: number; highlight?: boolean }[];
@@ -69,7 +112,7 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
         },
         {
           id: "maintenance",
-          label: "Project Scheduling & Care",
+          label: "Maintenance & Schedules",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -81,7 +124,7 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
         },
         {
           id: "finance",
-          label: "Smart Quotation & Stock",
+          label: "Accounts & Inventory",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="1" x2="12" y2="23" />
@@ -91,7 +134,7 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
         },
         {
           id: "service-card",
-          label: "Digital Service Card & QR",
+          label: "Digital Service Card",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="5" width="20" height="14" rx="2" />
@@ -221,30 +264,50 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
     },
   ];
 
-  return (
-    <aside className="w-full md:w-[260px] bg-[#0c1610]/95 backdrop-blur-xl text-white flex flex-col px-3.5 py-6 md:sticky md:top-0 md:h-screen shrink-0 shadow-2xl border-r border-white/10 z-20 font-sans">
-      {/* Brand/Logo */}
-      <div className="flex items-center gap-3 px-3 py-1 mb-6">
-        <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-        </div>
-        <div>
-          <span className="font-display font-bold text-[14px] text-[#E4E2D7] tracking-wide block leading-none">
-            A R Green Garden
-          </span>
-          <span className="text-[9px] font-mono text-emerald-400 font-semibold tracking-wider uppercase mt-1 block">
-            Master ERP Control
-          </span>
-        </div>
+  // Inner reusable navigation content matching Landing Page Theme
+  const renderSidebarContent = (isMobileView = false) => (
+    <div className="flex flex-col h-full justify-between">
+      {/* 1. Header / Brand Bar */}
+      <div className="flex items-center justify-between pb-5 border-b border-white/10 mb-4 px-2">
+        <Link
+          href="/"
+          target="_blank"
+          className="flex items-center gap-3 group focus:outline-none"
+          title="Visit Public Landing Page"
+        >
+          <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner group-hover:scale-105 transition-transform">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-display font-light text-[13px] sm:text-[14px] text-[#E4E2D7] uppercase tracking-[0.2em] block leading-tight group-hover:text-white transition-colors">
+              A R Green Garden
+            </span>
+            <span className="text-[9px] font-mono text-emerald-400/90 font-semibold tracking-[0.2em] uppercase block mt-0.5">
+              Studio ERP Control
+            </span>
+          </div>
+        </Link>
+
+        {/* Close Button on Mobile Drawer */}
+        {isMobileView && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
+            aria-label="Close Sidebar"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
-      {/* Navigation Sections */}
+      {/* 2. Scrollable Navigation Menu */}
       <div className="flex flex-col gap-4 flex-grow overflow-y-auto pr-1 custom-scrollbar">
         {menuSections.map((sec, idx) => (
           <div key={idx} className="flex flex-col gap-1">
-            <p className="text-[9px] uppercase font-mono font-bold tracking-widest text-white/40 px-3 mb-1">
+            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#E4E2D7]/40 px-3 mb-1">
               {sec.sectionTitle}
             </p>
             <nav className="flex flex-col gap-0.5">
@@ -257,20 +320,20 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
                     )}
                     <button
                       type="button"
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => handleTabClick(tab.id)}
                       className={`flex items-center gap-2.5 w-full py-2 px-3 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                         isSelected
-                          ? "text-stone-950 bg-emerald-400 font-bold shadow-md shadow-emerald-500/20"
-                          : "text-white/60 hover:text-white hover:bg-white/5"
+                          ? "text-emerald-300 bg-emerald-500/15 border border-emerald-500/35 shadow-[0_0_15px_rgba(16,185,129,0.15)] font-bold backdrop-blur-md"
+                          : "text-[#E4E2D7]/70 hover:text-white hover:bg-white/[0.05]"
                       }`}
                     >
-                      <span className={`shrink-0 ${isSelected ? "text-stone-950" : "text-white/40"}`}>
+                      <span className={`shrink-0 transition-colors ${isSelected ? "text-emerald-400" : "text-white/40"}`}>
                         {tab.icon}
                       </span>
                       <span className="flex-grow text-left truncate">{tab.label}</span>
                       {tab.badge !== undefined && tab.badge > 0 && (
                         <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          isSelected ? "bg-stone-950 text-emerald-300" : "bg-emerald-400 text-stone-950"
+                          isSelected ? "bg-emerald-400 text-stone-950" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                         }`}>
                           {tab.badge}
                         </span>
@@ -284,16 +347,84 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
         ))}
       </div>
 
-      {/* Super Admin Bottom Card */}
-      <div className="mt-auto border-t border-white/10 pt-3 flex items-center gap-3 px-2">
-        <div className="w-9 h-9 rounded-2xl overflow-hidden border border-emerald-500/30 flex items-center justify-center bg-emerald-950 text-emerald-300 font-bold text-xs shrink-0 shadow-inner">
-          {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
-        </div>
-        <div className="min-w-0">
-          <p className="text-[9px] uppercase font-mono tracking-wider text-white/40 font-bold leading-none">Super Admin:</p>
-          <p className="text-xs font-bold text-[#E4E2D7] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
+      {/* 3. Bottom Links & Admin Profile Card */}
+      <div className="mt-auto pt-3 border-t border-white/10 flex flex-col gap-2.5">
+        {/* Quick Landing Page Portal Link */}
+        <Link
+          href="/"
+          target="_blank"
+          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-[#E4E2D7]/80 hover:text-white border border-white/10 text-xs font-mono tracking-wider transition-all group"
+        >
+          <div className="flex items-center gap-2">
+            <span>🌐</span>
+            <span>ল্যান্ডিং পেজ দেখুন</span>
+          </div>
+          <span className="text-[11px] text-emerald-400 group-hover:translate-x-0.5 transition-transform">➔</span>
+        </Link>
+
+        {/* Super Admin Info Card */}
+        <div className="flex items-center justify-between px-2 pt-1">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl overflow-hidden border border-emerald-500/30 flex items-center justify-center bg-emerald-950 text-emerald-300 font-bold text-xs shrink-0 shadow-inner">
+              {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] uppercase font-mono tracking-wider text-emerald-400/80 font-bold leading-none">Super Admin</p>
+              <p className="text-xs font-bold text-[#E4E2D7] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="text-white/40 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs"
+            title="Log Out"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ================= 1. DESKTOP PERMANENT SIDEBAR (Laptop & Large Screens) ================= */}
+      <aside className="hidden md:flex md:w-[270px] bg-[#0c1610]/95 backdrop-blur-2xl text-white flex-col px-3.5 py-6 sticky top-0 h-screen shrink-0 shadow-2xl border-r border-white/10 z-20 font-sans">
+        {renderSidebarContent(false)}
+      </aside>
+
+      {/* ================= 2. MOBILE & TABLET SLIDE-IN DRAWER (< md Screens) ================= */}
+      <div
+        className={`fixed inset-0 z-50 md:hidden transition-all duration-300 ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile Navigation Drawer"
+      >
+        {/* Backdrop Overlay */}
+        <div
+          onClick={onClose}
+          className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 cursor-pointer ${
+            isOpen ? "opacity-100" : "opacity-0"
+          }`}
+          aria-hidden="true"
+        />
+
+        {/* Left Slide-out Drawer Container */}
+        <aside
+          className={`relative w-[300px] max-w-[85vw] h-full bg-[#0c1610]/98 backdrop-blur-2xl text-white flex flex-col px-4 py-6 shadow-2xl border-r border-white/15 z-10 transition-transform duration-300 ease-out font-sans ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          {renderSidebarContent(true)}
+        </aside>
+      </div>
+    </>
   );
 }

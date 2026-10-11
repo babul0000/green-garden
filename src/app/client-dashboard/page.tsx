@@ -72,6 +72,7 @@ export default function ClientDashboardPage() {
   const { user, loading: isPending, logout } = useAuth();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("overview");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
@@ -286,8 +287,8 @@ export default function ClientDashboardPage() {
       {/* Outer Studio Glass Frame */}
       <div className="w-full max-w-[1600px] mx-auto bg-[#18221A]/85 backdrop-blur-2xl rounded-[36px] shadow-2xl border border-white/10 flex overflow-hidden min-h-[920px] relative z-10">
         
-        {/* ================= LEFT SIDEBAR ================= */}
-        <aside className="w-64 bg-[#0d1610]/95 backdrop-blur-xl border-r border-white/10 text-white flex flex-col justify-between p-6 shrink-0">
+        {/* ================= 1. DESKTOP PERMANENT SIDEBAR (Laptop/Desktop) ================= */}
+        <aside className="hidden lg:flex w-64 bg-[#0d1610]/95 backdrop-blur-xl border-r border-white/10 text-white flex-col justify-between p-6 shrink-0">
           <div>
             {/* Logo */}
             <div className="flex items-center gap-3 mb-10">
@@ -312,41 +313,13 @@ export default function ClientDashboardPage() {
             {/* Navigation items */}
             <nav className="space-y-1.5">
               {[
-                {
-                  id: "overview",
-                  label: "Dashboard Overview",
-                  icon: "📊",
-                },
-                {
-                  id: "projects",
-                  label: `My Projects (${projects.length})`,
-                  icon: "🌿",
-                },
-                {
-                  id: "consultation",
-                  label: `Tree Doctor & Visits (${treeRequests.length})`,
-                  icon: "🩺",
-                },
-                {
-                  id: "payments",
-                  label: `Payment History (${invoices.length})`,
-                  icon: "💳",
-                },
-                {
-                  id: "service-card",
-                  label: "Digital Service Card",
-                  icon: "🪪",
-                },
-                {
-                  id: "loyalty",
-                  label: "Loyalty & Rewards",
-                  icon: "🎁",
-                },
-                {
-                  id: "support",
-                  label: "Feedback & Review",
-                  icon: "⭐",
-                },
+                { id: "overview", label: "Dashboard Overview", icon: "📊" },
+                { id: "projects", label: `My Projects (${projects.length})`, icon: "🌿" },
+                { id: "consultation", label: `Tree Doctor & Visits (${treeRequests.length})`, icon: "🩺" },
+                { id: "payments", label: `Payment History (${invoices.length})`, icon: "💳" },
+                { id: "service-card", label: "Digital Service Card", icon: "🪪" },
+                { id: "loyalty", label: "Loyalty & Rewards", icon: "🎁" },
+                { id: "support", label: "Feedback & Review", icon: "⭐" },
               ].map((item) => {
                 const isActive = activeTab === item.id;
                 return (
@@ -394,11 +367,120 @@ export default function ClientDashboardPage() {
           </div>
         </aside>
 
+        {/* ================= 2. MOBILE SLIDE-IN DRAWER (< lg screens) ================= */}
+        <div
+          className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
+            mobileDrawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            onClick={() => setMobileDrawerOpen(false)}
+            className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 ${
+              mobileDrawerOpen ? "opacity-100" : "opacity-0"
+            }`}
+          />
+          <aside
+            className={`relative w-[280px] max-w-[85vw] h-full bg-[#0d1610]/98 backdrop-blur-2xl border-r border-white/15 text-white flex flex-col justify-between p-6 z-10 transition-transform duration-300 ease-out ${
+              mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between mb-8 pb-3 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-base text-emerald-400">
+                    🌿
+                  </div>
+                  <div>
+                    <span className="text-sm font-display font-bold text-[#E4E2D7] block leading-tight">
+                      A R Green Garden
+                    </span>
+                    <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">
+                      Client Portal
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/5 text-white/70 hover:text-white flex items-center justify-center text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <nav className="space-y-1.5">
+                {[
+                  { id: "overview", label: "Dashboard Overview", icon: "📊" },
+                  { id: "projects", label: `My Projects (${projects.length})`, icon: "🌿" },
+                  { id: "consultation", label: `Tree Doctor & Visits (${treeRequests.length})`, icon: "🩺" },
+                  { id: "payments", label: `Payment History (${invoices.length})`, icon: "💳" },
+                  { id: "service-card", label: "Digital Service Card", icon: "🪪" },
+                  { id: "loyalty", label: "Loyalty & Rewards", icon: "🎁" },
+                  { id: "support", label: "Feedback & Review", icon: "⭐" },
+                ].map((item) => {
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setMobileDrawerOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+                        isActive
+                          ? "text-stone-950 bg-emerald-400 font-bold shadow-lg shadow-emerald-500/20"
+                          : "text-white/70 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span>{item.icon}</span>
+                        <span>{item.label}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-emerald-950 border border-emerald-500/40 flex items-center justify-center font-bold text-xs text-emerald-300">
+                  {clientDisplayName[0]}
+                </div>
+                <span className="text-xs font-bold text-[#E4E2D7] truncate max-w-[120px]">
+                  {clientDisplayName}
+                </span>
+              </div>
+              <button
+                onClick={() => logout()}
+                className="text-xs text-rose-400 hover:text-rose-300 font-mono"
+              >
+                Logout
+              </button>
+            </div>
+          </aside>
+        </div>
+
         {/* ================= MAIN CONTENT AREA ================= */}
         <main className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto">
           {/* Topbar */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-white/10">
             <div className="flex items-center gap-3">
+              {/* Mobile Drawer Button */}
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(true)}
+                className="lg:hidden flex items-center justify-center p-2 rounded-xl bg-white/5 border border-white/15 text-[#E4E2D7] hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Open Navigation Drawer"
+              >
+                <div className="flex flex-col gap-1 w-5">
+                  <span className="w-full h-[1.5px] bg-[#E4E2D7]"></span>
+                  <span className="w-full h-[1.5px] bg-[#E4E2D7]"></span>
+                  <span className="w-full h-[1.5px] bg-[#E4E2D7]"></span>
+                </div>
+              </button>
               <h1 className="text-xl sm:text-2xl font-display font-bold text-[#E4E2D7] tracking-tight">
                 Welcome, {clientDisplayName.split(" ")[0]}
               </h1>
