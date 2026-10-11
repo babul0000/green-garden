@@ -10,406 +10,468 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ bookings = [], projects = [], services = [], setActiveTab }: OverviewTabProps) {
-  const [timeFilter, setTimeFilter] = useState("January 2026 - May 2026");
+  const [selectedPeriod, setSelectedPeriod] = useState("2 month");
+  const [selectedRegion, setSelectedRegion] = useState("All regions");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const recentBookingsList = bookings && bookings.length > 0 ? bookings.slice(0, 4) : [
-    { clientName: "Client Name", service: "Garden Design", date: "12/17/2026", status: "Pending" },
-    { clientName: "Tanvir Ahmed", service: "Rooftop Oasis", date: "02/17/2026", status: "Confirmed" },
-    { clientName: "Rahim Chowdhury", service: "Tree Healthcare", date: "01/17/2026", status: "Confirmed" },
-    { clientName: "Shahidul Islam", service: "Landscape Lighting", date: "12/17/2026", status: "Confirmed" },
+  // Region Data matching AeuxGlobal table
+  const regionsList = [
+    {
+      flag: "🇺🇸",
+      region: "USA",
+      sub: "America (Dhaka Metro)",
+      factory: "253+",
+      recycled: "35%",
+      trend: "up",
+      tech: "Mechanical",
+      techColor: "bg-[#FFF4E5] text-[#B76E00] border-[#FFE2B8]",
+      totalValue: "4,167,987 tons",
+    },
+    {
+      flag: "🇩🇪",
+      region: "German",
+      sub: "Europe (Chittagong)",
+      factory: "211+",
+      recycled: "60%",
+      trend: "down",
+      tech: "Mechanical",
+      techColor: "bg-[#FFF4E5] text-[#B76E00] border-[#FFE2B8]",
+      totalValue: "2,571,193 tons",
+    },
+    {
+      flag: "🇯🇵",
+      region: "Japan",
+      sub: "Asia (Sylhet Eco)",
+      factory: "364+",
+      recycled: "85%",
+      trend: "up",
+      tech: "Energy recovery",
+      techColor: "bg-[#EBF7EE] text-[#1B5E20] border-[#C8E6C9]",
+      totalValue: "1,864,275 tons",
+    },
+    {
+      flag: "🇨🇳",
+      region: "China",
+      sub: "Asia (Rajshahi Belt)",
+      factory: "855+",
+      recycled: "25%",
+      trend: "down",
+      tech: "Chemical",
+      techColor: "bg-[#FBE9E7] text-[#D84315] border-[#FFCCBC]",
+      totalValue: "8,643,742 tons",
+    },
   ];
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in-up font-sans">
+    <div className="flex flex-col gap-5 sm:gap-6 animate-fade-in font-sans">
       
-      {/* Toast Notification */}
+      {/* Toast Alert */}
       {toastMessage && (
-        <div className="p-3.5 bg-[#D8F3DC] border border-[#B7E4C7] text-[#1B4332] rounded-2xl text-xs font-semibold animate-fade-in-up flex justify-between items-center shadow-xs">
-          <span>{toastMessage}</span>
-          <button onClick={() => setToastMessage(null)} className="text-[#1B4332] font-bold cursor-pointer hover:opacity-75">✕</button>
+        <div className="p-3.5 bg-[#111914] border border-[#00E676]/30 text-white rounded-2xl text-xs font-semibold animate-fade-in flex justify-between items-center shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse"></span>
+            <span>{toastMessage}</span>
+          </div>
+          <button onClick={() => setToastMessage(null)} className="text-stone-400 hover:text-white font-bold cursor-pointer">✕</button>
         </div>
       )}
 
-      {/* Top Header Row */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#B7E4C7] bg-[#D8F3DC] text-[10px] font-mono uppercase tracking-[0.2em] text-[#1B4332] font-semibold mb-2">
-            A R Green Garden Studio • Executive Overview
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-display text-[#1C1917] tracking-tight">
-            Dashboard Analytics & Business Metrics
-          </h2>
-          <p className="text-xs text-[#78716C] mt-0.5">
-            রিয়েল-টাইম অপারেশনস, প্রজেক্ট স্ট্যাটাস এবং আর্থিক পারফরম্যান্স এক নজরে।
-          </p>
-        </div>
-
-        {/* Date Selector Pill */}
-        <div className="flex items-center gap-2 bg-white border border-[#E7E5E4] rounded-full px-4 py-1.5 text-xs text-[#1C1917] font-mono shadow-2xs">
-          <span>📅</span>
-          <span>{timeFilter}</span>
-          <svg className="w-3.5 h-3.5 text-[#78716C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Master ERP Live Counters Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 bg-white p-4 rounded-3xl border border-[#E7E5E4] shadow-xs">
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Customers</span>
-          <span className="text-xl font-extrabold font-mono text-[#1C1917]">250+</span>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Running Proj</span>
-          <span className="text-xl font-extrabold font-mono text-[#1B4332]">18</span>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Completed</span>
-          <span className="text-xl font-extrabold font-mono text-[#1B4332]">96+</span>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Employees</span>
-          <span className="text-xl font-extrabold font-mono text-[#1C1917]">35</span>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Maintenance</span>
-          <span className="text-xl font-extrabold font-mono text-[#1B4332]">72+</span>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Tree Doctor</span>
-          <span className="text-xl font-extrabold font-mono text-emerald-700">12</span>
-        </div>
-        <div className="p-2.5 rounded-2xl bg-[#F9F9F6] border border-[#E7E5E4] text-center col-span-2 sm:col-span-1">
-          <span className="text-[10px] font-bold text-[#78716C] font-mono uppercase tracking-wider block">Quotations</span>
-          <span className="text-xl font-extrabold font-mono text-[#1C1917]">8</span>
-        </div>
-      </div>
-
-      {/* 3-Column Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+      {/* ================= 1. TOP ROW: 3 METRIC CARDS ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
         
-        {/* Left & Center Columns (2 of 3) */}
-        <div className="xl:col-span-2 space-y-6">
-          
-          {/* Row 1: Site Overview + Net Income + Total Return */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            {/* Card 1: Site Overview Featured Deep Botanical Forest Card */}
-            <div className="bg-[#1B4332] text-white p-5 rounded-3xl shadow-md border border-[#1B4332] flex flex-col justify-between min-h-[150px] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-              <div className="flex items-center gap-2 relative z-10">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#D8F3DC] animate-pulse"></span>
-                <span className="text-xs font-mono font-semibold text-[#D8F3DC] uppercase tracking-wider">Site Overview</span>
-              </div>
-              <div className="space-y-1.5 mt-3 text-xs relative z-10 font-mono">
-                <div className="flex justify-between items-center text-white/80">
-                  <span>Total Projects:</span>
-                  <span className="font-bold text-white">500+</span>
-                </div>
-                <div className="flex justify-between items-center text-white/80">
-                  <span>Happy Clients:</span>
-                  <span className="font-bold text-white">450+</span>
-                </div>
-                <div className="flex justify-between items-center text-white/80">
-                  <span>Pending Bookings:</span>
-                  <span className="font-bold text-[#D8F3DC]">8</span>
-                </div>
-                <div className="flex justify-between items-center text-white/80">
-                  <span>New Messages:</span>
-                  <span className="font-bold text-[#D8F3DC]">13</span>
-                </div>
-              </div>
+        {/* Card 1: Air Pollution Level (Dark Obsidian Card with Neon Bars) */}
+        <div className="bg-[#111914] text-white rounded-3xl p-5 border border-white/5 shadow-md flex items-center justify-between min-h-[140px] relative overflow-hidden group">
+          <div className="space-y-1 z-10">
+            <p className="text-xs text-stone-400 font-mono tracking-wide">
+              Air Pollution Level
+            </p>
+            <div className="text-2xl sm:text-[28px] font-extrabold font-mono tracking-tight text-white mt-1">
+              35.05 <span className="text-xs font-normal text-stone-400">µg/m³</span>
             </div>
-
-            {/* Card 2: Net Income Card */}
-            <div className="bg-white p-5 rounded-3xl shadow-xs border border-[#E7E5E4] flex flex-col justify-between min-h-[150px]">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-mono font-semibold text-[#78716C] uppercase tracking-wider">Net Income</span>
-                <button className="text-[#78716C] hover:text-[#1C1917]">•••</button>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-[#1C1917]">
-                  ৳1,93,000
-                </div>
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-[#D8F3DC] text-[#1B4332] border border-[#B7E4C7]">
-                    ↗ +35%
-                  </span>
-                  <span className="text-[#78716C] text-xs font-normal">from last month</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card 3: Total Return Card */}
-            <div className="bg-white p-5 rounded-3xl shadow-xs border border-[#E7E5E4] flex flex-col justify-between min-h-[150px]">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-mono font-semibold text-[#78716C] uppercase tracking-wider">Total Return</span>
-                <button className="text-[#78716C] hover:text-[#1C1917]">•••</button>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-[#1C1917]">
-                  ৳32,000
-                </div>
-                <div className="flex items-center gap-1.5 mt-2">
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold font-mono bg-rose-50 text-rose-700 border border-rose-200">
-                    ↘ -24%
-                  </span>
-                  <span className="text-[#78716C] text-xs font-normal">from last month</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Row 2: Recent Bookings Table + Revenue Analytics Card */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* Recent Bookings Card */}
-            <div className="bg-white rounded-3xl p-5 shadow-xs border border-[#E7E5E4] flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-display font-bold text-[#1C1917]">Recent Bookings</h3>
-                  <button className="text-[#78716C] hover:text-[#1C1917]">•••</button>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs font-mono">
-                    <thead>
-                      <tr className="border-b border-[#E7E5E4] text-[#78716C] text-[10px] uppercase font-semibold">
-                        <th className="pb-2.5">Client Name</th>
-                        <th className="pb-2.5">Service</th>
-                        <th className="pb-2.5">Date</th>
-                        <th className="pb-2.5 text-right">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E7E5E4]">
-                      {recentBookingsList.map((b: any, idx: number) => {
-                        const isPending = b.status?.toLowerCase() === "pending";
-                        return (
-                          <tr key={idx} className="hover:bg-[#F9F9F6] transition-colors">
-                            <td className="py-2.5 font-medium text-[#1C1917] truncate max-w-[90px]">
-                              {b.clientName || b.name || "Client Name"}
-                            </td>
-                            <td className="py-2.5 text-[#78716C] truncate max-w-[90px]">
-                              {b.service || "Garden Design"}
-                            </td>
-                            <td className="py-2.5 text-[#78716C] text-[11px]">
-                              {b.date || "12/17/2026"}
-                            </td>
-                            <td className="py-2.5 text-right">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                isPending
-                                  ? "bg-amber-50 text-amber-800 border border-amber-200"
-                                  : "bg-[#D8F3DC] text-[#1B4332] border border-[#B7E4C7]"
-                              }`}>
-                                {isPending ? "Pending" : "Confirmed"}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {setActiveTab && (
-                <button
-                  onClick={() => setActiveTab("bookings")}
-                  className="mt-4 text-center text-xs font-mono font-bold text-[#1B4332] hover:text-[#143527] pt-3 border-t border-[#E7E5E4] block cursor-pointer transition-colors"
-                >
-                  View All Bookings →
-                </button>
-              )}
-            </div>
-
-            {/* Revenue Analytics Card */}
-            <div className="bg-white rounded-3xl p-5 shadow-xs border border-[#E7E5E4] flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-display font-bold text-[#1C1917]">Revenue Analytics</h3>
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-[#78716C]">
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-[#1B4332]"></span> Income
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-[#52B788]"></span> Expenses
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-baseline gap-2 mb-4 font-mono">
-                  <span className="text-2xl font-extrabold text-[#1C1917]">৳1,93,000</span>
-                  <span className="text-[11px] font-bold text-[#1B4332]">↗ +35% from last month</span>
-                </div>
-
-                {/* Bar visualization */}
-                <div className="flex items-end justify-between gap-2 h-36 pt-2 border-b border-[#E7E5E4]">
-                  {[
-                    { h1: 60, h2: 35 },
-                    { h1: 85, h2: 45 },
-                    { h1: 70, h2: 90 },
-                    { h1: 55, h2: 30 },
-                    { h1: 95, h2: 60 },
-                    { h1: 75, h2: 40 },
-                    { h1: 85, h2: 50 },
-                  ].map((bar, idx) => (
-                    <div key={idx} className="flex-1 flex items-end justify-center gap-1 h-full">
-                      <div
-                        style={{ height: `${bar.h1}%` }}
-                        className="w-2.5 sm:w-3.5 bg-[#1B4332] rounded-t-sm"
-                      ></div>
-                      <div
-                        style={{ height: `${bar.h2}%` }}
-                        className="w-2.5 sm:w-3.5 bg-[#52B788] rounded-t-sm"
-                      ></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Row 3: Booking Trends Card */}
-          <div className="bg-white rounded-3xl p-5 shadow-xs border border-[#E7E5E4]">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-sm font-display font-bold text-[#1C1917]">Booking Trends</h3>
-              <button className="text-[#78716C] hover:text-[#1C1917]">•••</button>
-            </div>
-
-            <div className="flex items-baseline gap-2 mb-4 font-mono">
-              <span className="text-2xl font-extrabold text-[#1C1917]">৳2,00,000</span>
-              <span className="text-[11px] font-bold text-[#1B4332]">↗ +35% relevant last month</span>
-            </div>
-
-            {/* Custom Bar Visualization */}
-            <div className="flex items-end justify-between gap-3 h-32 pt-2 border-b border-[#E7E5E4] px-2">
-              {[
-                { h1: 30, h2: 20 },
-                { h1: 65, h2: 45 },
-                { h1: 40, h2: 25 },
-                { h1: 75, h2: 90 },
-                { h1: 95, h2: 60 },
-                { h1: 45, h2: 80 },
-                { h1: 85, h2: 40 },
-              ].map((bar, i) => (
-                <div key={i} className="flex-1 flex items-end justify-center gap-1.5 h-full">
-                  <div
-                    style={{ height: `${bar.h1}%` }}
-                    className="w-3 bg-[#1B4332] rounded-t-sm"
-                  ></div>
-                  <div
-                    style={{ height: `${bar.h2}%` }}
-                    className="w-3 bg-[#52B788] rounded-t-sm"
-                  ></div>
-                </div>
-              ))}
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#00E676] font-bold pt-1">
+              <span>↗ 2.3%</span>
+              <span className="text-stone-400 font-normal">than last month</span>
             </div>
           </div>
 
+          {/* Mini Neon Green Vertical Bar Chart */}
+          <div className="flex items-end gap-1.5 h-12 shrink-0 pr-1 z-10">
+            <span className="w-2 h-5 bg-[#00E676] rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-9 bg-[#00E676] rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-4 bg-[#00E676] rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-12 bg-[#00E676] rounded-sm transition-all group-hover:scale-y-110"></span>
+          </div>
+
+          {/* Ambient Glow */}
+          <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-[#00E676]/10 rounded-full blur-2xl pointer-events-none"></div>
         </div>
 
-        {/* Right Column Widget: Total View Performance + Level Up Card */}
-        <div className="space-y-6">
-          
-          {/* Total View Performance Donut Card */}
-          <div className="bg-white rounded-3xl p-6 shadow-xs border border-[#E7E5E4] flex flex-col items-center text-center">
-            <h3 className="text-sm font-display font-bold text-[#1C1917] mb-6 w-full text-left">
-              Total View Performance
+        {/* Card 2: Environmental Quality Index (Clean White Card with Coral Bars) */}
+        <div className="bg-white text-[#111813] rounded-3xl p-5 border border-stone-200/80 shadow-xs flex items-center justify-between min-h-[140px] group">
+          <div className="space-y-1">
+            <p className="text-xs text-stone-400 font-mono tracking-wide">
+              Environmental Quality Index
+            </p>
+            <div className="text-2xl sm:text-[28px] font-extrabold font-mono tracking-tight text-[#111813] mt-1">
+              75.50<span className="text-xs font-normal text-stone-400">/100%</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-rose-500 font-bold pt-1">
+              <span>↘ 1.4%</span>
+              <span className="text-stone-400 font-normal">than last month</span>
+            </div>
+          </div>
+
+          {/* Mini Coral Bar Chart */}
+          <div className="flex items-end gap-1.5 h-12 shrink-0 pr-1">
+            <span className="w-2 h-8 bg-rose-400 rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-4 bg-rose-400 rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-11 bg-rose-400 rounded-sm transition-all group-hover:scale-y-110"></span>
+          </div>
+        </div>
+
+        {/* Card 3: Investments in Clean Technologies (Clean White Card with Emerald Bars) */}
+        <div className="bg-white text-[#111813] rounded-3xl p-5 border border-stone-200/80 shadow-xs flex items-center justify-between min-h-[140px] group">
+          <div className="space-y-1">
+            <p className="text-xs text-stone-400 font-mono tracking-wide">
+              Investments in Clean Technologies
+            </p>
+            <div className="text-2xl sm:text-[28px] font-extrabold font-mono tracking-tight text-[#111813] mt-1">
+              $967,570
+            </div>
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-600 font-bold pt-1">
+              <span>↗ 5.1%</span>
+              <span className="text-stone-400 font-normal">than last month</span>
+            </div>
+          </div>
+
+          {/* Mini Emerald Bar Chart */}
+          <div className="flex items-end gap-1.5 h-12 shrink-0 pr-1">
+            <span className="w-2 h-4 bg-[#22C55E] rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-7 bg-[#22C55E] rounded-sm transition-all group-hover:scale-y-110"></span>
+            <span className="w-2 h-11 bg-[#22C55E] rounded-sm transition-all group-hover:scale-y-110"></span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= 2. MIDDLE ROW: BAR CHART & SAGE HIGHLIGHT ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        
+        {/* 2A: Climate Change Index Chart (7 of 12 columns) */}
+        <div className="lg:col-span-8 bg-white rounded-3xl p-6 border border-stone-200/80 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-extrabold text-base text-[#111813] tracking-tight">
+              Climate Change Index
             </h3>
 
-            {/* Donut Chart Visualization */}
-            <div className="relative w-44 h-44 flex items-center justify-center">
-              <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                {/* Neutral Track */}
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="46"
-                  fill="none"
-                  stroke="#E7E5E4"
-                  strokeWidth="16"
-                />
-                {/* Emerald Green Ring */}
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="46"
-                  fill="none"
-                  stroke="#1B4332"
-                  strokeWidth="16"
-                  strokeDasharray="289"
-                  strokeDashoffset="92"
-                />
-                {/* Secondary Accent Ring */}
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="46"
-                  fill="none"
-                  stroke="#52B788"
-                  strokeWidth="16"
-                  strokeDasharray="289"
-                  strokeDashoffset="222"
-                />
-              </svg>
-              
-              <div className="absolute flex flex-col items-center">
-                <span className="text-[10px] text-[#78716C] font-mono font-semibold uppercase">Total Count</span>
-                <span className="text-2xl font-extrabold text-[#1C1917] font-mono">565K</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-[#78716C] mt-6 leading-relaxed max-w-xs font-sans">
-              আর্কিটেকচারাল পোর্টাল এনগেজমেন্ট ও গ্রাহক ভিজিট অ্যানালিটিক্স।
-            </p>
-
-            <button className="mt-4 w-full py-2.5 border border-[#E7E5E4] bg-[#F9F9F6] hover:bg-[#F2F1EC] rounded-xl text-xs font-mono font-bold text-[#1C1917] transition-all cursor-pointer">
-              ভিউ গাইড ও রিপোর্ট
-            </button>
-
-            {/* Legend */}
-            <div className="flex items-center justify-center gap-4 mt-6 text-[10px] font-mono text-[#78716C] font-semibold">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#1B4332]"></span>
-                <span>View Count</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#52B788]"></span>
-                <span>Percentage</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Level Up Banner Card */}
-          <div className="bg-white rounded-3xl p-6 shadow-xs border border-[#E7E5E4] relative overflow-hidden flex flex-col justify-between min-h-[220px]">
-            {/* Subtle background wash */}
-            <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#D8F3DC]/30 rounded-full blur-2xl pointer-events-none"></div>
-
-            <div className="z-10">
-              <span className="text-2xl">🌱</span>
-              <h4 className="text-lg font-display font-bold text-[#1C1917] mt-2 leading-snug">
-                System & Database Optimization
-              </h4>
-              <p className="text-xs text-[#78716C] mt-1 max-w-[200px] leading-relaxed font-sans">
-                পোস্টগ্রেসকিউএল ও ক্লাউডিনারি মিডিয়া ক্যাশ রিলোড করুন।
-              </p>
-            </div>
-
+            {/* Dark Filter Dropdown Pill */}
             <button 
-              onClick={() => {
-                setToastMessage("🚀 Performance optimizer executed: Database queries indexed, image caching verified.");
-                setTimeout(() => setToastMessage(null), 4000);
-              }}
-              className="z-10 mt-4 w-full bg-[#1B4332] hover:bg-[#143527] text-white py-2.5 rounded-xl text-xs font-mono font-bold transition-all shadow-xs cursor-pointer"
+              type="button"
+              className="bg-[#111813] hover:bg-[#1E2922] text-white text-xs font-mono font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
-              সাইট অপ্টিমাইজ করুন
+              <span>{selectedPeriod}</span>
+              <span className="text-[10px] text-stone-400">▾</span>
             </button>
           </div>
 
+          {/* Interactive Chart with Dotted Guide & Peak Badge */}
+          <div className="relative pt-6 pb-2">
+            
+            {/* Dotted Guideline at 80 mark */}
+            <div className="absolute top-12 left-0 right-0 border-b border-dashed border-stone-300 z-0">
+              <span className="absolute -top-3 left-0 text-[10px] font-mono text-stone-400">80</span>
+            </div>
+            <div className="absolute top-24 left-0 right-0 border-b border-dashed border-stone-200 z-0">
+              <span className="absolute -top-3 left-0 text-[10px] font-mono text-stone-400">40</span>
+            </div>
+
+            {/* Bars Container */}
+            <div className="h-44 flex items-end justify-between gap-1.5 sm:gap-2 px-6 relative z-10">
+              
+              {/* W1 Past bars (Grey) */}
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[35%] bg-stone-200 rounded-xs"></span>
+                <span className="w-2.5 h-[55%] bg-stone-200 rounded-xs"></span>
+              </div>
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[40%] bg-stone-200 rounded-xs"></span>
+                <span className="w-2.5 h-[65%] bg-stone-200 rounded-xs"></span>
+              </div>
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[50%] bg-stone-200 rounded-xs"></span>
+                <span className="w-2.5 h-[75%] bg-stone-200 rounded-xs"></span>
+              </div>
+
+              {/* W4 PEAK HIGHLIGHT with "82.6 CCI" Dark Pill */}
+              <div className="flex-1 flex flex-col items-center justify-end h-full relative">
+                {/* 82.6 CCI Tooltip Badge */}
+                <div className="absolute -top-2 bg-[#111914] text-white border border-[#00E676]/40 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md shadow-md z-20 whitespace-nowrap">
+                  82.6 CCI
+                </div>
+                <div className="flex items-end gap-1 h-full">
+                  <span className="w-3 h-[90%] bg-[#00E676] rounded-xs shadow-sm"></span>
+                  <span className="w-3 h-[60%] bg-[#22C55E] rounded-xs"></span>
+                </div>
+              </div>
+
+              {/* W5-W8 (Bright Green Bars) */}
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[45%] bg-[#22C55E] rounded-xs"></span>
+                <span className="w-2.5 h-[65%] bg-[#22C55E] rounded-xs"></span>
+              </div>
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[30%] bg-[#22C55E] rounded-xs"></span>
+                <span className="w-2.5 h-[80%] bg-[#22C55E] rounded-xs"></span>
+              </div>
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[40%] bg-[#22C55E] rounded-xs"></span>
+                <span className="w-2.5 h-[70%] bg-[#22C55E] rounded-xs"></span>
+              </div>
+              <div className="flex-1 flex items-end justify-center gap-1 h-full">
+                <span className="w-2.5 h-[55%] bg-[#22C55E] rounded-xs"></span>
+                <span className="w-2.5 h-[45%] bg-[#22C55E] rounded-xs"></span>
+              </div>
+            </div>
+
+            {/* X-Axis Labels */}
+            <div className="flex justify-between px-6 pt-3 text-[10px] font-mono text-stone-400 border-t border-stone-200">
+              <span>W1</span>
+              <span>W2</span>
+              <span>W3</span>
+              <span className="text-[#111813] font-bold">W4</span>
+              <span>W5</span>
+              <span>W6</span>
+              <span>W7</span>
+              <span>W8</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2B: Sage Green Highlight Card (99,681m TONS) (4 of 12 columns) */}
+        <div className="lg:col-span-4 bg-[#DCE8DE] text-[#0E1712] rounded-3xl p-6 border border-[#C5D8C8] shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight text-[#0E1712]">
+                99,681m
+              </span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-stone-600">
+                TONS
+              </span>
+            </div>
+
+            <p className="text-xs font-mono font-bold text-emerald-800 mt-1 flex items-center gap-1">
+              <span>↗ 20% reduced CO2</span>
+            </p>
+          </div>
+
+          {/* 2 Feature Rows matching AeuxGlobal */}
+          <div className="space-y-4 pt-6">
+            {/* Row 1: Mechanical recycling */}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/70 border border-[#B8CEBC] flex items-center justify-center text-sm shrink-0 shadow-xs">
+                ♻️
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-[#0E1712] leading-tight">
+                  Mechanical recycling
+                </p>
+                <p className="text-[10px] font-mono text-stone-600 mt-0.5">
+                  1,697 TONS
+                </p>
+              </div>
+            </div>
+
+            {/* Row 2: Chemical recycling */}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/70 border border-[#B8CEBC] flex items-center justify-center text-sm shrink-0 shadow-xs">
+                🧪
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-[#0E1712] leading-tight">
+                  Chemical recycling
+                </p>
+                <p className="text-[10px] font-mono text-stone-600 mt-0.5">
+                  913 TONS
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= 3. BOTTOM ROW: REGIONS TABLE & DARK MAP ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        
+        {/* 3A: Plastic Recycling by Region Table (8 of 12 columns) */}
+        <div className="lg:col-span-8 bg-white rounded-3xl p-6 border border-stone-200/80 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-extrabold text-base text-[#111813] tracking-tight">
+                Plastic Recycling by Region
+              </h3>
+
+              {/* Dark Dropdown Filter: All regions ▾ */}
+              <button 
+                type="button"
+                className="bg-[#111914] hover:bg-[#1E2922] text-white text-xs font-mono font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <span>{selectedRegion}</span>
+                <span className="text-[10px] text-stone-400">▾</span>
+              </button>
+            </div>
+
+            {/* Data Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-mono">
+                <thead>
+                  <tr className="border-b border-stone-200 text-stone-400 text-[10px] uppercase font-semibold">
+                    <th className="pb-3 font-normal">Region</th>
+                    <th className="pb-3 font-normal">Factory</th>
+                    <th className="pb-3 font-normal">Recycled</th>
+                    <th className="pb-3 font-normal text-center">Dynamic</th>
+                    <th className="pb-3 font-normal">Main Technologies</th>
+                    <th className="pb-3 font-normal">Total Value</th>
+                    <th className="pb-3 text-right"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-100">
+                  {regionsList.map((row, idx) => (
+                    <tr key={idx} className="hover:bg-stone-50/80 transition-colors">
+                      {/* Region & Flag */}
+                      <td className="py-3 pr-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{row.flag}</span>
+                          <div>
+                            <p className="font-bold text-[#111813] font-sans text-xs leading-none">
+                              {row.region}
+                            </p>
+                            <p className="text-[10px] text-stone-400 font-mono mt-0.5">
+                              {row.sub}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Factory */}
+                      <td className="py-3 font-semibold text-stone-800">
+                        {row.factory}
+                      </td>
+
+                      {/* Recycled % */}
+                      <td className="py-3 font-semibold text-stone-800">
+                        {row.recycled}
+                      </td>
+
+                      {/* Dynamic Sparkline Wave (SVG) */}
+                      <td className="py-3 text-center px-2">
+                        {row.trend === "up" ? (
+                          <svg className="w-14 h-4 mx-auto text-[#22C55E]" viewBox="0 0 60 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                            <path d="M2 12 Q 15 2, 28 9 T 58 3" />
+                          </svg>
+                        ) : (
+                          <svg className="w-14 h-4 mx-auto text-rose-400" viewBox="0 0 60 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                            <path d="M2 4 Q 15 14, 28 7 T 58 13" />
+                          </svg>
+                        )}
+                      </td>
+
+                      {/* Tech Badge */}
+                      <td className="py-3">
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border font-mono ${row.techColor}`}>
+                          {row.tech}
+                        </span>
+                      </td>
+
+                      {/* Total Value */}
+                      <td className="py-3 font-bold text-stone-800">
+                        {row.totalValue}
+                      </td>
+
+                      {/* 3-dots Menu */}
+                      <td className="py-3 text-right">
+                        <button className="text-stone-400 hover:text-black cursor-pointer px-1">
+                          ⋮
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* 3B: Global Pollution / Interactive Territory Map (4 of 12 columns) */}
+        <div className="lg:col-span-4 bg-[#111914] text-white rounded-3xl p-6 border border-white/5 shadow-md flex flex-col justify-between relative overflow-hidden">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between z-10">
+            <h3 className="font-display font-extrabold text-base text-white tracking-tight">
+              Global pollution
+            </h3>
+
+            {/* Region Dropdown Pill */}
+            <button 
+              type="button"
+              className="bg-white/10 hover:bg-white/20 text-white text-[11px] font-mono px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <span>Europe</span>
+              <span className="text-[10px] text-stone-400">▾</span>
+            </button>
+          </div>
+
+          {/* Stylized Visual Map Illustration */}
+          <div className="relative h-44 my-2 flex items-center justify-center z-10">
+            {/* SVG Geographical Outline with Neon Green Hotspot */}
+            <svg className="w-full h-full opacity-80" viewBox="0 0 240 140" fill="none">
+              {/* Background Continents in Dark Slate */}
+              <path d="M20,30 Q40,10 70,25 T120,40 T160,20 T210,35 L220,100 Q180,120 140,110 T80,125 T30,90 Z" fill="#18231C" />
+              <path d="M60,40 L100,50 L110,80 L80,95 L50,70 Z" fill="#1F2E24" />
+              
+              {/* High Activity Hotspot (Ukraine / Active Zone in Neon Green) */}
+              <path 
+                d="M130,50 Q150,45 165,55 T180,75 T155,90 T135,70 Z" 
+                fill="#00E676" 
+                className="animate-pulse"
+                opacity="0.85"
+              />
+              <circle cx="150" cy="65" r="4" fill="#FFFFFF" />
+            </svg>
+
+            {/* Floating Tooltip Pill matching AeuxGlobal */}
+            <div className="absolute top-10 left-8 bg-black/85 backdrop-blur-md border border-white/20 p-2.5 rounded-xl shadow-xl flex items-center gap-3 z-20">
+              <div>
+                <p className="text-[10px] font-mono text-stone-400 leading-none">
+                  Ukraine
+                </p>
+                <p className="text-[9px] font-mono text-[#00E676] font-bold mt-0.5">
+                  High Level
+                </p>
+              </div>
+              <span className="text-xs font-mono font-extrabold text-[#00E676] bg-[#00E676]/10 px-1.5 py-0.5 rounded-md border border-[#00E676]/30">
+                89% ↗
+              </span>
+            </div>
+          </div>
+
+          {/* Bottom Controls */}
+          <div className="flex items-center justify-between z-10 pt-2 border-t border-white/10">
+            {/* Help Question Mark */}
+            <button 
+              type="button" 
+              className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white flex items-center justify-center text-xs font-mono cursor-pointer transition-colors"
+              title="Map Guide & Legend"
+            >
+              ?
+            </button>
+            <span className="text-[10px] font-mono text-stone-500">
+              Live Satellite Sync
+            </span>
+          </div>
+
+          {/* Ambient Map Glow */}
+          <div className="absolute right-0 bottom-0 w-32 h-32 bg-[#00E676]/10 rounded-full blur-3xl pointer-events-none"></div>
         </div>
 
       </div>

@@ -53,54 +53,39 @@ export default function Sidebar({
     }
   };
 
-  // Navigation Menu matching Landing Page architectural theme & clean standard Bengali
+  // Navigation Menu matching AeuxGlobal design system
   const menuSections: {
     sectionTitle: string;
-    items: { id: string; label: string; icon: React.ReactNode; badge?: number; highlight?: boolean }[];
+    items: { id: string; label: string; icon: React.ReactNode; badge?: number | string; highlight?: boolean }[];
   }[] = [
     {
-      sectionTitle: "OVERVIEW & ANALYTICS",
+      sectionTitle: "NAVIGATION",
       items: [
         {
           id: "analytics",
-          label: "Dashboard Analytics",
+          label: "Dashboard",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
             </svg>
           ),
         },
-      ],
-    },
-    {
-      sectionTitle: "CORE OPERATIONS & ERP",
-      items: [
         {
           id: "design-requests",
-          label: "Landscape Design Requests",
+          label: "Analytics & Design",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polygon points="12 8 8 12 12 16 16 12 12 8" />
-            </svg>
-          ),
-        },
-        {
-          id: "tree-doctor",
-          label: "Tree Doctor & Plant Clinic",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-              <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+              <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+              <path d="M22 12A10 10 0 0 0 12 2v10z" />
             </svg>
           ),
         },
         {
           id: "employees",
-          label: "Staff & Attendance",
+          label: "Team Structure",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -111,8 +96,48 @@ export default function Sidebar({
           ),
         },
         {
+          id: "bookings",
+          label: "Reports & Bookings",
+          badge: 1,
+          icon: (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+          ),
+        },
+        {
+          id: "careers",
+          label: "Support & Inbox",
+          badge: inboxCount > 0 ? inboxCount : "New",
+          icon: (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          ),
+        },
+      ],
+    },
+    {
+      sectionTitle: "STUDIO ERP & OPERATIONS",
+      items: [
+        {
+          id: "tree-doctor",
+          label: "Tree Doctor Clinic",
+          icon: (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+              <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+            </svg>
+          ),
+        },
+        {
           id: "maintenance",
-          label: "Maintenance & Schedules",
+          label: "Maintenance Schedules",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -142,54 +167,31 @@ export default function Sidebar({
             </svg>
           ),
         },
-      ],
-    },
-    {
-      sectionTitle: "WEBSITE & CONTENT MANAGEMENT",
-      items: [
-        {
-          id: "users",
-          label: "User Management",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          ),
-        },
-        {
-          id: "roles",
-          label: "Roles & Permissions",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          ),
-        },
         {
           id: "services",
-          label: "Service Catalog",
+          label: "Services Catalog",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="21 8 21 21 3 21 3 8" />
-              <rect x="1" y="3" width="22" height="5" />
-              <line x1="10" y1="12" x2="14" y2="12" />
+              <polygon points="12 2 2 7 12 12 22 7 12 2" />
+              <polyline points="2 17 12 22 22 17" />
+              <polyline points="2 12 12 17 22 12" />
             </svg>
           ),
         },
         {
           id: "projects",
-          label: "Project Portfolio",
+          label: "Portfolio Projects",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
             </svg>
           ),
         },
         {
           id: "gallery",
-          label: "Before & After Gallery",
+          label: "Gallery Showcase",
           icon: (
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -198,184 +200,164 @@ export default function Sidebar({
             </svg>
           ),
         },
-        {
-          id: "bookings",
-          label: "General Bookings",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
-          ),
-        },
-        {
-          id: "reviews",
-          label: "Reviews & Feedback",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          ),
-        },
-        {
-          id: "careers",
-          label: "Messages & Inquiries",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
-          ),
-          badge: inboxCount,
-        },
-        {
-          id: "hero",
-          label: "Hero Section & Video",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="23 7 16 12 23 17 23 7" />
-              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-            </svg>
-          ),
-        },
-        {
-          id: "header-nav",
-          label: "Header & Navigation",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="3" width="20" height="5" rx="1" />
-              <line x1="5" y1="5.5" x2="8" y2="5.5" />
-              <line x1="16" y1="5.5" x2="19" y2="5.5" />
-              <rect x="2" y="10" width="20" height="11" rx="2" />
-            </svg>
-          ),
-        },
-        {
-          id: "settings",
-          label: "System Settings",
-          icon: (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          ),
-        },
       ],
     },
   ];
 
-  // Inner reusable navigation content matching Landing Page Signature Linen Light Theme
   const renderSidebarContent = (isMobileView = false) => (
-    <div className="flex flex-col h-full justify-between">
-      {/* 1. Header / Brand Bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#E7E5E4] mb-3 px-2">
-        <Link
-          href="/"
-          className="flex items-center gap-3 group focus:outline-none cursor-pointer"
-          title="Visit Public Landing Page"
-        >
-          <div className="w-9 h-9 rounded-2xl bg-[#1B4332] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <div>
-            <span className="font-display font-bold text-[13px] sm:text-[14px] text-[#1C1917] uppercase tracking-[0.18em] block leading-tight group-hover:text-[#1B4332] transition-colors">
+    <div className="flex flex-col h-full justify-between select-none">
+      
+      {/* 1. Header / Brand Bar with 3 Neon Green Bars */}
+      <div className="space-y-4 pb-3">
+        <div className="flex items-center justify-between px-1">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group focus:outline-none cursor-pointer"
+            title="A R Green Garden Public Home"
+          >
+            {/* 3 Green Vertical Bars Icon matching AeuxGlobal */}
+            <div className="flex items-end gap-[3px] h-5 py-0.5">
+              <span className="w-1.5 h-3 bg-[#00E676] rounded-full group-hover:scale-y-110 transition-transform"></span>
+              <span className="w-1.5 h-4.5 bg-[#00E676] rounded-full group-hover:scale-y-110 transition-transform"></span>
+              <span className="w-1.5 h-3.5 bg-[#00E676] rounded-full group-hover:scale-y-110 transition-transform"></span>
+            </div>
+            <span className="font-display font-extrabold text-base tracking-tight text-white group-hover:text-[#00E676] transition-colors">
               A R Green Garden
             </span>
-            <span className="text-[9px] font-mono text-[#1B4332] font-semibold tracking-[0.2em] uppercase block mt-0.5">
-              Studio ERP Control
-            </span>
-          </div>
-        </Link>
+          </Link>
 
-        {/* Close Button on Mobile Drawer */}
-        {isMobileView && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-[#1C1917] flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
-            aria-label="Close Sidebar"
-          >
-            ✕
-          </button>
-        )}
+          {/* Close Button on Mobile Drawer */}
+          {isMobileView && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
+              aria-label="Close Sidebar"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Workspace Dropdown Pill */}
+        <div className="bg-[#141F18] border border-white/10 hover:border-white/20 rounded-2xl p-2.5 flex items-center justify-between text-xs cursor-pointer transition-all shadow-xs group">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-xl bg-[#00E676]/15 text-[#00E676] flex items-center justify-center font-bold text-xs shrink-0 border border-[#00E676]/30 shadow-xs group-hover:scale-105 transition-transform">
+              ✦
+            </div>
+            <div className="min-w-0 truncate">
+              <p className="text-[9px] uppercase font-mono text-stone-400 font-semibold leading-none">Team Workspace</p>
+              <p className="text-xs font-bold text-white mt-0.5 truncate">A R Green Garden</p>
+            </div>
+          </div>
+          <span className="text-stone-400 text-xs shrink-0 ml-1">▾</span>
+        </div>
+
+        {/* Quick Search Input with ⌘+F */}
+        <div className="relative">
+          <span className="absolute left-3 top-2.5 text-stone-400 text-xs">🔍</span>
+          <input
+            type="text"
+            placeholder="Search for..."
+            className="w-full bg-[#141F18] border border-white/10 rounded-2xl pl-8 pr-12 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-[#00E676] transition-all font-sans"
+          />
+          <span className="absolute right-2.5 top-2 px-1.5 py-0.5 rounded-md bg-white/10 text-[9px] font-mono text-stone-300 font-bold">
+            ⌘+F
+          </span>
+        </div>
       </div>
 
       {/* 2. Scrollable Navigation Menu */}
-      <div className="flex flex-col gap-3.5 flex-grow overflow-y-auto pr-1 custom-scrollbar">
+      <div className="flex flex-col gap-4 flex-grow overflow-y-auto pr-1 custom-scrollbar my-2">
         {menuSections.map((sec, idx) => (
-          <div key={idx} className="flex flex-col gap-0.5">
-            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#78716C] px-3 mb-1">
+          <div key={idx} className="flex flex-col gap-1">
+            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.2em] text-stone-500 px-3 mb-1">
               {sec.sectionTitle}
             </p>
-            <nav className="flex flex-col gap-0.5">
+            <nav className="flex flex-col gap-1">
               {sec.items.map((tab) => {
                 const isSelected = activeTab === tab.id;
                 return (
-                  <div key={tab.id} className="relative flex items-center w-full">
-                    {isSelected && (
-                      <div className="absolute left-0 w-1 h-5 bg-[#1B4332] rounded-r-md"></div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleTabClick(tab.id)}
-                      className={`flex items-center gap-2.5 w-full py-2 px-3 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-                        isSelected
-                          ? "text-white bg-[#1B4332] shadow-sm shadow-[#1B4332]/25 font-bold"
-                          : "text-[#1C1917]/80 hover:text-[#1C1917] hover:bg-black/[0.04]"
-                      }`}
-                    >
-                      <span className={`shrink-0 transition-colors ${isSelected ? "text-[#D8F3DC]" : "text-[#78716C]"}`}>
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => handleTabClick(tab.id)}
+                    className={`flex items-center justify-between w-full py-2.5 px-3.5 rounded-2xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+                      isSelected
+                        ? "text-white bg-[#1A261F] border border-white/10 shadow-sm font-bold"
+                        : "text-stone-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 truncate min-w-0">
+                      <span className={`shrink-0 transition-colors ${isSelected ? "text-[#00E676]" : "text-stone-400"}`}>
                         {tab.icon}
                       </span>
-                      <span className="flex-grow text-left truncate">{tab.label}</span>
-                      {tab.badge !== undefined && tab.badge > 0 && (
-                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          isSelected ? "bg-white text-[#1B4332]" : "bg-[#D8F3DC] text-[#1B4332] border border-[#B7E4C7]/60"
-                        }`}>
-                          {tab.badge}
-                        </span>
-                      )}
-                    </button>
-                  </div>
+                      <span className="truncate">{tab.label}</span>
+                    </div>
+
+                    {tab.badge !== undefined && (
+                      <span className="bg-[#00E676] text-stone-950 font-mono text-[9px] font-extrabold px-2 py-0.5 rounded-full shrink-0 shadow-xs">
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
                 );
               })}
             </nav>
           </div>
         ))}
+
+        {/* Settings Pill */}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => handleTabClick("settings")}
+            className={`flex items-center gap-3 w-full py-2.5 px-3.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+              activeTab === "settings"
+                ? "text-white bg-[#1A261F] border border-white/10 font-bold"
+                : "text-stone-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            <svg className="w-4 h-4 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>Settings</span>
+          </button>
+        </div>
       </div>
 
-      {/* 3. Bottom Links & Admin Profile Card */}
-      <div className="mt-auto pt-3 border-t border-[#E7E5E4] flex flex-col gap-2">
-        {/* Quick Landing Page Portal Link */}
-        <Link
-          href="/"
-          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white hover:bg-stone-50 text-[#1C1917] border border-[#E7E5E4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
-        >
-          <div className="flex items-center gap-2">
-            <span>🌐</span>
-            <span>ল্যান্ডিং পেজ দেখুন</span>
-          </div>
-          <span className="text-[11px] text-[#1B4332] group-hover:translate-x-0.5 transition-transform">➔</span>
-        </Link>
+      {/* 3. Bottom User Account Card & Portal Link */}
+      <div className="pt-3 border-t border-white/10 flex flex-col gap-2.5">
+        <p className="text-[9px] uppercase font-mono font-bold tracking-[0.2em] text-stone-500 px-3">
+          USER ACCOUNT
+        </p>
 
-        {/* Super Admin Info Card */}
-        <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#E7E5E4] shadow-2xs">
+        {/* User Profile Pill matching AeuxGlobal */}
+        <div className="flex items-center justify-between p-2 rounded-2xl bg-[#141F18] border border-white/10 hover:border-white/20 transition-all shadow-xs">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#1B4332] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
-              {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
+            {/* Avatar with Green Dot */}
+            <div className="relative">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-[#1A261F] border border-[#00E676]/40 text-[#00E676] flex items-center justify-center font-bold text-xs shrink-0">
+                {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
+              </div>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#00E676] rounded-full border-2 border-[#0B120E]"></span>
             </div>
+
             <div className="min-w-0">
-              <p className="text-[9px] uppercase font-mono tracking-wider text-[#1B4332] font-bold leading-none">Super Admin</p>
-              <p className="text-xs font-bold text-[#1C1917] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
+              <p className="text-xs font-bold text-white truncate leading-tight">
+                {sessionData?.user?.name || "Alex Williamson"}
+              </p>
+              <p className="text-[10px] font-mono text-stone-400 truncate mt-0.5">
+                #dela-1974
+              </p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => logout()}
-            className="text-[#78716C] hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-stone-100 cursor-pointer text-xs"
+            className="text-stone-400 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs"
             title="Log Out"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -385,14 +367,27 @@ export default function Sidebar({
             </svg>
           </button>
         </div>
+
+        {/* Live Site Portal Link */}
+        <Link
+          href="/"
+          className="flex items-center justify-between py-2 px-3 rounded-2xl bg-[#141F18]/80 hover:bg-[#141F18] text-stone-300 hover:text-white border border-white/10 text-xs font-mono transition-all group cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <span>🌐</span>
+            <span>ল্যান্ডিং পেজ দেখুন</span>
+          </div>
+          <span className="text-[11px] text-[#00E676] group-hover:translate-x-0.5 transition-transform">➔</span>
+        </Link>
       </div>
+
     </div>
   );
 
   return (
     <>
       {/* ================= 1. DESKTOP PERMANENT SIDEBAR (Laptop & Large Screens) ================= */}
-      <aside className="hidden md:flex md:w-[270px] bg-[#F4F3EE] text-[#1C1917] flex-col px-3.5 py-5 sticky top-0 h-screen shrink-0 shadow-xs border-r border-[#E7E5E4] z-20 font-sans">
+      <aside className="hidden md:flex md:w-[275px] bg-[#0B120E] text-white flex-col px-3.5 py-5 sticky top-0 h-screen shrink-0 shadow-2xl border-r border-[#16221A] z-20 font-sans">
         {renderSidebarContent(false)}
       </aside>
 
@@ -408,7 +403,7 @@ export default function Sidebar({
         {/* Backdrop Overlay */}
         <div
           onClick={onClose}
-          className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 cursor-pointer ${
+          className={`fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 cursor-pointer ${
             isOpen ? "opacity-100" : "opacity-0"
           }`}
           aria-hidden="true"
@@ -416,7 +411,7 @@ export default function Sidebar({
 
         {/* Left Slide-out Drawer Container */}
         <aside
-          className={`relative w-[300px] max-w-[85vw] h-full bg-[#F4F3EE] text-[#1C1917] flex flex-col px-4 py-5 shadow-2xl border-r border-[#E7E5E4] z-10 transition-transform duration-300 ease-out font-sans ${
+          className={`relative w-[300px] max-w-[85vw] h-full bg-[#0B120E] text-white flex flex-col px-4 py-5 shadow-2xl border-r border-[#16221A] z-10 transition-transform duration-300 ease-out font-sans ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >

@@ -596,11 +596,11 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="bg-[#F9F9F6] text-[#1C1917] font-sans min-h-screen flex flex-row relative overflow-x-hidden studio-portal-light">
-      {/* Background Architectural Ambient Grid & Glow matching Botanical Forest Luxury Theme */}
-      <div className="absolute inset-0 bg-[radial-gradient(#E7E5E4_1.2px,transparent_1.2px)] [background-size:28px_28px] opacity-70 pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D8F3DC]/25 rounded-full blur-[140px] pointer-events-none"></div>
-      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-[#E7E5E4]/40 rounded-full blur-[150px] pointer-events-none"></div>
+    <div className="bg-[#F4F6F4] text-[#111813] font-sans min-h-screen flex flex-row relative overflow-x-hidden">
+      {/* Background Architectural Ambient Grid & Glow matching AeuxGlobal Theme */}
+      <div className="absolute inset-0 bg-[radial-gradient(#E2E8E2_1.2px,transparent_1.2px)] [background-size:28px_28px] opacity-70 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00E676]/5 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-stone-200/40 rounded-full blur-[150px] pointer-events-none"></div>
       
       {/* 1. LEFT SIDEBAR (Permanent Desktop, Slide-out Drawer on Mobile) */}
       <Sidebar 
