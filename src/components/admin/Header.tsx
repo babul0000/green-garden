@@ -74,6 +74,17 @@ export default function Header({
           <span className="hidden sm:inline">রিফ্রেশ</span>
         </button>
 
+        {/* Master Project Settings Hub Shortcut (Facebook Style) */}
+        <button
+          type="button"
+          onClick={() => setActiveTab("settings")}
+          className="hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#121813] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center gap-1.5 shrink-0 shadow-2xs"
+          title="Master Project Settings (Facebook Hub A to Z)"
+        >
+          <span>⚙️</span>
+          <span className="hidden md:inline">সেটিংস হাব</span>
+        </button>
+
         {/* New Commission / Service Action */}
         <button 
           type="button" 

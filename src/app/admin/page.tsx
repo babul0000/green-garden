@@ -571,6 +571,9 @@ export default function AdminPage() {
       });
       if (res.ok) {
         setSettingsSuccess(true);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("site-settings-updated", { detail: settings }));
+        }
         setTimeout(() => setSettingsSuccess(false), 4000);
       } else {
         const err = await res.json();
@@ -583,7 +586,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleSettingsChange = (field: string, val: string) => {
+  const handleSettingsChange = (field: string, val: any) => {
     setSettings(prev => ({ ...prev, [field]: val }));
   };
 

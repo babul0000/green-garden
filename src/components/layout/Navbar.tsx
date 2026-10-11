@@ -32,6 +32,11 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [config, setConfig] = useState<INavbarConfig>(defaultNavbarConfig);
   const [rotateDeg, setRotateDeg] = useState(0);
+  const [announcement, setAnnouncement] = useState<{
+    enabled: boolean;
+    text: string;
+    link?: string;
+  }>({ enabled: false, text: "" });
 
   const handleToggleLang = () => {
     setRotateDeg((prev) => prev + 360);
@@ -50,6 +55,17 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
         const res = await fetch("/api/settings");
         if (res.ok) {
           const data = await res.json();
+          if (data?.value) {
+            if (data.value.enableAnnouncement && data.value.announcementText) {
+              setAnnouncement({
+                enabled: true,
+                text: data.value.announcementText,
+                link: data.value.announcementLink,
+              });
+            } else {
+              setAnnouncement({ enabled: false, text: "" });
+            }
+          }
           if (data?.value?.navbar_config) {
             setConfig({
               ...defaultNavbarConfig,
@@ -79,8 +95,35 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
       }
     };
 
+    const handleSiteSettingsUpdated = (e: any) => {
+      if (e?.detail) {
+        if (e.detail.enableAnnouncement && e.detail.announcementText) {
+          setAnnouncement({
+            enabled: true,
+            text: e.detail.announcementText,
+            link: e.detail.announcementLink,
+          });
+        } else {
+          setAnnouncement({ enabled: false, text: "" });
+        }
+        if (e.detail.title) {
+          setConfig((prev) => ({ ...prev, logoText: e.detail.title }));
+        }
+        if (e.detail.phone) {
+          setConfig((prev) => ({ ...prev, hotlinePhone: e.detail.phone }));
+        }
+        if (e.detail.fbPage) {
+          setConfig((prev) => ({ ...prev, facebookUrl: e.detail.fbPage }));
+        }
+      }
+    };
+
     window.addEventListener("navbar-config-updated", handleUpdate);
-    return () => window.removeEventListener("navbar-config-updated", handleUpdate);
+    window.addEventListener("site-settings-updated", handleSiteSettingsUpdated);
+    return () => {
+      window.removeEventListener("navbar-config-updated", handleUpdate);
+      window.removeEventListener("site-settings-updated", handleSiteSettingsUpdated);
+    };
   }, []);
 
   // Handle scroll detection
@@ -166,9 +209,27 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
   return (
     <>
+      {/* Dynamic Top Announcement Notice Bar */}
+      {announcement.enabled && (
+        <aside
+          role="region"
+          aria-label="Studio Announcement"
+          className="fixed top-0 left-0 w-full z-50 bg-[#2B4D33] text-white text-[11px] sm:text-xs py-1 px-4 text-center font-sans tracking-wide flex items-center justify-center gap-2 shadow-xs transition-all"
+        >
+          <span>{announcement.text}</span>
+          {announcement.link && (
+            <a href={announcement.link} className="underline hover:text-emerald-200 font-semibold ml-1">
+              বিস্তারিত ➔
+            </a>
+          )}
+        </aside>
+      )}
+
       {/* ================= ARCHITECTURAL TOP HEADER BAR ================= */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-out ${
+        className={`fixed left-0 w-full z-40 transition-all duration-500 ease-out ${
+          announcement.enabled ? "top-[28px] sm:top-[26px]" : "top-0"
+        } ${
           isLightHeader
             ? "bg-white/95 backdrop-blur-md shadow-xs py-3.5 sm:py-4 border-b border-black/5 text-[#323232]"
             : "bg-transparent py-5 sm:py-6 text-white"

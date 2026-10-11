@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -9,6 +9,53 @@ export default function Footer() {
   const { language, setLanguage, t } = useLanguage();
   const pathname = usePathname();
   const [submitted, setSubmitted] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<Record<string, any>>({
+    title: "A R GREEN GARDEN",
+    tagline: "LANDSCAPE ARCHITECTURE STUDIO",
+    phone: "01883012641",
+    whatsapp: "8801883012641",
+    whatsappMessage: "Hello A R Green Garden, I would like to consult about my garden.",
+    email: "admin@argreengarden.com",
+    projectEmail: "project@argreengarden.com",
+    address: "৪২/এ, রোড ৯/এ, ধানমন্ডি, ঢাকা-১২০৯, বাংলাদেশ",
+    fbPage: "https://facebook.com",
+    instagram: "https://instagram.com",
+    linkedin: "https://linkedin.com",
+    youtube: "https://youtube.com",
+    estYear: "2026",
+    bio: "বাংলাদেশজুড়ে আধুনিক ল্যান্ডস্কেপ আর্কিটেকচার, ছাদ বাগান, বায়োফিলিক ইন্টেরিয়র ও সার্টিফাইড বৃক্ষ চিকিৎসা সেবা প্রদানে আমরা নিবেদিতপ্রাণ।",
+  });
+
+  // Load master settings dynamically from API
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value) {
+            setSiteSettings((prev) => ({
+              ...prev,
+              ...data.value,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Footer settings fallback to defaults");
+      }
+    };
+
+    fetchSettings();
+
+    // Listen to live update events from settings tab
+    const handleSettingsUpdated = (e: any) => {
+      if (e?.detail) {
+        setSiteSettings((prev) => ({ ...prev, ...e.detail }));
+      }
+    };
+    window.addEventListener("site-settings-updated", handleSettingsUpdated);
+    return () => window.removeEventListener("site-settings-updated", handleSettingsUpdated);
+  }, []);
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
@@ -22,6 +69,10 @@ export default function Footer() {
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
   };
+
+  const whatsappHref = `https://wa.me/${siteSettings.whatsapp || "8801883012641"}?text=${encodeURIComponent(
+    siteSettings.whatsappMessage || "Hello A R Green Garden, I would like to consult about my garden."
+  )}`;
 
   return (
     <footer id="newsletter" className="relative w-full text-white">
@@ -131,15 +182,15 @@ export default function Footer() {
             <Link href="/" onClick={handleLogoClick} className="inline-block group">
               <div className="flex flex-col">
                 <span className="font-display font-extralight text-3xl sm:text-4xl tracking-[0.25em] uppercase text-white group-hover:text-[#5a9dff] transition-colors">
-                  A R GREEN GARDEN
+                  {siteSettings.title || "A R GREEN GARDEN"}
                 </span>
                 <span className="font-mono text-[10px] tracking-[0.28em] text-white/60 uppercase mt-1">
-                  {t("LANDSCAPE ARCHITECTURE STUDIO", "LANDSCAPE ARCHITECTURE STUDIO")}
+                  {siteSettings.tagline || t("LANDSCAPE ARCHITECTURE STUDIO", "LANDSCAPE ARCHITECTURE STUDIO")}
                 </span>
               </div>
             </Link>
             <p className="text-xs text-white/70 font-light leading-relaxed max-w-sm pt-2">
-              {t(
+              {siteSettings.bio || t(
                 "বাংলাদেশজুড়ে আধুনিক ল্যান্ডস্কেপ আর্কিটেকচার, ছাদ বাগান, বায়োফিলিক ইন্টেরিয়র ও সার্টিফাইড বৃক্ষ চিকিৎসা সেবা প্রদানে আমরা নিবেদিতপ্রাণ।",
                 "Dedicated to sustainable landscape architecture, biophilic living walls, and expert tree clinic services across Bangladesh."
               )}
@@ -152,20 +203,19 @@ export default function Footer() {
               {t("STUDIO COORDINATES", "STUDIO COORDINATES")}
             </h4>
             <div className="space-y-1 text-white/70">
-              <p>{t("৪২/এ, রোড ৯/এ, ধানমন্ডি,", "42/A, Road 9/A, Dhanmondi,")}</p>
-              <p>{t("ঢাকা-১২০৯, বাংলাদেশ", "Dhaka-1209, Bangladesh")}</p>
+              <p>{siteSettings.address || t("৪২/এ, রোড ৯/এ, ধানমন্ডি, ঢাকা-১২০৯, বাংলাদেশ", "42/A, Road 9/A, Dhanmondi, Dhaka-1209, Bangladesh")}</p>
               <p className="pt-1 text-white/95 font-medium">
-                {t("হটলাইন: ০১৮৮৩-০১২৬৪১", "Hotline: 01883012641")}
+                {t("হটলাইন:", "Hotline:")} {siteSettings.phone || "01883012641"}
               </p>
               <a
-                href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+                href={whatsappHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline font-mono font-bold mt-1"
               >
-                <span>💬</span> WhatsApp: +880 1883-012641
+                <span>💬</span> WhatsApp: +{siteSettings.whatsapp || "8801883012641"}
               </a>
-              <p className="pt-1">E: admin@argreengarden.com</p>
+              <p className="pt-1">E: {siteSettings.email || "admin@argreengarden.com"}</p>
             </div>
           </div>
 
@@ -178,8 +228,8 @@ export default function Footer() {
               <p className="text-white/70">
                 {t("নতুন প্রকল্পের জন্য ইমেইল করুন:", "For new commissions and designs:")}
               </p>
-              <a href="mailto:project@argreengarden.com" className="text-white hover:text-[#5a9dff] transition-colors">
-                project@argreengarden.com
+              <a href={`mailto:${siteSettings.projectEmail || "project@argreengarden.com"}`} className="text-white hover:text-[#5a9dff] transition-colors">
+                {siteSettings.projectEmail || "project@argreengarden.com"}
               </a>
             </div>
 
@@ -190,8 +240,8 @@ export default function Footer() {
               <p className="text-white/70">
                 {t("জরুরি সেবা ও গণমাধ্যম যোগাযোগ:", "Emergency arboriculture and media:")}
               </p>
-              <a href="mailto:pr@argreengarden.com" className="text-white hover:text-[#5a9dff] transition-colors">
-                doctor@argreengarden.com
+              <a href={`mailto:${siteSettings.email || "admin@argreengarden.com"}`} className="text-white hover:text-[#5a9dff] transition-colors">
+                {siteSettings.email || "admin@argreengarden.com"}
               </a>
             </div>
           </div>
@@ -221,25 +271,38 @@ export default function Footer() {
 
             {/* Social SVGs */}
             <div className="flex items-center gap-4 text-white">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="Facebook">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
-                  <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
-                </svg>
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="Instagram">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
-                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
-                </svg>
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="LinkedIn">
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
-                  <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
-                </svg>
-              </a>
+              {siteSettings.fbPage && (
+                <a href={siteSettings.fbPage} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="Facebook">
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
+                    <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
+                  </svg>
+                </a>
+              )}
+              {siteSettings.instagram && (
+                <a href={siteSettings.instagram} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="Instagram">
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                    <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
+                  </svg>
+                </a>
+              )}
+              {siteSettings.linkedin && (
+                <a href={siteSettings.linkedin} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="LinkedIn">
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                    <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
+                  </svg>
+                </a>
+              )}
+              {siteSettings.youtube && (
+                <a href={siteSettings.youtube} target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity" aria-label="YouTube">
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 576 512">
+                    <path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.203-142.739 81.203z"></path>
+                  </svg>
+                </a>
+              )}
             </div>
 
             <p className="text-[11px] text-white/50">
-              {t("© ২০২৬ এ আর গ্রিন গার্ডেন • সর্বস্বত্ব সংরক্ষিত", "© 2026 A R Green Garden. All rights reserved.")}
+              © {siteSettings.estYear || "2026"} {siteSettings.title || "এ আর গ্রিন গার্ডেন"} • {t("সর্বস্বত্ব সংরক্ষিত", "All rights reserved.")}
             </p>
           </div>
 
