@@ -382,5 +382,112 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
+/* Studio Architectural Portal & Dashboard - Signature Light Mode */
+.studio-portal-light {
+  background-color: #F7F6F2;
+  color: #121813;
+}
+
+.studio-portal-light .bg-white {
+  background-color: #FFFFFF !important;
+  border-color: #D6D2C4 !important;
+  color: #121813 !important;
+}
+
+/* Light mode card containers & dark class fallbacks */
+.studio-portal-light .bg-\[\#18221A\]\/85,
+.studio-portal-light .bg-\[\#18221A\],
+.studio-portal-light .bg-\[\#121A14\],
+.studio-portal-light .bg-\[\#0d1610\],
+.studio-portal-light .bg-\[\#0c1610\],
+.studio-portal-light .bg-\[\#0b140f\],
+.studio-portal-light .bg-black\/50,
+.studio-portal-light .bg-black\/40,
+.studio-portal-light .bg-black\/30,
+.studio-portal-light .bg-black\/20,
+.studio-portal-light .bg-white\/\[0\.03\],
+.studio-portal-light .bg-white\/\[0\.02\],
+.studio-portal-light .bg-white\/5 {
+  background-color: #FFFFFF !important;
+  border-color: #E2DEC9 !important;
+  color: #121813 !important;
+  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.05);
+}
+
+.studio-portal-light .bg-gray-50,
+.studio-portal-light .bg-gray-100,
+.studio-portal-light .bg-slate-50,
+.studio-portal-light .bg-slate-100 {
+  background-color: #FAF9F5 !important;
+  border-color: #E2DEC9 !important;
+  color: #121813 !important;
+}
+
+/* Text overrides in light mode */
+.studio-portal-light .text-\[\#E4E2D7\],
+.studio-portal-light .text-white {
+  color: #121813 !important;
+}
+
+.studio-portal-light .text-white\/80,
+.studio-portal-light .text-white\/70,
+.studio-portal-light .text-white\/60,
+.studio-portal-light .text-stone-400 {
+  color: #4A504A !important;
+}
+
+.studio-portal-light .text-white\/50,
+.studio-portal-light .text-white\/40,
+.studio-portal-light .text-white\/30 {
+  color: #727770 !important;
+}
+
+/* Border overrides */
+.studio-portal-light .border-white\/10,
+.studio-portal-light .border-white\/15,
+.studio-portal-light .border-white\/20,
+.studio-portal-light .border-white\/5 {
+  border-color: #E2DEC9 !important;
+}
+
+/* Inputs, selects, textareas in light mode */
+.studio-portal-light input,
+.studio-portal-light select,
+.studio-portal-light textarea {
+  background-color: #FAF9F5 !important;
+  border-color: #D6D2C4 !important;
+  color: #121813 !important;
+}
+
+.studio-portal-light input::placeholder,
+.studio-portal-light textarea::placeholder {
+  color: #8C9188 !important;
+}
+
+.studio-portal-light input:focus,
+.studio-portal-light select:focus,
+.studio-portal-light textarea:focus {
+  border-color: #2B4D33 !important;
+  background-color: #FFFFFF !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #2B4D33 !important;
+}
+
+/* Tables in light mode */
+.studio-portal-light table th {
+  color: #4A504A !important;
+  background-color: #F5F4EE !important;
+  border-color: #E2DEC9 !important;
+}
+
+.studio-portal-light table td {
+  border-color: #EBE8DC !important;
+  color: #121813 !important;
+}
+
+.studio-portal-light table tr:hover {
+  background-color: #F7F6F2 !important;
+}
+
 
 

@@ -596,11 +596,11 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="bg-[#0b140f] text-[#E4E2D7] font-sans min-h-screen flex flex-row relative overflow-x-hidden studio-portal-dark">
-      {/* Background Architectural Ambient Grid & Glow matching Landing Page */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1e3325_1px,transparent_1px)] [background-size:32px_32px] opacity-35 pointer-events-none"></div>
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-950/25 rounded-full blur-[130px] pointer-events-none"></div>
-      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-emerald-900/15 rounded-full blur-[140px] pointer-events-none"></div>
+    <div className="bg-[#F7F6F2] text-[#121813] font-sans min-h-screen flex flex-row relative overflow-x-hidden studio-portal-light">
+      {/* Background Architectural Ambient Grid & Glow matching Landing Page Light Theme */}
+      <div className="absolute inset-0 bg-[radial-gradient(#D6D2C4_1.2px,transparent_1.2px)] [background-size:28px_28px] opacity-70 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-[140px] pointer-events-none"></div>
+      <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-stone-200/40 rounded-full blur-[150px] pointer-events-none"></div>
       
       {/* 1. LEFT SIDEBAR (Permanent Desktop, Slide-out Drawer on Mobile) */}
       <Sidebar 

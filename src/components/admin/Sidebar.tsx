@@ -264,27 +264,27 @@ export default function Sidebar({
     },
   ];
 
-  // Inner reusable navigation content matching Landing Page Theme
+  // Inner reusable navigation content matching Landing Page Signature Linen Light Theme
   const renderSidebarContent = (isMobileView = false) => (
     <div className="flex flex-col h-full justify-between">
       {/* 1. Header / Brand Bar */}
-      <div className="flex items-center justify-between pb-5 border-b border-white/10 mb-4 px-2">
+      <div className="flex items-center justify-between pb-4 border-b border-[#D6D2C4] mb-3 px-2">
         <Link
           href="/"
           target="_blank"
           className="flex items-center gap-3 group focus:outline-none"
           title="Visit Public Landing Page"
         >
-          <div className="w-9 h-9 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner group-hover:scale-105 transition-transform">
+          <div className="w-9 h-9 rounded-2xl bg-[#2B4D33] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0">
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
           <div>
-            <span className="font-display font-light text-[13px] sm:text-[14px] text-[#E4E2D7] uppercase tracking-[0.2em] block leading-tight group-hover:text-white transition-colors">
+            <span className="font-display font-bold text-[13px] sm:text-[14px] text-[#121813] uppercase tracking-[0.18em] block leading-tight group-hover:text-[#2B4D33] transition-colors">
               A R Green Garden
             </span>
-            <span className="text-[9px] font-mono text-emerald-400/90 font-semibold tracking-[0.2em] uppercase block mt-0.5">
+            <span className="text-[9px] font-mono text-[#2B4D33] font-semibold tracking-[0.2em] uppercase block mt-0.5">
               Studio ERP Control
             </span>
           </div>
@@ -295,7 +295,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
+            className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-[#323232] flex items-center justify-center text-sm cursor-pointer transition-colors focus:outline-none"
             aria-label="Close Sidebar"
           >
             ✕
@@ -304,10 +304,10 @@ export default function Sidebar({
       </div>
 
       {/* 2. Scrollable Navigation Menu */}
-      <div className="flex flex-col gap-4 flex-grow overflow-y-auto pr-1 custom-scrollbar">
+      <div className="flex flex-col gap-3.5 flex-grow overflow-y-auto pr-1 custom-scrollbar">
         {menuSections.map((sec, idx) => (
-          <div key={idx} className="flex flex-col gap-1">
-            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#E4E2D7]/40 px-3 mb-1">
+          <div key={idx} className="flex flex-col gap-0.5">
+            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#323232]/55 px-3 mb-1">
               {sec.sectionTitle}
             </p>
             <nav className="flex flex-col gap-0.5">
@@ -316,24 +316,24 @@ export default function Sidebar({
                 return (
                   <div key={tab.id} className="relative flex items-center w-full">
                     {isSelected && (
-                      <div className="absolute left-0 w-1 h-5 bg-emerald-400 rounded-r-md"></div>
+                      <div className="absolute left-0 w-1 h-5 bg-[#2B4D33] rounded-r-md"></div>
                     )}
                     <button
                       type="button"
                       onClick={() => handleTabClick(tab.id)}
                       className={`flex items-center gap-2.5 w-full py-2 px-3 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
                         isSelected
-                          ? "text-emerald-300 bg-emerald-500/15 border border-emerald-500/35 shadow-[0_0_15px_rgba(16,185,129,0.15)] font-bold backdrop-blur-md"
-                          : "text-[#E4E2D7]/70 hover:text-white hover:bg-white/[0.05]"
+                          ? "text-white bg-[#2B4D33] shadow-md shadow-[#2B4D33]/25 font-bold"
+                          : "text-[#323232]/80 hover:text-[#121813] hover:bg-black/[0.05]"
                       }`}
                     >
-                      <span className={`shrink-0 transition-colors ${isSelected ? "text-emerald-400" : "text-white/40"}`}>
+                      <span className={`shrink-0 transition-colors ${isSelected ? "text-emerald-200" : "text-[#323232]/50"}`}>
                         {tab.icon}
                       </span>
                       <span className="flex-grow text-left truncate">{tab.label}</span>
                       {tab.badge !== undefined && tab.badge > 0 && (
                         <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          isSelected ? "bg-emerald-400 text-stone-950" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                          isSelected ? "bg-white text-[#2B4D33]" : "bg-[#C85A32] text-white"
                         }`}>
                           {tab.badge}
                         </span>
@@ -348,36 +348,36 @@ export default function Sidebar({
       </div>
 
       {/* 3. Bottom Links & Admin Profile Card */}
-      <div className="mt-auto pt-3 border-t border-white/10 flex flex-col gap-2.5">
+      <div className="mt-auto pt-3 border-t border-[#D6D2C4] flex flex-col gap-2">
         {/* Quick Landing Page Portal Link */}
         <Link
           href="/"
           target="_blank"
-          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-[#E4E2D7]/80 hover:text-white border border-white/10 text-xs font-mono tracking-wider transition-all group"
+          className="flex items-center justify-between py-2 px-3 rounded-xl bg-white/70 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group"
         >
           <div className="flex items-center gap-2">
             <span>🌐</span>
             <span>ল্যান্ডিং পেজ দেখুন</span>
           </div>
-          <span className="text-[11px] text-emerald-400 group-hover:translate-x-0.5 transition-transform">➔</span>
+          <span className="text-[11px] text-[#2B4D33] group-hover:translate-x-0.5 transition-transform">➔</span>
         </Link>
 
         {/* Super Admin Info Card */}
-        <div className="flex items-center justify-between px-2 pt-1">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-white/80 border border-[#D6D2C4] shadow-2xs">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl overflow-hidden border border-emerald-500/30 flex items-center justify-center bg-emerald-950 text-emerald-300 font-bold text-xs shrink-0 shadow-inner">
+            <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#2B4D33] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
               {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <p className="text-[9px] uppercase font-mono tracking-wider text-emerald-400/80 font-bold leading-none">Super Admin</p>
-              <p className="text-xs font-bold text-[#E4E2D7] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
+              <p className="text-[9px] uppercase font-mono tracking-wider text-[#2B4D33] font-bold leading-none">Super Admin</p>
+              <p className="text-xs font-bold text-[#121813] mt-0.5 truncate">{sessionData?.user?.name || "Rahman Khan"}</p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={() => logout()}
-            className="text-white/40 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-white/5 cursor-pointer text-xs"
+            className="text-stone-400 hover:text-rose-600 transition-colors p-1.5 rounded-lg hover:bg-stone-100 cursor-pointer text-xs"
             title="Log Out"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -394,7 +394,7 @@ export default function Sidebar({
   return (
     <>
       {/* ================= 1. DESKTOP PERMANENT SIDEBAR (Laptop & Large Screens) ================= */}
-      <aside className="hidden md:flex md:w-[270px] bg-[#0c1610]/95 backdrop-blur-2xl text-white flex-col px-3.5 py-6 sticky top-0 h-screen shrink-0 shadow-2xl border-r border-white/10 z-20 font-sans">
+      <aside className="hidden md:flex md:w-[270px] bg-[#E4E2D7] text-[#323232] flex-col px-3.5 py-5 sticky top-0 h-screen shrink-0 shadow-md border-r border-[#D6D2C4] z-20 font-sans">
         {renderSidebarContent(false)}
       </aside>
 
@@ -410,7 +410,7 @@ export default function Sidebar({
         {/* Backdrop Overlay */}
         <div
           onClick={onClose}
-          className={`fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300 cursor-pointer ${
+          className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 cursor-pointer ${
             isOpen ? "opacity-100" : "opacity-0"
           }`}
           aria-hidden="true"
@@ -418,7 +418,7 @@ export default function Sidebar({
 
         {/* Left Slide-out Drawer Container */}
         <aside
-          className={`relative w-[300px] max-w-[85vw] h-full bg-[#0c1610]/98 backdrop-blur-2xl text-white flex flex-col px-4 py-6 shadow-2xl border-r border-white/15 z-10 transition-transform duration-300 ease-out font-sans ${
+          className={`relative w-[300px] max-w-[85vw] h-full bg-[#E4E2D7] text-[#323232] flex flex-col px-4 py-5 shadow-2xl border-r border-[#D6D2C4] z-10 transition-transform duration-300 ease-out font-sans ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
