@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
-interface NavbarProps {
+export interface NavbarProps {
   onOpenEstimator?: () => void;
 }
 
-interface IMenuLink {
+export interface IMenuLink {
   id: string;
   titleBn: string;
   titleEn: string;
@@ -19,7 +20,7 @@ interface IMenuLink {
   order: number;
 }
 
-interface INavbarConfig {
+export interface INavbarConfig {
   logoType?: "TEXT" | "IMAGE";
   logoText?: string;
   logoImage?: string;
@@ -47,7 +48,7 @@ const defaultNavbarConfig: INavbarConfig = {
   logoText: "A R GREEN GARDEN",
   logoImage: "",
   logoHeight: 28,
-  logoTracking: "0.22em",
+  logoTracking: "0.24em",
   hotlinePhone: "01883012641",
   hotlineDisplay: "০১88৩-০১২৬৪১",
   hotlineVisible: true,
@@ -63,22 +64,42 @@ const defaultNavbarConfig: INavbarConfig = {
   enable3dWizardLink: true,
   enableEmergencyDoctor: true,
   menuLinks: [
-    { id: "1", titleBn: "প্রকল্পসমূহ", titleEn: "Projects", url: "#projects", isVisible: true, order: 1 },
+    { id: "1", titleBn: "প্রকল্পসমূহ", titleEn: "Projects", url: "/projects", isVisible: true, order: 1 },
     { id: "2", titleBn: "মেথডোলজি", titleEn: "Methodology", url: "#process", isVisible: true, order: 2 },
-    { id: "3", titleBn: "আমাদের টিম", titleEn: "Our Team", url: "#activities", isVisible: true, order: 3 },
-    { id: "4", titleBn: "স্টুডিও পরিচিতি", titleEn: "About Studio", url: "#container", isVisible: true, order: 4 },
-    { id: "5", titleBn: "সার্ভিসেস", titleEn: "Services", url: "#service", isVisible: true, order: 5 },
-    { id: "6", titleBn: "সংবাদ ও ইভেন্টস", titleEn: "Recent News & Events", url: "#activities", isVisible: true, order: 6 },
-    { id: "7", titleBn: "যোগাযোগ", titleEn: "Contact Us", url: "#newsletter", isVisible: true, order: 7 },
+    { id: "3", titleBn: "আমাদের টিম", titleEn: "Our Team", url: "/team", isVisible: true, order: 3 },
+    { id: "4", titleBn: "স্টুডিও পরিচিতি", titleEn: "About Studio", url: "/about", isVisible: true, order: 4 },
+    { id: "5", titleBn: "সেবাসমূহ", titleEn: "Services", url: "/services", isVisible: true, order: 5 },
+    { id: "6", titleBn: "প্ল্যান্ট শপ ও নার্সারি", titleEn: "Plant Nursery & Shop", url: "/shop", badge: "SHOP", isVisible: true, order: 6 },
+    { id: "7", titleBn: "বিফোর-আফটার রূপান্তর", titleEn: "Before & After", url: "/before-after", badge: "NEW", isVisible: true, order: 7 },
+    { id: "8", titleBn: "ফটো গ্যালারি", titleEn: "Gallery", url: "/gallery", isVisible: true, order: 8 },
+    { id: "9", titleBn: "গ্রাহক মতামত", titleEn: "Testimonials", url: "/testimonials", isVisible: true, order: 9 },
+    { id: "10", titleBn: "সংবাদ ও ইভেন্টস", titleEn: "Recent News & Events", url: "/blog", isVisible: true, order: 10 },
+    { id: "11", titleBn: "সাধারণ জিজ্ঞাসা", titleEn: "FAQ", url: "/faq", isVisible: true, order: 11 },
+    { id: "12", titleBn: "ক্যারিয়ার", titleEn: "Careers", url: "/career", isVisible: true, order: 12 },
+    { id: "13", titleBn: "যোগাযোগ", titleEn: "Contact Us", url: "/contact", isVisible: true, order: 13 },
   ],
 };
 
 export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
+  const pathname = usePathname();
+  const router = useRouter();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [config, setConfig] = useState<INavbarConfig>(defaultNavbarConfig);
+  const [rotateDeg, setRotateDeg] = useState(0);
+
+  const handleToggleLang = () => {
+    setRotateDeg((prev) => prev + 360);
+    toggleLanguage();
+  };
+
+  // Check if current page is the homepage with dark video hero
+  const isHomePage = pathname === "/";
+  // On interior pages, always keep the crisp light header style; on homepage, switch on scroll
+  const isLightHeader = !isHomePage || isScrolled;
 
   // Load navbar settings from API
   useEffect(() => {
@@ -123,7 +144,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
   // Handle scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      setIsScrolled(window.scrollY > 30);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -142,8 +163,61 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
     };
   }, [menuOpen]);
 
-  const visibleMenuLinks = (config.menuLinks || defaultNavbarConfig.menuLinks!)
-    .filter((link) => link.isVisible !== false);
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
+  // Handle link click with smooth scroll for hash anchors on homepage or router navigation on subpages
+  const handleLinkClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, targetUrl: string) => {
+      setMenuOpen(false);
+
+      if (targetUrl.startsWith("#")) {
+        if (isHomePage) {
+          e.preventDefault();
+          const el = document.querySelector(targetUrl);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+            window.history.pushState(null, "", targetUrl);
+          }
+        } else {
+          // If on a subpage, navigate to home with hash
+          e.preventDefault();
+          router.push(`/${targetUrl}`);
+        }
+      }
+    },
+    [isHomePage, router]
+  );
+
+  // Handle opening cost estimator modal
+  const handleTriggerEstimator = () => {
+    setMenuOpen(false);
+    if (onOpenEstimator) {
+      onOpenEstimator();
+    } else {
+      window.dispatchEvent(new CustomEvent("open-estimator"));
+    }
+  };
+
+  // Handle opening emergency tree doctor modal
+  const handleTriggerTreeDoctor = () => {
+    setMenuOpen(false);
+    window.dispatchEvent(new CustomEvent("open-tree-doctor"));
+  };
+
+  const visibleMenuLinks = (config.menuLinks || defaultNavbarConfig.menuLinks!).filter(
+    (link) => link.isVisible !== false
+  );
 
   const whatsappLink = `https://wa.me/${config.whatsappNumber || "8801883012641"}?text=${encodeURIComponent(
     config.whatsappMessage || "Hello A R Green Garden, I would like to consult about my garden."
@@ -151,78 +225,92 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
   return (
     <>
-      {/* DYNAMIC SHMA ARCHITECTURAL HEADER (TRANSPARENT AT TOP, FROSTED WHITE ON SCROLL) */}
+      {/* ================= EXACT SHMA ARCHITECTURAL HEADER ================= */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          isScrolled
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ease-out ${
+          isLightHeader
             ? "bg-white/95 backdrop-blur-md shadow-xs py-3.5 sm:py-4 border-b border-black/5 text-[#323232]"
             : "bg-transparent py-5 sm:py-6 text-white"
         }`}
+        role="banner"
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-4">
           
-          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Language Switcher */}
+          {/* Column 1: Minimalist Thin 3-Line Hamburger + Language Switcher */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <button
               onClick={() => setMenuOpen(true)}
-              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
+              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2B4D33] rounded-lg"
               aria-label={t("মেন্যু খুলুন", "Open Navigation Menu")}
+              aria-expanded={menuOpen}
             >
               <div className="flex flex-col gap-1.5 w-7">
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
+                    isLightHeader ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
+                    isLightHeader ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
+                    isLightHeader ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
               </div>
             </button>
 
-            {/* Language Switcher Pill Toggle */}
+            {/* Single Language Switcher with Smooth 360-Degree Rotating Sync Icon */}
             {config.enableLanguageSwitch !== false && (
               <button
-                onClick={toggleLanguage}
-                className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                  isScrolled
-                    ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
-                    : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
+                onClick={handleToggleLang}
+                type="button"
+                className={`group text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none hover:scale-105 active:scale-95 duration-200 ${
+                  isLightHeader
+                    ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03] hover:bg-black/[0.07]"
+                    : "border-white/35 hover:border-white text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
                 }`}
-                title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
+                title={language === "bn" ? "Switch to English" : "বাংলা ভাষায় পরিবর্তন করুন"}
+                aria-label="Toggle Language"
               >
-                <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
-                  বাংলা
-                </span>
-                <span className="opacity-40">|</span>
-                <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-60"}>
-                  EN
+                <svg
+                  style={{ transform: `rotate(${rotateDeg}deg)` }}
+                  className="w-3.5 h-3.5 transition-transform duration-500 ease-in-out shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                <span className="font-bold text-xs tracking-wider transition-opacity duration-200">
+                  {language === "bn" ? "বাংলা" : "English"}
                 </span>
               </button>
             )}
           </div>
 
           {/* Column 2: Exact Shma Centered Brand Logo (Image or Text) */}
-          <div className="flex-1 flex items-center justify-center text-center px-2">
-            <Link href="/" className="group inline-block whitespace-nowrap">
+          <div className="flex-1 flex items-center justify-center text-center px-2 overflow-hidden">
+            <Link href="/" className="group inline-block whitespace-nowrap focus:outline-none">
               {config.logoType === "IMAGE" && config.logoImage ? (
                 <img
                   src={config.logoImage}
                   alt={config.logoText || "A R Green Garden Logo"}
                   style={{ height: `${config.logoHeight || 28}px` }}
-                  className="object-contain max-w-[260px] inline-block"
+                  className="object-contain max-w-[200px] sm:max-w-[280px] inline-block transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
                 <span
-                  className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] uppercase transition-colors"
-                  style={{ letterSpacing: config.logoTracking || "0.22em" }}
+                  className="font-display font-extralight text-base sm:text-xl md:text-[22px] lg:text-[25px] uppercase transition-colors tracking-[0.16em] sm:tracking-[0.24em]"
+                  style={{ letterSpacing: config.logoTracking || "0.24em" }}
                 >
                   {config.logoText || "A R GREEN GARDEN"}
                 </span>
@@ -232,7 +320,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
           {/* Column 3: Hotline, WhatsApp & Dashboard */}
           <div className="flex items-center justify-end gap-2 sm:gap-3.5 shrink-0">
-            {/* Social Icons - visible on large monitors to prevent crowding */}
+            {/* Social Icons (Large Screens) */}
             {config.socialVisible !== false && (
               <div className="hidden xl:flex items-center gap-3.5 text-inherit">
                 {/* Facebook */}
@@ -287,27 +375,31 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               <a
                 href={`tel:${config.hotlinePhone || "01883012641"}`}
                 className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
-                  isScrolled ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
+                  isLightHeader ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
                 }`}
+                title="Call Studio Hotline"
               >
                 {config.hotlineDisplay || config.hotlinePhone || "০১88৩-০১২৬৪১"}
               </a>
             )}
 
-            {/* Direct WhatsApp Action */}
+            {/* Direct WhatsApp Action (Icon Only) */}
             {config.whatsappVisible !== false && (
               <a
                 href={whatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="w-8 h-8 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-stone-950 flex items-center justify-center shadow-xs transition-all hover:scale-110 active:scale-95 duration-200 shrink-0 cursor-pointer"
+                title="Chat on WhatsApp"
+                aria-label="Chat on WhatsApp"
               >
-                <span>💬</span>
-                <span className="hidden md:inline">WhatsApp</span>
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                  <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+                </svg>
               </a>
             )}
 
-            {/* Login / Dashboard Link */}
+            {/* Login / Dashboard Link (Hidden on Mobile, accessible inside Hamburger Menu) */}
             {user ? (
               <Link
                 href={
@@ -319,7 +411,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     ? "/moderator"
                     : "/client-dashboard"
                 }
-                className="pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-600/40"
+                className="hidden sm:flex pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-xs transition-all items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-600/40 hover:scale-105 active:scale-95 duration-200 shrink-0"
                 title={user.name ? `Logged in as ${user.name}` : "Dashboard"}
               >
                 <div className="w-5 h-5 rounded-full overflow-hidden bg-emerald-950 border border-white/60 flex items-center justify-center shrink-0 shadow-inner">
@@ -337,13 +429,15 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             ) : (
               <Link
                 href="/login"
-                className={`px-3.5 py-1 rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  isScrolled
+                className={`hidden sm:flex px-3.5 py-1 rounded-full text-xs font-semibold shadow-xs transition-all items-center gap-1.5 cursor-pointer whitespace-nowrap hover:scale-105 active:scale-95 duration-200 shrink-0 ${
+                  isLightHeader
                     ? "bg-stone-100 hover:bg-stone-200 text-[#323232] border border-stone-300"
                     : "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-xs"
                 }`}
               >
-                <span>👤</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
                 <span>{t("লগইন", "Login")}</span>
               </Link>
             )}
@@ -352,60 +446,64 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
         </div>
       </header>
 
-      {/* EXACT SHMA POPUP 2433: FULL-HEIGHT SLIDE-IN DRAWER MENU */}
+      {/* ================= EXACT SHMA ARCHITECTURAL LINEN SLIDE-IN MENU ================= */}
       {menuOpen && (
-        <div className="fixed inset-0 z-[100] flex">
-          {/* Backdrop Overlay */}
+        <div className="fixed inset-0 z-[100] flex animate-fade-in" role="dialog" aria-modal="true">
+          {/* Backdrop Overlay with Ambient Blur */}
           <div
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity duration-300"
+            aria-hidden="true"
           ></div>
 
-          {/* Left Slide Menu Container: Exact Shma Background #6f7375 */}
-          <div className="relative w-full max-w-[480px] bg-[#6f7375] text-white h-full overflow-y-auto px-8 sm:px-12 py-10 flex flex-col justify-between z-10 shadow-2xl animate-fade-in-up">
+          {/* Left Slide Menu Container: Exact Shma Signature Linen / Off-White Tone #E4E2D7 / #F7F6F2 */}
+          <div className="relative w-full max-w-[480px] bg-[#E4E2D7] text-[#323232] h-full max-h-screen overflow-y-auto overscroll-contain px-6 sm:px-10 py-8 flex flex-col justify-between z-10 shadow-2xl border-r border-[#D6D2C4] animate-slide-right">
             
-            {/* Top Close Hamburger & Language Toggle */}
-            <div className="flex justify-between items-center mb-6">
+            {/* 1. Top Close Hamburger & Language Toggle */}
+            <div className="sticky top-0 z-20 bg-[#E4E2D7]/95 backdrop-blur-md pb-4 pt-1 border-b border-[#D6D2C4] flex justify-between items-center -mx-6 px-6 sm:-mx-10 sm:px-10 mb-6">
               <button
                 onClick={() => setMenuOpen(false)}
-                className="group flex items-center p-2 -ml-2 text-white hover:opacity-70 cursor-pointer focus:outline-none"
+                className="group flex items-center p-2 -ml-2 text-[#323232] hover:opacity-70 cursor-pointer focus:outline-none"
                 aria-label="Close Navigation Menu"
               >
                 <div className="flex flex-col gap-1.5 w-7">
-                  <span className="w-full h-[1.5px] bg-white"></span>
-                  <span className="w-full h-[1.5px] bg-white"></span>
-                  <span className="w-full h-[1.5px] bg-white"></span>
+                  <span className="w-full h-[1.5px] bg-[#323232]"></span>
+                  <span className="w-full h-[1.5px] bg-[#323232]"></span>
+                  <span className="w-full h-[1.5px] bg-[#323232]"></span>
                 </div>
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-white/60">
-                  {t("ভাষা", "Language")}:
-                </span>
+                {/* Single Rotating Language Switcher in Drawer */}
                 <button
-                  onClick={() => setLanguage("bn")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
-                    language === "bn"
-                      ? "bg-white text-[#3d2e17] font-bold shadow"
-                      : "text-white/70 hover:text-white"
-                  }`}
+                  onClick={handleToggleLang}
+                  type="button"
+                  className="group flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/[0.06] hover:bg-black/[0.12] text-[#323232] border border-[#323232]/20 text-xs font-mono transition-all cursor-pointer select-none hover:scale-105 active:scale-95 duration-200"
+                  title={language === "bn" ? "Switch to English" : "বাংলা ভাষায় পরিবর্তন করুন"}
+                  aria-label="Toggle Language"
                 >
-                  বাংলা
-                </button>
-                <button
-                  onClick={() => setLanguage("en")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
-                    language === "en"
-                      ? "bg-white text-[#3d2e17] font-bold shadow"
-                      : "text-white/70 hover:text-white"
-                  }`}
-                >
-                  English
+                  <svg
+                    style={{ transform: `rotate(${rotateDeg}deg)` }}
+                    className="w-3.5 h-3.5 transition-transform duration-500 ease-in-out shrink-0 text-[#2B4D33]"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  <span className="font-bold text-xs tracking-wider">
+                    {language === "bn" ? "বাংলা" : "English"}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="text-white hover:opacity-70 text-2xl p-1 ml-2 cursor-pointer focus:outline-none"
+                  className="w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 text-[#323232] flex items-center justify-center text-sm ml-1 cursor-pointer transition-all hover:rotate-90 duration-300 focus:outline-none"
                   aria-label="Close"
                 >
                   ✕
@@ -413,65 +511,106 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               </div>
             </div>
 
-            {/* Navigation Links */}
-            <div className="space-y-6 my-auto">
+            {/* 2. Iconic Shma Large Architectural Menu Links Body */}
+            <div className="space-y-6 my-auto py-2">
               
-              {/* Dynamic Menu Links from Database */}
-              <div className="space-y-3 font-display font-light">
-                {visibleMenuLinks.map((link) => (
-                  <div key={link.id}>
-                    <a
-                      href={link.url}
-                      onClick={() => setMenuOpen(false)}
-                      className="text-2xl sm:text-3xl md:text-[34px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                    >
-                      {language === "bn" ? link.titleBn : link.titleEn}
-                    </a>
-                  </div>
-                ))}
-              </div>
+              {/* Dynamic Menu Links with Exact Shma Large Display Typography */}
+              <nav className="space-y-3 font-display font-light" aria-label="Main Navigation">
+                {visibleMenuLinks.map((link) => {
+                  const isInternalAnchor = link.url.startsWith("#");
+                  const isActive = !isInternalAnchor && pathname === link.url;
 
-              {/* Action Feature Links */}
-              <div className="space-y-3 font-display font-light pt-4 border-t border-white/20">
+                  return (
+                    <div key={link.id} className="group flex items-center justify-between">
+                      {isInternalAnchor ? (
+                        <a
+                          href={isHomePage ? link.url : `/${link.url}`}
+                          onClick={(e) => handleLinkClick(e, link.url)}
+                          className="text-2xl sm:text-3xl md:text-[34px] font-light text-[#323232] hover:text-[#2B4D33] hover:translate-x-1.5 transition-all block leading-tight tracking-tight duration-200"
+                        >
+                          {link.titleEn}
+                        </a>
+                      ) : (
+                        <Link
+                          href={link.url}
+                          onClick={() => setMenuOpen(false)}
+                          className={`text-2xl sm:text-3xl md:text-[34px] font-light hover:translate-x-1.5 transition-all block leading-tight tracking-tight duration-200 ${
+                            isActive
+                              ? "text-[#2B4D33] font-normal"
+                              : "text-[#323232] hover:text-[#2B4D33]"
+                          }`}
+                        >
+                          {link.titleEn}
+                        </Link>
+                      )}
+
+                      {link.badge && (
+                        <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full bg-[#323232]/10 text-[#323232] border border-[#323232]/20 font-bold uppercase tracking-wider">
+                          {link.badge}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </nav>
+
+              {/* Action Feature Links (3D Wizard, Cost Estimator, Tree Doctor) */}
+              <div className="space-y-3 font-display font-light pt-5 border-t border-[#D6D2C4]">
                 {config.enable3dWizardLink !== false && (
-                  <div>
-                    <Link
-                      href="/design-garden"
-                      onClick={() => setMenuOpen(false)}
-                      className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
-                    >
-                      <span>{t("3D Garden Wizard 🎨", "3D Garden Wizard 🎨")}</span>
-                      <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
-                        {t("কাস্টম ছাদবাগান বাজেট ও নকশা", "Interactive Landscape Estimator & Design")}
-                      </span>
-                    </Link>
-                  </div>
+                  <Link
+                    href="/design-garden"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-base sm:text-lg font-normal text-[#2B4D33] hover:text-[#121813] transition-colors block group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>🎨 {t("3D Garden Wizard", "3D Garden Wizard")}</span>
+                      <span className="text-xs group-hover:translate-x-1 transition-transform">➔</span>
+                    </div>
+                    <span className="text-xs font-sans text-[#323232]/70 block mt-0.5 font-normal">
+                      {t("কাস্টম ছাদবাগান বাজেট ও ইন্টারেক্টিভ নকশা", "Interactive Landscape Estimator & Design")}
+                    </span>
+                  </Link>
                 )}
 
-                {config.enableEmergencyDoctor !== false && (
-                  <div>
-                    <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        window.dispatchEvent(new CustomEvent("open-tree-doctor"));
-                      }}
-                      className="text-base sm:text-lg font-normal text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
-                    >
-                      <span>{t("Emergency Tree Doctor 🚨", "Emergency Tree Doctor 🚨")}</span>
-                      <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
-                        {t("অন-কল ডাক্তার ভিজিট ও রোগ নির্ণয়", "Urgent Tree Clinic, Surgery & Visit")}
-                      </span>
-                    </button>
+                {/* Instant Cost Estimator */}
+                <button
+                  type="button"
+                  onClick={handleTriggerEstimator}
+                  className="text-left text-base sm:text-lg font-normal text-[#C85A32] hover:text-[#121813] transition-colors block w-full cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>🧮 {t("Instant Cost Estimator", "Instant Cost Estimator")}</span>
+                    <span className="text-xs group-hover:translate-x-1 transition-transform">➔</span>
                   </div>
+                  <span className="text-xs font-sans text-[#323232]/70 block mt-0.5 font-normal">
+                    {t("স্কয়ার ফিট হিসাব ও তাৎক্ষণিক বাজেট কোটেশন", "Instant SQFT Budget Calculator")}
+                  </span>
+                </button>
+
+                {/* Emergency Tree Doctor */}
+                {config.enableEmergencyDoctor !== false && (
+                  <button
+                    type="button"
+                    onClick={handleTriggerTreeDoctor}
+                    className="text-base sm:text-lg font-normal text-rose-800 hover:text-rose-950 transition-colors block cursor-pointer text-left w-full group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>🚨 {t("Emergency Tree Doctor", "Emergency Tree Doctor")}</span>
+                      <span className="text-xs group-hover:translate-x-1 transition-transform">➔</span>
+                    </div>
+                    <span className="text-xs font-sans text-rose-800/80 block mt-0.5 font-normal">
+                      {t("অন-কল ডাক্তার ভিজিট ও জরুরি বৃক্ষ চিকিৎসা", "Urgent Tree Clinic, Surgery & On-Site Visit")}
+                    </span>
+                  </button>
                 )}
               </div>
 
-              {/* Drawer Auth / Dashboard Actions */}
-              <div className="pt-3 border-t border-white/20">
+              {/* Drawer Auth / Dashboard Card */}
+              <div className="pt-4 border-t border-[#D6D2C4]">
                 {user ? (
-                  <div className="flex items-center justify-between bg-black/25 p-3 rounded-2xl">
+                  <div className="flex items-center justify-between bg-white/80 p-3.5 rounded-2xl border border-[#D6D2C4] shadow-xs">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-950 border border-emerald-400/40 shrink-0 flex items-center justify-center shadow-inner">
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-950 border border-emerald-500/40 shrink-0 flex items-center justify-center shadow-inner">
                         <img
                           src={
                             user.avatar ||
@@ -482,8 +621,8 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                         />
                       </div>
                       <div className="text-left min-w-0">
-                        <p className="text-xs font-bold text-white truncate max-w-[110px]">{user.name}</p>
-                        <p className="text-[10px] text-emerald-300 font-mono uppercase tracking-wider">{user.role}</p>
+                        <p className="text-xs font-bold text-[#121813] truncate max-w-[120px]">{user.name}</p>
+                        <p className="text-[10px] text-emerald-800 font-mono uppercase tracking-wider">{user.role}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -498,7 +637,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                             : "/client-dashboard"
                         }
                         onClick={() => setMenuOpen(false)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
+                        className="px-3 py-1.5 bg-[#2B4D33] hover:bg-[#1E3724] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
                       >
                         Dashboard
                       </Link>
@@ -507,25 +646,26 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                           setMenuOpen(false);
                           logout();
                         }}
-                        className="px-2.5 py-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        type="button"
+                        className="px-2.5 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
                       >
                         {t("লগআউট", "Logout")}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Link
                       href="/login"
                       onClick={() => setMenuOpen(false)}
-                      className="flex-1 text-center py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
+                      className="flex-1 text-center py-2.5 bg-[#2B4D33] hover:bg-[#1E3724] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
                     >
                       👤 {t("লগইন করুন", "Sign In")}
                     </Link>
                     <Link
                       href="/register"
                       onClick={() => setMenuOpen(false)}
-                      className="flex-1 text-center py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold transition-all"
+                      className="flex-1 text-center py-2.5 bg-white/60 hover:bg-white text-[#323232] border border-[#D6D2C4] rounded-xl text-xs font-bold transition-all"
                     >
                       ✨ {t("রেজিস্ট্রেশন", "Register")}
                     </Link>
@@ -535,33 +675,41 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
             </div>
 
-            {/* Bottom Studio Info */}
-            <div className="pt-6 border-t border-white/20 text-xs font-sans text-white/80 grid grid-cols-2 gap-4">
+            {/* 3. Exact Shma Studio Coordinates Footer */}
+            <div className="pt-6 border-t border-[#D6D2C4] text-xs font-sans text-[#323232]/85 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <p className="font-semibold text-white">
-                  {t("এ আর গ্রিন গার্ডেন কোং লি.", "A R Green Garden Co., Ltd.")}
+                <p className="font-semibold text-[#121813]">
+                  A R Green Garden Co., Ltd.
                 </p>
-                <p className="text-[11px] text-white/70">
+                <p className="text-[11px] text-[#323232]/70">
                   {t("ল্যান্ডস্কেপ আর্কিটেকচার স্টুডিও", "Landscape Architecture Studio")}
                 </p>
-                <p className="pt-1 text-[11px] leading-relaxed text-white/60">
+                <p className="pt-1 text-[11px] leading-relaxed text-[#323232]/60">
                   {t("৪২/এ, রোড ৯/এ, ধানমন্ডি,", "42/A, Road 9/A, Dhanmondi,")}<br />
                   {t("ঢাকা-১২০৯, বাংলাদেশ", "Dhaka-1209, Bangladesh")}
                 </p>
               </div>
-              <div className="text-[11px] leading-relaxed">
-                <p className="font-semibold text-white">
-                  {t(`হটলাইন: ${config.hotlineDisplay || config.hotlinePhone || "০১৮৮৩-০১২৬৪১"}`, `Hotline: ${config.hotlinePhone || "01883012641"}`)}
-                </p>
+              <div className="text-[11px] leading-relaxed flex flex-col justify-between">
+                <div>
+                  <p className="font-semibold text-[#121813]">
+                    {t(
+                      `হটলাইন: ${config.hotlineDisplay || config.hotlinePhone || "০১৮৮৩-০১২৬৪১"}`,
+                      `Hotline: ${config.hotlinePhone || "01883012641"}`
+                    )}
+                  </p>
+                  <p className="pt-0.5 text-[#323232]/70">admin@argreengarden.com</p>
+                </div>
                 <a
                   href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-[#25D366] text-stone-950 font-bold text-xs shadow"
+                  className="inline-flex items-center justify-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold text-xs shadow-xs transition-colors"
                 >
-                  <span>💬</span> WhatsApp Chat
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512">
+                    <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+                  </svg>
+                  <span>WhatsApp Chat</span>
                 </a>
-                <p className="pt-2 text-white/70">admin@argreengarden.com</p>
               </div>
             </div>
 
@@ -571,4 +719,3 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
     </>
   );
 }
-

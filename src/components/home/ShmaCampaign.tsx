@@ -60,7 +60,7 @@ export default function ShmaCampaign() {
       {/* Centered Campaign Typography */}
       <div className="relative z-10 text-center text-white px-6 space-y-4 max-w-4xl mx-auto">
         <h2 className="font-display font-light text-3xl sm:text-5xl md:text-6xl tracking-wider uppercase">
-          {language === "bn" ? active.titleBn : active.titleEn}
+          {active.titleEn}
         </h2>
         <p className="font-display font-light text-base sm:text-xl md:text-2xl text-white/90 tracking-wide">
           {language === "bn" ? active.subtitleBn : active.subtitleEn}

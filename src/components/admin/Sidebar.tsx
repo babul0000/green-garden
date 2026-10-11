@@ -186,6 +186,16 @@ export default function Sidebar({ activeTab, setActiveTab, sessionData, inboxCou
           badge: inboxCount,
         },
         {
+          id: "hero",
+          label: "Hero Section & Video",
+          icon: (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+          ),
+        },
+        {
           id: "header-nav",
           label: "Header & Navigation",
           icon: (

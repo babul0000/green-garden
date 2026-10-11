@@ -107,10 +107,10 @@ export default function PublicTeamPage() {
         {/* Page Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>👥</span> {t("আমাদের বিশেষজ্ঞ টিম", "Professional Landscape Team")}
+            <span>👥</span> Professional Landscape Team
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            {t("এ আর গ্রিন গার্ডেনের মূল চালিকাশক্তি", "Meet the Experts Behind A R Green Garden")}
+            Meet the Experts Behind A R Green Garden
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
             {t(

@@ -15,8 +15,8 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Default to English ('en') for international modern aesthetics, persist in localStorage
-  const [language, setLanguageState] = useState<Language>("en");
+  // Default to Bengali ('bn') with modern architectural English headlines, persist in localStorage
+  const [language, setLanguageState] = useState<Language>("bn");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

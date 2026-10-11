@@ -106,11 +106,11 @@ export default function ShmaHighlightProjects() {
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {t("নির্বাচিত প্রকল্পসমূহ", "Highlight Projects")}
+              Highlight Projects
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("আর্কিটেকচারাল পোর্টফোলিও", "Architectural Portfolio")}
+            Architectural Portfolio
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
@@ -139,7 +139,7 @@ export default function ShmaHighlightProjects() {
                 ) : (
                   <img
                     src={item.imageUrl}
-                    alt={language === "bn" ? item.nameBn : item.nameEn}
+                    alt={item.nameEn}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 )}
@@ -153,7 +153,7 @@ export default function ShmaHighlightProjects() {
               <div className="space-y-2 pt-1">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="font-display font-light text-xl sm:text-2xl uppercase tracking-wide text-[#3d2e17]">
-                    {language === "bn" ? item.nameBn : item.nameEn}
+                    {item.nameEn}
                   </h3>
                   <span className="inline-block px-3 py-1 rounded-full bg-[#dedad2] text-xs text-[#3d2e17] font-sans">
                     {language === "bn" ? item.categoryBn : item.categoryEn}
@@ -190,7 +190,7 @@ export default function ShmaHighlightProjects() {
                 ) : (
                   <img
                     src={item.imageUrl}
-                    alt={language === "bn" ? item.nameBn : item.nameEn}
+                    alt={item.nameEn}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 )}
@@ -204,7 +204,7 @@ export default function ShmaHighlightProjects() {
               <div className="space-y-2 pt-1">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="font-display font-light text-xl sm:text-2xl uppercase tracking-wide text-[#3d2e17]">
-                    {language === "bn" ? item.nameBn : item.nameEn}
+                    {item.nameEn}
                   </h3>
                   <span className="inline-block px-3 py-1 rounded-full bg-[#dedad2] text-xs text-[#3d2e17] font-sans">
                     {language === "bn" ? item.categoryBn : item.categoryEn}
@@ -234,10 +234,10 @@ export default function ShmaHighlightProjects() {
               ✕
             </button>
             <span className="text-xs uppercase tracking-[0.2em] text-[#75787b] block font-mono">
-              {t("স্থাপত্যের অনন্য নিদর্শন", "Architectural Masterpiece")}
+              Architectural Masterpiece
             </span>
             <h3 className="text-2xl sm:text-3xl font-light font-display text-[#3d2e17]">
-              {language === "bn" ? activeModalProject.nameBn : activeModalProject.nameEn}
+              {activeModalProject.nameEn}
             </h3>
             <p className="text-xs text-[#75787b]">
               {language === "bn" ? activeModalProject.locationBn : activeModalProject.locationEn}

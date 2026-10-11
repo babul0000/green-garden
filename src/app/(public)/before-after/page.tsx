@@ -35,10 +35,10 @@ export default function BeforeAfterPage() {
       <div className="max-w-4xl mx-auto flex flex-col gap-12 text-center">
         <div>
           <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">
-            {t("বাস্তব রূপান্তরের গল্প", "Visual Transformation")}
+            Visual Transformation
           </span>
           <h1 className="text-3xl md:text-5xl font-serif font-bold text-[#1a3020] mt-3">
-            {t("রূপান্তরের পূর্বাপর স্লাইডার", "Before & After Slider")}
+            Before & After Slider
           </h1>
           <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded mt-3"></div>
           <p className="text-xs md:text-sm text-foreground/75 mt-3 max-w-xl mx-auto">

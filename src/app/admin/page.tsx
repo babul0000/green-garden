@@ -16,6 +16,7 @@ import BlogsTab from "@/components/admin/BlogsTab";
 import CareersTab from "@/components/admin/CareersTab";
 import SettingsTab from "@/components/admin/SettingsTab";
 import NavbarConfigTab from "@/components/admin/NavbarConfigTab";
+import HeroConfigTab from "@/components/admin/HeroConfigTab";
 import SecurityTab from "@/components/admin/SecurityTab";
 
 // Import new modular admin components
@@ -750,6 +751,11 @@ export default function AdminPage() {
             />
           )}
 
+          {/* TAB: HERO SECTION & CINEMATIC VIDEO */}
+          {activeTab === "hero" && (
+            <HeroConfigTab />
+          )}
+
           {/* TAB: HEADER & NAVBAR STUDIO */}
           {activeTab === "header-nav" && (
             <NavbarConfigTab />
@@ -764,6 +770,7 @@ export default function AdminPage() {
               handleSaveSettings={handleSaveSettings}
               handleSettingsChange={handleSettingsChange}
               onOpenNavbarStudio={() => handleTabChange("header-nav")}
+              onOpenHeroStudio={() => handleTabChange("hero")}
             />
           )}
           {/* TAB 9: SECURITY */}

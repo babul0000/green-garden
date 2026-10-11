@@ -9,6 +9,7 @@ interface SettingsTabProps {
   handleSaveSettings: (e: React.FormEvent) => void;
   handleSettingsChange: (key: string, value: any) => void;
   onOpenNavbarStudio?: () => void;
+  onOpenHeroStudio?: () => void;
 }
 
 export default function SettingsTab({
@@ -18,6 +19,7 @@ export default function SettingsTab({
   handleSaveSettings,
   handleSettingsChange,
   onOpenNavbarStudio,
+  onOpenHeroStudio,
 }: SettingsTabProps) {
   const [showEmailConfig, setShowEmailConfig] = useState(false);
 
@@ -31,27 +33,50 @@ export default function SettingsTab({
         <p className="text-xs text-white/50 mt-1">অফিসিয়াল যোগাযোগ নম্বর, ঠিকানা, ব্র্যান্ড কালার কোড, SEO মেটা ট্যাগ এবং অটোমেটেড ইমেইল টেমপ্লেট পরিচালনা করুন।</p>
       </div>
 
-      {/* QUICK LINK TO FULL NAVBAR STUDIO */}
-      {onOpenNavbarStudio && (
-        <div className="bg-gradient-to-r from-emerald-950/60 via-emerald-900/40 to-black/50 border border-emerald-500/30 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
-              🎨
+      {/* QUICK LINKS TO HERO & NAVBAR STUDIOS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {onOpenHeroStudio && (
+          <div className="bg-gradient-to-r from-emerald-950/60 via-emerald-900/40 to-black/50 border border-emerald-500/30 p-4 rounded-2xl flex flex-col justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
+                📹
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white">হিরো সেকশন ও ভিডিও ম্যানেজার (Hero Studio)</p>
+                <p className="text-[11px] text-white/50">সিনেমাটিক ভিডিও লিঙ্ক, পোস্টার, স্লাইড-আউট CTA বাটন ও টেক্সট কন্টেন্ট।</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-bold text-white">হেডার ও ন্যাভবার ম্যানেজমেন্ট সেন্টার (Live Navbar Studio)</p>
-              <p className="text-[11px] text-white/50">লোগো ইমেজ আপলোড, হটলাইন, হোয়াটসঅ্যাপ ও ড্রয়ার মেনু লিঙ্কসমূহ কাস্টমাইজ করুন।</p>
-            </div>
+            <button
+              type="button"
+              onClick={onOpenHeroStudio}
+              className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow"
+            >
+              <span>🚀 Open Hero Video Studio</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onOpenNavbarStudio}
-            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow"
-          >
-            <span>🚀 Open Full Navbar Studio</span>
-          </button>
-        </div>
-      )}
+        )}
+
+        {onOpenNavbarStudio && (
+          <div className="bg-gradient-to-r from-emerald-950/60 via-emerald-900/40 to-black/50 border border-emerald-500/30 p-4 rounded-2xl flex flex-col justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
+                🎨
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white">হেডার ও ন্যাভবার ম্যানেজমেন্ট (Navbar Studio)</p>
+                <p className="text-[11px] text-white/50">লোগো ইমেজ আপলোড, হটলাইন, হোয়াটসঅ্যাপ ও ড্রয়ার মেনু লিঙ্কসমূহ।</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenNavbarStudio}
+              className="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow"
+            >
+              <span>🚀 Open Full Navbar Studio</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       <form onSubmit={handleSaveSettings} className="flex flex-col gap-6 max-w-3xl">
         {settingsSuccess && (

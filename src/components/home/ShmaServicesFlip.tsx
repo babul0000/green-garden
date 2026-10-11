@@ -81,11 +81,11 @@ export default function ShmaServicesFlip() {
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {t("স্থাপত্য ও উদ্যান সেবাসমূহ", "Our Services")}
+              Our Services
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("বিশেষায়িত সেবাসমূহ", "Architectural Disciplines")}
+            Architectural Disciplines
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
@@ -108,7 +108,7 @@ export default function ShmaServicesFlip() {
                 </span>
                 <div className="my-auto text-center space-y-2">
                   <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                    {language === "bn" ? item.titleBn : item.titleEn}
+                    {item.titleEn}
                   </h3>
                 </div>
                 <div className="text-right">
@@ -127,7 +127,7 @@ export default function ShmaServicesFlip() {
                     </span>
                   </div>
                   <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
-                    {language === "bn" ? item.titleBn : item.titleEn}
+                    {item.titleEn}
                   </h4>
                   <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
                     {language === "bn" ? item.descBn : item.descEn}

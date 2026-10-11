@@ -182,5 +182,97 @@ export interface ISetting {
   youtube?: string;
   themeColor?: string;
   seoDescription?: string;
+  hero_config?: IHeroSettings;
   [key: string]: any;
 }
+
+export interface IHeroSettings {
+  // 1. Background Media Settings
+  mediaType: "video" | "image";
+  videoUrl: string;
+  posterImageUrl: string;
+  autoPlay: boolean;
+  loop: boolean;
+  muted: boolean;
+  playbackSpeed: number;
+  imageUrl?: string;
+
+  // 2. Visual Vignette & Overlay
+  overlayDarkness: number; // 0 - 80 %
+  showTopVignette: boolean;
+  showBottomVignette: boolean;
+
+  // 3. Slide-Out CTA Button Controller
+  ctaEnabled: boolean;
+  ctaTriggerMode: "hover" | "always_visible";
+  ctaHoverZoneWidth: number;
+  ctaAnimationDuration: number;
+
+  // Button 1 (Projects)
+  btnProjectsVisible: boolean;
+  btnProjectsTextEn: string;
+  btnProjectsTextBn: string;
+  btnProjectsLink: string;
+  btnProjectsAction: "scroll" | "navigate";
+  btnProjectsStyle: "white-pill" | "dark-glass" | "emerald";
+
+  // Button 2 (Contact)
+  btnContactVisible: boolean;
+  btnContactTextEn: string;
+  btnContactTextBn: string;
+  btnContactLink: string;
+  btnContactStyle: "emerald-glow" | "white-pill" | "dark-glass";
+
+  // 4. Optional Text Overlay
+  enableTextOverlay: boolean;
+  taglineEn?: string;
+  taglineBn?: string;
+  headlineEn?: string;
+  headlineBn?: string;
+  descriptionEn?: string;
+  descriptionBn?: string;
+  textPosition?: "center" | "bottom-left";
+}
+
+export const defaultHeroSettings: IHeroSettings = {
+  mediaType: "video",
+  videoUrl: "https://shmadesigns.com/wp-content/uploads/2026/04/Homepage-260408.mp4",
+  posterImageUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
+  autoPlay: true,
+  loop: true,
+  muted: true,
+  playbackSpeed: 1.0,
+  imageUrl: "https://images.unsplash.com/photo-1558904541-efa8c4a08931?auto=format&fit=crop&w=2000&q=80",
+
+  overlayDarkness: 10,
+  showTopVignette: true,
+  showBottomVignette: true,
+
+  ctaEnabled: true,
+  ctaTriggerMode: "hover",
+  ctaHoverZoneWidth: 280,
+  ctaAnimationDuration: 400,
+
+  btnProjectsVisible: true,
+  btnProjectsTextEn: "Projects",
+  btnProjectsTextBn: "প্রকল্পসমূহ",
+  btnProjectsLink: "#projects",
+  btnProjectsAction: "scroll",
+  btnProjectsStyle: "white-pill",
+
+  btnContactVisible: true,
+  btnContactTextEn: "Contact",
+  btnContactTextBn: "যোগাযোগ",
+  btnContactLink: "/contact",
+  btnContactStyle: "emerald-glow",
+
+  enableTextOverlay: false,
+  taglineEn: "LANDSCAPE ARCHITECTURE & URBAN GREENERY",
+  taglineBn: "ল্যান্ডস্কেপ আর্কিটেকচার ও নগর সবুজায়ন",
+  headlineEn: "WEAVING NATURE INTO MODERN SPACES",
+  headlineBn: "প্রকৃতিকে আধুনিক স্থাপত্যের সাথে সমন্বিত করা",
+  descriptionEn: "Creating living, breathing ecosystems that enhance well-being and biodiversity.",
+  descriptionBn: "টেকসই ও মনোরম ল্যান্ডস্কেপ তৈরির মাধ্যমে প্রতিটি স্থানকে একটি জীবন্ত মরূদ্যানে রূপান্তর করি।",
+  textPosition: "center",
+};
+

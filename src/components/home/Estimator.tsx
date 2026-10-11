@@ -56,10 +56,10 @@ export default function Estimator({ isModal, onClose }: EstimatorProps) {
     <div className="w-full">
       <div className="text-center max-w-2xl mx-auto flex flex-col gap-3 mb-8">
         <span className="text-[13px] font-semibold tracking-wider text-emerald-800 uppercase">
-          {t("তাৎক্ষণিক খরচ নিরূপণ", "Instant Valuation")}
+          Instant Valuation
         </span>
         <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
-          {t("বাগানের সাইজ ও বাজেট ক্যালকুলেটর", "Garden Size & Budget Estimator")}
+          Garden Size & Budget Estimator
         </h2>
         <p className="text-gray-600 text-xs md:text-sm">
           {t(

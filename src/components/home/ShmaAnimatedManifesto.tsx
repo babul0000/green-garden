@@ -21,10 +21,10 @@ export default function ShmaAnimatedManifesto() {
   const [animationStarted, setAnimationStarted] = useState(false);
 
   const textContent = language === "bn" ? {
-    enable: "টেকসই",
-    change: "পরিবর্তন",
-    for_text: "সবুজ",
-    a_better_earth: "বাংলাদেশের তরে",
+    enable: "ENABLE",
+    change: "CHANGE",
+    for_text: "FOR",
+    a_better_earth: "A BETTER EARTH",
     description: "একটি সবুজ, সজীব ও টেকসই বাংলাদেশ বিনির্মাণের প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে এ আর গ্রিন গার্ডেন শহুরে ধূসর কংক্রিটকে রূপান্তর করে জীবন্ত ইকোসিস্টেমে। আমাদের স্থাপত্য পরিকল্পনা তাপমাত্রা হ্রাস করে, জীববৈচিত্র্য রক্ষা করে এবং নাগরিক জীবনে আনে স্নিগ্ধ প্রকৃতির পরম ছোঁয়া।",
   } : {
     enable: "ENABLE",

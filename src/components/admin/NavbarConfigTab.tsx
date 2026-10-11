@@ -72,13 +72,19 @@ const defaultNavbarSettings: INavbarSettings = {
   enableEmergencyDoctor: true,
   
   menuLinks: [
-    { id: "1", titleBn: "প্রকল্পসমূহ", titleEn: "Projects", url: "#projects", isVisible: true, order: 1 },
-    { id: "2", titleBn: "মেথডোলজি", titleEn: "Methodology", url: "#process", isVisible: true, order: 2 },
-    { id: "3", titleBn: "আমাদের টিম", titleEn: "Our Team", url: "#activities", isVisible: true, order: 3 },
-    { id: "4", titleBn: "স্টুডিও পরিচিতি", titleEn: "About Studio", url: "#container", isVisible: true, order: 4 },
-    { id: "5", titleBn: "সার্ভিসেস", titleEn: "Services", url: "#service", isVisible: true, order: 5 },
-    { id: "6", titleBn: "সংবাদ ও ইভেন্টস", titleEn: "Recent News & Events", url: "#activities", isVisible: true, order: 6 },
-    { id: "7", titleBn: "যোগাযোগ", titleEn: "Contact Us", url: "#newsletter", isVisible: true, order: 7 },
+    { id: "1", titleBn: "প্রকল্পসমূহ (Portfolio)", titleEn: "Projects & Portfolio", url: "/projects", isVisible: true, order: 1 },
+    { id: "2", titleBn: "সেবাসমূহ", titleEn: "Landscape Services", url: "/services", isVisible: true, order: 2 },
+    { id: "3", titleBn: "মেথডোলজি ও কাজের ধাপ", titleEn: "Methodology & Process", url: "#process", isVisible: true, order: 3 },
+    { id: "4", titleBn: "প্ল্যান্ট নার্সারি ও শপ", titleEn: "Plant Nursery & Shop", url: "/shop", badge: "SHOP", isVisible: true, order: 4 },
+    { id: "5", titleBn: "ফটো গ্যালারি", titleEn: "Photo Gallery", url: "/gallery", isVisible: true, order: 5 },
+    { id: "6", titleBn: "বিফোর-আফটার রূপান্তর", titleEn: "Before & After Showcase", url: "/before-after", badge: "NEW", isVisible: true, order: 6 },
+    { id: "7", titleBn: "আমাদের টিম", titleEn: "Our Landscape Team", url: "/team", isVisible: true, order: 7 },
+    { id: "8", titleBn: "স্টুডিও পরিচিতি", titleEn: "About Studio", url: "/about", isVisible: true, order: 8 },
+    { id: "9", titleBn: "গ্রাহক মতামত", titleEn: "Client Testimonials", url: "/testimonials", isVisible: true, order: 9 },
+    { id: "10", titleBn: "সংবাদ ও ব্লগ", titleEn: "Articles & Blog", url: "/blog", isVisible: true, order: 10 },
+    { id: "11", titleBn: "সাধারণ জিজ্ঞাসা (FAQ)", titleEn: "Frequently Asked Questions", url: "/faq", isVisible: true, order: 11 },
+    { id: "12", titleBn: "ক্যারিয়ার সুযোগ", titleEn: "Careers at Studio", url: "/career", isVisible: true, order: 12 },
+    { id: "13", titleBn: "যোগাযোগ ও কনসাল্টেশন", titleEn: "Contact & Consultation", url: "/contact", isVisible: true, order: 13 },
   ],
 };
 
@@ -763,7 +769,7 @@ export default function NavbarConfigTab() {
               }`}
             >
               {/* Order & Titles */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 flex-1">
                 <div>
                   <label className="text-[9px] font-mono text-white/40 uppercase block mb-1">
                     বাংলা নাম (Bangla Title):
@@ -797,6 +803,19 @@ export default function NavbarConfigTab() {
                     value={link.url}
                     onChange={(e) => handleUpdateLink(link.id, "url", e.target.value)}
                     className="w-full bg-black/60 border border-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-mono text-[11px]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-mono text-white/40 uppercase block mb-1">
+                    ব্যাজ / লেবেল (ঐচ্ছিক):
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. NEW, HOT"
+                    value={link.badge || ""}
+                    onChange={(e) => handleUpdateLink(link.id, "badge", e.target.value)}
+                    className="w-full bg-black/60 border border-white/10 text-emerald-300 font-mono px-3 py-1.5 rounded-lg text-xs uppercase"
                   />
                 </div>
               </div>

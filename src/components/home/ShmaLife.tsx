@@ -26,7 +26,7 @@ export default function ShmaLife() {
       <div className="relative z-10 max-w-[1380px] mx-auto px-6 sm:px-10 py-16 text-white space-y-6">
         <div className="flex flex-wrap items-baseline gap-4 mb-4">
           <h2 className="font-display font-light text-4xl sm:text-6xl md:text-7xl tracking-tight text-white">
-            {language === "bn" ? "স্টুডিও ও কর্মসংস্কৃতি" : "Studio Life & Culture"}
+            Studio Life & Culture
           </h2>
         </div>
 

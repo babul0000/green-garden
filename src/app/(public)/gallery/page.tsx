@@ -352,12 +352,12 @@ export default function GalleryPage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full border border-emerald-200">
-            {t("🌿 আমাদের কাজ ও প্রজেক্ট গ্যালারি", "🌿 Signature Project Portfolio")}
+            🌿 Signature Project Portfolio
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
             A R Green Garden <br />
             <span className="text-emerald-700 italic font-medium">
-              {t("প্রিমিয়াম প্রজেক্ট শোকেস ও গ্যালারি", "Landscape Masterworks & Portfolio")}
+              Landscape Masterworks & Portfolio
             </span>
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">

@@ -78,11 +78,11 @@ export default function ShmaRecentActivities() {
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {t("সাম্প্রতিক কার্যক্রম", "Recent Activities")}
+              Recent Activities
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("স্টুডিও নিউজ ও ইভেন্ট", "Studio News & Events")}
+            Studio News & Events
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
@@ -95,7 +95,7 @@ export default function ShmaRecentActivities() {
             <div className="aspect-[3/4] overflow-hidden bg-stone-100 relative">
               <img
                 src={item.image}
-                alt={language === "bn" ? item.titleBn : item.titleEn}
+                alt={item.titleEn}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
@@ -109,7 +109,7 @@ export default function ShmaRecentActivities() {
                 {language === "bn" ? item.dateBn : item.dateEn}
               </p>
               <h3 className="font-sans text-xs sm:text-[13px] font-medium text-[#3d2e17] leading-snug line-clamp-2 group-hover:text-[#5a9dff] transition-colors">
-                {language === "bn" ? item.titleBn : item.titleEn}
+                {item.titleEn}
               </h3>
               <p className="font-sans text-[11px] text-[#75787b] leading-tight line-clamp-2">
                 {language === "bn" ? item.subtitleBn : item.subtitleEn}
