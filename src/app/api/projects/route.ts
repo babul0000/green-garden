@@ -59,6 +59,7 @@ export async function POST(req: Request) {
       images,
       materialsUsed,
       notes,
+      featured,
     } = body;
 
     if (!name) {
@@ -89,6 +90,7 @@ export async function POST(req: Request) {
         images: Array.isArray(images) ? images : [],
         materialsUsed: materialsUsed || null,
         notes: notes || null,
+        featured: Boolean(featured),
       },
     });
 

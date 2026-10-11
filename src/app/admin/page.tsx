@@ -670,6 +670,7 @@ export default function AdminPage() {
           {activeTab === "projects" && (
             <ProjectsTab 
               projects={projects}
+              onRefresh={fetchData}
               projName={projName}
               setProjName={setProjName}
               projClient={projClient}

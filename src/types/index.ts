@@ -45,21 +45,38 @@ export interface IProject {
   name: string;
   title?: string;
   slug: string;
+  clientId?: string;
   client?: string;
+  clientName?: string;
+  clientPhone?: string;
   category: string;
   imageUrl?: string;
+  beforeImage?: string;
+  afterImage?: string;
+  wipImages?: string[];
   images?: string[];
   videoUrl?: string;
   location?: string;
   duration?: string;
   budgetRange?: string;
+  budget?: number;
+  totalExpense?: number;
   cost?: number;
+  progress?: number;
+  status?: string;
+  startDate?: string | Date;
+  deadline?: string | Date;
+  completionDate?: string | Date;
+  warrantyMonths?: number;
+  description?: string;
   challenges?: string;
   solution?: string;
   clientTestimonial?: ITestimonial;
   featured?: boolean;
-  status?: string;
+  notes?: string;
+  materialsUsed?: any;
   createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface IGalleryItem {
