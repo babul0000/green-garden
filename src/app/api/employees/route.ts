@@ -18,6 +18,9 @@ export function calculateExperience(joiningDate: Date | string): { years: number
   return { years, months, text };
 }
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -69,7 +72,13 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json(enriched);
+    return NextResponse.json(enriched, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    });
   } catch (error: any) {
     console.error("Error fetching employees:", error);
     return NextResponse.json(

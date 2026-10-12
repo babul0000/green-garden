@@ -79,7 +79,7 @@ export default function Gallery() {
   const filterOptions = ["All", "Rooftop Garden", "Vertical Wall", "Residential", "Resort", "Water Feature"];
 
   useEffect(() => {
-    fetch("/api/projects")
+    fetch("/api/projects", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {

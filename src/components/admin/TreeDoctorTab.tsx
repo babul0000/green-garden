@@ -58,21 +58,21 @@ export default function TreeDoctorTab() {
     setLoading(true);
     try {
       // 1. Fetch Tree Doctor Requests
-      const reqRes = await fetch("/api/tree-doctor");
+      const reqRes = await fetch("/api/tree-doctor", { cache: "no-store" });
       if (reqRes.ok) {
         const data = await reqRes.json();
         setRequests(data);
       }
 
       // 2. Fetch Plant Health Records
-      const recRes = await fetch("/api/plant-health");
+      const recRes = await fetch("/api/plant-health", { cache: "no-store" });
       if (recRes.ok) {
         const recData = await recRes.json();
         setRecords(recData);
       }
 
       // 3. Fetch Doctors / Employees
-      const empRes = await fetch("/api/employees");
+      const empRes = await fetch("/api/employees", { cache: "no-store" });
       if (empRes.ok) {
         const empData = await empRes.json();
         const docList = empData

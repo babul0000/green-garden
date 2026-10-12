@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -18,11 +21,20 @@ export async function GET(req: Request) {
 
     const lowStockCount = enriched.filter((i) => i.isLowStock).length;
 
-    return NextResponse.json({
-      items: enriched,
-      totalItems: items.length,
-      lowStockCount,
-    });
+    return NextResponse.json(
+      {
+        items: enriched,
+        totalItems: items.length,
+        lowStockCount,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+      }
+    );
   } catch (error: any) {
     console.error("Error fetching inventory:", error);
     return NextResponse.json(

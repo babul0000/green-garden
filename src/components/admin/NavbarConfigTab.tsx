@@ -104,7 +104,7 @@ export default function NavbarConfigTab() {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data?.value?.navbar_config) {
@@ -137,7 +137,7 @@ export default function NavbarConfigTab() {
       setSavedSuccess(false);
 
       // Fetch current site_config first to merge
-      const resGet = await fetch("/api/settings");
+      const resGet = await fetch("/api/settings", { cache: "no-store" });
       let currentVal = {};
       if (resGet.ok) {
         const d = await resGet.json();

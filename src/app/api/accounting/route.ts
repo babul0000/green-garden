@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     // 1. Calculate Incomes from Invoices and Projects
@@ -51,6 +54,12 @@ export async function GET() {
         transport: { label: "Transportation (যাতায়াত ও পরিবহন)", amount: transportExpense },
         toolsIrrigation: { label: "Tools & Equipment (টুলস ও পাইপ)", amount: toolsIrrigationExpense },
         officeExpense: { label: "Office & Utilities (অফিস ও অপারেশনাল)", amount: officeExpense },
+      },
+    }, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
       },
     });
   } catch (error: any) {

@@ -20,11 +20,20 @@ export async function uploadToCloudinary(
   filename?: string
 ): Promise<CloudinaryUploadResult> {
   return new Promise((resolve, reject) => {
+    // Generate clean unique public_id with timestamp to bust CDN cache
+    let publicId: string | undefined = undefined;
+    if (filename) {
+      const clean = filename.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+      publicId = `${clean}_${Date.now()}`;
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder,
-        public_id: filename ? filename.replace(/\.[^/.]+$/, "") : undefined,
+        public_id: publicId,
         resource_type: "auto",
+        overwrite: true,
+        invalidate: true, // Bust Cloudinary CDN cache globally
       },
       (error, result) => {
         if (error || !result) {

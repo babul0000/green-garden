@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const assignments = await prisma.projectAssignment.findMany({
@@ -15,7 +18,13 @@ export async function GET() {
       orderBy: { assignedDate: "desc" },
     });
 
-    return NextResponse.json(assignments);
+    return NextResponse.json(assignments, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    });
   } catch (error: any) {
     console.error("Error fetching project assignments:", error);
     return NextResponse.json(

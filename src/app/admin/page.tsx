@@ -127,35 +127,35 @@ export default function AdminPage() {
   const fetchData = async () => {
     try {
       // Bookings
-      const resBookings = await fetch("/api/bookings");
+      const resBookings = await fetch("/api/bookings", { cache: "no-store" });
       if (resBookings.ok) setBookings(norm(await resBookings.json()));
 
       // Projects
-      const resProjects = await fetch("/api/projects");
+      const resProjects = await fetch("/api/projects", { cache: "no-store" });
       if (resProjects.ok) setProjects(norm(await resProjects.json()));
 
       // Gallery
-      const resGallery = await fetch("/api/gallery");
+      const resGallery = await fetch("/api/gallery", { cache: "no-store" });
       if (resGallery.ok) setGallery(norm(await resGallery.json()));
 
       // Blogs
-      const resBlogs = await fetch("/api/blogs");
+      const resBlogs = await fetch("/api/blogs", { cache: "no-store" });
       if (resBlogs.ok) setBlogs(norm(await resBlogs.json()));
 
       // Services
-      const resServices = await fetch("/api/services");
+      const resServices = await fetch("/api/services", { cache: "no-store" });
       if (resServices.ok) setServices(norm(await resServices.json()));
 
       // Messages
-      const resMsg = await fetch("/api/messages");
+      const resMsg = await fetch("/api/messages", { cache: "no-store" });
       if (resMsg.ok) setMessages(norm(await resMsg.json()));
 
       // Careers
-      const resCar = await fetch("/api/careers");
+      const resCar = await fetch("/api/careers", { cache: "no-store" });
       if (resCar.ok) setCareers(norm(await resCar.json()));
 
       // Settings
-      const resSettings = await fetch("/api/settings");
+      const resSettings = await fetch("/api/settings", { cache: "no-store" });
       if (resSettings.ok) {
         const data = await resSettings.json();
         if (data?.value) setSettings(data.value);

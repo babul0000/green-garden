@@ -3,13 +3,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/green-garden";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   const client = new MongoClient(mongoUri);
   try {
     await client.connect();
     const db = client.db("green-garden");
     const reviews = await db.collection("reviews").find().sort({ createdAt: -1 }).toArray();
-    return NextResponse.json(reviews);
+    return NextResponse.json(reviews, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    });
   } catch (error) {
     const err = error as Error;
     return NextResponse.json({ error: err.message }, { status: 500 });

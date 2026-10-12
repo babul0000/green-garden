@@ -23,18 +23,37 @@ export default function HeroBackgroundMedia({
   loop,
   videoRef,
 }: HeroBackgroundMediaProps) {
+  const [videoError, setVideoError] = React.useState(false);
+
+  // Reset video error when videoUrl changes
+  React.useEffect(() => {
+    setVideoError(false);
+    if (videoRef.current && mediaType === "video" && videoUrl) {
+      videoRef.current.load();
+      if (autoPlay) {
+        videoRef.current.play().catch(() => {});
+      }
+    }
+  }, [videoUrl, mediaType, autoPlay, videoRef]);
+
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">
-      {mediaType === "video" ? (
+      {mediaType === "video" && !videoError ? (
         <video
           ref={videoRef}
           key={videoUrl}
+          src={videoUrl}
           autoPlay={autoPlay}
           muted={muted}
           loop={loop}
           playsInline
+          preload="auto"
           controls={false}
           poster={posterImageUrl}
+          onError={() => {
+            console.warn("Video failed to play from URL:", videoUrl, "falling back to poster image");
+            setVideoError(true);
+          }}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
         >
           <source src={videoUrl} type="video/mp4" />

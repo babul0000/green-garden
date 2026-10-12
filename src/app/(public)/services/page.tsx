@@ -412,7 +412,7 @@ export default function ServicesPage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("/api/services");
+        const res = await fetch("/api/services", { cache: "no-store" });
         if (res.ok) {
           const dbServices: any[] = await res.json();
           if (Array.isArray(dbServices) && dbServices.length > 0) {

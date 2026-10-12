@@ -35,7 +35,7 @@ export default function DesignRequestsTab({ setActiveTab, onSelectForQuotation }
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/design-requests");
+      const res = await fetch("/api/design-requests", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         setRequests(data);

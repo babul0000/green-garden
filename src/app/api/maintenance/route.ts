@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -38,10 +41,19 @@ export async function GET(req: Request) {
       });
     }
 
-    return NextResponse.json({
-      schedules,
-      proximitySuggestions,
-    });
+    return NextResponse.json(
+      {
+        schedules,
+        proximitySuggestions,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+      }
+    );
   } catch (error: any) {
     console.error("Error fetching maintenance schedules:", error);
     return NextResponse.json(

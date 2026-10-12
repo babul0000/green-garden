@@ -271,7 +271,7 @@ export default function GalleryPage() {
   useEffect(() => {
     const fetchDbProjects = async () => {
       try {
-        const res = await fetch("/api/projects");
+        const res = await fetch("/api/projects", { cache: "no-store" });
         if (res.ok) {
           const dbProjects: any[] = await res.json();
           if (Array.isArray(dbProjects) && dbProjects.length > 0) {

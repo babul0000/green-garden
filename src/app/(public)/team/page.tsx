@@ -26,7 +26,7 @@ export default function PublicTeamPage() {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await fetch("/api/employees?public=true");
+        const res = await fetch("/api/employees?public=true", { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {

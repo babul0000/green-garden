@@ -20,7 +20,13 @@ export default function ShmaHeroVideo() {
   useEffect(() => {
     const fetchHeroConfig = async () => {
       try {
-        const res = await fetch("/api/settings");
+        const res = await fetch(`/api/settings?_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data?.value?.hero_config) {
@@ -54,12 +60,13 @@ export default function ShmaHeroVideo() {
     };
   }, []);
 
-  // 2. Control video element playback & speed
+  // 2. Control video element playback & speed (force reload when video changes)
   useEffect(() => {
     if (videoRef.current && config.mediaType === "video") {
       videoRef.current.defaultMuted = config.muted;
       videoRef.current.muted = config.muted;
       videoRef.current.playbackRate = config.playbackSpeed || 1.0;
+      videoRef.current.load();
       if (config.autoPlay) {
         videoRef.current.play().catch(() => {});
       }

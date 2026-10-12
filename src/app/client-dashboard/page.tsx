@@ -95,11 +95,11 @@ export default function ClientDashboardPage() {
     setDataLoading(true);
     try {
       const [projRes, invRes, treeRes, plantRes, maintRes] = await Promise.all([
-        fetch("/api/projects"),
-        fetch("/api/invoices"),
-        fetch("/api/tree-doctor"),
-        fetch("/api/plant-health"),
-        fetch("/api/maintenance"),
+        fetch("/api/projects", { cache: "no-store" }),
+        fetch("/api/invoices", { cache: "no-store" }),
+        fetch("/api/tree-doctor", { cache: "no-store" }),
+        fetch("/api/plant-health", { cache: "no-store" }),
+        fetch("/api/maintenance", { cache: "no-store" }),
       ]);
 
       if (projRes.ok) {

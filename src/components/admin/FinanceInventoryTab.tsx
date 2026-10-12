@@ -96,21 +96,21 @@ export default function FinanceInventoryTab() {
     setLoading(true);
     try {
       // 1. Fetch Quotations
-      const qRes = await fetch("/api/quotations");
+      const qRes = await fetch("/api/quotations", { cache: "no-store" });
       if (qRes.ok) {
         const qData = await qRes.json();
         setQuotations(qData);
       }
 
       // 2. Fetch Inventory
-      const invRes = await fetch("/api/inventory");
+      const invRes = await fetch("/api/inventory", { cache: "no-store" });
       if (invRes.ok) {
         const iData = await invRes.json();
         setInventory(iData.items || []);
       }
 
       // 3. Fetch Accounting
-      const accRes = await fetch("/api/accounting");
+      const accRes = await fetch("/api/accounting", { cache: "no-store" });
       if (accRes.ok) {
         const aData = await accRes.json();
         setAccounting(aData);

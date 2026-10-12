@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const reviews = await prisma.review.findMany({
       where: { status: "Approved" },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json(reviews);
+    return NextResponse.json(reviews, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    });
   } catch (error: any) {
     console.error("Error fetching reviews:", error);
     return NextResponse.json(

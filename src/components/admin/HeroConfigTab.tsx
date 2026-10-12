@@ -12,15 +12,15 @@ const VIDEO_PRESETS = [
     posterUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
   },
   {
-    name: "Tropical Garden Drone",
-    desc: "Aerial view of lush green trees, pathways, and luxury resort lawns",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-resort-with-palms-and-swimming-pool-41484-large.mp4",
-    posterUrl: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80",
+    name: "Sky-Forest Penthouse",
+    desc: "Lush residential forest rooftop with automated irrigation",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Sky-Forest.mp4",
+    posterUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1600&q=80",
   },
   {
-    name: "Modern Rooftop Oasis",
-    desc: "Skyline urban garden with timber decking and flowerbeds",
-    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-landscape-of-green-mountains-in-the-mist-42861-large.mp4",
+    name: "Mapletree Urban Park",
+    desc: "Biophilic commercial architecture with water cascade & lawns",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Mapletree-Business-City-II.mp4",
     posterUrl: "https://images.unsplash.com/photo-1558904541-efa8c4a08931?auto=format&fit=crop&w=1600&q=80",
   },
 ];
@@ -31,6 +31,7 @@ export default function HeroConfigTab() {
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [activeTab, setActiveTab] = useState<"media" | "cta" | "style" | "text">("media");
   const [previewHover, setPreviewHover] = useState(false);
   const [previewLang, setPreviewLang] = useState<"en" | "bn">("en");
@@ -44,7 +45,7 @@ export default function HeroConfigTab() {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/settings");
+      const res = await fetch("/api/settings", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data?.value?.hero_config) {
@@ -69,7 +70,7 @@ export default function HeroConfigTab() {
       setSavedSuccess(false);
 
       // Fetch existing site_config to preserve other properties
-      const resGet = await fetch("/api/settings");
+      const resGet = await fetch("/api/settings", { cache: "no-store" });
       let currentVal = {};
       if (resGet.ok) {
         const d = await resGet.json();
@@ -145,6 +146,42 @@ export default function HeroConfigTab() {
       alert("ছবি আপলোড করার সময় সমস্যা হয়েছে।");
     } finally {
       setUploadingPoster(false);
+    }
+  };
+
+  // 5. Handle video file upload
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingVideo(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "hero-videos");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.url) {
+          setConfig((prev) => ({
+            ...prev,
+            videoUrl: data.url,
+            mediaType: "video",
+          }));
+        }
+      } else {
+        alert("ভিডিও ফাইল আপলোড ব্যর্থ হয়েছে।");
+      }
+    } catch (err) {
+      console.error("Video upload error:", err);
+      alert("ভিডিও আপলোড করার সময় সমস্যা হয়েছে।");
+    } finally {
+      setUploadingVideo(false);
     }
   };
 
@@ -569,6 +606,16 @@ export default function HeroConfigTab() {
                     placeholder="https://your-domain.com/path-to-video.mp4"
                     className="flex-grow bg-black/60 border border-white/20 rounded-xl px-4 py-2.5 text-xs text-white font-mono focus:border-emerald-400 focus:outline-none"
                   />
+                  <label className="px-3.5 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-mono uppercase tracking-wider border border-emerald-500/30 shrink-0 cursor-pointer">
+                    {uploadingVideo ? "Uploading..." : "Upload MP4 📹"}
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/*"
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                      disabled={uploadingVideo}
+                    />
+                  </label>
                   <a
                     href={config.videoUrl}
                     target="_blank"

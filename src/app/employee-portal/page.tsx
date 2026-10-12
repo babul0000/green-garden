@@ -82,7 +82,7 @@ export default function EmployeePortalPage() {
     setDataLoading(true);
     try {
       // 1. Fetch employees to match current user
-      const empRes = await fetch("/api/employees");
+      const empRes = await fetch("/api/employees", { cache: "no-store" });
       let currentEmp: EmployeeData | null = null;
       if (empRes.ok) {
         const emps: EmployeeData[] = await empRes.json();
@@ -95,7 +95,7 @@ export default function EmployeePortalPage() {
 
       // 2. Fetch attendance for this employee
       if (currentEmp) {
-        const attRes = await fetch(`/api/attendance?employeeId=${currentEmp.id}`);
+        const attRes = await fetch(`/api/attendance?employeeId=${currentEmp.id}`, { cache: "no-store" });
         if (attRes.ok) {
           const attData = await attRes.json();
           setAttendances(attData.attendances || []);
@@ -114,7 +114,7 @@ export default function EmployeePortalPage() {
       }
 
       // 3. Fetch project assignments
-      const assignRes = await fetch("/api/assignments");
+      const assignRes = await fetch("/api/assignments", { cache: "no-store" });
       if (assignRes.ok) {
         const aData: AssignmentItem[] = await assignRes.json();
         if (currentEmp) {
@@ -125,7 +125,7 @@ export default function EmployeePortalPage() {
       }
 
       // 4. Fetch tree doctor tasks
-      const treeRes = await fetch("/api/tree-doctor");
+      const treeRes = await fetch("/api/tree-doctor", { cache: "no-store" });
       if (treeRes.ok) {
         const tData: any[] = await treeRes.json();
         if (currentEmp) {
