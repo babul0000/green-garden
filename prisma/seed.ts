@@ -163,35 +163,168 @@ async function main() {
   }
   console.log("✅ Inventory seeded");
 
-  // 6. Seed Projects
-  const sampleProject = await prisma.project.upsert({
-    where: { slug: "dhanmondi-luxury-rooftop-retreat" },
-    update: {},
-    create: {
-      slug: "dhanmondi-luxury-rooftop-retreat",
-      name: "Dhanmondi Luxury Rooftop Retreat",
+  // 6. Seed High-End Architectural Projects (Inspired by Shma Designs)
+  const architecturalProjects = [
+    {
+      slug: "dhanmondi-sky-forest",
+      name: "Dhanmondi Sky Forest & Bio-Terrace",
       clientId: clientUser.id,
-      clientName: "Tanvir Ahmed",
+      clientName: "Tanvir Rahman",
       clientPhone: "01811223344",
       category: "Rooftop Garden",
       location: "Road 9/A, Dhanmondi, Dhaka",
-      description: "A 2,200 sqft penthouse rooftop featuring Japanese grass lawn, illuminated pergola, and automated drip irrigation.",
-      progress: 75,
-      status: "RUNNING",
-      budget: 350000,
-      totalExpense: 240000,
-      startDate: new Date("2026-08-10"),
-      deadline: new Date("2026-10-01"),
+      description: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 450000,
+      totalExpense: 320000,
+      startDate: new Date("2026-05-10"),
+      deadline: new Date("2026-06-15"),
+      completionDate: new Date("2026-06-12"),
       featured: true,
       beforeImage: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=800&q=80",
-      afterImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
+      afterImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
       images: [
-        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
-        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
+        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
+        "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
       ],
     },
-  });
-  console.log("✅ Sample Project seeded:", sampleProject.name);
+    {
+      slug: "gulshan-corporate-green-wall",
+      name: "Gulshan Corporate Living Green Wall",
+      clientId: clientUser.id,
+      clientName: "BTI Landmark Developments",
+      clientPhone: "01711223344",
+      category: "Vertical Garden",
+      location: "Gulshan Avenue, Dhaka",
+      description: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air.",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 680000,
+      totalExpense: 490000,
+      startDate: new Date("2025-08-01"),
+      deadline: new Date("2025-09-10"),
+      completionDate: new Date("2025-09-08"),
+      featured: true,
+      afterImage: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
+        "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
+      ],
+    },
+    {
+      slug: "mapletree-business-city",
+      name: "Mapletree Business City II",
+      clientId: clientUser.id,
+      clientName: "Mapletree Investments",
+      category: "Commercial",
+      location: "Singapore",
+      description: "Mapletree Business City II aims to create an ‘Urban Wilderness’ by integrating modern workspaces with an eco-friendly, nature-inspired landscape.",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 1500000,
+      totalExpense: 1200000,
+      featured: true,
+      afterImage: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
+      images: [
+        "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
+      ],
+    },
+    {
+      slug: "the-standard-hua-hin",
+      name: "The Standard Hua Hin",
+      clientId: clientUser.id,
+      clientName: "Standard International",
+      category: "Resort",
+      location: "Prachuap Khiri Khan, Thailand",
+      description: "Envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character.",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 2200000,
+      featured: true,
+      afterImage: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
+      images: [
+        "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
+      ],
+    },
+    {
+      slug: "one-city-centre-occ",
+      name: "One City Centre (OCC)",
+      clientId: clientUser.id,
+      clientName: "Raimon Land & Mitsubishi Estate",
+      category: "Public Realm",
+      location: "Ploenchit, Bangkok, Thailand",
+      description: "A visionary high-density corporate hub enveloped in sunken rain gardens, shaded pedestrian corridors, and permeable paving that significantly mitigates urban thermal heat.",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 1800000,
+      featured: true,
+      afterImage: "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
+      images: [
+        "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
+      ],
+    },
+    {
+      slug: "coxs-bazar-coastal-resort",
+      name: "Cox's Bazar Coastal Eco-Resort",
+      clientId: clientUser.id,
+      clientName: "Ocean Paradise Retreats",
+      category: "Resort",
+      location: "Marine Drive, Cox's Bazar, Bangladesh",
+      description: "Coastal landscape masterplan tailored for sea breezes and saline soil conditions, featuring salt-tolerant endemic trees and natural water retention ponds.",
+      progress: 80,
+      status: "RUNNING",
+      budget: 1250000,
+      featured: true,
+      afterImage: "https://shmadesigns.com/wp-content/uploads/2026/09/3.-The-Residences-at-Mandarin-Oriental-Miami-at-One-Island-Drive_POOL-1.webp",
+      images: [
+        "https://shmadesigns.com/wp-content/uploads/2026/09/3.-The-Residences-at-Mandarin-Oriental-Miami-at-One-Island-Drive_POOL-1.webp",
+      ],
+    },
+    {
+      slug: "banani-royal-estate",
+      name: "Banani Royal Estate & Water Garden",
+      clientId: clientUser.id,
+      clientName: "Chowdhury Residence",
+      category: "Residential",
+      location: "Road 11, Banani, Dhaka",
+      description: "Featuring architectural marble water cascades, ambient evening lighting, and rare perennial flora integrated into a private residential estate.",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 520000,
+      featured: true,
+      afterImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+      ],
+    },
+    {
+      slug: "purbachal-sunken-park",
+      name: "Purbachal Nature Retreat & Sunken Park",
+      clientId: clientUser.id,
+      clientName: "Civic Green Foundation",
+      category: "Public Realm",
+      location: "Purbachal New Town, Dhaka",
+      description: "A vibrant urban gathering place featuring sunken rain gardens, walking trails, and permeable green paving designed for community wellness.",
+      progress: 90,
+      status: "RUNNING",
+      budget: 950000,
+      featured: true,
+      afterImage: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80",
+      ],
+    },
+  ];
+
+  for (const proj of architecturalProjects) {
+    await prisma.project.upsert({
+      where: { slug: proj.slug },
+      update: proj,
+      create: proj,
+    });
+  }
+  console.log(`✅ ${architecturalProjects.length} Architectural Projects seeded successfully`);
 
   // 7. Seed Site Setting
   await prisma.setting.upsert({

@@ -147,6 +147,7 @@ export default function ShmaHeroVideo() {
         headlineBn={config.headlineBn}
         descriptionEn={config.descriptionEn}
         descriptionBn={config.descriptionBn}
+        textPosition={config.textPosition}
       />
 
       {/* 4. Interactive Slide-Out CTA (Hover Trigger & Action Buttons) */}

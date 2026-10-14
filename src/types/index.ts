@@ -285,13 +285,13 @@ export const defaultHeroSettings: IHeroSettings = {
   btnContactLink: "/contact",
   btnContactStyle: "emerald-glow",
 
-  enableTextOverlay: false,
-  taglineEn: "LANDSCAPE ARCHITECTURE & URBAN GREENERY",
-  taglineBn: "ল্যান্ডস্কেপ আর্কিটেকচার ও নগর সবুজায়ন",
-  headlineEn: "WEAVING NATURE INTO MODERN SPACES",
+  enableTextOverlay: true,
+  taglineEn: "LANDSCAPE ARCHITECTURE & URBAN BIOPHILIA",
+  taglineBn: "ল্যান্ডস্কেপ আর্কিটেকচার ও বায়োফিলিক সবুজায়ন",
+  headlineEn: "WEAVING NATURE INTO MODERN ARCHITECTURE",
   headlineBn: "প্রকৃতিকে আধুনিক স্থাপত্যের সাথে সমন্বিত করা",
-  descriptionEn: "Creating living, breathing ecosystems that enhance well-being and biodiversity.",
+  descriptionEn: "Creating living, breathing ecosystems that enhance well-being, cool urban density, and restore biodiversity.",
   descriptionBn: "টেকসই ও মনোরম ল্যান্ডস্কেপ তৈরির মাধ্যমে প্রতিটি স্থানকে একটি জীবন্ত মরূদ্যানে রূপান্তর করি।",
-  textPosition: "center",
+  textPosition: "bottom-left",
 };
 

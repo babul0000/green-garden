@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 
-interface ProjectItem {
+export interface HighlightProjectItem {
   id: string;
+  slug?: string;
   nameBn: string;
   nameEn: string;
   categoryBn: string;
@@ -15,98 +17,144 @@ interface ProjectItem {
   descEn: string;
   videoUrl?: string;
   imageUrl?: string;
+  year?: string;
+  area?: string;
+  client?: string;
+  ecoMetrics?: {
+    tempDrop?: string;
+    rainwater?: string;
+    greenCoverage?: string;
+  };
 }
 
-const projects: ProjectItem[] = [
+const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
   {
-    id: "dhanmondi-sky-haven",
+    id: "mapletree-business-city",
+    slug: "mapletree-business-city",
+    nameBn: "ম্যাপলট্রি বিজনেস সিটি ২: আরবান ওয়াইল্ডারনেস",
+    nameEn: "Mapletree Business City II",
+    categoryBn: "ইনস্টিটিউশন ও আধুনিক কর্মক্ষেত্র",
+    categoryEn: "Institution and Workplace",
+    locationBn: "সিঙ্গাপুর",
+    locationEn: "Singapore",
+    descBn: "ম্যাপলট্রি বিজনেস সিটি ২ কর্মক্ষেত্র ও প্রকৃতির মেলবন্ধনে একটি 'আরবান ওয়াইল্ডারনেস' সৃষ্টি করেছে। সংলগ্ন নেচার রিজার্ভ ও ক্রান্তীয় জলবায়ুর অনুপ্রেরণায় পরিকল্পিত এই ল্যান্ডস্কেপ জীববৈচিত্র্য ও নাগরিক স্বস্তির এক অপূর্ব দৃষ্টান্ত।",
+    descEn: "Mapletree Business City II aims to create an ‘Urban Wilderness’ by integrating modern workspaces with an eco-friendly, nature-inspired landscape. This design enhances comfort and recreation while fostering ecological balance, inspired by the adjacent nature reserve and tropical climate.",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Mapletree-Business-City-II.mp4#t=1",
+    imageUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
+    year: "2024",
+    area: "28,000 sq.m",
+    client: "Mapletree Investments",
+    ecoMetrics: { tempDrop: "-3.5°C", rainwater: "85% Recycled", greenCoverage: "68%" },
+  },
+  {
+    id: "the-standard-hua-hin",
+    slug: "the-standard-hua-hin",
+    nameBn: "দ্য স্ট্যান্ডার্ড হুয়া হিন ট্রপিক্যাল রিসোর্ট",
+    nameEn: "The Standard Hua Hin",
+    categoryBn: "হসপিটালিটি ও ইকো রিসোর্ট",
+    categoryEn: "Hospitality",
+    locationBn: "প্রাচুয়াপ খিরি খান, থাইল্যান্ড",
+    locationEn: "Prachuap Khiri Khan, Thailand",
+    descBn: "প্রকৃতির পরম কোলে এক শান্ত প্রশান্তিময় আশ্রম। সাইটের বিদ্যমান বিশালাকার বনস্পতিগুলোকে অক্ষত রেখে নকশা করা হয়েছে প্রতিটি কর্নার—যেখানে আলো, গঠন ও নিসর্গ মিলেমিশে এক অভূতপূর্ব অনুভূতি সৃষ্টি করে।",
+    descEn: "The Standard Hua Hin is envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character. Each space invites guests to reconnect with nature through light, texture, and time. The forest is not just a backdrop. It is the foundation of the experience.",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/Pop-up-The-standard-huahin.mp4#t=1",
+    imageUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
+    year: "2023",
+    area: "14,500 sq.m",
+    client: "Standard International",
+    ecoMetrics: { tempDrop: "-4.2°C", rainwater: "100% Retained", greenCoverage: "74%" },
+  },
+  {
+    id: "one-city-centre-occ",
+    slug: "one-city-centre-occ",
+    nameBn: "ওয়ান সিটি সেন্টার (OCC) আরবান প্লাজা",
+    nameEn: "One City Centre (OCC)",
+    categoryBn: "কর্মক্ষেত্র ও পাবলিক প্লাজা",
+    categoryEn: "Workplace & Civic Plaza",
+    locationBn: "প্লয়েনচিট, ব্যাংকক",
+    locationEn: "Ploenchit, Bangkok, Thailand",
+    descBn: "ব্যাংককের প্রাণকেন্দ্রে একটি সানকেন পাবলিক পার্ক ও জীবন্ত সবুজ প্লাজা। এটি পথচারীদের জন্য শীতল ছায়াময় পথ সৃষ্টি করে এবং নগরীর অতিরিক্ত উত্তাপ প্রশমনে সক্রিয় ভূমিকা রাখে।",
+    descEn: "A visionary high-density corporate hub enveloped in sunken gardens, shaded pedestrian corridors, and porous water plazas that substantially reduce the urban heat island effect.",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/Pop-up-OCC.mp4#t=1",
+    imageUrl: "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
+    year: "2024",
+    area: "19,200 sq.m",
+    client: "Raimon Land & Mitsubishi Estate",
+    ecoMetrics: { tempDrop: "-3.8°C", rainwater: "90% Filtered", greenCoverage: "62%" },
+  },
+  {
+    id: "dhanmondi-sky-forest",
+    slug: "dhanmondi-sky-forest",
     nameBn: "ধানমন্ডি স্কাই ফরেস্ট ও বায়োফিলিক টেরেস",
-    nameEn: "DHANMONDI SKY FOREST & BIO-TERRACE",
-    categoryBn: "লাক্সারি ছাদবাগান ও রেসিডেন্সিয়াল",
+    nameEn: "Dhanmondi Sky Forest & Bio-Terrace",
+    categoryBn: "লাক্সারি ছাদবাগান ও রেসিডেন্সিয়াল",
     categoryEn: "Luxury Rooftop & Residential",
     locationBn: "রোড ৯/এ, ধানমন্ডি, ঢাকা, বাংলাদেশ",
     locationEn: "Road 9/A, Dhanmondi, Dhaka, Bangladesh",
-    descBn: "কংক্রিট ছাদকে রূপান্তর করা হয়েছে সবুজ বায়োফিলিক স্বর্গে—যেখানে রয়েছে সম্পূর্ণ ওয়াটারপ্রুফ ড্রেনেজ, সুপরিকল্পিত জাপানিজ কার্পেট ঘাসের লন এবং মেহগনি কাঠের ছায়ানিবিড় পারগোলা।",
-    descEn: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Mapletree-Business-City-II.mp4#t=1",
+    descBn: "কংক্রিট ছাদকে রূপান্তর করা হয়েছে সবুজ বায়োফিলিক স্বর্গে—যেখানে রয়েছে মাল্টি-লেয়ার ১০০% ওয়াটারপ্রুফ ড্রেনেজ, সুপরিকল্পিত জাপানিজ কার্পেট ঘাসের লন এবং মেহগনি কাঠের ছায়ানিবিড় পারগোলা।",
+    descEn: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Sky-Forest.mp4#t=1",
+    imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
+    year: "2026",
+    area: "3,800 sq.ft",
+    client: "Tanvir Rahman",
+    ecoMetrics: { tempDrop: "-5.0°C", rainwater: "100% Drainage Safe", greenCoverage: "80%" },
   },
   {
     id: "gulshan-green-tower",
+    slug: "gulshan-green-tower",
     nameBn: "গুলশান করপোরেট লিভিং গ্রিন ওয়াল",
-    nameEn: "GULSHAN CORPORATE LIVING GREEN WALL",
-    categoryBn: "কর্মক্ষেত্র ও আধুনিক বাণিজ্যিক স্থাপত্য",
+    nameEn: "Gulshan Corporate Living Green Wall",
+    categoryBn: "কর্মক্ষেত্র ও বায়োফিলিক স্থাপত্য",
     categoryEn: "Corporate Workplace & Vertical Forest",
     locationBn: "গুলশান এভিনিউ, ঢাকা, বাংলাদেশ",
     locationEn: "Gulshan Avenue, Dhaka, Bangladesh",
     descBn: "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
-    descEn: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/Pop-up-The-standard-huahin.mp4#t=1",
-  },
-  {
-    id: "banani-royal-estate",
-    nameBn: "বনানী রয়েল এস্টেট ও ওয়াটার গার্ডেন",
-    nameEn: "BANANI ROYAL ESTATE & WATER GARDEN",
-    categoryBn: "প্রাইভেট এস্টেট ও কোর্টইয়ার্ড",
-    categoryEn: "Private Estate & Courtyard",
-    locationBn: "রোড ১১, বনানী, ঢাকা, বাংলাদেশ",
-    locationEn: "Road 11, Banani, Dhaka, Bangladesh",
-    descBn: "মার্বেল পাথরের নান্দনিক জলপ্রপাত, উষ্ণ ল্যান্ডস্কেপ লাইটিং এবং সুবিন্যস্ত বহুবর্ষজীবী বাগান উদ্ভিদের সমাহারে নির্মিত এক অনন্য অভিজাত ব্যক্তিগত অঙ্গন।",
-    descEn: "Featuring architectural marble water cascades, ambient evening lighting, and rare perennial flora integrated into a private residential estate.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Sky-Forest.mp4#t=1",
+    descEn: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air in central Gulshan.",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/สวนสาน-.mp4#t=1",
+    imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=1200",
+    year: "2025",
+    area: "6,400 sq.ft",
+    client: "BTI Landmark",
+    ecoMetrics: { tempDrop: "-3.2°C", rainwater: "Automated Drip", greenCoverage: "95%" },
   },
   {
     id: "coxs-bazar-resort",
+    slug: "coxs-bazar-resort",
     nameBn: "কক্সবাজার ট্রপিক্যাল ইকো রিসোর্ট",
-    nameEn: "COX'S BAZAR TROPICAL ECO RESORT",
+    nameEn: "Cox's Bazar Tropical Eco Resort",
     categoryBn: "রিসোর্ট ও হসপিটালিটি ল্যান্ডস্কেপ",
     categoryEn: "Resort & Hospitality Landscape",
     locationBn: "মেরিন ড্রাইভ, কক্সবাজার, বাংলাদেশ",
     locationEn: "Marine Drive, Cox's Bazar, Bangladesh",
     descBn: "সমুদ্র উপকূলের লবণাক্ত আবহাওয়া ও আর্দ্রতা উপযোগী দেশীয় উদ্ভিদের সমন্বয়ে নির্মিত উন্মুক্ত ল্যান্ডস্কেপ ও পরিবেশবান্ধব রিট্রিট মাস্টারপ্ল্যান।",
-    descEn: "Coastal landscape masterplan tailored for sea breezes and saline soil conditions, featuring salt-tolerant endemic trees and natural water retention ponds.",
+    descEn: "Coastal landscape masterplan tailored for sea breezes and saline soil conditions, featuring salt-tolerant endemic trees and natural water retention ponds along the marine coastline.",
     imageUrl: "https://shmadesigns.com/wp-content/uploads/2026/09/3.-The-Residences-at-Mandarin-Oriental-Miami-at-One-Island-Drive_POOL-1.webp",
-  },
-  {
-    id: "purbachal-retreat",
-    nameBn: "পূর্বাচল নেচার রিট্রিট ও সানকেন পার্ক",
-    nameEn: "PURBACHAL NATURE RETREAT & SUNKEN PARK",
-    categoryBn: "কমিউনিটি পার্ক ও ওপেন স্পেস",
-    categoryEn: "Community Park & Open Space",
-    locationBn: "পূর্বাচল নিউ টাউন, ঢাকা, বাংলাদেশ",
-    locationEn: "Purbachal New Town, Dhaka, Bangladesh",
-    descBn: "নগরবাসীর শারীরিক ও মানসিক প্রশান্তির জন্য সানকেন প্লাজা, হাঁটার ট্রেইল এবং বৃষ্টির পানি সংরক্ষণের সমন্বয়ে পরিকল্পিত আধুনিক গ্রিন স্পেস।",
-    descEn: "A vibrant urban gathering place featuring sunken rain gardens, walking trails, and permeable green paving for civic wellness.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/Pop-up-OCC.mp4#t=1",
-  },
-  {
-    id: "baridhara-oasis",
-    nameBn: "বারিধারা ডিপ্লোম্যাটিক এম্বাসি গার্ডেন",
-    nameEn: "BARIDHARA DIPLOMATIC OASIS",
-    categoryBn: "লাক্সারি রেসিডেন্সিয়াল গার্ডেন",
-    categoryEn: "Luxury Residential Landscape",
-    locationBn: "বারিধারা ডিপ্লোম্যাটিক জোন, ঢাকা, বাংলাদেশ",
-    locationEn: "Baridhara Diplomatic Enclave, Dhaka, Bangladesh",
-    descBn: "নিভৃত ও সুরক্ষিত আধুনিক স্থাপত্য আঙ্গিনায় জ্যামিতিক গ্রিন প্যাটিও, শান্ত ফোয়ারা এবং ছায়ানিবিড় ট্রপিক্যাল গাছের অনন্য মেলবন্ধন।",
-    descEn: "High-security biophilic landscaping integrating geometric stone patios, soothing water reflections, and shaded tropical foliage.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/สวนสาน-.mp4#t=1",
+    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/07/About.mp4",
+    year: "2025",
+    area: "35,000 sq.m",
+    client: "Ocean Paradise Retreats",
+    ecoMetrics: { tempDrop: "-4.0°C", rainwater: "Retention Ponds", greenCoverage: "70%" },
   },
 ];
 
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
-  const [projectList, setProjectList] = useState<ProjectItem[]>(projects);
-  const [activeModalProject, setActiveModalProject] = useState<ProjectItem | null>(null);
+  const isBn = language === "bn";
+  const [projectList, setProjectList] = useState<HighlightProjectItem[]>(SHMA_DEFAULT_PROJECTS);
+  const [activeModalProject, setActiveModalProject] = useState<HighlightProjectItem | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchLiveProjects = async () => {
       try {
-        const res = await fetch(`/api/projects?_t=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch(`/api/projects?featured=true&_t=${Date.now()}`, { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.projects || [];
-          if (items.length > 0) {
-            const mapped: ProjectItem[] = items.map((p: any, idx: number) => ({
+          if (items.length >= 2) {
+            const mapped: HighlightProjectItem[] = items.map((p: any, idx: number) => ({
               id: p._id || p.id || `proj-${idx}`,
+              slug: p.slug,
               nameBn: p.titleBn || p.nameBn || p.title || p.name || "",
               nameEn: p.titleEn || p.nameEn || p.title || p.name || "",
               categoryBn: p.categoryBn || p.category || "ল্যান্ডস্কেপ ডিজাইন",
@@ -115,245 +163,306 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
               locationEn: p.locationEn || p.location || "Dhaka, Bangladesh",
               descBn: p.descBn || p.description || p.desc || "",
               descEn: p.descEn || p.description || p.desc || "",
-              imageUrl: p.imageUrl || p.image || p.coverImage || (projects[idx % projects.length]?.imageUrl),
-              videoUrl: p.videoUrl || (p.imageUrl ? undefined : projects[idx % projects.length]?.videoUrl),
+              imageUrl: p.imageUrl || p.image || p.coverImage || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length]?.imageUrl,
+              videoUrl: p.videoUrl || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length]?.videoUrl,
+              year: p.year || "2026",
+              area: p.area || p.budgetRange || "3,500 sq.ft",
+              client: p.client || p.clientName || "Private Client",
+              ecoMetrics: {
+                tempDrop: "-3.5°C",
+                rainwater: "100% Drainage Safe",
+                greenCoverage: "75%",
+              },
             }));
             setProjectList(mapped);
           }
         }
       } catch (e) {
-        // keep default projects
+        // keep default curated Shma projects
       }
     };
     fetchLiveProjects();
   }, []);
 
-  const mid = Math.ceil(projectList.length / 2);
-  const col1 = projectList.slice(0, mid);
-  const col2 = projectList.slice(mid);
-
-  const isMultiCol = columns && columns > 2;
-  const gridClass =
-    columns === 1
-      ? "grid grid-cols-1 max-w-3xl mx-auto gap-y-16"
-      : columns === 3
-      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-      : columns === 4
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-      : "grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-16 gap-y-16";
-
   return (
-    <section id="projects" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
-      {/* Section Header */}
-      <div className="mb-14">
+    <section id="projects" className="py-24 px-6 sm:px-10 lg:px-16 max-w-[1440px] mx-auto text-[#323232] bg-white">
+      {/* 1. ARCHITECTURAL SECTION HEADER (MATCHING SHMA DESIGNS) */}
+      <div className="mb-16 sm:mb-20">
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
-          <div className="flex items-baseline gap-3">
-            <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Highlight Projects
+          <div className="space-y-1">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#75787b] block">
+              {t("নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
+            </span>
+            <h2 className="font-display font-light text-4xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
+              Highlight Project
             </h2>
           </div>
-          <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            Architectural Portfolio
-          </span>
+          <Link
+            href="/projects"
+            className="group inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] transition-colors"
+          >
+            <span>{t("সকল প্রকল্প দেখুন", "View All Works")}</span>
+            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </Link>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
-      {/* Dynamic Staggered / Multicolumn Grid */}
-      {isMultiCol ? (
-        <div className={gridClass}>
-          {projectList.map((item) => (
-            <div key={item.id} className="space-y-4">
+      {/* 2. ASYMMETRIC ALTERNATING ARCHITECTURAL SHOWCASE (SHMA SIGNATURE) */}
+      <div className="space-y-24 sm:space-y-32">
+        {projectList.map((item, index) => {
+          const isEven = index % 2 === 0;
+
+          return (
+            <div
+              key={item.id}
+              className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center ${
+                isEven ? "" : "lg:grid-flow-dense"
+              }`}
+            >
+              {/* Media Container (Video / Image with Aspect 16/10) */}
               <div
-                onClick={() => setActiveModalProject(item)}
-                className="relative overflow-hidden cursor-pointer group bg-[#dedad2] aspect-[16/11] rounded-2xl"
+                className={`lg:col-span-7 ${
+                  isEven ? "lg:order-1" : "lg:col-start-6 lg:order-2"
+                }`}
               >
-                {item.videoUrl ? (
-                  <video
-                    src={item.videoUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                ) : (
-                  <img
-                    src={item.imageUrl || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800"}
-                    alt={item.nameEn}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                )}
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-300" />
-                <span className="absolute bottom-3 left-3 font-mono text-[11px] text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md">
-                  {language === "bn" ? item.categoryBn : item.categoryEn}
-                </span>
-              </div>
-              <div>
-                <h3 className="font-display font-light text-lg sm:text-xl text-[#3d2e17] leading-tight">
-                  {language === "bn" ? item.nameBn : item.nameEn}
-                </h3>
-                <p className="font-mono text-xs text-[#75787b] mt-1">
-                  {language === "bn" ? item.locationBn : item.locationEn}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className={gridClass}>
-          {/* Column 1 (Left) */}
-          <div className="space-y-16">
-            {col1.map((item) => (
-              <div key={item.id} className="space-y-4">
                 <div
                   onClick={() => setActiveModalProject(item)}
-                className="relative aspect-[16/10] overflow-hidden bg-stone-100 group cursor-pointer"
-              >
-                {item.videoUrl ? (
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src={item.videoUrl}
-                  ></video>
-                ) : (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.nameEn}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                )}
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <span className="text-white text-base sm:text-lg font-light tracking-wider border-b border-white/60 pb-0.5">
-                    {t("বিস্তারিত দেখুন →", "View Details →")}
-                  </span>
+                  className="group relative aspect-[16/10] overflow-hidden bg-[#dedad2] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-700"
+                >
+                  {item.videoUrl ? (
+                    <video
+                      src={item.videoUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    />
+                  ) : (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.nameEn}
+                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src =
+                          "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200";
+                      }}
+                    />
+                  )}
+
+                  {/* Shma Subtle Ambient Vignette & Interactive Hover Banner */}
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors duration-500" />
+                  
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <span className="px-5 py-2.5 bg-white/95 text-[#3d1916] text-xs font-mono uppercase tracking-[0.2em] backdrop-blur-sm shadow-md">
+                      {t("কেস স্টাডি দেখুন ➔", "Explore Project ➔")}
+                    </span>
+                  </div>
+
+                  {/* Corner Category Tag */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-white bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full">
+                      {isBn ? item.categoryBn : item.categoryEn}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <h3 className="font-display font-light text-xl sm:text-2xl uppercase tracking-wide text-[#3d2e17]">
-                    {item.nameEn}
-                  </h3>
-                  <span className="inline-block px-3 py-1 rounded-full bg-[#dedad2] text-xs text-[#3d2e17] font-sans">
-                    {language === "bn" ? item.categoryBn : item.categoryEn}
-                  </span>
-                </div>
-                <p className="font-sans text-xs text-[#75787b] font-light">
-                  {language === "bn" ? item.locationBn : item.locationEn}
-                </p>
-                <p className="font-sans text-sm font-light text-[#54595f] leading-relaxed">
-                  {language === "bn" ? item.descBn : item.descEn}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Column 2 (Right) */}
-        <div className="space-y-16">
-          {col2.map((item) => (
-            <div key={item.id} className="space-y-4">
+              {/* Text & Architectural Narrative Container */}
               <div
-                onClick={() => setActiveModalProject(item)}
-                className="relative aspect-[16/10] overflow-hidden bg-stone-100 group cursor-pointer"
+                className={`lg:col-span-5 space-y-6 ${
+                  isEven ? "lg:order-2" : "lg:col-start-1 lg:order-1"
+                }`}
               >
-                {item.videoUrl ? (
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src={item.videoUrl}
-                  ></video>
-                ) : (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.nameEn}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                )}
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <span className="text-white text-base sm:text-lg font-light tracking-wider border-b border-white/60 pb-0.5">
-                    {t("বিস্তারিত দেখুন →", "View Details →")}
-                  </span>
+                {/* Typology & Location */}
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="inline-block px-3 py-1 text-xs font-mono tracking-wider uppercase text-[#3d1916] bg-[#dedad2]/70 rounded-full">
+                      {isBn ? item.categoryBn : item.categoryEn}
+                    </span>
+                    {item.year && (
+                      <span className="font-mono text-xs text-[#75787b]">{item.year}</span>
+                    )}
+                  </div>
+                  <p className="font-mono text-xs tracking-wider uppercase text-[#75787b]">
+                    {isBn ? item.locationBn : item.locationEn}
+                  </p>
                 </div>
-              </div>
 
-              <div className="space-y-2 pt-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <h3 className="font-display font-light text-xl sm:text-2xl uppercase tracking-wide text-[#3d2e17]">
-                    {item.nameEn}
-                  </h3>
-                  <span className="inline-block px-3 py-1 rounded-full bg-[#dedad2] text-xs text-[#3d2e17] font-sans">
-                    {language === "bn" ? item.categoryBn : item.categoryEn}
-                  </span>
+                {/* Project Title (Architectural Display Typeface) */}
+                <h3
+                  onClick={() => setActiveModalProject(item)}
+                  className="font-display font-light text-2xl sm:text-3xl md:text-4xl text-[#3d1916] leading-tight tracking-tight hover:text-[#5a9dff] transition-colors cursor-pointer"
+                >
+                  {isBn ? item.nameBn : item.nameEn}
+                </h3>
+
+                {/* Narrative Description */}
+                <p className="font-sans text-sm sm:text-[15px] font-light text-[#54595f] leading-relaxed">
+                  {isBn ? item.descBn : item.descEn}
+                </p>
+
+                {/* Eco Metric Quick Summary */}
+                {item.ecoMetrics && (
+                  <div className="pt-2 border-t border-[#e7e7e7] grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <span className="block font-display text-lg text-[#3d1916] font-normal">
+                        {item.ecoMetrics.tempDrop}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#75787b] uppercase">Microclimate</span>
+                    </div>
+                    <div>
+                      <span className="block font-display text-lg text-[#3d1916] font-normal">
+                        {item.ecoMetrics.greenCoverage}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#75787b] uppercase">Biophilia</span>
+                    </div>
+                    <div>
+                      <span className="block font-display text-lg text-[#3d1916] font-normal">
+                        {item.ecoMetrics.rainwater}
+                      </span>
+                      <span className="text-[10px] font-mono text-[#75787b] uppercase">Hydrology</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Call-to-action button */}
+                <div className="pt-2 flex items-center gap-4">
+                  <button
+                    onClick={() => setActiveModalProject(item)}
+                    className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] pb-1 border-b border-[#3d1916] hover:border-[#5a9dff] transition-all cursor-pointer"
+                  >
+                    <span>{t("প্রকল্পের বিস্তারিত", "Project Case Study")}</span>
+                    <span>→</span>
+                  </button>
                 </div>
-                <p className="font-sans text-xs text-[#75787b] font-light">
-                  {language === "bn" ? item.locationBn : item.locationEn}
-                </p>
-                <p className="font-sans text-sm font-light text-[#54595f] leading-relaxed">
-                  {language === "bn" ? item.descBn : item.descEn}
-                </p>
               </div>
             </div>
-          ))}
-        </div>
-
+          );
+        })}
       </div>
-      )}
 
-      {/* Lightbox / Details Modal */}
+      {/* 3. ARCHITECTURAL EXPLORE MORE FOOTER */}
+      <div className="mt-28 text-center border-t border-[#e7e7e7] pt-14">
+        <Link
+          href="/projects"
+          className="inline-block px-10 py-4 border border-[#3d1916] text-[#3d1916] text-xs font-mono uppercase tracking-[0.25em] hover:bg-[#3d1916] hover:text-white transition-all duration-300"
+        >
+          {t("সকল প্রকল্প ও কেস স্টাডি দেখুন", "Explore Complete Portfolio")}
+        </Link>
+      </div>
+
+      {/* 4. LUXURY ARCHITECTURAL MODAL / DRAWER */}
       {activeModalProject && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-          <div className="bg-white max-w-2xl w-full p-8 rounded-none relative text-[#323232] space-y-6">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white max-w-4xl w-full p-6 sm:p-10 relative text-[#323232] space-y-6 my-auto shadow-2xl animate-fade-in-up">
+            {/* Close Button */}
             <button
               onClick={() => setActiveModalProject(null)}
-              className="absolute top-4 right-4 text-2xl text-[#3d2e17] hover:opacity-60 cursor-pointer"
+              className="absolute top-6 right-6 text-2xl text-[#3d1916] hover:opacity-60 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors"
+              aria-label="Close"
             >
               ✕
             </button>
-            <span className="text-xs uppercase tracking-[0.2em] text-[#75787b] block font-mono">
-              Architectural Masterpiece
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-light font-display text-[#3d2e17]">
-              {activeModalProject.nameEn}
-            </h3>
-            <p className="text-xs text-[#75787b]">
-              {language === "bn" ? activeModalProject.locationBn : activeModalProject.locationEn}
-            </p>
-            <p className="text-sm font-light text-[#54595f] leading-relaxed">
-              {language === "bn" ? activeModalProject.descBn : activeModalProject.descEn}
-            </p>
-            <p className="text-xs text-[#75787b] leading-relaxed">
-              {t(
-                "আমাদের বিশেষজ্ঞ দল প্রতিটি প্রকল্পের হাইড্রোলজি, ড্রেনেজ ও জীববৈচিত্র্য সুরক্ষায় আন্তর্জাতিক মানদণ্ড বজায় রেখে শতভাগ ওয়াটারপ্রুফ সমাধান প্রদান করে।",
-                "Our multidisciplinary team ensures scientific hydrology, soil media engineering, and 100% waterproof membranes tailored to Bangladesh's climate."
+
+            {/* Overline & Category */}
+            <div className="space-y-1 pr-8">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#75787b] block font-mono">
+                {t("স্থাপত্য বিশ্লেষণ ও সমীক্ষা", "ARCHITECTURAL CASE STUDY")}
+              </span>
+              <h3 className="text-2xl sm:text-4xl font-light font-display text-[#3d1916] tracking-tight">
+                {isBn ? activeModalProject.nameBn : activeModalProject.nameEn}
+              </h3>
+              <p className="text-xs font-mono uppercase tracking-wider text-[#75787b] pt-1">
+                {isBn ? activeModalProject.locationBn : activeModalProject.locationEn}
+                {activeModalProject.year && ` • ${activeModalProject.year}`}
+              </p>
+            </div>
+
+            {/* Media Highlight (Video / Image) */}
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-black">
+              {activeModalProject.videoUrl ? (
+                <video
+                  src={activeModalProject.videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  controls
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={activeModalProject.imageUrl}
+                  alt={activeModalProject.nameEn}
+                  className="w-full h-full object-cover"
+                />
               )}
-            </p>
-            <div className="pt-4 flex flex-wrap gap-4">
-              <a
-                href="#newsletter"
-                onClick={() => setActiveModalProject(null)}
-                className="px-6 py-2.5 bg-[#3d2e17] text-white text-xs uppercase tracking-widest hover:bg-[#5a9dff] transition-colors"
-              >
-                {t("পরামর্শ নিন", "Inquire Project")}
-              </a>
+            </div>
+
+            {/* Project Specs Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-[#f8faf9] border border-[#e7e7e7] text-xs">
+              <div>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Typology</span>
+                <span className="font-medium text-[#3d1916]">
+                  {isBn ? activeModalProject.categoryBn : activeModalProject.categoryEn}
+                </span>
+              </div>
+              <div>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Scale / Area</span>
+                <span className="font-medium text-[#3d1916]">{activeModalProject.area || "Custom Scope"}</span>
+              </div>
+              <div>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Climate Adaptation</span>
+                <span className="font-medium text-[#3d1916]">Tropical Monsoon</span>
+              </div>
+              <div>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Waterproofing</span>
+                <span className="font-medium text-[#3d1916]">100% Guaranteed</span>
+              </div>
+            </div>
+
+            {/* Narrative & Engineering Strategy */}
+            <div className="space-y-4 font-sans text-sm font-light text-[#54595f] leading-relaxed">
+              <p>{isBn ? activeModalProject.descBn : activeModalProject.descEn}</p>
+              <p className="text-xs text-[#75787b] leading-relaxed">
+                {t(
+                  "এ আর গ্রিন গার্ডেনের বিশেষজ্ঞ টিম প্রতিটি সাইটের ড্রেনেজ, মাটির গভীরতা ও সূর্যের অবস্থান নিবিড়ভাবে পর্যবেক্ষণ করে বায়োফিলিক ল্যান্ডস্কেপ বাস্তবায়ন করে। শতভাগ লিক-প্রুফ ড্রেনেজ সেল ও উন্নত ফিল্টারেশন মেমব্রেনের মাধ্যমে ছাদ ও ভবনের দীর্ঘস্থায়িত্ব নিশ্চিত করা হয়।",
+                  "A R Green Garden's multidisciplinary team executes rigorous hydrological modeling, root-barrier membranes, and automated drip fertigation tailored to the subtropical conditions of Bangladesh, ensuring decades of thriving greenery without slab dampness."
+                )}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-4 border-t border-[#e7e7e7] flex flex-wrap gap-4 items-center justify-between">
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href={`/contact?subject=${encodeURIComponent(activeModalProject.nameEn)}`}
+                  onClick={() => setActiveModalProject(null)}
+                  className="px-6 py-3 bg-[#3d1916] text-white text-xs font-mono uppercase tracking-widest hover:bg-[#5a9dff] transition-colors"
+                >
+                  {t("এই ডিজাইনে পরামর্শ নিন", "Inquire About This Project")}
+                </Link>
+                <Link
+                  href="/projects"
+                  onClick={() => setActiveModalProject(null)}
+                  className="px-6 py-3 border border-[#3d1916] text-[#3d1916] text-xs font-mono uppercase tracking-widest hover:bg-[#dedad2] transition-colors"
+                >
+                  {t("সকল কাজ দেখুন", "All Case Studies")}
+                </Link>
+              </div>
+
               <button
                 onClick={() => setActiveModalProject(null)}
-                className="px-6 py-2.5 border border-[#3d2e17] text-[#3d2e17] text-xs uppercase tracking-widest hover:bg-[#dedad2] transition-colors cursor-pointer"
+                className="text-xs font-mono uppercase text-[#75787b] hover:text-[#3d1916] transition-colors cursor-pointer"
               >
-                {t("বন্ধ করুন", "Close")}
+                {t("বন্ধ করুন [ESC]", "Close [ESC]")}
               </button>
             </div>
           </div>
         </div>
       )}
-
     </section>
   );
 }

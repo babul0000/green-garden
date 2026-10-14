@@ -11,6 +11,7 @@ interface HeroTextOverlayProps {
   headlineBn?: string;
   descriptionEn?: string;
   descriptionBn?: string;
+  textPosition?: "center" | "bottom-left";
 }
 
 export default function HeroTextOverlay({
@@ -22,6 +23,7 @@ export default function HeroTextOverlay({
   headlineBn,
   descriptionEn,
   descriptionBn,
+  textPosition = "bottom-left",
 }: HeroTextOverlayProps) {
   if (!enableTextOverlay) return null;
 
@@ -29,20 +31,42 @@ export default function HeroTextOverlay({
   const headline = isBn ? headlineBn || headlineEn : headlineEn;
   const description = isBn ? descriptionBn || descriptionEn : descriptionEn;
 
+  if (textPosition === "bottom-left") {
+    return (
+      <div className="absolute bottom-24 sm:bottom-28 left-6 sm:left-12 lg:left-16 z-20 max-w-2xl text-left text-white pointer-events-none space-y-3 drop-shadow-md">
+        {tagline && (
+          <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#E4E2D7] block font-medium">
+            {tagline}
+          </span>
+        )}
+        {headline && (
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-display font-light tracking-tight leading-[1.08] uppercase text-white drop-shadow-lg">
+            {headline}
+          </h1>
+        )}
+        {description && (
+          <p className="max-w-xl text-xs sm:text-sm text-white/80 font-sans font-light leading-relaxed drop-shadow">
+            {description}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="relative z-10 max-w-5xl mx-auto px-6 text-center text-white pointer-events-none">
+    <div className="relative z-20 max-w-4xl mx-auto px-6 text-center text-white pointer-events-none space-y-4">
       {tagline && (
-        <span className="inline-block px-4 py-1 mb-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono uppercase tracking-[0.25em] text-emerald-300">
+        <span className="inline-block px-4 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono uppercase tracking-[0.25em] text-[#E4E2D7]">
           {tagline}
         </span>
       )}
       {headline && (
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-light tracking-wide uppercase font-serif mb-4 drop-shadow-md">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-light font-display tracking-tight uppercase drop-shadow-lg">
           {headline}
         </h1>
       )}
       {description && (
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-white/80 font-sans font-light leading-relaxed drop-shadow">
+        <p className="max-w-2xl mx-auto text-sm sm:text-base text-white/85 font-sans font-light leading-relaxed drop-shadow">
           {description}
         </p>
       )}
