@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToNeonStorage, getNeonStorageClient } from "@/lib/neonStorage";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
@@ -22,7 +23,33 @@ export async function POST(req: Request) {
     const uniqueStamp = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const uniqueNameWithStamp = `${uniqueStamp}_${safeName}`;
 
-    // Primary: Upload to Cloudinary CDN
+    // 1. Neon Object Storage (if configured)
+    if (getNeonStorageClient()) {
+      try {
+        const objectKey = `${folder}/${uniqueNameWithStamp}`;
+        const neonResult = await uploadToNeonStorage(buffer, objectKey, file.type || "application/octet-stream");
+        return NextResponse.json(
+          {
+            success: true,
+            url: neonResult.url,
+            key: neonResult.key,
+            fileName: uniqueNameWithStamp,
+            provider: "neon-object-storage",
+          },
+          {
+            headers: {
+              "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+              "Pragma": "no-cache",
+              "Expires": "0",
+            },
+          }
+        );
+      } catch (neonErr: any) {
+        console.warn("Neon storage upload error, falling back:", neonErr?.message);
+      }
+    }
+
+    // 2. Fallback: Upload to Cloudinary CDN
     if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
       try {
         const cloudResult = await uploadToCloudinary(buffer, folder, uniqueNameWithStamp);
