@@ -21,14 +21,68 @@ interface IOrderPlaced {
 }
 
 export default function ShopPage() {
-  const [products] = useState<IProduct[]>(PRODUCTS_DATA);
+  const [products, setProducts] = useState<IProduct[]>(PRODUCTS_DATA);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [maxPrice, setMaxPrice] = useState(1500);
+  const [maxPrice, setMaxPrice] = useState(2500);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Cart state
   const [cart, setCart] = useState<ICartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Fetch live inventory on mount with zero caching
+  React.useEffect(() => {
+    fetchInventory();
+  }, []);
+
+  const fetchInventory = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/inventory?_t=${Date.now()}`, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
+          const mapped: IProduct[] = data.items.map((item: any, idx: number) => {
+            let defaultImg = "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=600&auto=format&fit=crop";
+            const cat = (item.category || "").toLowerCase();
+            if (cat.includes("plant") || cat.includes("tree")) {
+              defaultImg = "https://images.unsplash.com/photo-1597055181300-e3633a207518?q=80&w=600&auto=format&fit=crop";
+            } else if (cat.includes("pot") || cat.includes("tub")) {
+              defaultImg = "https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=600&auto=format&fit=crop";
+            } else if (cat.includes("soil") || cat.includes("media") || cat.includes("fertilizer")) {
+              defaultImg = "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?q=80&w=600&auto=format&fit=crop";
+            } else if (cat.includes("tool")) {
+              defaultImg = "https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?q=80&w=600&auto=format&fit=crop";
+            } else if (cat.includes("lighting")) {
+              defaultImg = "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=600&auto=format&fit=crop";
+            } else if (cat.includes("irrigation")) {
+              defaultImg = "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=600&auto=format&fit=crop";
+            }
+
+            const calculatedPrice = item.unitCost ? Math.round(item.unitCost * 1.25) : 350;
+
+            return {
+              id: item.id || `inv-${idx}`,
+              name: item.name,
+              category: item.category || "General Supplies",
+              price: calculatedPrice,
+              rating: 5,
+              imageUrl: item.imageUrl || defaultImg,
+              desc: item.location ? `স্টক অবস্থান: ${item.location} (${item.stockQuantity} ${item.unit} মজুদ রয়েছে)` : `প্রিমিয়াম কোয়ালিটি গার্ডেনিং আইটেম। স্টক: ${item.stockQuantity} ${item.unit}`,
+            };
+          });
+          setProducts(mapped);
+          const maxP = Math.max(...mapped.map((p) => p.price), 2000);
+          setMaxPrice(maxP);
+        }
+      }
+    } catch (e) {
+      console.warn("Using fallback products", e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Checkout state
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -41,8 +95,8 @@ export default function ShopPage() {
   // Zoom product state
   const [viewProduct, setViewProduct] = useState<IProduct | null>(null);
 
-  // Filters
-  const categories = ["All", "Live Plants", "Designer Pots", "Botanical Soils", "Garden Tools"];
+  // Dynamic Filters
+  const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
   
   const filteredProducts = products.filter(p => {
     const matchCategory = selectedCategory === "All" || p.category === selectedCategory;

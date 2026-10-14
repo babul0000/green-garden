@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ActivityItem {
@@ -69,6 +69,35 @@ const activities: ActivityItem[] = [
 
 export default function ShmaRecentActivities() {
   const { language, t } = useLanguage();
+  const [activityList, setActivityList] = useState<ActivityItem[]>(activities);
+
+  React.useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const res = await fetch(`/api/gallery?_t=${Date.now()}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : data?.items || [];
+          if (items.length > 0) {
+            const mapped: ActivityItem[] = items.slice(0, 5).map((g: any, idx: number) => ({
+              id: g._id || g.id || `act-${idx}`,
+              titleBn: g.titleBn || g.title || activities[idx % activities.length].titleBn,
+              titleEn: g.titleEn || g.title || activities[idx % activities.length].titleEn,
+              subtitleBn: g.category || g.descBn || activities[idx % activities.length].subtitleBn,
+              subtitleEn: g.category || g.descEn || activities[idx % activities.length].subtitleEn,
+              image: g.imageUrl || g.image || activities[idx % activities.length].image,
+              dateBn: g.dateBn || "২০২৬",
+              dateEn: g.dateEn || "2026",
+            }));
+            setActivityList(mapped);
+          }
+        }
+      } catch (e) {
+        // fallback to default
+      }
+    };
+    fetchGallery();
+  }, []);
 
   return (
     <section id="activities" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
@@ -90,7 +119,7 @@ export default function ShmaRecentActivities() {
 
       {/* 5-Column Photo Stream */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-        {activities.map((item) => (
+        {activityList.map((item) => (
           <div key={item.id} className="space-y-3 group cursor-pointer">
             <div className="aspect-[3/4] overflow-hidden bg-stone-100 relative">
               <img

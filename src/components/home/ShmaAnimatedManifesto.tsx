@@ -4,7 +4,14 @@ import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useLanguage } from "@/context/LanguageContext";
 
-export default function ShmaAnimatedManifesto() {
+interface ManifestoConfig {
+  lineEn?: string;
+  lineBn?: string;
+  descriptionEn?: string;
+  descriptionBn?: string;
+}
+
+export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoConfig?: ManifestoConfig }) {
   const { language } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const enableRef = useRef<HTMLSpanElement>(null);
@@ -24,14 +31,14 @@ export default function ShmaAnimatedManifesto() {
     enable: "ENABLE",
     change: "CHANGE",
     for_text: "FOR",
-    a_better_earth: "A BETTER EARTH",
-    description: "একটি সবুজ, সজীব ও টেকসই বাংলাদেশ বিনির্মাণের প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে এ আর গ্রিন গার্ডেন শহুরে ধূসর কংক্রিটকে রূপান্তর করে জীবন্ত ইকোসিস্টেমে। আমাদের স্থাপত্য পরিকল্পনা তাপমাত্রা হ্রাস করে, জীববৈচিত্র্য রক্ষা করে এবং নাগরিক জীবনে আনে স্নিগ্ধ প্রকৃতির পরম ছোঁয়া।",
+    a_better_earth: manifestoConfig?.lineBn || "A BETTER EARTH",
+    description: manifestoConfig?.descriptionBn || "একটি সবুজ, সজীব ও টেকসই বাংলাদেশ বিনির্মাণের প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে এ আর গ্রিন গার্ডেন শহুরে ধূসর কংক্রিটকে রূপান্তর করে জীবন্ত ইকোসিস্টেমে। আমাদের স্থাপত্য পরিকল্পনা তাপমাত্রা হ্রাস করে, জীববৈচিত্র্য রক্ষা করে এবং নাগরিক জীবনে আনে স্নিগ্ধ প্রকৃতির পরম ছোঁয়া।",
   } : {
     enable: "ENABLE",
     change: "CHANGE",
     for_text: "FOR",
-    a_better_earth: "A BETTER EARTH",
-    description: "A R Green Garden envisions a climate-resilient Bangladesh where sustainability, ecological design, and architectural biophilia thrive together. Through scientific planting, stormwater hydrology, and green architecture, we transform urban concrete into living sanctuaries that cool our cities and restore lasting ecological harmony.",
+    a_better_earth: manifestoConfig?.lineEn || "A BETTER EARTH",
+    description: manifestoConfig?.descriptionEn || "A R Green Garden envisions a climate-resilient Bangladesh where sustainability, ecological design, and architectural biophilia thrive together. Through scientific planting, stormwater hydrology, and green architecture, we transform urban concrete into living sanctuaries that cool our cities and restore lasting ecological harmony.",
   };
 
   const states = {

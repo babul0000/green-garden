@@ -193,7 +193,7 @@ export default function DesignYourGardenWizard() {
           spaceType,
           designStyle,
           features,
-          sitePhotoUrl: uploadedPhotoUrl || sitePhotoPreview || null,
+          sitePhotoUrl: uploadedPhotoUrl || (sitePhotoPreview && !sitePhotoPreview.startsWith("blob:") ? sitePhotoPreview : null),
           approxArea,
           budgetRange,
           userId: user?.id,

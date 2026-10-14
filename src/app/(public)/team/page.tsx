@@ -35,6 +35,25 @@ export default function PublicTeamPage() {
             return;
           }
         }
+        // Check settings team_config if employees empty
+        const configRes = await fetch(`/api/settings?key=team_config&_t=${Date.now()}`, { cache: "no-store" });
+        if (configRes.ok) {
+          const configData = await configRes.json();
+          if (configData?.value?.members && configData.value.members.length > 0) {
+            setTeam(configData.value.members.map((m: any, i: number) => ({
+              id: m.id || `team-${i}`,
+              employeeId: `EMP-${100 + i}`,
+              name: m.name,
+              designation: m.designation,
+              department: m.dept || "Architecture & Design",
+              experience: m.experience || "3+ Years",
+              skills: typeof m.skills === "string" ? m.skills.split(",").map((s: string) => s.trim()) : (m.skills || []),
+              photo: m.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+            })));
+            setLoading(false);
+            return;
+          }
+        }
       } catch {
         // Use fallback if server not currently answering
       }

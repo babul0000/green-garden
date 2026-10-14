@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 interface HeroBackgroundMediaProps {
   mediaType: "video" | "image";
@@ -11,6 +11,7 @@ interface HeroBackgroundMediaProps {
   muted: boolean;
   loop: boolean;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  version?: number | string;
 }
 
 export default function HeroBackgroundMedia({
@@ -22,47 +23,81 @@ export default function HeroBackgroundMedia({
   muted,
   loop,
   videoRef,
+  version,
 }: HeroBackgroundMediaProps) {
-  const [videoError, setVideoError] = React.useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const prevVideoUrlRef = useRef<string>("");
 
-  // Reset video error when videoUrl changes
-  React.useEffect(() => {
-    setVideoError(false);
-    if (videoRef.current && mediaType === "video" && videoUrl) {
-      videoRef.current.load();
-      if (autoPlay) {
-        videoRef.current.play().catch(() => {});
+  const effectiveVideoUrl = React.useMemo(() => {
+    if (!videoUrl) return "";
+    if (!version) return videoUrl;
+    const separator = videoUrl.includes("?") ? "&" : "?";
+    return `${videoUrl}${separator}_v=${version}`;
+  }, [videoUrl, version]);
+
+  const effectivePosterUrl = React.useMemo(() => {
+    if (!posterImageUrl) return "";
+    if (!version) return posterImageUrl;
+    const separator = posterImageUrl.includes("?") ? "&" : "?";
+    return `${posterImageUrl}${separator}_v=${version}`;
+  }, [posterImageUrl, version]);
+
+  // Only reload video if URL actually changes
+  useEffect(() => {
+    if (mediaType === "video" && effectiveVideoUrl && prevVideoUrlRef.current !== effectiveVideoUrl) {
+      prevVideoUrlRef.current = effectiveVideoUrl;
+      setVideoError(false);
+      setIsVideoLoaded(false);
+      if (videoRef.current) {
+        videoRef.current.load();
+        if (autoPlay) {
+          videoRef.current.play().catch(() => {});
+        }
       }
     }
-  }, [videoUrl, mediaType, autoPlay, videoRef]);
+  }, [effectiveVideoUrl, mediaType, autoPlay, videoRef]);
 
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden">
-      {mediaType === "video" && !videoError ? (
-        <video
-          ref={videoRef}
-          key={videoUrl}
-          src={videoUrl}
-          autoPlay={autoPlay}
-          muted={muted}
-          loop={loop}
-          playsInline
-          preload="auto"
-          controls={false}
-          poster={posterImageUrl}
-          onError={() => {
-            console.warn("Video failed to play from URL:", videoUrl, "falling back to poster image");
-            setVideoError(true);
-          }}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-        >
-          <source src={videoUrl} type="video/mp4" />
-        </video>
+    <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#041a2e]">
+      {mediaType === "video" && !videoError && effectiveVideoUrl ? (
+        <>
+          {/* Smooth poster preview layer */}
+          {effectivePosterUrl && (
+            <img
+              src={effectivePosterUrl}
+              alt="Hero Preview"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                isVideoLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
+            />
+          )}
+
+          <video
+            ref={videoRef}
+            src={effectiveVideoUrl}
+            autoPlay={autoPlay}
+            muted={muted}
+            loop={loop}
+            playsInline
+            preload="auto"
+            controls={false}
+            onLoadedData={() => setIsVideoLoaded(true)}
+            onPlaying={() => setIsVideoLoaded(true)}
+            onError={() => {
+              console.warn("Video failed to play from URL:", videoUrl, "falling back to poster/image");
+              setVideoError(true);
+            }}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              isVideoLoaded ? "opacity-100" : "opacity-90"
+            }`}
+          />
+        </>
       ) : (
         <img
-          src={imageUrl || posterImageUrl}
+          src={imageUrl || effectivePosterUrl}
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-100"
         />
       )}
     </div>

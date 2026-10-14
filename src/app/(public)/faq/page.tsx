@@ -1,11 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+
+interface FaqConfigItem {
+  id?: string;
+  questionEn: string;
+  questionBn: string;
+  answerEn: string;
+  answerBn: string;
+}
 
 export default function FAQPage() {
+  const { language } = useLanguage();
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [dynamicFaqs, setDynamicFaqs] = useState<FaqConfigItem[]>([]);
+  const [faqHeader, setFaqHeader] = useState({ titleEn: "Frequently Asked Questions", titleBn: "প্রায়শই জিজ্ঞাসিত প্রশ্নাবলী" });
 
-  const faqs = [
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const res = await fetch(`/api/settings?key=faq_config&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value) {
+            if (data.value.titleEn || data.value.titleBn) {
+              setFaqHeader({
+                titleEn: data.value.titleEn || "Frequently Asked Questions",
+                titleBn: data.value.titleBn || "প্রায়শই জিজ্ঞাসিত প্রশ্নাবলী",
+              });
+            }
+            if (Array.isArray(data.value.items) && data.value.items.length > 0) {
+              setDynamicFaqs(data.value.items);
+            }
+          }
+        }
+      } catch (e) {
+        // use fallback
+      }
+    };
+    fetchFaqs();
+  }, []);
+
+  const defaultFaqs = [
     {
       cat: "Pricing & Budgeting",
       items: [
@@ -29,48 +69,82 @@ export default function FAQPage() {
     }
   ];
 
+  const hasDynamic = dynamicFaqs.length > 0;
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6 relative">
       <div className="max-w-3xl mx-auto flex flex-col gap-12">
         {/* Header */}
         <div className="text-center max-w-xl mx-auto flex flex-col gap-3">
-          <span className="text-xs text-primary-green font-bold uppercase tracking-wider">Help & Support</span>
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">Frequently Asked Questions</h1>
-          <p className="text-xs text-foreground/60 leading-relaxed mt-1">Get instant answers regarding waterproofing, weights, costs, and drip systems.</p>
+          <span className="text-xs text-primary-green font-bold uppercase tracking-wider">
+            {language === "bn" ? "সাহায্য ও তথ্য" : "Help & Support"}
+          </span>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">
+            {language === "bn" ? faqHeader.titleBn : faqHeader.titleEn}
+          </h1>
+          <p className="text-xs text-foreground/60 leading-relaxed mt-1">
+            {language === "bn" ? "ওয়াটারপ্রুফিং, লোড, খরচ এবং বাগান সংক্রান্ত সাধারণ প্রশ্নের উত্তর।" : "Get instant answers regarding waterproofing, weights, costs, and drip systems."}
+          </p>
         </div>
 
-        {/* FAQ Categories list */}
+        {/* FAQ list */}
         <div className="flex flex-col gap-8">
-          {faqs.map((group, idx) => (
-            <div key={idx} className="flex flex-col gap-4">
-              <h3 className="font-serif font-bold text-base text-primary-green border-b border-foreground/5 pb-2">{group.cat}</h3>
-              <div className="flex flex-col gap-4">
-                {group.items.map((item, itemIdx) => {
-                  const globalIdx = `${idx}-${itemIdx}`;
-                  const isOpen = openFaq === globalIdx;
-                  return (
-                    <div 
-                      key={itemIdx}
-                      className="bg-[#f8faf9] border border-foreground/5 rounded-2xl p-5 md:p-6 transition-all duration-300"
+          {hasDynamic ? (
+            <div className="flex flex-col gap-4">
+              {dynamicFaqs.map((item, idx) => {
+                const isOpen = openFaq === `dyn-${idx}`;
+                const q = language === "bn" ? item.questionBn : item.questionEn;
+                const a = language === "bn" ? item.answerBn : item.answerEn;
+                return (
+                  <div key={idx} className="bg-[#f8faf9] border border-foreground/5 rounded-2xl p-5 md:p-6 transition-all duration-300">
+                    <button
+                      onClick={() => setOpenFaq(isOpen ? null : `dyn-${idx}`)}
+                      className="w-full flex items-center justify-between text-left font-bold text-[#1a3020] text-xs md:text-sm focus:outline-none"
                     >
-                      <button 
-                        onClick={() => setOpenFaq(isOpen ? null : globalIdx)}
-                        className="w-full flex items-center justify-between text-left font-bold text-[#1a3020] text-xs md:text-sm focus:outline-none"
-                      >
-                        <span>{item.q}</span>
-                        <span className="text-lg text-primary-green/60 ml-4">{isOpen ? "−" : "+"}</span>
-                      </button>
-                      {isOpen && (
-                        <p className="mt-3 text-xs text-foreground/75 leading-relaxed border-t border-primary-green/10 pt-3 animate-fade-in-up">
-                          {item.a}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                      <span>{q}</span>
+                      <span className="text-lg text-primary-green/60 ml-4">{isOpen ? "−" : "+"}</span>
+                    </button>
+                    {isOpen && (
+                      <p className="mt-3 text-xs text-foreground/75 leading-relaxed border-t border-primary-green/10 pt-3 animate-fade-in-up">
+                        {a}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          ) : (
+            defaultFaqs.map((group, idx) => (
+              <div key={idx} className="flex flex-col gap-4">
+                <h3 className="font-serif font-bold text-base text-primary-green border-b border-foreground/5 pb-2">{group.cat}</h3>
+                <div className="flex flex-col gap-4">
+                  {group.items.map((item, itemIdx) => {
+                    const globalIdx = `${idx}-${itemIdx}`;
+                    const isOpen = openFaq === globalIdx;
+                    return (
+                      <div 
+                        key={itemIdx}
+                        className="bg-[#f8faf9] border border-foreground/5 rounded-2xl p-5 md:p-6 transition-all duration-300"
+                      >
+                        <button 
+                          onClick={() => setOpenFaq(isOpen ? null : globalIdx)}
+                          className="w-full flex items-center justify-between text-left font-bold text-[#1a3020] text-xs md:text-sm focus:outline-none"
+                        >
+                          <span>{item.q}</span>
+                          <span className="text-lg text-primary-green/60 ml-4">{isOpen ? "−" : "+"}</span>
+                        </button>
+                        {isOpen && (
+                          <p className="mt-3 text-xs text-foreground/75 leading-relaxed border-t border-primary-green/10 pt-3 animate-fade-in-up">
+                            {item.a}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

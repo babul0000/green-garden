@@ -28,18 +28,39 @@ const campaigns: CampaignItem[] = [
   },
 ];
 
-export default function ShmaCampaign() {
+interface CampaignConfig {
+  textEn?: string;
+  textBn?: string;
+  items?: CampaignItem[];
+}
+
+export default function ShmaCampaign({ campaignConfig }: { campaignConfig?: CampaignConfig }) {
   const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const activeCampaigns = campaignConfig?.items && campaignConfig.items.length > 0
+    ? campaignConfig.items
+    : campaignConfig?.textEn
+    ? [
+        {
+          titleBn: campaignConfig.textBn || campaigns[0].titleBn,
+          titleEn: campaignConfig.textEn || campaigns[0].titleEn,
+          subtitleBn: campaigns[0].subtitleBn,
+          subtitleEn: campaigns[0].subtitleEn,
+          image: campaigns[0].image,
+        },
+        ...campaigns.slice(1)
+      ]
+    : campaigns;
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % campaigns.length);
+      setCurrentSlide((prev) => (prev + 1) % activeCampaigns.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeCampaigns.length]);
 
-  const active = campaigns[currentSlide];
+  const active = activeCampaigns[currentSlide % activeCampaigns.length] || campaigns[0];
 
   return (
     <section className="relative w-full h-[450px] sm:h-[550px] overflow-hidden bg-black flex items-center justify-center">

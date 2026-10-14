@@ -33,6 +33,10 @@ import MaintenanceSchedulerTab from "@/components/admin/MaintenanceSchedulerTab"
 import FinanceInventoryTab from "@/components/admin/FinanceInventoryTab";
 import DigitalServiceCardTab from "@/components/admin/DigitalServiceCardTab";
 
+// New Phase 2 Tabs
+import HomepageSectionsTab from "@/components/admin/HomepageSectionsTab";
+import ContentManagerTab from "@/components/admin/ContentManagerTab";
+
 export default function AdminPage() {
   const { user, loading: isPending } = useAuth();
   const sessionData = user ? { user } : null;
@@ -842,6 +846,16 @@ export default function AdminPage() {
           {/* TAB 19: DIGITAL SERVICE CARD (STEP 10) */}
           {activeTab === "service-card" && (
             <DigitalServiceCardTab />
+          )}
+
+          {/* TAB 20: HOMEPAGE SECTIONS MANAGER (Phase 2) */}
+          {activeTab === "homepage-sections" && (
+            <HomepageSectionsTab />
+          )}
+
+          {/* TAB 21: CONTENT MANAGER — All Text Dynamic (Phase 2) */}
+          {activeTab === "content-manager" && (
+            <ContentManagerTab />
           )}
         </div>
       </main>

@@ -15,6 +15,8 @@ export default function TreeDoctorPage() {
   const [problem, setProblem] = useState("");
   const [preferredVisitTime, setPreferredVisitTime] = useState("Morning (10:00 AM - 1:00 PM)");
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [cloudinaryPhotoUrl, setCloudinaryPhotoUrl] = useState<string | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isEmergency, setIsEmergency] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,14 +28,32 @@ export default function TreeDoctorPage() {
     }
   }, []);
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setPhotoPreview(URL.createObjectURL(file));
+      setIsUploadingPhoto(true);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "tree-doctor");
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.url) {
+            setCloudinaryPhotoUrl(data.url);
+          }
+        }
+      } catch (err) {
+        console.error("Cloudinary upload failed:", err);
+      } finally {
+        setIsUploadingPhoto(false);
+      }
     }
   };
 
@@ -41,6 +61,11 @@ export default function TreeDoctorPage() {
     e.preventDefault();
     if (!name || !phone || !treeName || !problem) {
       alert("অনুগ্রহ করে আপনার নাম, মোবাইল নম্বর, গাছের নাম ও সমস্যার বিবরণ দিন।");
+      return;
+    }
+
+    if (isUploadingPhoto) {
+      alert("ছবি ক্লাউডিনারিতে আপলোড হচ্ছে, অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন...");
       return;
     }
 
@@ -56,7 +81,7 @@ export default function TreeDoctorPage() {
           treeName,
           problem,
           preferredVisitTime,
-          treePhotoUrl: photoPreview,
+          treePhotoUrl: cloudinaryPhotoUrl || null,
           isEmergency: Boolean(isEmergency),
           userId: user?.id,
         }),

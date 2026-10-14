@@ -1,10 +1,51 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+
+interface AboutConfig {
+  titleEn?: string;
+  titleBn?: string;
+  subtitleEn?: string;
+  subtitleBn?: string;
+  storyEn?: string;
+  storyBn?: string;
+  visionEn?: string;
+  visionBn?: string;
+  missionEn?: string;
+  missionBn?: string;
+  founderName?: string;
+  founderTitle?: string;
+  founderPhoto?: string;
+  founderQuoteEn?: string;
+  founderQuoteBn?: string;
+  stats?: Array<{ labelEn: string; labelBn: string; value: string }>;
+}
 
 export default function AboutPage() {
+  const { language } = useLanguage();
+  const [config, setConfig] = useState<AboutConfig | null>(null);
+
+  useEffect(() => {
+    const fetchAbout = async () => {
+      try {
+        const res = await fetch(`/api/settings?key=about_config&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value) setConfig(data.value);
+        }
+      } catch (e) {
+        // use defaults
+      }
+    };
+    fetchAbout();
+  }, []);
+
   const team = [
-    { name: "Tanvir Ahmed", role: "Founder & CEO", desc: "12+ years in environmental engineering and landscape design.", icon: "👨‍💼" },
+    { name: config?.founderName || "Tanvir Ahmed", role: config?.founderTitle || "Founder & CEO", desc: config?.founderQuoteEn || "12+ years in environmental engineering and landscape design.", icon: "👨‍💼" },
     { name: "Sultana Yasmin", role: "Principal Landscape Architect", desc: "Renowned architect specialized in bio-climatic designs.", icon: "👩‍🎨" },
     { name: "Dr. Rafiqul Islam", role: "Chief Botanist & Agronomist", desc: "Expert in soil health and sub-tropical plant biology.", icon: "👨‍🔬" }
   ];
@@ -16,16 +57,23 @@ export default function AboutPage() {
     { year: "2026", title: "Bangladesh's Premier Landscaper", desc: "Ranked as the #1 design agency for sustainable urban landscaping and eco-friendly garden architecture." }
   ];
 
+  const title = language === "bn" ? (config?.titleBn || "এ আর গ্রিন গার্ডেন সম্পর্কে") : (config?.titleEn || "We Design Harmonious Urban Ecosystems");
+  const subtitle = language === "bn" ? (config?.subtitleBn || "বাংলাদেশের শীর্ষস্থানীয় স্টুডিও") : (config?.subtitleEn || "Our Journey");
+  const story = language === "bn" 
+    ? (config?.storyBn || "একটি সহজ চিন্তা থেকেই আমাদের যাত্রা শুরু: ঢাকার তীব্র নগরায়ন মানুষকে প্রকৃতি থেকে দূরে সরিয়ে দিচ্ছিল। তাই প্রকৃতি ও স্থাপত্যের মেলবন্ধন ঘটিয়ে আমরা গড়ে তুলছি টেকসই সবুজ সমাধান।")
+    : (config?.storyEn || "It all started with a simple observation: Dhaka's rapid urban growth was cutting off citizens from nature. Determined to make a change, our founders combined botanical sciences with modern architecture to create self-sustaining green solutions. Today, we are a full-service team crafting premium landscapes.");
+  const mission = language === "bn" ? (config?.missionBn || "স্থাপত্য নির্মাণে প্রাকৃতিক বাস্তুতন্ত্রের সংযোজন ঘটিয়ে নগরীর তাপমাত্রা হ্রাস এবং বিশুদ্ধ অক্সিজেন সমৃদ্ধ পরিবেশ তৈরি।") : (config?.missionEn || "To integrate natural ecology into modern construction, reducing urban heat islands and building resilient, oxygen-rich environments.");
+  const vision = language === "bn" ? (config?.visionBn || "একটি সবুজ বাংলাদেশের নেতৃত্ব দেওয়া যেখানে প্রতিটি ভবন হবে কার্বন শোষণকারী ছাদবাগান এবং গ্রিন ওয়ালে সজ্জিত।") : (config?.visionEn || "To lead Bangladesh's transition towards green cities where every building features carbon-absorbing rooftops and living vertical walls.");
+
   return (
     <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6">
       <div className="max-w-5xl mx-auto flex flex-col gap-24">
         
         {/* Section 1: Hero Banner */}
         <div className="text-center max-w-3xl mx-auto flex flex-col gap-6 animate-fade-in-up">
-          <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">Our Journey</span>
+          <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">{subtitle}</span>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1a3020]">
-            We Design Harmonious <br />
-            <span className="text-primary-green italic font-medium">Urban Ecosystems</span>
+            {title}
           </h1>
           <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded"></div>
           <p className="text-foreground/75 leading-relaxed text-sm md:text-base">
@@ -38,7 +86,7 @@ export default function AboutPage() {
           <div className="glass-card bg-white/60 border border-foreground/5 rounded-3xl p-8 shadow-md">
             <h3 className="text-xl font-serif font-bold text-[#1a3020] mb-4">Our Story</h3>
             <p className="text-sm text-foreground/75 leading-relaxed">
-              It all started with a simple observation: Dhaka's rapid urban growth was cutting off citizens from nature. Determined to make a change, our founders combined botanical sciences with modern architecture to create self-sustaining green solutions. Today, we are a full-service team of designers, engineers, and agronomists crafting premium landscapes that improve both mental wellness and air quality.
+              {story}
             </p>
           </div>
 
@@ -47,14 +95,14 @@ export default function AboutPage() {
               <span className="text-2xl mt-1">🎯</span>
               <div>
                 <h4 className="font-bold text-[15px] text-[#1a3020]">Our Mission</h4>
-                <p className="text-xs text-foreground/70 mt-1 leading-relaxed">To integrate natural ecology into modern construction, reducing urban heat islands and building resilient, oxygen-rich environments.</p>
+                <p className="text-xs text-foreground/70 mt-1 leading-relaxed">{mission}</p>
               </div>
             </div>
             <div className="bg-[#f4f7f5] border border-primary-green/10 rounded-2xl p-6 flex gap-4">
               <span className="text-2xl mt-1">👁️</span>
               <div>
                 <h4 className="font-bold text-[15px] text-[#1a3020]">Our Vision</h4>
-                <p className="text-xs text-foreground/70 mt-1 leading-relaxed">To lead Bangladesh's transition towards green cities where every building features carbon-absorbing rooftops and living vertical walls.</p>
+                <p className="text-xs text-foreground/70 mt-1 leading-relaxed">{vision}</p>
               </div>
             </div>
           </div>

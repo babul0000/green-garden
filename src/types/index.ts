@@ -249,6 +249,8 @@ export interface IHeroSettings {
   descriptionEn?: string;
   descriptionBn?: string;
   textPosition?: "center" | "bottom-left";
+  version?: number | string;
+  updatedAt?: number | string;
 }
 
 export const defaultHeroSettings: IHeroSettings = {

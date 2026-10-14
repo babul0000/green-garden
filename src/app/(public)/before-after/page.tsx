@@ -3,10 +3,55 @@
 import React, { useState, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
+interface BeforeAfterItem {
+  id: string;
+  titleBn?: string;
+  titleEn?: string;
+  before: string;
+  after: string;
+}
+
 export default function BeforeAfterPage() {
   const { lang, t } = useLanguage();
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [items, setItems] = useState<BeforeAfterItem[]>([
+    {
+      id: "default",
+      titleBn: "ধানমন্ডি স্কাই হ্যাভেন রুফটপ",
+      titleEn: "Dhanmondi Sky Haven Rooftop",
+      before: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=1200&auto=format&fit=crop",
+      after: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop",
+    },
+  ]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  React.useEffect(() => {
+    const fetchBA = async () => {
+      try {
+        const res = await fetch(`/api/gallery?_t=${Date.now()}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          const list: any[] = Array.isArray(data) ? data : data?.items || [];
+          const filtered = list.filter((i) => i.beforeImageUrl && i.afterImageUrl);
+          if (filtered.length > 0) {
+            setItems(filtered.map((f, idx) => ({
+              id: f.id || f._id || `ba-${idx}`,
+              titleBn: f.titleBn || f.title || `রূপান্তর #${idx + 1}`,
+              titleEn: f.titleEn || f.title || `Transformation #${idx + 1}`,
+              before: f.beforeImageUrl,
+              after: f.afterImageUrl,
+            })));
+          }
+        }
+      } catch (e) {
+        // use default
+      }
+    };
+    fetchBA();
+  }, []);
+
+  const activeItem = items[activeIndex] || items[0];
 
   const handleMove = (clientX: number) => {
     if (!containerRef.current) return;
@@ -49,6 +94,25 @@ export default function BeforeAfterPage() {
           </p>
         </div>
 
+        {/* Switcher Pills if multiple items */}
+        {items.length > 1 && (
+          <div className="flex gap-2 justify-center flex-wrap">
+            {items.map((item, idx) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveIndex(idx)}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  activeIndex === idx
+                    ? "bg-[#1a3020] text-white shadow-md"
+                    : "bg-white border border-foreground/10 text-foreground/70 hover:border-primary-green"
+                }`}
+              >
+                {lang === "bn" ? item.titleBn : item.titleEn}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div 
           ref={containerRef}
           onMouseMove={handleMouseMove}
@@ -58,7 +122,7 @@ export default function BeforeAfterPage() {
           {/* Before */}
           <div className="absolute inset-0 bg-[#f4f7f5]">
             <img 
-              src="https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=1200&auto=format&fit=crop" 
+              src={activeItem.before} 
               alt="Before"
               className="w-full h-full object-cover pointer-events-none"
               onContextMenu={e => e.preventDefault()}
@@ -74,7 +138,7 @@ export default function BeforeAfterPage() {
             style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }}
           >
             <img 
-              src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop" 
+              src={activeItem.after} 
               alt="After"
               className="w-full h-full object-cover pointer-events-none"
               onContextMenu={e => e.preventDefault()}

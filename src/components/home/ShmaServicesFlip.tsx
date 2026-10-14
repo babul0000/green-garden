@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ShmaService {
@@ -70,8 +70,45 @@ const services: ShmaService[] = [
   },
 ];
 
-export default function ShmaServicesFlip() {
+export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
+  const [serviceList, setServiceList] = useState<ShmaService[]>(services);
+
+  React.useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch(`/api/services?_t=${Date.now()}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : data?.services || [];
+          if (items.length > 0) {
+            const mapped: ShmaService[] = items.slice(0, 6).map((s: any, idx: number) => ({
+              id: String(idx + 1).padStart(2, "0"),
+              titleBn: s.bengaliTitle || s.titleBn || s.title || "",
+              titleEn: s.title || s.titleEn || "",
+              descBn: s.descBn || s.desc || s.description || "",
+              descEn: s.descEn || s.desc || s.description || "",
+              scopeBn: s.features || s.scopeBn || ["কনসেপ্ট ডিজাইন", "বাস্তবায়ন", "রক্ষণাবেক্ষণ"],
+              scopeEn: s.features || s.scopeEn || ["Concept Design", "Implementation", "Maintenance"],
+            }));
+            setServiceList(mapped);
+          }
+        }
+      } catch (e) {
+        // fallback to default
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const gridColsClass =
+    columns === 1
+      ? "grid-cols-1 max-w-2xl mx-auto"
+      : columns === 2
+      ? "grid-cols-1 md:grid-cols-2"
+      : columns === 4
+      ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section id="service" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
@@ -91,9 +128,9 @@ export default function ShmaServicesFlip() {
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
-      {/* 6 Flip-Box Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {services.map((item) => (
+      {/* Dynamic Flip-Box Grid */}
+      <div className={`grid ${gridColsClass} gap-6 sm:gap-8`}>
+        {serviceList.map((item) => (
           <div
             key={item.id}
             className="group relative h-[300px] sm:h-[340px] [perspective:1000px] cursor-pointer"

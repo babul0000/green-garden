@@ -1,29 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
-  try {
-    const messages = await prisma.contactMessage.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(messages, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
-    });
-  } catch (error: any) {
-    console.error("Error fetching messages:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+export const GET = withAuthErrorHandling(async (req: Request) => {
+  await requireAdmin(req);
+  const messages = await prisma.contactMessage.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return NextResponse.json(messages, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    },
+  });
+});
 
 export async function POST(req: Request) {
   try {

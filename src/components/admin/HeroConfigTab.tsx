@@ -77,22 +77,41 @@ export default function HeroConfigTab() {
         currentVal = d.value || {};
       }
 
-      const updatedVal = {
-        ...currentVal,
-        hero_config: config,
+      const timestamp = Date.now();
+      const updatedHeroConfig = {
+        ...config,
+        version: timestamp,
+        updatedAt: timestamp,
       };
 
+      const updatedVal = {
+        ...currentVal,
+        hero_config: updatedHeroConfig,
+      };
+
+      // 1. Save within site_config
       const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedVal),
       });
 
+      // 2. Also save to dedicated key hero_config for direct lookup
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          key: "hero_config",
+          value: updatedHeroConfig,
+        }),
+      });
+
       if (res.ok) {
+        setConfig(updatedHeroConfig);
         setSavedSuccess(true);
         // Dispatch live event to immediately update any open homepage components
         window.dispatchEvent(
-          new CustomEvent("hero-config-updated", { detail: config })
+          new CustomEvent("hero-config-updated", { detail: updatedHeroConfig })
         );
         setTimeout(() => setSavedSuccess(false), 4000);
       } else {
@@ -168,10 +187,13 @@ export default function HeroConfigTab() {
       if (res.ok) {
         const data = await res.json();
         if (data.url) {
+          const timestamp = Date.now();
           setConfig((prev) => ({
             ...prev,
             videoUrl: data.url,
             mediaType: "video",
+            version: timestamp,
+            updatedAt: timestamp,
           }));
         }
       } else {
@@ -653,9 +675,21 @@ export default function HeroConfigTab() {
                       disabled={uploadingPoster}
                     />
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const matchedPreset = VIDEO_PRESETS.find((p) => p.videoUrl === config.videoUrl);
+                      const defaultPoster = matchedPreset ? matchedPreset.posterUrl : VIDEO_PRESETS[0].posterUrl;
+                      setConfig({ ...config, posterImageUrl: defaultPoster, imageUrl: defaultPoster });
+                    }}
+                    className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-xs font-mono uppercase tracking-wider border border-white/10 shrink-0 cursor-pointer"
+                    title="ভিডিও ফ্রেমের সাথে পোস্টার ছবি সিঙ্ক করুন"
+                  >
+                    ভিডিওর সাথে সিঙ্ক 🔄
+                  </button>
                 </div>
-                <p className="text-[11px] text-white/40 mt-1 font-mono">
-                  ভিডিও লোড হওয়ার মুহূর্তে এবং স্লো ইন্টারনেটে এই ছবিটি প্রদর্শন হবে।
+                <p className="text-[11px] text-emerald-400/80 mt-1 font-mono">
+                  ভিডিও লোড হওয়ার মুহূর্তে এই ছবিটি দেখাবে। ভিডিওর সাথে মিল রাখতে &quot;ভিডিওর সাথে সিঙ্ক 🔄&quot; বাটনে ক্লিক করতে পারেন।
                 </p>
               </div>
 

@@ -29,10 +29,15 @@ export default function ShmaHeroVideo() {
         });
         if (res.ok) {
           const data = await res.json();
-          if (data?.value?.hero_config) {
+          const heroConfig =
+            data?.hero_config ||
+            data?.value?.hero_config ||
+            (data?.key === "hero_config" ? data?.value : null);
+
+          if (heroConfig && (heroConfig.videoUrl || heroConfig.mediaType)) {
             setConfig((prev) => ({
               ...prev,
-              ...data.value.hero_config,
+              ...heroConfig,
             }));
           }
         }
@@ -60,18 +65,17 @@ export default function ShmaHeroVideo() {
     };
   }, []);
 
-  // 2. Control video element playback & speed (force reload when video changes)
+  // 2. Control video element playback & speed (seamless sync)
   useEffect(() => {
     if (videoRef.current && config.mediaType === "video") {
       videoRef.current.defaultMuted = config.muted;
       videoRef.current.muted = config.muted;
       videoRef.current.playbackRate = config.playbackSpeed || 1.0;
-      videoRef.current.load();
-      if (config.autoPlay) {
+      if (config.autoPlay && videoRef.current.paused) {
         videoRef.current.play().catch(() => {});
       }
     }
-  }, [config.mediaType, config.videoUrl, config.muted, config.autoPlay, config.playbackSpeed]);
+  }, [config.mediaType, config.muted, config.autoPlay, config.playbackSpeed]);
 
   const handleMouseEnter = () => {
     if (leaveTimerRef.current) {
@@ -113,7 +117,7 @@ export default function ShmaHeroVideo() {
 
   return (
     <section className="relative w-full h-[100dvh] min-h-[560px] overflow-hidden bg-[#041a2e] flex items-center justify-center select-none">
-      {/* 1. Dynamic Video / Image Background Media */}
+      {/* 1. Dynamic Video / Image Background Media with Anti-Cache Version */}
       <HeroBackgroundMedia
         mediaType={config.mediaType}
         videoUrl={config.videoUrl}
@@ -123,6 +127,7 @@ export default function ShmaHeroVideo() {
         muted={config.muted}
         loop={config.loop}
         videoRef={videoRef}
+        version={config.version || config.updatedAt}
       />
 
       {/* 2. Visual Depth & Cinematic Vignette Overlays */}

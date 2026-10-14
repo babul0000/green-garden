@@ -1,40 +1,45 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
-  try {
-    // 1. Calculate Incomes from Invoices and Projects
-    const invoices = await prisma.invoice.findMany();
-    const paidIncome = invoices.reduce((acc, inv) => acc + inv.paidAmount, 0);
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 
-    // Breakdown streams
-    const projectIncome = Math.round(paidIncome * 0.65);
-    const maintenanceIncome = Math.round(paidIncome * 0.18);
-    const treeDoctorIncome = Math.round(paidIncome * 0.08);
-    const plantSalesIncome = Math.round(paidIncome * 0.09);
+// Admin only: accounting data is sensitive
+export const GET = withAuthErrorHandling(async (req: Request) => {
+  await requireAdmin(req);
 
-    const totalIncome = projectIncome + maintenanceIncome + treeDoctorIncome + plantSalesIncome;
+  const invoices = await prisma.invoice.findMany();
+  const paidIncome = invoices.reduce((acc, inv) => acc + inv.paidAmount, 0);
 
-    // 2. Calculate Expenses
-    const employees = await prisma.employee.findMany();
-    const totalSalaries = employees.reduce((acc, emp) => acc + (emp.salary || 0), 0);
+  const projectIncome = Math.round(paidIncome * 0.65);
+  const maintenanceIncome = Math.round(paidIncome * 0.18);
+  const treeDoctorIncome = Math.round(paidIncome * 0.08);
+  const plantSalesIncome = Math.round(paidIncome * 0.09);
+  const totalIncome = projectIncome + maintenanceIncome + treeDoctorIncome + plantSalesIncome;
 
-    const projects = await prisma.project.findMany();
-    const projectExpenses = projects.reduce((acc, p) => acc + (p.totalExpense || 0), 0);
+  const employees = await prisma.employee.findMany({ select: { salary: true } });
+  const totalSalaries = employees.reduce((acc, emp) => acc + (emp.salary || 0), 0);
 
-    const plantMaterialExpense = Math.round(projectExpenses * 0.4);
-    const soilFertilizerExpense = Math.round(projectExpenses * 0.2);
-    const transportExpense = Math.round(projectExpenses * 0.15);
-    const toolsIrrigationExpense = Math.round(projectExpenses * 0.15);
-    const officeExpense = 25000;
+  const projects = await prisma.project.findMany({ select: { totalExpense: true } });
+  const projectExpenses = projects.reduce((acc, p) => acc + (p.totalExpense || 0), 0);
 
-    const totalExpense = totalSalaries + projectExpenses + officeExpense;
-    const netProfit = totalIncome - totalExpense;
+  const plantMaterialExpense = Math.round(projectExpenses * 0.4);
+  const soilFertilizerExpense = Math.round(projectExpenses * 0.2);
+  const transportExpense = Math.round(projectExpenses * 0.15);
+  const toolsIrrigationExpense = Math.round(projectExpenses * 0.15);
+  const officeExpense = 25000;
+  const totalExpense = totalSalaries + projectExpenses + officeExpense;
+  const netProfit = totalIncome - totalExpense;
 
-    return NextResponse.json({
+  return NextResponse.json(
+    {
       summary: {
         totalIncome,
         totalExpense,
@@ -55,18 +60,7 @@ export async function GET() {
         toolsIrrigation: { label: "Tools & Equipment (টুলস ও পাইপ)", amount: toolsIrrigationExpense },
         officeExpense: { label: "Office & Utilities (অফিস ও অপারেশনাল)", amount: officeExpense },
       },
-    }, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
-    });
-  } catch (error: any) {
-    console.error("Error calculating accounting:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+    },
+    { headers: NO_CACHE }
+  );
+});

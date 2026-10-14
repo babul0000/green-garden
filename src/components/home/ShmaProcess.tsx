@@ -42,8 +42,31 @@ const steps: ProcessStep[] = [
   },
 ];
 
-export default function ShmaProcess() {
+interface ProcessConfig {
+  titleEn?: string;
+  titleBn?: string;
+  steps?: Array<{
+    iconEn?: string;
+    titleEn?: string;
+    titleBn?: string;
+    descEn?: string;
+    descBn?: string;
+    image?: string;
+  }>;
+}
+
+export default function ShmaProcess({ processConfig }: { processConfig?: ProcessConfig }) {
   const { language, t } = useLanguage();
+
+  const activeSteps = processConfig?.steps && processConfig.steps.length > 0
+    ? processConfig.steps.map((s, idx) => ({
+        titleBn: s.titleBn || steps[idx % steps.length]?.titleBn || "",
+        titleEn: s.titleEn || steps[idx % steps.length]?.titleEn || "",
+        descBn: s.descBn || steps[idx % steps.length]?.descBn || "",
+        descEn: s.descEn || steps[idx % steps.length]?.descEn || "",
+        image: s.image || steps[idx % steps.length]?.image || "",
+      }))
+    : steps;
 
   return (
     <section id="process" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
@@ -69,8 +92,10 @@ export default function ShmaProcess() {
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-3">
           <h3 className="font-display font-light text-2xl sm:text-3xl text-[#3d2e17] leading-tight">
-            A Thoughtful Journey to
-            <span className="block text-[#5a9dff] mt-1">Transformative Solutions</span>
+            {processConfig?.titleEn || "A Thoughtful Journey to"}
+            <span className="block text-[#5a9dff] mt-1">
+              {processConfig?.titleBn ? processConfig.titleBn : "Transformative Solutions"}
+            </span>
           </h3>
           <p className="font-sans text-xs sm:text-sm text-[#75787b] font-light leading-relaxed pt-2">
             {t(
@@ -82,7 +107,7 @@ export default function ShmaProcess() {
 
         {/* Right Columns: Steps Grid */}
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {steps.map((step, idx) => (
+          {activeSteps.map((step, idx) => (
             <div key={idx} className="space-y-3 group">
               <div className="aspect-[4/3] overflow-hidden bg-stone-100">
                 <img

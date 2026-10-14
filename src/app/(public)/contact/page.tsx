@@ -1,27 +1,97 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+
+interface ContactConfig {
+  titleEn?: string;
+  titleBn?: string;
+  address?: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  officeHours?: string;
+  mapEmbedUrl?: string;
+  fbPage?: string;
+  instagram?: string;
+  youtube?: string;
+}
 
 export default function ContactPage() {
+  const { language } = useLanguage();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [branch, setBranch] = useState("dhaka");
   const [service, setService] = useState("rooftop");
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [config, setConfig] = useState<ContactConfig | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const res = await fetch(`/api/settings?key=contact_config&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value) setConfig(data.value);
+        }
+      } catch (e) {
+        // use defaults
+      }
+    };
+    fetchContact();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name && phone) {
+    if (!name || !phone) return;
+    setSubmitting(true);
+    try {
+      await fetch("/api/quotations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientName: name,
+          clientPhone: phone,
+          clientEmail: email,
+          projectType: service,
+          siteAddress: branch,
+          notes: message,
+          status: "PENDING",
+        }),
+      });
       setSubmitted(true);
+    } catch {
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const branches = [
-    { city: "Dhaka (Head Office)", address: "House 42, Road 11, Banani, Dhaka", phone: "+880 1700-000000", email: "dhaka@argreengarden.com" },
-    { city: "Chittagong Branch", address: "A K Khan Circle, GEC, Chittagong", phone: "+880 1700-000001", email: "ctg@argreengarden.com" },
-    { city: "Sylhet Branch", address: "Nirvana Plaza, Zindabazar, Sylhet", phone: "+880 1700-000002", email: "sylhet@argreengarden.com" }
+    {
+      city: language === "bn" ? "ঢাকা (প্রধান কার্যালয়)" : "Dhaka (Head Office)",
+      address: config?.address || "House 42, Road 11, Banani, Dhaka",
+      phone: config?.phone || "+880 1883-012641",
+      email: config?.email || "info@argreengarden.com",
+    },
+    {
+      city: language === "bn" ? "চট্টগ্রাম শাখা" : "Chittagong Branch",
+      address: "A K Khan Circle, GEC, Chittagong",
+      phone: "+880 1700-000001",
+      email: "ctg@argreengarden.com",
+    },
+    {
+      city: language === "bn" ? "সিলেট শাখা" : "Sylhet Branch",
+      address: "Nirvana Plaza, Zindabazar, Sylhet",
+      phone: "+880 1700-000002",
+      email: "sylhet@argreengarden.com",
+    },
   ];
 
   return (

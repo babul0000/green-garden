@@ -267,18 +267,24 @@ export default function GalleryPage() {
 
   const [projects, setProjects] = useState<GalleryProject[]>(initialProjects);
 
-  // Fetch dynamic projects from PostgreSQL API
+  // Fetch dynamic projects & gallery items
   useEffect(() => {
     const fetchDbProjects = async () => {
       try {
-        const res = await fetch("/api/projects", { cache: "no-store" });
-        if (res.ok) {
-          const dbProjects: any[] = await res.json();
+        const [projRes, galRes] = await Promise.all([
+          fetch(`/api/projects?_t=${Date.now()}`, { cache: "no-store" }),
+          fetch(`/api/gallery?_t=${Date.now()}`, { cache: "no-store" }).catch(() => null),
+        ]);
+
+        let allDynamic: GalleryProject[] = [];
+
+        if (projRes.ok) {
+          const dbProjects: any[] = await projRes.json();
           if (Array.isArray(dbProjects) && dbProjects.length > 0) {
             const formatted: GalleryProject[] = dbProjects.map((p) => ({
               id: p.id || p._id || p.slug,
-              name: p.name,
-              bengaliName: p.name,
+              name: p.name || p.title || "Project",
+              bengaliName: p.nameBn || p.name || p.title || "প্রকল্প",
               location: p.location || "Dhaka, Bangladesh",
               projectType: p.category || "Landscape Design",
               category: p.category || "Residential",
@@ -287,19 +293,44 @@ export default function GalleryPage() {
                 ? new Date(p.completionDate).toLocaleDateString("bn-BD", { year: "numeric", month: "long" })
                 : "Ongoing",
               description: p.description || "A R Green Garden-এর প্রফেশনাল ল্যান্ডস্কেপিং প্রকল্প।",
-              mainImage: p.afterImage || (p.images && p.images[0]) || p.beforeImage || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
+              mainImage: p.afterImage || (p.images && p.images[0]) || p.beforeImage || p.imageUrl || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
               photos: (Array.isArray(p.images) && p.images.length > 0)
                 ? p.images
-                : [p.afterImage || p.beforeImage || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80"],
+                : [p.afterImage || p.beforeImage || p.imageUrl || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80"],
               beforePhoto: p.beforeImage || undefined,
               afterPhoto: p.afterImage || undefined,
             }));
-
-            // Merge with initial, ensuring unique IDs and rich coverage
-            const dbIds = new Set(formatted.map(f => f.name.toLowerCase()));
-            const remaining = initialProjects.filter(p => !dbIds.has(p.name.toLowerCase()));
-            setProjects([...formatted, ...remaining]);
+            allDynamic.push(...formatted);
           }
+        }
+
+        if (galRes && galRes.ok) {
+          const galData = await galRes.json();
+          const galItems: any[] = Array.isArray(galData) ? galData : (galData?.items || []);
+          if (galItems.length > 0) {
+            const formattedGal: GalleryProject[] = galItems.map((g, idx) => ({
+              id: g.id || g._id || `gal-${idx}`,
+              name: g.titleEn || g.title || "Gallery Item",
+              bengaliName: g.titleBn || g.title || "গ্যালারি আইটেম",
+              location: g.location || "Dhaka, Bangladesh",
+              projectType: g.category || "Landscape",
+              category: g.category || "All",
+              status: "Completed",
+              completionDate: g.dateBn || "২০২৬",
+              description: g.descBn || g.descEn || g.description || "",
+              mainImage: g.imageUrl || g.image || (g.photos && g.photos[0]) || "",
+              photos: Array.isArray(g.photos) ? g.photos : [g.imageUrl || g.image],
+              beforePhoto: g.beforeImageUrl || undefined,
+              afterPhoto: g.afterImageUrl || undefined,
+            }));
+            allDynamic.push(...formattedGal);
+          }
+        }
+
+        if (allDynamic.length > 0) {
+          const dbIds = new Set(allDynamic.map((f) => f.name.toLowerCase()));
+          const remaining = initialProjects.filter((p) => !dbIds.has(p.name.toLowerCase()));
+          setProjects([...allDynamic, ...remaining]);
         }
       } catch (err) {
         console.warn("Could not fetch DB projects, using rich masterplan projects:", err);

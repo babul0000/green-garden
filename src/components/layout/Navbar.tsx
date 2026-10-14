@@ -1,136 +1,25 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import {
-  NavbarProps,
-  IMenuLink,
-  INavbarConfig,
-  defaultNavbarConfig,
-} from "./navbar/types";
-import NavLogo from "./navbar/NavLogo";
-import NavLanguageToggle from "./navbar/NavLanguageToggle";
-import NavSocials from "./navbar/NavSocials";
-import NavHotline from "./navbar/NavHotline";
-import NavWhatsAppBtn from "./navbar/NavWhatsAppBtn";
-import NavUserAuthBtn from "./navbar/NavUserAuthBtn";
-import NavMenuDrawer from "./navbar/NavMenuDrawer";
 
-// Re-export types for backward compatibility
-export type { NavbarProps, IMenuLink, INavbarConfig };
-export { defaultNavbarConfig };
+interface NavbarProps {
+  onOpenEstimator?: () => void;
+}
 
 export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
-  const { toggleLanguage, t } = useLanguage();
-  const pathname = usePathname();
-  const router = useRouter();
-
+  const { language, setLanguage, toggleLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [config, setConfig] = useState<INavbarConfig>(defaultNavbarConfig);
-  const [rotateDeg, setRotateDeg] = useState(0);
-  const [announcement, setAnnouncement] = useState<{
-    enabled: boolean;
-    text: string;
-    link?: string;
-  }>({ enabled: false, text: "" });
 
-  const handleToggleLang = () => {
-    setRotateDeg((prev) => prev + 360);
-    toggleLanguage();
-  };
-
-  // Check if current page is the homepage with dark video hero
-  const isHomePage = pathname === "/";
-  // On interior pages, always keep the crisp light header style; on homepage, switch on scroll
-  const isLightHeader = !isHomePage || isScrolled;
-
-  // Load navbar settings from API
-  useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const res = await fetch("/api/settings");
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.value) {
-            if (data.value.enableAnnouncement && data.value.announcementText) {
-              setAnnouncement({
-                enabled: true,
-                text: data.value.announcementText,
-                link: data.value.announcementLink,
-              });
-            } else {
-              setAnnouncement({ enabled: false, text: "" });
-            }
-          }
-          if (data?.value?.navbar_config) {
-            setConfig({
-              ...defaultNavbarConfig,
-              ...data.value.navbar_config,
-              menuLinks: data.value.navbar_config.menuLinks || defaultNavbarConfig.menuLinks,
-            });
-          } else if (data?.value) {
-            setConfig((prev) => ({
-              ...prev,
-              logoText: data.value.title || prev.logoText,
-              hotlinePhone: data.value.phone || prev.hotlinePhone,
-              facebookUrl: data.value.fbPage || prev.facebookUrl,
-            }));
-          }
-        }
-      } catch (err) {
-        console.warn("Navbar config fetch fallback to default");
-      }
-    };
-
-    loadConfig();
-
-    // Listen for live update events from admin panel
-    const handleUpdate = (e: any) => {
-      if (e.detail) {
-        setConfig((prev) => ({ ...prev, ...e.detail }));
-      }
-    };
-
-    const handleSiteSettingsUpdated = (e: any) => {
-      if (e?.detail) {
-        if (e.detail.enableAnnouncement && e.detail.announcementText) {
-          setAnnouncement({
-            enabled: true,
-            text: e.detail.announcementText,
-            link: e.detail.announcementLink,
-          });
-        } else {
-          setAnnouncement({ enabled: false, text: "" });
-        }
-        if (e.detail.title) {
-          setConfig((prev) => ({ ...prev, logoText: e.detail.title }));
-        }
-        if (e.detail.phone) {
-          setConfig((prev) => ({ ...prev, hotlinePhone: e.detail.phone }));
-        }
-        if (e.detail.fbPage) {
-          setConfig((prev) => ({ ...prev, facebookUrl: e.detail.fbPage }));
-        }
-      }
-    };
-
-    window.addEventListener("navbar-config-updated", handleUpdate);
-    window.addEventListener("site-settings-updated", handleSiteSettingsUpdated);
-    return () => {
-      window.removeEventListener("navbar-config-updated", handleUpdate);
-      window.removeEventListener("site-settings-updated", handleSiteSettingsUpdated);
-    };
-  }, []);
-
-  // Handle scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
+      setIsScrolled(window.scrollY > 40);
     };
+    // Initialize state immediately on mount
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -148,183 +37,448 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
     };
   }, [menuOpen]);
 
-  // Handle ESC key to close menu
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setMenuOpen(false);
-      }
-    };
-    if (menuOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-    }
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [menuOpen]);
-
-  // Handle link click with smooth scroll for hash anchors on homepage or router navigation on subpages
-  const handleLinkClick = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>, targetUrl: string) => {
-      setMenuOpen(false);
-
-      if (targetUrl.startsWith("#")) {
-        if (isHomePage) {
-          e.preventDefault();
-          const el = document.querySelector(targetUrl);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth" });
-            window.history.pushState(null, "", targetUrl);
-          }
-        } else {
-          e.preventDefault();
-          router.push(`/${targetUrl}`);
-        }
-      }
-    },
-    [isHomePage, router]
-  );
-
-  // Handle opening cost estimator modal
-  const handleTriggerEstimator = () => {
-    setMenuOpen(false);
-    if (onOpenEstimator) {
-      onOpenEstimator();
-    } else {
-      window.dispatchEvent(new CustomEvent("open-estimator"));
-    }
-  };
-
-  // Handle opening emergency tree doctor modal
-  const handleTriggerTreeDoctor = () => {
-    setMenuOpen(false);
-    window.dispatchEvent(new CustomEvent("open-tree-doctor"));
-  };
-
-  const visibleMenuLinks = (config.menuLinks || defaultNavbarConfig.menuLinks!).filter(
-    (link) => link.isVisible !== false
-  );
-
-  const whatsappLink = `https://wa.me/${config.whatsappNumber || "8801883012641"}?text=${encodeURIComponent(
-    config.whatsappMessage || "Hello A R Green Garden, I would like to consult about my garden."
-  )}`;
-
   return (
     <>
-      {/* Dynamic Top Announcement Notice Bar */}
-      {announcement.enabled && (
-        <aside
-          role="region"
-          aria-label="Studio Announcement"
-          className="fixed top-0 left-0 w-full z-50 bg-[#2B4D33] text-white text-[11px] sm:text-xs py-1 px-4 text-center font-sans tracking-wide flex items-center justify-center gap-2 shadow-xs transition-all"
-        >
-          <span>{announcement.text}</span>
-          {announcement.link && (
-            <a href={announcement.link} className="underline hover:text-emerald-200 font-semibold ml-1">
-              বিস্তারিত ➔
-            </a>
-          )}
-        </aside>
-      )}
-
-      {/* ================= ARCHITECTURAL TOP HEADER BAR ================= */}
+      {/* DYNAMIC SHMA ARCHITECTURAL HEADER (TRANSPARENT AT TOP, FROSTED WHITE ON SCROLL) */}
       <header
-        className={`fixed left-0 w-full z-40 transition-all duration-500 ease-out ${
-          announcement.enabled ? "top-[28px] sm:top-[26px]" : "top-0"
-        } ${
-          isLightHeader
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+          isScrolled
             ? "bg-white/95 backdrop-blur-md shadow-xs py-3.5 sm:py-4 border-b border-black/5 text-[#323232]"
             : "bg-transparent py-5 sm:py-6 text-white"
         }`}
-        role="banner"
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-3 sm:gap-4">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4">
           
-          {/* Section 1: Hamburger Menu Trigger + Rotating Language Toggle */}
+          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Language Switcher */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <button
               onClick={() => setMenuOpen(true)}
-              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2B4D33] rounded-lg"
+              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
               aria-label={t("মেন্যু খুলুন", "Open Navigation Menu")}
-              aria-expanded={menuOpen}
             >
               <div className="flex flex-col gap-1.5 w-7">
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isLightHeader ? "bg-[#323232]" : "bg-white"
+                    isScrolled ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isLightHeader ? "bg-[#323232]" : "bg-white"
+                    isScrolled ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isLightHeader ? "bg-[#323232]" : "bg-white"
+                    isScrolled ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
               </div>
             </button>
 
-            {config.enableLanguageSwitch !== false && (
-              <NavLanguageToggle
-                isLightHeader={isLightHeader}
-                rotateDeg={rotateDeg}
-                onToggle={handleToggleLang}
-              />
-            )}
+            {/* Language Switcher Pill Toggle */}
+            <button
+              onClick={toggleLanguage}
+              className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
+                isScrolled
+                  ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
+                  : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
+              }`}
+              title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
+            >
+              <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
+                বাংলা
+              </span>
+              <span className="opacity-40">|</span>
+              <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-60"}>
+                EN
+              </span>
+            </button>
           </div>
 
-          {/* Section 2: Centered Brand Logo (Image or Text) */}
-          <NavLogo config={config} />
+          {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
+          <div className="flex-1 flex items-center justify-center text-center px-2">
+            <Link href="/" className="group inline-block whitespace-nowrap">
+              <span className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] tracking-[0.16em] sm:tracking-[0.22em] uppercase transition-colors">
+                A R GREEN GARDEN
+              </span>
+            </Link>
+          </div>
 
-          {/* Section 3: Right Action Column (Socials, Hotline, WhatsApp, Auth) */}
+          {/* Column 3: Hotline, WhatsApp & Dashboard */}
           <div className="flex items-center justify-end gap-2 sm:gap-3.5 shrink-0">
-            {config.socialVisible !== false && (
-              <NavSocials
-                facebookUrl={config.facebookUrl}
-                instagramUrl={config.instagramUrl}
-                linkedinUrl={config.linkedinUrl}
-              />
-            )}
+            {/* Social Icons - visible on large monitors to prevent crowding */}
+            <div className="hidden xl:flex items-center gap-3.5 text-inherit">
+              {/* Facebook */}
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="Facebook"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
+                  <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
+                </svg>
+              </a>
 
-            {config.hotlineVisible !== false && (
-              <NavHotline
-                isLightHeader={isLightHeader}
-                hotlinePhone={config.hotlinePhone}
-                hotlineDisplay={config.hotlineDisplay}
-              />
-            )}
+              {/* Instagram */}
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="Instagram"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
+                </svg>
+              </a>
 
-            {config.whatsappVisible !== false && (
-              <NavWhatsAppBtn whatsappLink={whatsappLink} />
-            )}
+              {/* LinkedIn */}
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-inherit hover:opacity-60 transition-opacity"
+                aria-label="LinkedIn"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                  <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
+                </svg>
+              </a>
+            </div>
 
-            <NavUserAuthBtn
-              isLightHeader={isLightHeader}
-              user={user}
-            />
+            {/* Hotline Phone */}
+            <a
+              href="tel:01883012641"
+              className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
+                isScrolled ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
+              }`}
+            >
+              ০১88৩-০১২৬৪১
+            </a>
+
+            {/* Direct WhatsApp Action */}
+            <a
+              href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <span>💬</span>
+              <span className="hidden md:inline">WhatsApp</span>
+            </a>
+
+            {/* Login / Dashboard Link */}
+            {user ? (
+              <Link
+                href={
+                  user.role?.toLowerCase() === "admin" || user.role?.toLowerCase() === "editor"
+                    ? "/admin"
+                    : user.role?.toLowerCase() === "employee"
+                    ? "/employee-portal"
+                    : user.role?.toLowerCase() === "moderator"
+                    ? "/moderator"
+                    : "/client-dashboard"
+                }
+                className="pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-600/40"
+                title={user.name ? `Logged in as ${user.name}` : "Dashboard"}
+              >
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-emerald-950 border border-white/60 flex items-center justify-center shrink-0 shadow-inner">
+                  <img
+                    src={
+                      user.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=064e3b&color=ffffff&bold=true&size=64`
+                    }
+                    alt={user.name || "User"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="tracking-wide">Dashboard</span>
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                className={`px-3.5 py-1 rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  isScrolled
+                    ? "bg-stone-100 hover:bg-stone-200 text-[#323232] border border-stone-300"
+                    : "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-xs"
+                }`}
+              >
+                <span>👤</span>
+                <span>{t("লগইন", "Login")}</span>
+              </Link>
+            )}
           </div>
 
         </div>
       </header>
 
-      {/* ================= ARCHITECTURAL LINEN SLIDE-IN DRAWER MODAL ================= */}
-      <NavMenuDrawer
-        isOpen={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        config={config}
-        visibleMenuLinks={visibleMenuLinks}
-        pathname={pathname}
-        isHomePage={isHomePage}
-        rotateDeg={rotateDeg}
-        onToggleLang={handleToggleLang}
-        onLinkClick={handleLinkClick}
-        onTriggerEstimator={handleTriggerEstimator}
-        onTriggerTreeDoctor={handleTriggerTreeDoctor}
-        user={user}
-        onLogout={logout}
-        whatsappLink={whatsappLink}
-      />
+      {/* EXACT SHMA POPUP 2433: FULL-HEIGHT SLIDE-IN DRAWER MENU */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-[100] flex">
+          {/* Backdrop Overlay */}
+          <div
+            onClick={() => setMenuOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity"
+          ></div>
+
+          {/* Left Slide Menu Container: Exact Shma Background #6f7375 */}
+          <div className="relative w-full max-w-[480px] bg-[#6f7375] text-white h-full overflow-y-auto px-8 sm:px-12 py-10 flex flex-col justify-between z-10 shadow-2xl animate-fade-in-up">
+            
+            {/* Top Close Hamburger & Language Toggle */}
+            <div className="flex justify-between items-center mb-6">
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="group flex items-center p-2 -ml-2 text-white hover:opacity-70 cursor-pointer focus:outline-none"
+                aria-label="Close Navigation Menu"
+              >
+                <div className="flex flex-col gap-1.5 w-7">
+                  <span className="w-full h-[1.5px] bg-white"></span>
+                  <span className="w-full h-[1.5px] bg-white"></span>
+                  <span className="w-full h-[1.5px] bg-white"></span>
+                </div>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-white/60">
+                  {t("ভাষা", "Language")}:
+                </span>
+                <button
+                  onClick={() => setLanguage("bn")}
+                  className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
+                    language === "bn"
+                      ? "bg-white text-[#3d2e17] font-bold shadow"
+                      : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  বাংলা
+                </button>
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
+                    language === "en"
+                      ? "bg-white text-[#3d2e17] font-bold shadow"
+                      : "text-white/70 hover:text-white"
+                  }`}
+                >
+                  English
+                </button>
+
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="text-white hover:opacity-70 text-2xl p-1 ml-2 cursor-pointer focus:outline-none"
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="space-y-6 my-auto">
+              
+              {/* Primary Large Links (Project, Process, People) */}
+              <div className="space-y-3 font-display font-light">
+                <div>
+                  <a
+                    href="#projects"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
+                  >
+                    {t("Projects", "Projects")}
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#process"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
+                  >
+                    {t("Methodology", "Methodology")}
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#activities"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
+                  >
+                    {t("Our Team", "Our Team")}
+                  </a>
+                </div>
+              </div>
+
+              {/* Secondary Medium Links */}
+              <div className="space-y-2.5 font-display font-light pt-4 border-t border-white/20">
+                <div>
+                  <a
+                    href="#container"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
+                  >
+                    {t("About Studio", "About Studio")}
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#service"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
+                  >
+                    {t("Services", "Services")}
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#activities"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
+                  >
+                    {t("Recent News & Events", "Recent News & Events")}
+                  </a>
+                </div>
+                <div>
+                  <a
+                    href="#newsletter"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
+                  >
+                    {t("Contact Us", "Contact Us")}
+                  </a>
+                </div>
+
+                <div className="pt-2">
+                  <Link
+                    href="/design-garden"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
+                  >
+                    <span>{t("3D Garden Wizard 🎨", "3D Garden Wizard 🎨")}</span>
+                    <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
+                      {t("কাস্টম ছাদবাগান বাজেট ও নকশা", "Interactive Landscape Estimator & Design")}
+                    </span>
+                  </Link>
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent("open-tree-doctor"));
+                    }}
+                    className="text-base sm:text-lg font-normal text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
+                  >
+                    <span>{t("Emergency Tree Doctor 🚨", "Emergency Tree Doctor 🚨")}</span>
+                    <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
+                      {t("অন-কল ডাক্তার ভিজিট ও রোগ নির্ণয়", "Urgent Tree Clinic, Surgery & Visit")}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Drawer Auth / Dashboard Actions */}
+              <div className="pt-3 border-t border-white/20">
+                {user ? (
+                  <div className="flex items-center justify-between bg-black/25 p-3 rounded-2xl">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-full overflow-hidden bg-emerald-950 border border-emerald-400/40 shrink-0 flex items-center justify-center shadow-inner">
+                        <img
+                          src={
+                            user.avatar ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=064e3b&color=ffffff&bold=true&size=64`
+                          }
+                          alt={user.name || "User"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="text-left min-w-0">
+                        <p className="text-xs font-bold text-white truncate max-w-[110px]">{user.name}</p>
+                        <p className="text-[10px] text-emerald-300 font-mono uppercase tracking-wider">{user.role}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={
+                          user.role?.toLowerCase() === "admin" || user.role?.toLowerCase() === "editor"
+                            ? "/admin"
+                            : user.role?.toLowerCase() === "employee"
+                            ? "/employee-portal"
+                            : user.role?.toLowerCase() === "moderator"
+                            ? "/moderator"
+                            : "/client-dashboard"
+                        }
+                        onClick={() => setMenuOpen(false)}
+                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
+                      >
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          logout();
+                        }}
+                        className="px-2.5 py-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      >
+                        {t("লগআউট", "Logout")}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href="/login"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex-1 text-center py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
+                    >
+                      👤 {t("লগইন করুন", "Sign In")}
+                    </Link>
+                    <Link
+                      href="/register"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex-1 text-center py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold transition-all"
+                    >
+                      ✨ {t("রেজিস্ট্রেশন", "Register")}
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* Bottom Studio Info */}
+            <div className="pt-6 border-t border-white/20 text-xs font-sans text-white/80 grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-semibold text-white">
+                  {t("এ আর গ্রিন গার্ডেন কোং লি.", "A R Green Garden Co., Ltd.")}
+                </p>
+                <p className="text-[11px] text-white/70">
+                  {t("ল্যান্ডস্কেপ আর্কিটেকচার স্টুডিও", "Landscape Architecture Studio")}
+                </p>
+                <p className="pt-1 text-[11px] leading-relaxed text-white/60">
+                  {t("৪২/এ, রোড ৯/এ, ধানমন্ডি,", "42/A, Road 9/A, Dhanmondi,")}<br />
+                  {t("ঢাকা-১২০৯, বাংলাদেশ", "Dhaka-1209, Bangladesh")}
+                </p>
+              </div>
+              <div className="text-[11px] leading-relaxed">
+                <p className="font-semibold text-white">
+                  {t("হটলাইন: ০১৮৮৩-০১২৬৪১", "Hotline: 01883012641")}
+                </p>
+                <a
+                  href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-[#25D366] text-stone-950 font-bold text-xs shadow"
+                >
+                  <span>💬</span> WhatsApp Chat
+                </a>
+                <p className="pt-2 text-white/70">admin@argreengarden.com</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
     </>
   );
 }

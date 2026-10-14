@@ -92,12 +92,55 @@ const projects: ProjectItem[] = [
   },
 ];
 
-export default function ShmaHighlightProjects() {
+export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
+  const [projectList, setProjectList] = useState<ProjectItem[]>(projects);
   const [activeModalProject, setActiveModalProject] = useState<ProjectItem | null>(null);
 
-  const col1 = [projects[0], projects[1], projects[2], projects[3]];
-  const col2 = [projects[4], projects[5]];
+  React.useEffect(() => {
+    const fetchLiveProjects = async () => {
+      try {
+        const res = await fetch(`/api/projects?_t=${Date.now()}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : data?.projects || [];
+          if (items.length > 0) {
+            const mapped: ProjectItem[] = items.map((p: any, idx: number) => ({
+              id: p._id || p.id || `proj-${idx}`,
+              nameBn: p.titleBn || p.nameBn || p.title || p.name || "",
+              nameEn: p.titleEn || p.nameEn || p.title || p.name || "",
+              categoryBn: p.categoryBn || p.category || "ল্যান্ডস্কেপ ডিজাইন",
+              categoryEn: p.categoryEn || p.category || "Landscape Design",
+              locationBn: p.locationBn || p.location || "ঢাকা, বাংলাদেশ",
+              locationEn: p.locationEn || p.location || "Dhaka, Bangladesh",
+              descBn: p.descBn || p.description || p.desc || "",
+              descEn: p.descEn || p.description || p.desc || "",
+              imageUrl: p.imageUrl || p.image || p.coverImage || (projects[idx % projects.length]?.imageUrl),
+              videoUrl: p.videoUrl || (p.imageUrl ? undefined : projects[idx % projects.length]?.videoUrl),
+            }));
+            setProjectList(mapped);
+          }
+        }
+      } catch (e) {
+        // keep default projects
+      }
+    };
+    fetchLiveProjects();
+  }, []);
+
+  const mid = Math.ceil(projectList.length / 2);
+  const col1 = projectList.slice(0, mid);
+  const col2 = projectList.slice(mid);
+
+  const isMultiCol = columns && columns > 2;
+  const gridClass =
+    columns === 1
+      ? "grid grid-cols-1 max-w-3xl mx-auto gap-y-16"
+      : columns === 3
+      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+      : columns === 4
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+      : "grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-16 gap-y-16";
 
   return (
     <section id="projects" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
@@ -116,15 +159,55 @@ export default function ShmaHighlightProjects() {
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
-      {/* 2-Column Staggered Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 xl:gap-x-16 gap-y-16">
-        
-        {/* Column 1 (Left) */}
-        <div className="space-y-16">
-          {col1.map((item) => (
+      {/* Dynamic Staggered / Multicolumn Grid */}
+      {isMultiCol ? (
+        <div className={gridClass}>
+          {projectList.map((item) => (
             <div key={item.id} className="space-y-4">
               <div
                 onClick={() => setActiveModalProject(item)}
+                className="relative overflow-hidden cursor-pointer group bg-[#dedad2] aspect-[16/11] rounded-2xl"
+              >
+                {item.videoUrl ? (
+                  <video
+                    src={item.videoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <img
+                    src={item.imageUrl || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800"}
+                    alt={item.nameEn}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                )}
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-300" />
+                <span className="absolute bottom-3 left-3 font-mono text-[11px] text-white bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-md">
+                  {language === "bn" ? item.categoryBn : item.categoryEn}
+                </span>
+              </div>
+              <div>
+                <h3 className="font-display font-light text-lg sm:text-xl text-[#3d2e17] leading-tight">
+                  {language === "bn" ? item.nameBn : item.nameEn}
+                </h3>
+                <p className="font-mono text-xs text-[#75787b] mt-1">
+                  {language === "bn" ? item.locationBn : item.locationEn}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className={gridClass}>
+          {/* Column 1 (Left) */}
+          <div className="space-y-16">
+            {col1.map((item) => (
+              <div key={item.id} className="space-y-4">
+                <div
+                  onClick={() => setActiveModalProject(item)}
                 className="relative aspect-[16/10] overflow-hidden bg-stone-100 group cursor-pointer"
               >
                 {item.videoUrl ? (
@@ -222,6 +305,7 @@ export default function ShmaHighlightProjects() {
         </div>
 
       </div>
+      )}
 
       {/* Lightbox / Details Modal */}
       {activeModalProject && (
