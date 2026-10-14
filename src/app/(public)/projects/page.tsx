@@ -449,6 +449,7 @@ export default function ProjectsPage() {
                     loop
                     muted
                     playsInline
+                    preload="metadata"
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                   />
                 ) : (
@@ -555,6 +556,7 @@ export default function ProjectsPage() {
                   muted
                   controls
                   playsInline
+                  preload="metadata"
                   className="w-full h-full object-cover"
                 />
               ) : (

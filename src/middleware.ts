@@ -4,9 +4,15 @@ import { verifyJwtToken, AUTH_COOKIE_NAME } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
-  const user = token ? await verifyJwtToken(token) : null;
+  
+  // Extract token from Authorization header or cookie
+  let token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
+  const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
+  if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7).trim();
+  }
 
+  const user = token ? await verifyJwtToken(token) : null;
   const role = user?.role?.toUpperCase();
 
   // 1. Protect Admin Routes (/admin)

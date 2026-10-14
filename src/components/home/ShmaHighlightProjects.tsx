@@ -237,6 +237,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                       loop
                       muted
                       playsInline
+                      preload="metadata"
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                     />
                   ) : (

@@ -207,7 +207,7 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
               muted
               loop
               playsInline
-              preload="auto"
+              preload="none"
               src="https://shmadesigns.com/wp-content/uploads/2025/07/About.mp4"
             ></video>
           </div>

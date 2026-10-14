@@ -15,14 +15,21 @@ export async function getCurrentUser(req: NextRequest | Request): Promise<AuthUs
   try {
     let token: string | undefined;
 
-    // NextRequest (middleware/route handlers)
-    if (req instanceof NextRequest) {
-      token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
-    } else {
-      // Standard Request — parse Cookie header
-      const cookieHeader = req.headers.get("cookie") || "";
-      const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${AUTH_COOKIE_NAME}=([^;]+)`));
-      token = match?.[1];
+    // 1. Check Authorization Header (Bearer token) — immune to mobile cookie blocking
+    const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7).trim();
+    }
+
+    // 2. Fallback to HTTP-only cookie if Authorization header is not present
+    if (!token) {
+      if (req instanceof NextRequest) {
+        token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+      } else {
+        const cookieHeader = req.headers.get("cookie") || "";
+        const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${AUTH_COOKIE_NAME}=([^;]+)`));
+        token = match?.[1];
+      }
     }
 
     if (!token) return null;

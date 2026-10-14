@@ -80,7 +80,7 @@ export default function HeroBackgroundMedia({
             muted={muted}
             loop={loop}
             playsInline
-            preload="auto"
+            preload="metadata"
             controls={false}
             onLoadedData={() => setIsVideoLoaded(true)}
             onPlaying={() => setIsVideoLoaded(true)}

@@ -21,7 +21,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check current session from /api/auth/me
   const refreshUser = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/me");
+      const storedToken = typeof window !== "undefined" ? localStorage.getItem("gg_auth_token") : null;
+      const headers: Record<string, string> = {};
+      if (storedToken) {
+        headers["Authorization"] = `Bearer ${storedToken}`;
+      }
+
+      const res = await fetch("/api/auth/me", {
+        headers,
+        credentials: "include",
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user || null);
@@ -44,12 +53,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
 
       if (!res.ok) {
         return { success: false, error: data.error || "Login failed. Please try again." };
+      }
+
+      // Store in localStorage for mobile data & cross-origin resilience
+      if (data.token && typeof window !== "undefined") {
+        localStorage.setItem("gg_auth_token", data.token);
       }
 
       setUser(data.user);
@@ -64,12 +79,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
       const result = await res.json();
 
       if (!res.ok) {
         return { success: false, error: result.error || "Registration failed. Please try again." };
+      }
+
+      // Store in localStorage for mobile data & cross-origin resilience
+      if (result.token && typeof window !== "undefined") {
+        localStorage.setItem("gg_auth_token", result.token);
       }
 
       setUser(result.user);
@@ -81,7 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("gg_auth_token");
+      }
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     } finally {
       setUser(null);
       window.location.href = "/login";

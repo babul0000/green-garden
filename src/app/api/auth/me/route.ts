@@ -3,7 +3,11 @@ import { verifyJwtToken, AUTH_COOKIE_NAME } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+    let token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+    const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
+    if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7).trim();
+    }
 
     if (!token) {
       return NextResponse.json({ user: null }, { status: 401 });
