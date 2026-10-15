@@ -79,16 +79,19 @@ export default function ShmaRecentActivities() {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.items || [];
           if (items.length > 0) {
-            const mapped: ActivityItem[] = items.slice(0, 5).map((g: any, idx: number) => ({
-              id: g._id || g.id || `act-${idx}`,
-              titleBn: g.titleBn || g.title || activities[idx % activities.length].titleBn,
-              titleEn: g.titleEn || g.title || activities[idx % activities.length].titleEn,
-              subtitleBn: g.category || g.descBn || activities[idx % activities.length].subtitleBn,
-              subtitleEn: g.category || g.descEn || activities[idx % activities.length].subtitleEn,
-              image: g.imageUrl || g.image || activities[idx % activities.length].image,
-              dateBn: g.dateBn || "২০২৬",
-              dateEn: g.dateEn || "2026",
-            }));
+            const mapped: ActivityItem[] = items.slice(0, 5).map((g: any, idx: number) => {
+              const fallback = activities[idx % activities.length];
+              return {
+                id: g._id || g.id || `act-${idx}`,
+                titleBn: g.titleBn || fallback.titleBn || g.title,
+                titleEn: g.titleEn || g.title || fallback.titleEn,
+                subtitleBn: g.subtitleBn || fallback.subtitleBn || g.category || g.descBn,
+                subtitleEn: g.subtitleEn || g.category || g.descEn || fallback.subtitleEn,
+                image: g.imageUrl || g.image || fallback.image,
+                dateBn: g.dateBn || fallback.dateBn || "২০২৬",
+                dateEn: g.dateEn || fallback.dateEn || "2026",
+              };
+            });
             setActivityList(mapped);
           }
         }
@@ -111,7 +114,7 @@ export default function ShmaRecentActivities() {
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            Studio News & Events
+            {t("স্টুডিও সংবাদ ও ইভেন্ট", "Studio News & Events")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>

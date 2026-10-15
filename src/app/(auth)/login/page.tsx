@@ -72,7 +72,7 @@ export default function Login() {
             </span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#E4E2D7]">
-            {t("পোর্টাল সাইন ইন", "Sign In to Portal")}
+            Sign In to Portal
           </h1>
           <p className="text-xs text-white/60 font-sans leading-relaxed max-w-sm mx-auto">
             {t(

@@ -291,6 +291,11 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
   },
 ];
 
+const toBnDigits = (str: string | number) => {
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(str).replace(/[0-9]/g, (d) => bnDigits[Number(d)]);
+};
+
 export default function ProjectsPage() {
   const { language, t } = useLanguage();
   const isBn = language === "bn";
@@ -309,31 +314,47 @@ export default function ProjectsPage() {
           const items = Array.isArray(data) ? data : data?.projects || [];
           if (items.length > 0) {
             const mapped: ProjectDetail[] = items.map((p: any, idx: number) => {
-              const fallback = ARCHITECTURAL_PROJECTS[idx % ARCHITECTURAL_PROJECTS.length];
+              const fallback =
+                ARCHITECTURAL_PROJECTS.find(
+                  (df) =>
+                    df.slug === p.slug ||
+                    df.id === p.id ||
+                    df.nameEn?.toLowerCase() === (p.name || p.title || "").toLowerCase()
+                ) || ARCHITECTURAL_PROJECTS[idx % ARCHITECTURAL_PROJECTS.length];
+
               let cat: "Residential" | "Commercial" | "Hospitality" | "Public Realm" = "Residential";
               const cLower = (p.category || "").toLowerCase();
               if (cLower.includes("commercial") || cLower.includes("workplace") || cLower.includes("office")) cat = "Commercial";
               else if (cLower.includes("hospitality") || cLower.includes("resort") || cLower.includes("hotel")) cat = "Hospitality";
               else if (cLower.includes("park") || cLower.includes("public") || cLower.includes("plaza")) cat = "Public Realm";
 
+              const descEn = p.descEn || p.description || p.desc || fallback.descEn || "";
+              let descBn = p.descBn;
+              if (!descBn || descBn === descEn) {
+                descBn = fallback.descBn || descEn;
+              }
+
+              const locEn = p.locationEn || p.location || fallback.locationEn || "Dhaka, Bangladesh";
+              const locBn = p.locationBn || fallback.locationBn || locEn;
+
               return {
                 id: p._id || p.id || `live-${idx}`,
                 slug: p.slug || fallback.slug,
-                nameBn: p.titleBn || p.nameBn || p.title || p.name || fallback.nameBn,
+                nameBn: p.titleBn || p.nameBn || fallback.nameBn || p.title || p.name,
                 nameEn: p.titleEn || p.nameEn || p.title || p.name || fallback.nameEn,
                 category: cat,
                 categoryBn: p.categoryBn || fallback.categoryBn,
                 categoryEn: p.categoryEn || fallback.categoryEn,
-                locationBn: p.locationBn || p.location || fallback.locationBn,
-                locationEn: p.locationEn || p.location || fallback.locationEn,
+                locationBn: locBn,
+                locationEn: locEn,
                 client: p.client || p.clientName || fallback.client,
                 year: p.year || fallback.year || "2026",
                 area: p.area || p.budgetRange || fallback.area,
-                descBn: p.descBn || p.description || p.desc || fallback.descBn,
-                descEn: p.descEn || p.description || p.desc || fallback.descEn,
-                challengesBn: p.challengesBn || p.challenges || fallback.challengesBn,
+                descBn: descBn,
+                descEn: descEn,
+                challengesBn: p.challengesBn || fallback.challengesBn,
                 challengesEn: p.challengesEn || p.challenges || fallback.challengesEn,
-                solutionBn: p.solutionBn || p.solution || fallback.solutionBn,
+                solutionBn: p.solutionBn || fallback.solutionBn,
                 solutionEn: p.solutionEn || p.solution || fallback.solutionEn,
                 imageUrl: p.imageUrl || p.image || p.coverImage || fallback.imageUrl,
                 videoUrl: p.videoUrl || fallback.videoUrl,
@@ -388,11 +409,7 @@ export default function ProjectsPage() {
             {t("পোর্টফোলিও • স্থাপত্য ও বায়োফিলিক ল্যান্ডস্কেপ", "PORTFOLIO • ARCHITECTURAL LANDSCAPES & BIOPHILIA")}
           </span>
           <h1 className="font-display font-light text-4xl sm:text-6xl md:text-7xl lg:text-[76px] tracking-tight leading-[1.08] text-white max-w-4xl">
-            {isBn ? (
-              <>প্রকৃতি ও আধুনিক স্থাপত্যের <span className="font-normal italic text-[#5a9dff]">নিখুঁত মেলবন্ধন</span></>
-            ) : (
-              <>Weaving Living Nature into <span className="font-normal italic text-[#5a9dff]">Modern Architecture</span></>
-            )}
+            Weaving Living Nature into <span className="font-normal italic text-[#5a9dff]">Modern Architecture</span>
           </h1>
           <p className="font-sans text-sm sm:text-base font-light text-white/80 max-w-2xl leading-relaxed pt-2">
             {t(
@@ -480,7 +497,7 @@ export default function ProjectsPage() {
 
                 {project.year && (
                   <span className="absolute bottom-4 right-4 z-10 font-mono text-[11px] text-white/90 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-sm">
-                    {project.year}
+                    {isBn ? toBnDigits(project.year) : project.year}
                   </span>
                 )}
               </div>
@@ -489,13 +506,13 @@ export default function ProjectsPage() {
               <div className="space-y-2 pt-1">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <h3 className="font-display font-light text-2xl sm:text-3xl text-[#3D1916] leading-tight tracking-tight group-hover:text-[#5a9dff] transition-colors">
-                    {isBn ? project.nameBn : project.nameEn}
+                    {project.nameEn || project.nameBn}
                   </h3>
                 </div>
 
                 <p className="font-mono text-xs uppercase tracking-wider text-[#75787b]">
                   {isBn ? project.locationBn : project.locationEn}
-                  {project.area && ` • ${project.area}`}
+                  {project.area && ` • ${isBn ? toBnDigits(project.area) : project.area}`}
                 </p>
 
                 <p className="font-sans text-sm font-light text-[#54595f] leading-relaxed line-clamp-3 pt-1">
@@ -505,11 +522,11 @@ export default function ProjectsPage() {
                 {/* Eco & Performance Indicators */}
                 {project.metrics && (
                   <div className="flex items-center gap-4 pt-3 font-mono text-[11px] text-[#75787b] border-t border-[#E7E5DC]">
-                    <span>🌡️ {project.metrics.tempDrop}</span>
+                    <span>🌡️ {isBn ? toBnDigits(project.metrics.tempDrop) : project.metrics.tempDrop}</span>
                     <span>•</span>
-                    <span>💧 {project.metrics.rainwater}</span>
+                    <span>💧 {isBn ? project.metrics.rainwater.replace("100% Retained", "১০০% সংরক্ষিত").replace("85% Harvested", "৮৫% হার্ভেস্টেড").replace("90% Infiltrated", "৯০% ইনফিল্ট্রেটেড").replace("Filtered Recirculation", "ফিল্টার্ড পুনর্ব্যবহার") : project.metrics.rainwater}</span>
                     <span>•</span>
-                    <span>🌿 {project.metrics.greenCoverage}</span>
+                    <span>🌿 {isBn ? toBnDigits(project.metrics.greenCoverage) : project.metrics.greenCoverage}</span>
                   </div>
                 )}
               </div>
@@ -537,12 +554,12 @@ export default function ProjectsPage() {
                 {t("স্থাপত্য কেস স্টাডি ও কারিগরি বিবরণ", "ARCHITECTURAL CASE STUDY & SPECIFICATIONS")}
               </span>
               <h2 className="text-2xl sm:text-4xl font-light font-display text-[#3D1916] tracking-tight">
-                {isBn ? selectedProject.nameBn : selectedProject.nameEn}
+                {selectedProject.nameEn || selectedProject.nameBn}
               </h2>
               <p className="text-xs font-mono uppercase tracking-wider text-[#75787b]">
                 {isBn ? selectedProject.locationBn : selectedProject.locationEn}
-                {selectedProject.client && ` • Client: ${selectedProject.client}`}
-                {selectedProject.year && ` • ${selectedProject.year}`}
+                {selectedProject.client && ` • ${t("ক্লায়েন্ট:", "Client:")} ${selectedProject.client}`}
+                {selectedProject.year && ` • ${isBn ? toBnDigits(selectedProject.year) : selectedProject.year}`}
               </p>
             </div>
 
@@ -571,25 +588,35 @@ export default function ProjectsPage() {
             {/* Specs Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-[#f8faf9] border border-[#e7e7e7] text-xs">
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Typology</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("টাইপোলজি", "Typology")}</span>
                 <span className="font-medium text-[#3D1916]">
                   {isBn ? selectedProject.categoryBn : selectedProject.categoryEn}
                 </span>
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Site Footprint</span>
-                <span className="font-medium text-[#3D1916]">{selectedProject.area || "Custom"}</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("পরিসর / ক্ষেত্রফল", "Site Footprint")}</span>
+                <span className="font-medium text-[#3D1916]">{isBn ? toBnDigits(selectedProject.area || "৩,৫০০ বর্গফুট") : (selectedProject.area || "Custom")}</span>
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Waterproofing</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("ওয়াটারপ্রুফিং", "Waterproofing")}</span>
                 <span className="font-medium text-[#3D1916]">
-                  {selectedProject.metrics?.waterproofing || "10-Year Warranty"}
+                  {isBn
+                    ? (selectedProject.metrics?.waterproofing || "১০ বছরের নিশ্চয়তা")
+                        .replace("10-Year Warranty", "১০ বছরের নিশ্চয়তা")
+                        .replace("High-Spec Podium", "হাই-স্পেক পোডিয়াম")
+                        .replace("Custom Basins", "কাস্টম বেসিন")
+                        .replace("Podium Membrane", "পোডিয়াম মেমব্রেন")
+                        .replace("Zero Seepage Membrane", "জিরো সিপেজ মেমব্রেন")
+                    : (selectedProject.metrics?.waterproofing || "10-Year Warranty")}
                 </span>
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Microclimate Delta</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("মাইক্রোক্লাইমেট প্রভাব", "Microclimate Delta")}</span>
                 <span className="font-medium text-[#3D1916]">
-                  {selectedProject.metrics?.tempDrop || "-3.5°C Cooling"}
+                  {isBn
+                    ? toBnDigits(selectedProject.metrics?.tempDrop || "-৩.৫° সে. শীতলীকরণ")
+                        .replace("Cooling", "শীতলীকরণ")
+                    : (selectedProject.metrics?.tempDrop || "-3.5°C Cooling")}
                 </span>
               </div>
             </div>

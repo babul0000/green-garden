@@ -200,7 +200,7 @@ export default function Hero() {
                 <span>📐 {t(currentHighlight.areaBn, currentHighlight.areaEn)}</span>
               </div>
               <h3 className="font-display text-lg font-bold leading-snug text-white">
-                {t(currentHighlight.titleBn, currentHighlight.titleEn)}
+                {currentHighlight.titleEn || currentHighlight.titleBn}
               </h3>
               <div className="pt-1 flex items-center justify-between">
                 <span className="text-xs text-emerald-400 font-mono tracking-wider">

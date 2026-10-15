@@ -80,7 +80,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            Design & Delivery Stages
+            {t("ডিজাইন ও বাস্তবায়ন পর্যায়", "Design & Delivery Stages")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
@@ -94,7 +94,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
           <h3 className="font-display font-light text-2xl sm:text-3xl text-[#3d2e17] leading-tight">
             {processConfig?.titleEn || "A Thoughtful Journey to"}
             <span className="block text-[#5a9dff] mt-1">
-              {processConfig?.titleBn ? processConfig.titleBn : "Transformative Solutions"}
+              {processConfig?.titleEn ? processConfig.titleEn : "Transformative Solutions"}
             </span>
           </h3>
           <p className="font-sans text-xs sm:text-sm text-[#75787b] font-light leading-relaxed pt-2">

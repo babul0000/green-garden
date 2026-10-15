@@ -80,7 +80,7 @@ export default function FAQPage() {
             {language === "bn" ? "সাহায্য ও তথ্য" : "Help & Support"}
           </span>
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">
-            {language === "bn" ? faqHeader.titleBn : faqHeader.titleEn}
+            {faqHeader.titleEn || "Frequently Asked Questions"}
           </h1>
           <p className="text-xs text-foreground/60 leading-relaxed mt-1">
             {language === "bn" ? "ওয়াটারপ্রুফিং, লোড, খরচ এবং বাগান সংক্রান্ত সাধারণ প্রশ্নের উত্তর।" : "Get instant answers regarding waterproofing, weights, costs, and drip systems."}

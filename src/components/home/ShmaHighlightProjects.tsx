@@ -138,6 +138,58 @@ const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
   },
 ];
 
+const CATEGORY_MAP_BN: Record<string, string> = {
+  "Rooftop Garden": "লাক্সারি ছাদবাগান",
+  "Vertical Garden": "ভার্টিক্যাল গ্রিন ওয়াল",
+  "Commercial Landscape": "বাণিজ্যিক ল্যান্ডস্কেপ",
+  "Commercial": "বাণিজ্যিক ল্যান্ডস্কেপ",
+  "Indoor Plants": "ইনডোর বায়োফিলিয়া",
+  "Landscape Design": "ল্যান্ডস্কেপ ডিজাইন",
+  "Hospitality": "হসপিটালিটি ও ইকো রিসোর্ট",
+  "Resort": "হসপিটালিটি ও রিসোর্ট",
+  "Workplace & Civic Plaza": "কর্মক্ষেত্র ও পাবলিক প্লাজা",
+  "Luxury Rooftop & Residential": "লাক্সারি ছাদবাগান ও রেসিডেন্সিয়াল",
+  "Corporate Workplace & Vertical Forest": "করপোরেট কর্মক্ষেত্র ও ভার্টিক্যাল গার্ডেন",
+  "Resort & Hospitality Landscape": "রিসোর্ট ও হসপিটালিটি ল্যান্ডস্কেপ",
+  "Public Realm": "পাবলিক রিয়েলম ও আরবান পার্ক",
+};
+
+const LOCATION_MAP_BN: Record<string, string> = {
+  "Road 9/A, Dhanmondi, Dhaka": "রোড ৯/এ, ধানমন্ডি, ঢাকা",
+  "Road 9/A, Dhanmondi, Dhaka, Bangladesh": "রোড ৯/এ, ধানমন্ডি, ঢাকা, বাংলাদেশ",
+  "Gulshan Avenue, Dhaka": "গুলশান এভিনিউ, ঢাকা",
+  "Gulshan Avenue, Dhaka, Bangladesh": "গুলশান এভিনিউ, ঢাকা, বাংলাদেশ",
+  "Gulshan, Dhaka": "গুলশান, ঢাকা",
+  "Banani, Dhaka": "বনানী, ঢাকা",
+  "Road 11, Banani, Dhaka, Bangladesh": "রোড ১১, বনানী, ঢাকা, বাংলাদেশ",
+  "Uttara, Dhaka": "উত্তরা, ঢাকা",
+  "Dhaka, Bangladesh": "ঢাকা, বাংলাদেশ",
+  "Marine Drive, Cox's Bazar, Bangladesh": "মেরিন ড্রাইভ, কক্সবাজার, বাংলাদেশ",
+  "Cox's Bazar, Bangladesh": "কক্সবাজার, বাংলাদেশ",
+  "Prachuap Khiri Khan, Thailand": "প্রাচুয়াপ খিরি খান, থাইল্যান্ড",
+  "Ploenchit, Bangkok, Thailand": "প্লয়েনচিট, ব্যাংকক, থাইল্যান্ড",
+  "Singapore": "সিঙ্গাপুর",
+  "Purbachal New Town, Dhaka, Bangladesh": "পূর্বাচল নিউ টাউন, ঢাকা, বাংলাদেশ",
+};
+
+const DESC_MAP_BN: Record<string, string> = {
+  "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.":
+    "কংক্রিট ছাদকে রূপান্তর করা হয়েছে সবুজ বায়োফিলিক স্বর্গে—যেখানে রয়েছে মাল্টি-লেয়ার ১০০% ওয়াটারপ্রুফ ড্রেনেজ, সুপরিকল্পিত জাপানিজ কার্পেট ঘাসের লন এবং মেহগনি কাঠের ছায়ানিবিড় পারগোলা।",
+  "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air.":
+    "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
+  "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air in central Gulshan.":
+    "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
+  "Mapletree Business City II aims to create an ‘Urban Wilderness’ by integrating modern workspaces with an eco-friendly, nature-inspired landscape.":
+    "ম্যাপলট্রি বিজনেস সিটি ২ কর্মক্ষেত্র ও প্রকৃতির মেলবন্ধনে একটি 'আরবান ওয়াইল্ডারনেস' সৃষ্টি করেছে। সংলগ্ন নেচার রিজার্ভের অনুপ্রেরণায় পরিকল্পিত এই ল্যান্ডস্কেপ জীববৈচিত্র্যের এক অনন্য প্রতীক।",
+  "Envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character.":
+    "প্রকৃতির পরম কোলে এক শান্ত প্রশান্তিময় আশ্রম। সাইটের বিদ্যমান বিশালাকার বনস্পতিগুলোকে অক্ষত রেখে নকশা করা হয়েছে প্রতিটি কর্নার—যেখানে আলো, গঠন ও নিসর্গ মিলেমিশে এক অভূতপূর্ব অনুভূতি সৃষ্টি করে।",
+};
+
+const toBnDigits = (str: string | number) => {
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(str).replace(/[0-9]/g, (d) => bnDigits[Number(d)]);
+};
+
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
   const isBn = language === "bn";
@@ -152,28 +204,65 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.projects || [];
           if (items.length >= 2) {
-            const mapped: HighlightProjectItem[] = items.map((p: any, idx: number) => ({
-              id: p._id || p.id || `proj-${idx}`,
-              slug: p.slug,
-              nameBn: p.titleBn || p.nameBn || p.title || p.name || "",
-              nameEn: p.titleEn || p.nameEn || p.title || p.name || "",
-              categoryBn: p.categoryBn || p.category || "ল্যান্ডস্কেপ ডিজাইন",
-              categoryEn: p.categoryEn || p.category || "Landscape Design",
-              locationBn: p.locationBn || p.location || "ঢাকা, বাংলাদেশ",
-              locationEn: p.locationEn || p.location || "Dhaka, Bangladesh",
-              descBn: p.descBn || p.description || p.desc || "",
-              descEn: p.descEn || p.description || p.desc || "",
-              imageUrl: p.imageUrl || p.image || p.coverImage || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length]?.imageUrl,
-              videoUrl: p.videoUrl || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length]?.videoUrl,
-              year: p.year || "2026",
-              area: p.area || p.budgetRange || "3,500 sq.ft",
-              client: p.client || p.clientName || "Private Client",
-              ecoMetrics: {
-                tempDrop: "-3.5°C",
-                rainwater: "100% Drainage Safe",
-                greenCoverage: "75%",
-              },
-            }));
+            const mapped: HighlightProjectItem[] = items.map((p: any, idx: number) => {
+              const fallback =
+                SHMA_DEFAULT_PROJECTS.find(
+                  (df) =>
+                    df.slug === p.slug ||
+                    df.id === p.id ||
+                    df.nameEn?.toLowerCase() === (p.name || p.title || "").toLowerCase()
+                ) || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length];
+
+              const catEn = p.categoryEn || p.category || fallback.categoryEn || "Landscape Design";
+              const catBn =
+                p.categoryBn ||
+                CATEGORY_MAP_BN[p.category] ||
+                CATEGORY_MAP_BN[catEn] ||
+                fallback.categoryBn ||
+                "ল্যান্ডস্কেপ ডিজাইন";
+
+              const locEn = p.locationEn || p.location || fallback.locationEn || "Dhaka, Bangladesh";
+              const locBn =
+                p.locationBn ||
+                LOCATION_MAP_BN[p.location] ||
+                LOCATION_MAP_BN[locEn] ||
+                fallback.locationBn ||
+                "ঢাকা, বাংলাদেশ";
+
+              const descEn = p.descEn || p.description || p.desc || fallback.descEn || "";
+              let descBn = p.descBn;
+              if (!descBn || descBn === descEn) {
+                descBn = DESC_MAP_BN[p.description] || DESC_MAP_BN[descEn] || fallback.descBn || descEn;
+              }
+
+              return {
+                id: p._id || p.id || `proj-${idx}`,
+                slug: p.slug || fallback.slug,
+                nameBn: p.titleBn || p.nameBn || fallback.nameBn || p.title || p.name || "",
+                nameEn: p.titleEn || p.nameEn || p.title || p.name || fallback.nameEn || "",
+                categoryBn: catBn,
+                categoryEn: catEn,
+                locationBn: locBn,
+                locationEn: locEn,
+                descBn: descBn,
+                descEn: descEn,
+                imageUrl:
+                  p.imageUrl ||
+                  p.image ||
+                  p.afterImage ||
+                  p.coverImage ||
+                  fallback.imageUrl,
+                videoUrl: p.videoUrl || fallback.videoUrl,
+                year: p.year || fallback.year || "2026",
+                area: p.area || p.budgetRange || fallback.area || "3,500 sq.ft",
+                client: p.client || p.clientName || fallback.client || "Private Client",
+                ecoMetrics: fallback.ecoMetrics || {
+                  tempDrop: "-3.5°C",
+                  rainwater: "100% Drainage Safe",
+                  greenCoverage: "75%",
+                },
+              };
+            });
             setProjectList(mapped);
           }
         }
@@ -283,7 +372,9 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                       {isBn ? item.categoryBn : item.categoryEn}
                     </span>
                     {item.year && (
-                      <span className="font-mono text-xs text-[#75787b]">{item.year}</span>
+                      <span className="font-mono text-xs text-[#75787b]">
+                        {isBn ? toBnDigits(item.year) : item.year}
+                      </span>
                     )}
                   </div>
                   <p className="font-mono text-xs tracking-wider uppercase text-[#75787b]">
@@ -296,7 +387,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                   onClick={() => setActiveModalProject(item)}
                   className="font-display font-light text-2xl sm:text-3xl md:text-4xl text-[#3d1916] leading-tight tracking-tight hover:text-[#5a9dff] transition-colors cursor-pointer"
                 >
-                  {isBn ? item.nameBn : item.nameEn}
+                  {item.nameEn || item.nameBn}
                 </h3>
 
                 {/* Narrative Description */}
@@ -309,21 +400,34 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                   <div className="pt-2 border-t border-[#e7e7e7] grid grid-cols-3 gap-2 sm:gap-4 text-center">
                     <div>
                       <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
-                        {item.ecoMetrics.tempDrop}
+                        {isBn ? toBnDigits(item.ecoMetrics.tempDrop) : item.ecoMetrics.tempDrop}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">Microclimate</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
+                        {t("মাইক্রোক্লাইমেট", "Microclimate")}
+                      </span>
                     </div>
                     <div>
                       <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
-                        {item.ecoMetrics.greenCoverage}
+                        {isBn ? toBnDigits(item.ecoMetrics.greenCoverage) : item.ecoMetrics.greenCoverage}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">Biophilia</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
+                        {t("বায়োফিলিয়া", "Biophilia")}
+                      </span>
                     </div>
                     <div>
                       <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
-                        {item.ecoMetrics.rainwater}
+                        {isBn
+                          ? item.ecoMetrics.rainwater
+                              .replace("100% Drainage Safe", "১০০% নিরাপদ ড্রেনেজ")
+                              .replace("100% Retained", "১০০% সংরক্ষিত পানি")
+                              .replace("90% Filtered", "৯০% ফিল্টার্ড ড্রেনেজ")
+                              .replace("Automated Drip", "স্বয়ংক্রিয় ড্রিপ সেচ")
+                              .replace("Retention Ponds", "ধারণ জলাধার")
+                          : item.ecoMetrics.rainwater}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">Hydrology</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
+                        {t("হাইড্রোলজি", "Hydrology")}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -373,11 +477,11 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 {t("স্থাপত্য বিশ্লেষণ ও সমীক্ষা", "ARCHITECTURAL CASE STUDY")}
               </span>
               <h3 className="text-2xl sm:text-4xl font-light font-display text-[#3d1916] tracking-tight">
-                {isBn ? activeModalProject.nameBn : activeModalProject.nameEn}
+                {activeModalProject.nameEn || activeModalProject.nameBn}
               </h3>
               <p className="text-xs font-mono uppercase tracking-wider text-[#75787b] pt-1">
                 {isBn ? activeModalProject.locationBn : activeModalProject.locationEn}
-                {activeModalProject.year && ` • ${activeModalProject.year}`}
+                {activeModalProject.year && ` • ${isBn ? toBnDigits(activeModalProject.year) : activeModalProject.year}`}
               </p>
             </div>
 
@@ -405,22 +509,22 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
             {/* Project Specs Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-[#f8faf9] border border-[#e7e7e7] text-xs">
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Typology</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("টাইপোলজি", "Typology")}</span>
                 <span className="font-medium text-[#3d1916]">
                   {isBn ? activeModalProject.categoryBn : activeModalProject.categoryEn}
                 </span>
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Scale / Area</span>
-                <span className="font-medium text-[#3d1916]">{activeModalProject.area || "Custom Scope"}</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("পরিসর / ক্ষেত্রফল", "Scale / Area")}</span>
+                <span className="font-medium text-[#3d1916]">{isBn ? toBnDigits(activeModalProject.area || "৩,৫০০ বর্গফুট") : (activeModalProject.area || "Custom Scope")}</span>
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Climate Adaptation</span>
-                <span className="font-medium text-[#3d1916]">Tropical Monsoon</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("জলবায়ু উপযোগিতা", "Climate Adaptation")}</span>
+                <span className="font-medium text-[#3d1916]">{t("গ্রীষ্মমণ্ডলীয় মৌসুমি", "Tropical Monsoon")}</span>
               </div>
               <div>
-                <span className="block font-mono text-[10px] text-[#75787b] uppercase">Waterproofing</span>
-                <span className="font-medium text-[#3d1916]">100% Guaranteed</span>
+                <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("ওয়াটারপ্রুফিং", "Waterproofing")}</span>
+                <span className="font-medium text-[#3d1916]">{t("১০০% সুরক্ষিত নিশ্চয়তা", "100% Guaranteed")}</span>
               </div>
             </div>
 

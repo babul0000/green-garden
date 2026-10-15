@@ -10,6 +10,7 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
   t: (bnText: string, enText: string) => string;
+  tHeadline: (bnText: string, enText: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -44,12 +45,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguage(language === "bn" ? "en" : "bn");
   };
 
+  // Standard translation helper: In Bengali mode returns Bengali text, in English mode returns English text
   const t = (bnText: string, enText: string): string => {
     return language === "bn" ? bnText : enText;
   };
 
+  // Architectural Headline Helper: Headlines are ALWAYS in English in both 'en' and 'bn' themes
+  const tHeadline = (bnText: string, enText: string): string => {
+    return enText || bnText;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, lang: language, setLanguage, toggleLanguage, t }}>
+    <LanguageContext.Provider value={{ language, lang: language, setLanguage, toggleLanguage, t, tHeadline }}>
       {children}
     </LanguageContext.Provider>
   );

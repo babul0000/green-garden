@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
             </span>
           </div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#E4E2D7]">
-            {t("পাসওয়ার্ড পুনরুদ্ধার", "Reset Password")}
+            Reset Password
           </h1>
           <p className="text-xs text-white/60 font-sans leading-relaxed max-w-sm mx-auto">
             {t(

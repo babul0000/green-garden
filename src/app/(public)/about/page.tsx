@@ -57,8 +57,9 @@ export default function AboutPage() {
     { year: "2026", title: "Bangladesh's Premier Landscaper", desc: "Ranked as the #1 design agency for sustainable urban landscaping and eco-friendly garden architecture." }
   ];
 
-  const title = language === "bn" ? (config?.titleBn || "এ আর গ্রিন গার্ডেন সম্পর্কে") : (config?.titleEn || "We Design Harmonious Urban Ecosystems");
-  const subtitle = language === "bn" ? (config?.subtitleBn || "বাংলাদেশের শীর্ষস্থানীয় স্টুডিও") : (config?.subtitleEn || "Our Journey");
+  // Headlines always stay in English in both English and Bengali themes
+  const title = config?.titleEn || "We Design Harmonious Urban Ecosystems";
+  const subtitle = config?.subtitleEn || "Our Journey";
   const story = language === "bn" 
     ? (config?.storyBn || "একটি সহজ চিন্তা থেকেই আমাদের যাত্রা শুরু: ঢাকার তীব্র নগরায়ন মানুষকে প্রকৃতি থেকে দূরে সরিয়ে দিচ্ছিল। তাই প্রকৃতি ও স্থাপত্যের মেলবন্ধন ঘটিয়ে আমরা গড়ে তুলছি টেকসই সবুজ সমাধান।")
     : (config?.storyEn || "It all started with a simple observation: Dhaka's rapid urban growth was cutting off citizens from nature. Determined to make a change, our founders combined botanical sciences with modern architecture to create self-sustaining green solutions. Today, we are a full-service team crafting premium landscapes.");

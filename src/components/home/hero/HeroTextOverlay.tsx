@@ -28,7 +28,8 @@ export default function HeroTextOverlay({
   if (!enableTextOverlay) return null;
 
   const tagline = isBn ? taglineBn || taglineEn : taglineEn;
-  const headline = isBn ? headlineBn || headlineEn : headlineEn;
+  // Headlines always stay in English in both English and Bengali themes
+  const headline = headlineEn || headlineBn;
   const description = isBn ? descriptionBn || descriptionEn : descriptionEn;
 
   if (textPosition === "bottom-left") {

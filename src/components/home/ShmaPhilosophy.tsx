@@ -85,7 +85,7 @@ export default function ShmaPhilosophy() {
                 {t("আমাদের মূল দর্শন", "Studio Philosophy")}
               </span>
               <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-light tracking-tight text-white">
-                {t("পরিবেশবান্ধব স্থাপত্য ও স্থায়িত্বের মেলবন্ধন", "Resilience, Ecology & Architectural Precision")}
+                Resilience, Ecology & Architectural Precision
               </h2>
             </div>
             <p className="font-sans text-xs sm:text-sm text-white/70 max-w-md leading-relaxed">
@@ -120,7 +120,7 @@ export default function ShmaPhilosophy() {
                   </span>
                   <div>
                     <h4 className="font-display text-base font-bold text-white">
-                      {language === "bn" ? p.titleBn : p.titleEn}
+                      {p.titleEn}
                     </h4>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ export default function ShmaPhilosophy() {
               </div>
 
               <h3 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight">
-                {language === "bn" ? current.titleBn : current.titleEn}
+                {current.titleEn}
               </h3>
               <p className="font-sans text-sm text-white/80 leading-relaxed">
                 {language === "bn" ? current.descBn : current.descEn}

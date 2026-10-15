@@ -87,15 +87,18 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.services || [];
           if (items.length > 0) {
-            const mapped: ShmaService[] = items.slice(0, 6).map((s: any, idx: number) => ({
-              id: String(idx + 1).padStart(2, "0"),
-              titleBn: s.bengaliTitle || s.titleBn || s.title || "",
-              titleEn: s.title || s.titleEn || "",
-              descBn: s.descBn || s.desc || s.description || "",
-              descEn: s.descEn || s.desc || s.description || "",
-              scopeBn: s.features || s.scopeBn || ["কনসেপ্ট ডিজাইন", "বাস্তবায়ন", "রক্ষণাবেক্ষণ"],
-              scopeEn: s.features || s.scopeEn || ["Concept Design", "Implementation", "Maintenance"],
-            }));
+            const mapped: ShmaService[] = items.slice(0, 6).map((s: any, idx: number) => {
+              const fallback = services[idx % services.length];
+              return {
+                id: String(idx + 1).padStart(2, "0"),
+                titleBn: s.bengaliTitle || s.titleBn || fallback.titleBn || s.title || "",
+                titleEn: s.title || s.titleEn || fallback.titleEn || "",
+                descBn: s.descBn || fallback.descBn || s.desc || s.description || "",
+                descEn: s.descEn || s.desc || s.description || fallback.descEn || "",
+                scopeBn: s.scopeBn || fallback.scopeBn || ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "ড্রেনেজ সমন্বয়", "টার্ন-কি সাইট বাস্তবায়ন"],
+                scopeEn: s.scopeEn || s.features || fallback.scopeEn || ["Concept & 3D Visualization", "Drainage Architecture", "Turn-key Implementation"],
+              };
+            });
             setServiceList(mapped);
           }
         }
@@ -127,7 +130,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            Architectural Disciplines
+            {t("স্থাপত্য ও নকশা শৃঙ্খলা", "Architectural Disciplines")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
