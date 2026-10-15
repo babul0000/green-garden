@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function DesignGardenPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-white to-white py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-white to-white pt-24 sm:pt-28 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="text-sm text-gray-500 flex items-center gap-2">
           <Link href="/" className="hover:text-emerald-700">Home</Link>

@@ -15,16 +15,16 @@ export default function ProjectsTab({ projects, onTabChange }: ProjectsTabProps)
 
   return (
     <div className="space-y-6 mt-6 animate-fade-in-up">
-      <div className="flex justify-between items-center pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-white/10">
         <div>
           <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest block">Project Portfolio</span>
-          <h3 className="text-2xl font-display font-bold text-[#E4E2D7]">
+          <h3 className="text-xl sm:text-2xl font-display font-bold text-[#E4E2D7]">
             My Landscape Projects ({projects.length})
           </h3>
         </div>
         <Link
           href="/design-garden"
-          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-bold font-mono shadow-lg shadow-emerald-500/20 transition-all"
+          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-bold font-mono shadow-lg shadow-emerald-500/20 transition-all shrink-0"
         >
           + {t("নতুন প্রজেক্ট শুরু করুন", "Start New Project")}
         </Link>

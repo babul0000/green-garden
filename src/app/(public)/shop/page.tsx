@@ -94,6 +94,7 @@ export default function ShopPage() {
 
   // Zoom product state
   const [viewProduct, setViewProduct] = useState<IProduct | null>(null);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Dynamic Filters
   const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
@@ -152,18 +153,18 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6 relative">
+    <div className="bg-background text-foreground font-sans min-h-screen py-10 sm:py-16 px-4 sm:px-6 relative">
       {/* Banner */}
-      <div className="max-w-6xl mx-auto flex flex-col gap-10">
-        <div className="flex justify-between items-center border-b border-foreground/5 pb-6">
-          <div className="flex flex-col gap-2">
-            <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">E-Commerce Nursery</span>
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">Shop Garden Accessories</h1>
+      <div className="max-w-6xl mx-auto flex flex-col gap-6 sm:gap-10">
+        <div className="flex justify-between items-center border-b border-foreground/5 pb-4 sm:pb-6">
+          <div className="flex flex-col gap-1 sm:gap-2">
+            <span className="text-xs sm:text-[13px] font-bold tracking-wider text-primary-green uppercase">E-Commerce Nursery</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">Shop Garden Accessories</h1>
           </div>
           {/* Cart Icon trigger */}
           <button 
             onClick={() => setIsCartOpen(true)}
-            className="relative bg-primary-green text-white p-3.5 rounded-full flex items-center justify-center shadow-md hover:bg-primary-green-dark transition-colors cursor-pointer"
+            className="relative bg-primary-green text-white p-3 sm:p-3.5 rounded-full flex items-center justify-center shadow-md hover:bg-primary-green-dark transition-colors cursor-pointer shrink-0"
           >
             🛒
             {cart.length > 0 && (
@@ -174,12 +175,40 @@ export default function ShopPage() {
           </button>
         </div>
 
+        {/* Mobile Quick Horizontal Category Scroll Bar */}
+        <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 scrollbar-none items-center">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border shrink-0 transition-all ${
+                selectedCategory === cat
+                  ? "bg-[#2B4D33] text-white border-[#2B4D33] shadow-sm font-bold"
+                  : "bg-white text-gray-700 border-gray-200"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowMobileFilters((prev) => !prev)}
+            className="px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1 shrink-0"
+          >
+            <span>⚙️</span>
+            <span>{showMobileFilters ? "ফিল্টার লুকান" : "বাজেট ও ফিল্টার"}</span>
+          </button>
+        </div>
+
         {/* Main layout: Filters + Products */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
-          {/* Left Column: Filters */}
-          <div className="bg-white/80 border border-foreground/5 p-6 rounded-3xl flex flex-col gap-6 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-10 items-start">
+          {/* Left Column: Filters (Collapsible on Mobile, Permanent on Desktop) */}
+          <div
+            className={`bg-white/90 border border-foreground/5 p-5 sm:p-6 rounded-3xl flex flex-col gap-6 shadow-sm ${
+              showMobileFilters ? "flex" : "hidden lg:flex"
+            }`}
+          >
             <div>
-              <h3 className="font-serif font-bold text-[#1a3020] text-sm md:text-base uppercase tracking-wider mb-4">Search</h3>
+              <h3 className="font-serif font-bold text-[#1a3020] text-sm md:text-base uppercase tracking-wider mb-3">Search</h3>
               <input 
                 type="text"
                 placeholder="Find plants, soils..."
@@ -189,17 +218,17 @@ export default function ShopPage() {
               />
             </div>
 
-            <div>
+            <div className="hidden lg:block">
               <h3 className="font-serif font-bold text-[#1a3020] text-sm md:text-base uppercase tracking-wider mb-4">Categories</h3>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 {categories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
                     className={`text-left py-2 px-3 rounded-lg text-xs md:text-sm font-medium transition-all cursor-pointer ${
                       selectedCategory === cat
-                        ? "bg-sage-light text-primary-green font-bold"
-                        : "text-foreground/70 hover:bg-sage-pastel/15"
+                        ? "bg-[#2B4D33]/10 text-[#2B4D33] font-bold"
+                        : "text-foreground/70 hover:bg-black/5"
                     }`}
                   >
                     {cat}
@@ -209,17 +238,17 @@ export default function ShopPage() {
             </div>
 
             <div>
-              <h3 className="font-serif font-bold text-[#1a3020] text-sm md:text-base uppercase tracking-wider mb-4">Max Price</h3>
+              <h3 className="font-serif font-bold text-[#1a3020] text-sm md:text-base uppercase tracking-wider mb-3">Max Price</h3>
               <input 
                 type="range"
                 min="200"
-                max="2000"
+                max="2500"
                 step="50"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(parseInt(e.target.value))}
                 className="w-full accent-primary-green h-1.5 bg-sage-pastel rounded-lg appearance-none cursor-pointer"
               />
-              <div className="flex justify-between text-xs text-foreground/50 mt-2">
+              <div className="flex justify-between text-xs text-foreground/60 mt-2 font-mono">
                 <span>BDT 200</span>
                 <span className="font-bold text-primary-green">BDT {maxPrice}</span>
               </div>

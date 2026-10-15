@@ -95,8 +95,8 @@ export default function ContactPage() {
   ];
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-24">
+    <div className="bg-background text-foreground font-sans min-h-screen pt-24 sm:pt-28 pb-16 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto flex flex-col gap-12 sm:gap-24">
         
         {/* Section 1: Header */}
         <div className="text-center max-w-3xl mx-auto flex flex-col gap-6 animate-fade-in-up">

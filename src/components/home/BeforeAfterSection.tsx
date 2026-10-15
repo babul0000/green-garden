@@ -94,11 +94,11 @@ export default function BeforeAfterSection() {
         </div>
 
         {/* Interactive Comparison Slider */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center bg-white p-6 sm:p-10 rounded-[32px] border border-stone-300 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center bg-white p-4 sm:p-10 rounded-2xl sm:rounded-[32px] border border-stone-300 shadow-sm">
           
           {/* Comparison Slider Frame (Left) */}
           <div className="lg:col-span-8">
-            <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden select-none shadow-xl border border-stone-200">
+            <div className="relative w-full aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden select-none shadow-xl border border-stone-200">
               
               {/* After Image (Background) */}
               <img
@@ -106,32 +106,31 @@ export default function BeforeAfterSection() {
                 alt="After Transformation"
                 className="absolute inset-0 w-full h-full object-cover"
               />
-              <div className="absolute top-4 right-4 bg-[#2B4D33] text-white px-3.5 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-widest font-bold shadow-md">
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-[#2B4D33] text-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full font-mono text-[9px] sm:text-[10px] uppercase tracking-widest font-bold shadow-md z-10">
                 {t("রূপান্তরের পরে", "AFTER")}
               </div>
 
-              {/* Before Image (Clipped Foreground) */}
+              {/* Before Image (Clipped Foreground with clipPath - never distorts) */}
               <div
                 className="absolute inset-0 overflow-hidden"
-                style={{ width: `${sliderPosition}%` }}
+                style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
               >
                 <img
                   src={current.beforeImg}
                   alt="Before Transformation"
-                  className="absolute inset-0 w-full h-full object-cover max-w-none"
-                  style={{ width: "100%", height: "100%" }}
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-black/80 text-white px-3.5 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-widest font-bold shadow-md">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-black/80 text-white px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full font-mono text-[9px] sm:text-[10px] uppercase tracking-widest font-bold shadow-md z-10">
                   {t("পূর্ববর্তী অবস্থা", "BEFORE")}
                 </div>
               </div>
 
               {/* Slider Divider Bar */}
               <div
-                className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.6)] cursor-ew-resize flex items-center justify-center pointer-events-none"
+                className="absolute top-0 bottom-0 w-0.5 sm:w-1 bg-white shadow-[0_0_15px_rgba(0,0,0,0.6)] cursor-ew-resize flex items-center justify-center pointer-events-none z-10"
                 style={{ left: `${sliderPosition}%` }}
               >
-                <div className="w-9 h-9 rounded-full bg-[#18221A] text-white border-2 border-white flex items-center justify-center shadow-xl text-xs font-mono font-bold">
+                <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#18221A] text-white border-2 border-white flex items-center justify-center shadow-xl text-xs font-mono font-bold">
                   ↔
                 </div>
               </div>
@@ -143,12 +142,12 @@ export default function BeforeAfterSection() {
                 max="100"
                 value={sliderPosition}
                 onChange={(e) => setSliderPosition(Number(e.target.value))}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-20 touch-none"
                 aria-label="Before and after transformation slider"
               />
             </div>
             
-            <p className="text-center font-mono text-xs text-[#75787B] mt-3">
+            <p className="text-center font-mono text-[11px] sm:text-xs text-[#75787B] mt-2.5">
               {t("← স্লাইডারটি টেনে রূপান্তর তুলনা করুন →", "← Drag slider horizontally to compare →")}
             </p>
           </div>

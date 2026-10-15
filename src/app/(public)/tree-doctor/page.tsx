@@ -128,8 +128,8 @@ export default function TreeDoctorPage() {
   ];
 
   return (
-    <div className="bg-gradient-to-b from-emerald-50/40 via-white to-white min-h-screen py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-16">
+    <div className="bg-gradient-to-b from-emerald-50/40 via-white to-white min-h-screen pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16">
         
         {/* Page Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">

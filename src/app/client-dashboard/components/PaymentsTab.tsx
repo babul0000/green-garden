@@ -51,8 +51,8 @@ export default function PaymentsTab({
       </div>
 
       {/* Invoices Table */}
-      <div className="border border-white/10 rounded-3xl overflow-hidden bg-black/40 shadow-xl">
-        <table className="w-full text-left text-xs">
+      <div className="border border-white/10 rounded-2xl sm:rounded-3xl overflow-x-auto bg-black/40 shadow-xl">
+        <table className="w-full text-left text-xs min-w-[620px]">
           <thead className="bg-white/5 text-white/50 font-mono uppercase tracking-wider text-[11px] border-b border-white/10">
             <tr>
               <th className="py-3.5 px-4">Invoice #</th>

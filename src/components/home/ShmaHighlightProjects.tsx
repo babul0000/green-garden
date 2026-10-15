@@ -185,15 +185,15 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
   }, []);
 
   return (
-    <section id="projects" className="py-24 px-6 sm:px-10 lg:px-16 max-w-[1440px] mx-auto text-[#323232] bg-white">
+    <section id="projects" className="py-12 sm:py-24 px-4 sm:px-10 lg:px-16 max-w-[1440px] mx-auto text-[#323232] bg-white">
       {/* 1. ARCHITECTURAL SECTION HEADER (MATCHING SHMA DESIGNS) */}
-      <div className="mb-16 sm:mb-20">
+      <div className="mb-10 sm:mb-20">
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="space-y-1">
             <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#75787b] block">
               {t("নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
             </span>
-            <h2 className="font-display font-light text-4xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
+            <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
               Highlight Project
             </h2>
           </div>
@@ -306,24 +306,24 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
 
                 {/* Eco Metric Quick Summary */}
                 {item.ecoMetrics && (
-                  <div className="pt-2 border-t border-[#e7e7e7] grid grid-cols-3 gap-4 text-center">
+                  <div className="pt-2 border-t border-[#e7e7e7] grid grid-cols-3 gap-2 sm:gap-4 text-center">
                     <div>
-                      <span className="block font-display text-lg text-[#3d1916] font-normal">
+                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
                         {item.ecoMetrics.tempDrop}
                       </span>
-                      <span className="text-[10px] font-mono text-[#75787b] uppercase">Microclimate</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">Microclimate</span>
                     </div>
                     <div>
-                      <span className="block font-display text-lg text-[#3d1916] font-normal">
+                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
                         {item.ecoMetrics.greenCoverage}
                       </span>
-                      <span className="text-[10px] font-mono text-[#75787b] uppercase">Biophilia</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">Biophilia</span>
                     </div>
                     <div>
-                      <span className="block font-display text-lg text-[#3d1916] font-normal">
+                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
                         {item.ecoMetrics.rainwater}
                       </span>
-                      <span className="text-[10px] font-mono text-[#75787b] uppercase">Hydrology</span>
+                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">Hydrology</span>
                     </div>
                   </div>
                 )}

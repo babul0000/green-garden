@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -12,14 +13,18 @@ interface NavbarProps {
 export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Automatically make header solid with readable dark text on non-home pages
+  const isHome = pathname === "/";
+  const isHeaderSolid = isScrolled || !isHome;
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
     };
-    // Initialize state immediately on mount
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -39,37 +44,37 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
   return (
     <>
-      {/* DYNAMIC SHMA ARCHITECTURAL HEADER (TRANSPARENT AT TOP, FROSTED WHITE ON SCROLL) */}
+      {/* DYNAMIC SHMA ARCHITECTURAL HEADER */}
       <header
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          isScrolled
-            ? "bg-white/95 backdrop-blur-md shadow-xs py-3.5 sm:py-4 border-b border-black/5 text-[#323232]"
-            : "bg-transparent py-5 sm:py-6 text-white"
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          isHeaderSolid
+            ? "bg-white/95 backdrop-blur-md shadow-xs py-3 sm:py-4 border-b border-black/5 text-[#323232]"
+            : "bg-transparent py-4 sm:py-6 text-white"
         }`}
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-center justify-between gap-4">
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-6 md:px-8 flex items-center justify-between gap-2 sm:gap-4">
           
-          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Language Switcher */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Compact Language Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={() => setMenuOpen(true)}
-              className="group flex items-center gap-2 text-inherit p-2 -ml-2 transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
+              className="group flex items-center p-1.5 -ml-1 text-inherit transition-opacity hover:opacity-70 cursor-pointer focus:outline-none"
               aria-label={t("মেন্যু খুলুন", "Open Navigation Menu")}
             >
-              <div className="flex flex-col gap-1.5 w-7">
+              <div className="flex flex-col gap-1 w-6 sm:w-7">
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
+                    isHeaderSolid ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
+                    isHeaderSolid ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isScrolled ? "bg-[#323232]" : "bg-white"
+                    isHeaderSolid ? "bg-[#323232]" : "bg-white"
                   }`}
                 ></span>
               </div>
@@ -78,15 +83,15 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             {/* Language Switcher Pill Toggle */}
             <button
               onClick={toggleLanguage}
-              className={`text-xs font-mono tracking-wider px-2.5 sm:px-3 py-1 rounded-full border transition-all flex items-center gap-1.5 cursor-pointer select-none ${
-                isScrolled
+              className={`text-[11px] sm:text-xs font-mono tracking-wider px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer select-none ${
+                isHeaderSolid
                   ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
                   : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
               }`}
               title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
             >
               <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
-                বাংলা
+                বাং
               </span>
               <span className="opacity-40">|</span>
               <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-60"}>
@@ -95,17 +100,17 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             </button>
           </div>
 
-          {/* Column 2: Exact Shma Centered Architectural Outline Logo */}
-          <div className="flex-1 flex items-center justify-center text-center px-2">
-            <Link href="/" className="group inline-block whitespace-nowrap">
-              <span className="font-display font-extralight text-lg sm:text-xl md:text-[22px] lg:text-[25px] tracking-[0.16em] sm:tracking-[0.22em] uppercase transition-colors">
+          {/* Column 2: Responsive Center Logo */}
+          <div className="flex-1 flex items-center justify-center text-center px-1 min-w-0">
+            <Link href="/" className="group inline-block max-w-[160px] xs:max-w-[190px] sm:max-w-none">
+              <span className="font-display font-light text-xs xs:text-sm sm:text-lg md:text-[22px] lg:text-[25px] tracking-[0.08em] xs:tracking-[0.14em] sm:tracking-[0.22em] uppercase transition-colors truncate block">
                 A R GREEN GARDEN
               </span>
             </Link>
           </div>
 
           {/* Column 3: Hotline, WhatsApp & Dashboard */}
-          <div className="flex items-center justify-end gap-2 sm:gap-3.5 shrink-0">
+          <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
             {/* Social Icons - visible on large monitors to prevent crowding */}
             <div className="hidden xl:flex items-center gap-3.5 text-inherit">
               {/* Facebook */}
@@ -152,21 +157,22 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             <a
               href="tel:01883012641"
               className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
-                isScrolled ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
+                isHeaderSolid ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
               }`}
             >
               ০১88৩-০১২৬৪১
             </a>
 
-            {/* Direct WhatsApp Action */}
+            {/* Direct WhatsApp Action - compact on mobile */}
             <a
               href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="p-1 sm:px-3 sm:py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              title="WhatsApp"
             >
-              <span>💬</span>
-              <span className="hidden md:inline">WhatsApp</span>
+              <span className="text-sm sm:text-xs">💬</span>
+              <span className="hidden sm:inline">WhatsApp</span>
             </a>
 
             {/* Login / Dashboard Link */}
@@ -181,7 +187,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     ? "/moderator"
                     : "/client-dashboard"
                 }
-                className="pl-1.5 pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap border border-emerald-600/40"
+                className="pl-1 pr-2 sm:pl-1.5 sm:pr-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-[11px] sm:text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap border border-emerald-600/40"
                 title={user.name ? `Logged in as ${user.name}` : "Dashboard"}
               >
                 <div className="w-5 h-5 rounded-full overflow-hidden bg-emerald-950 border border-white/60 flex items-center justify-center shrink-0 shadow-inner">
@@ -194,19 +200,19 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="tracking-wide">Dashboard</span>
+                <span className="tracking-wide hidden xs:inline">Dashboard</span>
               </Link>
             ) : (
               <Link
                 href="/login"
-                className={`px-3.5 py-1 rounded-full text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
-                  isScrolled
+                className={`px-2.5 sm:px-3.5 py-1 rounded-full text-[11px] sm:text-xs font-semibold shadow-xs transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap ${
+                  isHeaderSolid
                     ? "bg-stone-100 hover:bg-stone-200 text-[#323232] border border-stone-300"
                     : "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-xs"
                 }`}
               >
                 <span>👤</span>
-                <span>{t("লগইন", "Login")}</span>
+                <span className="hidden xs:inline">{t("লগইন", "Login")}</span>
               </Link>
             )}
           </div>
@@ -214,41 +220,38 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
         </div>
       </header>
 
-      {/* EXACT SHMA POPUP 2433: FULL-HEIGHT SLIDE-IN DRAWER MENU */}
+      {/* SHMA POPUP: FULL-HEIGHT SLIDE-IN DRAWER MENU */}
       {menuOpen && (
         <div className="fixed inset-0 z-[100] flex">
           {/* Backdrop Overlay */}
           <div
             onClick={() => setMenuOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer transition-opacity"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm cursor-pointer transition-opacity"
           ></div>
 
-          {/* Left Slide Menu Container: Exact Shma Background #6f7375 */}
-          <div className="relative w-full max-w-[480px] bg-[#6f7375] text-white h-full overflow-y-auto px-8 sm:px-12 py-10 flex flex-col justify-between z-10 shadow-2xl animate-fade-in-up">
+          {/* Left Slide Menu Container: Deep Architectural Emerald #142017 */}
+          <div className="relative w-full max-w-[420px] bg-[#142017] text-white h-full overflow-y-auto px-6 sm:px-10 py-8 flex flex-col justify-between z-10 shadow-2xl border-r border-white/10 animate-fade-in-up">
             
             {/* Top Close Hamburger & Language Toggle */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
               <button
                 onClick={() => setMenuOpen(false)}
                 className="group flex items-center p-2 -ml-2 text-white hover:opacity-70 cursor-pointer focus:outline-none"
                 aria-label="Close Navigation Menu"
               >
-                <div className="flex flex-col gap-1.5 w-7">
+                <div className="flex flex-col gap-1 w-6">
                   <span className="w-full h-[1.5px] bg-white"></span>
                   <span className="w-full h-[1.5px] bg-white"></span>
                   <span className="w-full h-[1.5px] bg-white"></span>
                 </div>
               </button>
 
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-white/60">
-                  {t("ভাষা", "Language")}:
-                </span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setLanguage("bn")}
                   className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
                     language === "bn"
-                      ? "bg-white text-[#3d2e17] font-bold shadow"
+                      ? "bg-emerald-500 text-stone-950 font-bold shadow"
                       : "text-white/70 hover:text-white"
                   }`}
                 >
@@ -258,7 +261,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                   onClick={() => setLanguage("en")}
                   className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
                     language === "en"
-                      ? "bg-white text-[#3d2e17] font-bold shadow"
+                      ? "bg-emerald-500 text-stone-950 font-bold shadow"
                       : "text-white/70 hover:text-white"
                   }`}
                 >
@@ -267,7 +270,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
 
                 <button
                   onClick={() => setMenuOpen(false)}
-                  className="text-white hover:opacity-70 text-2xl p-1 ml-2 cursor-pointer focus:outline-none"
+                  className="text-white hover:opacity-70 text-xl p-1.5 ml-1 cursor-pointer focus:outline-none rounded-full bg-white/10"
                   aria-label="Close"
                 >
                   ✕

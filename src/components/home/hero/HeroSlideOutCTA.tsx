@@ -40,9 +40,9 @@ export default function HeroSlideOutCTA({
 
   return (
     <>
-      {/* ================= LEFT-EDGE HOVER DETECTION ZONES ================= */}
+      {/* ================= LEFT-EDGE HOVER DETECTION ZONES (Desktop only) ================= */}
       {ctaTriggerMode === "hover" && (
-        <>
+        <div className="hidden md:block">
           {/* Vertical Left Edge Zone */}
           <div
             onMouseEnter={onMouseEnter}
@@ -58,17 +58,17 @@ export default function HeroSlideOutCTA({
             className="absolute left-0 bottom-0 w-72 sm:w-[420px] h-48 sm:h-64 z-20 pointer-events-auto"
             aria-hidden="true"
           />
-        </>
+        </div>
       )}
 
       {/* ================= SLIDE-OUT CTA BUTTONS CONTAINER ================= */}
       <div
         onMouseEnter={ctaTriggerMode === "hover" ? onMouseEnter : undefined}
         onMouseLeave={ctaTriggerMode === "hover" ? onMouseLeave : undefined}
-        className={`absolute bottom-12 sm:bottom-16 left-6 sm:left-12 z-30 flex items-center transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`absolute bottom-8 sm:bottom-16 left-4 sm:left-12 z-30 flex items-center transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           showCta
             ? "translate-x-0 opacity-100 pointer-events-auto scale-100"
-            : "-translate-x-[calc(100%+4rem)] opacity-0 pointer-events-none scale-95"
+            : "max-md:translate-x-0 max-md:opacity-100 max-md:pointer-events-auto -translate-x-[calc(100%+4rem)] opacity-0 pointer-events-none scale-95"
         }`}
         style={{ willChange: "transform, opacity" }}
       >

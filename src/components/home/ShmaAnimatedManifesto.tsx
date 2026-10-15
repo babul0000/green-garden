@@ -82,7 +82,18 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
 
     const isMobile = window.innerWidth <= 768;
 
-    // Set initial state matching Shma setInitialState()
+    if (isMobile) {
+      gsap.set(enable, { color: states.state4.line01 });
+      gsap.set([change, for_text, earth], { color: states.state4.allText });
+      gsap.set(container, { backgroundColor: states.state4.bgColor });
+      gsap.set(description, { opacity: 1, y: 0 });
+      gsap.set(image2, { opacity: 1 });
+      title?.classList.add("final-style");
+      video?.play().catch(() => {});
+      return;
+    }
+
+    // Set initial state matching Shma setInitialState() (Desktop only)
     gsap.set(enable, { color: states.state1.line01 });
     gsap.set([change, for_text, earth], { color: states.state1.allText });
     gsap.set(container, { backgroundColor: states.state1.bgColor });
@@ -90,7 +101,7 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
     gsap.set(image1, { opacity: 0 });
     gsap.set(image2, { opacity: 0 });
 
-    const leftPosition = isMobile ? "40%" : "28%";
+    const leftPosition = "28%";
     gsap.set(content, {
       left: leftPosition,
       xPercent: -50,
@@ -105,8 +116,8 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
     mainTimeline.to(container, { backgroundColor: s2.bgColor, duration: 0.4 }, "state2");
     mainTimeline.to(change, { color: s2.line01, duration: 0.4 }, "state2");
     mainTimeline.to([enable, for_text, earth], { color: s2.allText, duration: 0.4 }, "state2");
-    mainTimeline.to(content, { left: isMobile ? "20%" : "10%", xPercent: 0, duration: 0.75 }, "state2");
-    mainTimeline.to(image1, { opacity: 1, top: isMobile ? "75%" : "40%", duration: 1 }, "state2");
+    mainTimeline.to(content, { left: "10%", xPercent: 0, duration: 0.75 }, "state2");
+    mainTimeline.to(image1, { opacity: 1, top: "40%", duration: 1 }, "state2");
     mainTimeline.to({}, { duration: 0.75 });
 
     // State 3
@@ -114,7 +125,7 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
     mainTimeline.to(container, { backgroundColor: s3.bgColor, duration: 0.35 }, "state3");
     mainTimeline.to([enable, for_text, change], { color: s3.allText, duration: 0.35 }, "state3");
     mainTimeline.to(earth, { color: s3.override.for_text, duration: 0.35 }, "state3");
-    mainTimeline.to(content, { left: "50%", top: isMobile ? "5%" : undefined, xPercent: -50, textAlign: "center", duration: 1 }, "state3");
+    mainTimeline.to(content, { left: "50%", xPercent: -50, textAlign: "center", duration: 1 }, "state3");
     mainTimeline.to(image1, { opacity: 0, duration: 0.8 }, "state3");
     mainTimeline.to({}, { duration: 0.75 });
 
@@ -123,9 +134,9 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
     mainTimeline.to(container, { backgroundColor: s4.bgColor, duration: 0.8 }, "state4");
     mainTimeline.to(enable, { color: s4.line01, duration: 0.8 }, "state4");
     mainTimeline.to([change, for_text, earth], { color: s4.allText, duration: 0.8 }, "state4");
-    mainTimeline.to(content, { left: "5%", xPercent: 0, textAlign: "left", duration: 1 }, "state4");
+    mainTimeline.to(content, { left: "0%", xPercent: 0, textAlign: "left", duration: 1 }, "state4");
     mainTimeline.to(title, {
-      fontSize: isMobile ? "8.5vw" : "2.5rem",
+      fontSize: "2.5rem",
       onComplete: () => {
         title?.classList.add("final-style");
       },
@@ -140,7 +151,7 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
         video?.play().catch(() => {});
       }
     }, "state4+=0.3");
-    mainTimeline.to(content, { left: "0%", paddingTop: "3.5rem", paddingLeft: isMobile ? "1rem" : "0", duration: 1 }, "state4");
+    mainTimeline.to(content, { left: "0%", paddingTop: "3.5rem", paddingLeft: "0", duration: 1 }, "state4");
     mainTimeline.to(container, { minHeight: "560px", duration: 1 }, "state4");
 
     // Intersection observer or click to trigger animation automatically

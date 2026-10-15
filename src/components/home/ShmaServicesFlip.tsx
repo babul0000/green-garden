@@ -73,6 +73,11 @@ const services: ShmaService[] = [
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
   const [serviceList, setServiceList] = useState<ShmaService[]>(services);
+  const [flippedId, setFlippedId] = useState<string | null>(null);
+
+  const toggleFlip = (id: string) => {
+    setFlippedId((prev) => (prev === id ? null : id));
+  };
 
   React.useEffect(() => {
     const fetchServices = async () => {
@@ -130,39 +135,60 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
 
       {/* Dynamic Flip-Box Grid */}
       <div className={`grid ${gridColsClass} gap-6 sm:gap-8`}>
-        {serviceList.map((item) => (
-          <div
-            key={item.id}
-            className="group relative h-[300px] sm:h-[340px] [perspective:1000px] cursor-pointer"
-          >
-            {/* Flipping Inner Container */}
-            <div className="relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-              
-              {/* FRONT FACE: Clean Beige Rectangular Box */}
-              <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-[#dedad2] p-8 flex flex-col justify-between">
-                <span className="font-mono text-xs text-[#75787b] font-light">
-                  {item.id}
-                </span>
-                <div className="my-auto text-center space-y-2">
-                  <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                    {item.titleEn}
-                  </h3>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-mono uppercase tracking-widest text-[#75787b] opacity-0 group-hover:opacity-100 transition-opacity">
-                    {t("বিস্তারিত দেখুন →", "Hover to View Details →")}
-                  </span>
-                </div>
-              </div>
+        {serviceList.map((item) => {
+          const isFlipped = flippedId === item.id;
 
-              {/* BACK FACE: Dark Brown Architectural Brief */}
-              <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#3d2e17] text-white p-7 sm:p-8 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[11px] text-[#dedad2]/70 font-light block">
-                      {t("সেবার পরিধি", "Scope & Deliverables")}
+          return (
+            <div
+              key={item.id}
+              onClick={() => toggleFlip(item.id)}
+              className="group relative h-[300px] sm:h-[340px] [perspective:1000px] cursor-pointer"
+            >
+              {/* Flipping Inner Container */}
+              <div
+                className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${
+                  isFlipped ? "[transform:rotateY(180deg)]" : "md:group-hover:[transform:rotateY(180deg)]"
+                }`}
+              >
+                
+                {/* FRONT FACE: Clean Beige Rectangular Box */}
+                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-[#dedad2] p-8 flex flex-col justify-between rounded-2xl">
+                  <span className="font-mono text-xs text-[#75787b] font-light">
+                    {item.id}
+                  </span>
+                  <div className="my-auto text-center space-y-2">
+                    <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
+                      {item.titleEn}
+                    </h3>
+                    <span className="text-[11px] font-mono text-[#75787b] md:hidden block mt-1">
+                      {t("ট্যাপ করে বিবরণ দেখুন ➔", "Tap to view details ➔")}
                     </span>
                   </div>
+                  <div className="text-right">
+                    <span className="text-xs font-mono uppercase tracking-widest text-[#75787b] opacity-0 group-hover:opacity-100 transition-opacity hidden md:inline">
+                      {t("বিস্তারিত দেখুন →", "Hover to View Details →")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* BACK FACE: Dark Brown Architectural Brief */}
+                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#3d2e17] text-white p-7 sm:p-8 flex flex-col justify-between rounded-2xl">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-mono text-[11px] text-[#dedad2]/70 font-light block">
+                        {t("সেবার পরিধি", "Scope & Deliverables")}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFlippedId(null);
+                        }}
+                        className="md:hidden text-[10px] font-mono text-white/60 hover:text-white underline cursor-pointer"
+                      >
+                        {t("✕ বন্ধ করুন", "✕ Close")}
+                      </button>
+                    </div>
                   <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
                     {item.titleEn}
                   </h4>
@@ -192,8 +218,9 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
 
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
+    </div>
 
     </section>
   );

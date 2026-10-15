@@ -181,10 +181,10 @@ export default function Footer() {
           <div className="md:col-span-4 space-y-4">
             <Link href="/" onClick={handleLogoClick} className="inline-block group">
               <div className="flex flex-col">
-                <span className="font-display font-extralight text-3xl sm:text-4xl tracking-[0.25em] uppercase text-white group-hover:text-[#5a9dff] transition-colors">
+                <span className="font-display font-extralight text-2xl sm:text-3xl md:text-4xl tracking-[0.12em] sm:tracking-[0.25em] uppercase text-white group-hover:text-[#5a9dff] transition-colors">
                   {siteSettings.title || "A R GREEN GARDEN"}
                 </span>
-                <span className="font-mono text-[10px] tracking-[0.28em] text-white/60 uppercase mt-1">
+                <span className="font-mono text-[9px] sm:text-[10px] tracking-[0.2em] sm:tracking-[0.28em] text-white/60 uppercase mt-1">
                   {siteSettings.tagline || t("LANDSCAPE ARCHITECTURE STUDIO", "LANDSCAPE ARCHITECTURE STUDIO")}
                 </span>
               </div>
@@ -247,7 +247,7 @@ export default function Footer() {
           </div>
 
           {/* Col 4: Social Icons & Language Switcher (2 cols) */}
-          <div className="md:col-span-2 flex flex-col justify-between h-full space-y-6 text-right md:items-end">
+          <div className="md:col-span-2 flex flex-col justify-between h-full space-y-6 text-left md:text-right md:items-end">
             {/* Language Switcher in Footer */}
             <div className="flex items-center gap-2 border border-white/20 rounded-full px-3 py-1 text-xs">
               <button

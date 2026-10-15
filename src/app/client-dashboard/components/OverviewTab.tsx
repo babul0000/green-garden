@@ -112,13 +112,14 @@ export default function OverviewTab({
               Phase {milestones.filter((m) => m.done).length} of 5
             </span>
           </div>
-          <div className="relative py-4 px-2">
-            <div className="absolute top-7 left-6 right-6 h-1 bg-white/10 -z-0 rounded-full" />
-            <div
-              className="absolute top-7 left-6 h-1 bg-emerald-500 -z-0 transition-all duration-500 rounded-full shadow-lg shadow-emerald-500/50"
-              style={{ width: `${Math.min(100, projectProgress)}%` }}
-            />
-            <div className="flex justify-between items-center relative z-10">
+          <div className="relative py-4 px-2 overflow-x-auto scrollbar-none">
+            <div className="min-w-[440px] relative">
+              <div className="absolute top-3.5 left-6 right-6 h-1 bg-white/10 -z-0 rounded-full" />
+              <div
+                className="absolute top-3.5 left-6 h-1 bg-emerald-500 -z-0 transition-all duration-500 rounded-full shadow-lg shadow-emerald-500/50"
+                style={{ width: `${Math.min(100, projectProgress)}%` }}
+              />
+              <div className="flex justify-between items-center relative z-10">
               {milestones.map((step, idx) => (
                 <div key={idx} className="flex flex-col items-center gap-2">
                   <div
@@ -150,6 +151,7 @@ export default function OverviewTab({
             </div>
           </div>
         </div>
+      </div>
 
         {/* Tree Doctor & Photos */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
