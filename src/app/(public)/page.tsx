@@ -86,15 +86,17 @@ export default function Home() {
     .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   const renderSection = (section: HomeSection) => {
-    const widthClass =
-      section.width === "compact"
-        ? "max-w-4xl mx-auto px-4"
-        : section.width === "contained"
-        ? "max-w-7xl mx-auto px-4 sm:px-6"
-        : "w-full";
+    const isHero = section.id === "hero";
+    const widthClass = isHero
+      ? "w-full"
+      : section.width === "compact"
+      ? "max-w-4xl mx-auto px-4"
+      : section.width === "contained"
+      ? "max-w-7xl mx-auto px-4 sm:px-6"
+      : "w-full";
 
     const paddingClass =
-      section.padding === "none"
+      isHero || section.padding === "none"
         ? "py-0"
         : section.padding === "small"
         ? "py-6 sm:py-8"

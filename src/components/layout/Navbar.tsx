@@ -18,7 +18,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Automatically make header solid with readable dark text on non-home pages
-  const isHome = pathname === "/";
+  const isHome = pathname === "/" || pathname === "" || !pathname;
   const isHeaderSolid = isScrolled || !isHome;
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           isHeaderSolid
             ? "bg-white/95 backdrop-blur-md shadow-xs py-3 sm:py-4 border-b border-black/5 text-[#323232]"
-            : "bg-transparent py-4 sm:py-6 text-white"
+            : "bg-gradient-to-b from-black/60 via-black/25 to-transparent py-4 sm:py-6 text-white"
         }`}
       >
         <div className="max-w-[1440px] mx-auto px-3 sm:px-6 md:px-8 flex items-center justify-between gap-2 sm:gap-4">
@@ -64,17 +64,17 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               <div className="flex flex-col gap-1 w-6 sm:w-7">
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isHeaderSolid ? "bg-[#323232]" : "bg-white"
+                    isHeaderSolid ? "bg-[#323232]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isHeaderSolid ? "bg-[#323232]" : "bg-white"
+                    isHeaderSolid ? "bg-[#323232]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isHeaderSolid ? "bg-[#323232]" : "bg-white"
+                    isHeaderSolid ? "bg-[#323232]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                   }`}
                 ></span>
               </div>
@@ -86,15 +86,15 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               className={`text-[11px] sm:text-xs font-mono tracking-wider px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer select-none ${
                 isHeaderSolid
                   ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
-                  : "border-white/35 hover:border-white text-white bg-white/10 backdrop-blur-sm"
+                  : "border-white/50 hover:border-white text-white bg-black/20 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
               }`}
               title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
             >
-              <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-60"}>
+              <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-75"}>
                 বাং
               </span>
               <span className="opacity-40">|</span>
-              <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-60"}>
+              <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-75"}>
                 EN
               </span>
             </button>
@@ -103,7 +103,9 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
           {/* Column 2: Responsive Center Logo */}
           <div className="flex-1 flex items-center justify-center text-center px-1 min-w-0">
             <Link href="/" className="group inline-block max-w-[160px] xs:max-w-[190px] sm:max-w-none">
-              <span className="font-display font-light text-xs xs:text-sm sm:text-lg md:text-[22px] lg:text-[25px] tracking-[0.08em] xs:tracking-[0.14em] sm:tracking-[0.22em] uppercase transition-colors truncate block">
+              <span className={`font-display font-light text-xs xs:text-sm sm:text-lg md:text-[22px] lg:text-[25px] tracking-[0.08em] xs:tracking-[0.14em] sm:tracking-[0.22em] uppercase transition-colors truncate block ${
+                isHeaderSolid ? "text-[#323232]" : "text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]"
+              }`}>
                 A R GREEN GARDEN
               </span>
             </Link>
@@ -157,7 +159,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             <a
               href="tel:01883012641"
               className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
-                isHeaderSolid ? "text-[#323232] border-[#323232]/35" : "text-white border-white/40"
+                isHeaderSolid ? "text-[#323232] border-[#323232]/35" : "text-white border-white/50 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
               }`}
             >
               ০১88৩-০১২৬৪১

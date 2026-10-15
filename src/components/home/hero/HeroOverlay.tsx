@@ -23,10 +23,20 @@ export default function HeroOverlay({
 
       {/* Top & Bottom Vignettes for Header Readability & Cinematic Depth */}
       {showTopVignette && (
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/50 via-black/20 to-transparent pointer-events-none"></div>
+        <div
+          className="absolute inset-x-0 top-0 h-40 pointer-events-none z-10"
+          style={{
+            background: "linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0) 100%)",
+          }}
+        />
       )}
       {showBottomVignette && (
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/60 via-black/25 to-transparent pointer-events-none"></div>
+        <div
+          className="absolute inset-x-0 bottom-0 h-48 pointer-events-none z-10"
+          style={{
+            background: "linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0) 100%)",
+          }}
+        />
       )}
     </>
   );
