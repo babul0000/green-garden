@@ -29,6 +29,15 @@ interface HomepageConfig {
     titleBn: string;
     points: { iconEn: string; titleEn: string; titleBn: string; descEn: string; descBn: string }[];
   };
+  studioLife?: {
+    titleEn: string;
+    titleBn: string;
+    image: string;
+    paragraph1Bn: string;
+    paragraph2Bn: string;
+    paragraph1En: string;
+    paragraph2En: string;
+  };
 }
 
 const DEFAULT_CONFIG: HomepageConfig = {
@@ -60,6 +69,15 @@ const DEFAULT_CONFIG: HomepageConfig = {
     textEn: "A R GREEN GARDEN — 10TH ANNIVERSARY — Participating in the Future",
     textBn: "এ আর গ্রিন গার্ডেন — ১০ম বার্ষিকী — ভবিষ্যতের সাথে অংশীদারিত্ব",
   },
+  studioLife: {
+    titleEn: "Studio Life & Culture",
+    titleBn: "স্টুডিও লাইফ ও কালচার",
+    image: "https://shmadesigns.com/wp-content/uploads/2025/06/Banner-Website-Shma-19th_Artboard-1_01-1.jpg",
+    paragraph1Bn: "ঢাকার প্রাণকেন্দ্র ধানমন্ডিতে অবস্থিত এ আর গ্রিন গার্ডেনের স্টুডিও ক্যাম্পাস। এখানে নবীন ও অভিজ্ঞ ল্যান্ডস্কেপ আর্কিটেক্ট, আরবারিস্ট এবং সিভিল ইঞ্জিনিয়াররা মিলেমিশে গড়ে তুলেছেন এক উন্মুক্ত উদ্ভাবনী পরিবেশ।",
+    paragraph2Bn: "আমাদের স্টুডিও কেবল গতানুগতিক কাজের জায়গা নয়, বরং এটি ধানমন্ডির বুকে এক জীবন্ত সবুজ গবেষণাগার।",
+    paragraph1En: "Located in the heart of Dhanmondi, the A R Green Garden studio is an open collaborative space where landscape architects, arborists, and civil engineers unite around climate-resilient design.",
+    paragraph2En: "Beyond a traditional architectural studio, our campus serves as a biophilic learning laboratory."
+  }
 };
 
 export default function HomepageSectionsTab() {
@@ -67,7 +85,7 @@ export default function HomepageSectionsTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
-  const [activeTab, setActiveTab] = useState<"sections" | "manifesto" | "process" | "campaign">("sections");
+  const [activeTab, setActiveTab] = useState<"sections" | "manifesto" | "process" | "campaign" | "studioLife">("sections");
 
   useEffect(() => { fetchConfig(); }, []);
 
@@ -194,6 +212,7 @@ export default function HomepageSectionsTab() {
           { key: "manifesto", label: "✨ Manifesto Text" },
           { key: "process", label: "📐 Process Steps" },
           { key: "campaign", label: "📣 Campaign Banner" },
+          { key: "studioLife", label: "🌱 Studio Life & Culture" },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -415,6 +434,116 @@ export default function HomepageSectionsTab() {
           <div className="bg-emerald-900 rounded-2xl py-6 px-8 overflow-hidden">
             <div className="whitespace-nowrap animate-marquee text-emerald-300 text-lg font-bold tracking-widest uppercase">
               {config.campaign.textEn} &nbsp;·&nbsp; {config.campaign.textBn} &nbsp;·&nbsp;
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Studio Life & Culture Tab ── */}
+      {activeTab === "studioLife" && (
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-6">
+          <div>
+            <h3 className="font-bold text-gray-800 text-base">🌱 স্টুডিও লাইফ ও কালচার সেকশন এডিটর</h3>
+            <p className="text-xs text-gray-500 mt-0.5">হোমপেজে স্টুডিও পরিচিতি, ব্যাকগ্রাউন্ড ইমেজ ও টেক্সট পরিবর্তন করুন।</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Title (English)</label>
+              <input
+                type="text"
+                value={config.studioLife?.titleEn || ""}
+                onChange={(e) => setConfig((p) => ({
+                  ...p,
+                  studioLife: { ...p.studioLife!, titleEn: e.target.value }
+                }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Title (বাংলা)</label>
+              <input
+                type="text"
+                value={config.studioLife?.titleBn || ""}
+                onChange={(e) => setConfig((p) => ({
+                  ...p,
+                  studioLife: { ...p.studioLife!, titleBn: e.target.value }
+                }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-gray-600 block mb-1">Background Image URL</label>
+            <input
+              type="text"
+              value={config.studioLife?.image || ""}
+              onChange={(e) => setConfig((p) => ({
+                ...p,
+                studioLife: { ...p.studioLife!, image: e.target.value }
+              }))}
+              placeholder="https://..."
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+            />
+            {config.studioLife?.image && (
+              <div className="mt-3 w-full h-36 rounded-xl overflow-hidden border border-gray-200 relative">
+                <img src={config.studioLife.image} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Paragraph 1 (English)</label>
+              <textarea
+                rows={4}
+                value={config.studioLife?.paragraph1En || ""}
+                onChange={(e) => setConfig((p) => ({
+                  ...p,
+                  studioLife: { ...p.studioLife!, paragraph1En: e.target.value }
+                }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Paragraph 1 (বাংলা)</label>
+              <textarea
+                rows={4}
+                value={config.studioLife?.paragraph1Bn || ""}
+                onChange={(e) => setConfig((p) => ({
+                  ...p,
+                  studioLife: { ...p.studioLife!, paragraph1Bn: e.target.value }
+                }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 resize-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Paragraph 2 (English)</label>
+              <textarea
+                rows={4}
+                value={config.studioLife?.paragraph2En || ""}
+                onChange={(e) => setConfig((p) => ({
+                  ...p,
+                  studioLife: { ...p.studioLife!, paragraph2En: e.target.value }
+                }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1">Paragraph 2 (বাংলা)</label>
+              <textarea
+                rows={4}
+                value={config.studioLife?.paragraph2Bn || ""}
+                onChange={(e) => setConfig((p) => ({
+                  ...p,
+                  studioLife: { ...p.studioLife!, paragraph2Bn: e.target.value }
+                }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 resize-none"
+              />
             </div>
           </div>
         </div>

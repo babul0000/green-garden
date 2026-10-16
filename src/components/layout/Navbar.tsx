@@ -6,6 +6,76 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
+interface IMenuLink {
+  id: string;
+  titleBn: string;
+  titleEn: string;
+  url: string;
+  badge?: string;
+  isVisible: boolean;
+  order: number;
+}
+
+interface INavbarSettings {
+  logoType: "TEXT" | "IMAGE";
+  logoText: string;
+  logoImage?: string;
+  logoHeight?: number;
+  logoTracking?: string;
+  hotlinePhone: string;
+  hotlineDisplay: string;
+  hotlineVisible: boolean;
+  whatsappNumber: string;
+  whatsappMessage: string;
+  whatsappVisible: boolean;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  youtubeUrl?: string;
+  socialVisible: boolean;
+  enableLanguageSwitch: boolean;
+  enable3dWizardLink: boolean;
+  enableEmergencyDoctor: boolean;
+  menuLinks: IMenuLink[];
+}
+
+const DEFAULT_NAVBAR_SETTINGS: INavbarSettings = {
+  logoType: "TEXT",
+  logoText: "A R GREEN GARDEN",
+  logoImage: "",
+  logoHeight: 28,
+  logoTracking: "0.22em",
+  hotlinePhone: "01883012641",
+  hotlineDisplay: "০১88৩-০১২৬৪১",
+  hotlineVisible: true,
+  whatsappNumber: "8801883012641",
+  whatsappMessage: "Hello A R Green Garden, I would like to consult about my garden.",
+  whatsappVisible: true,
+  facebookUrl: "https://facebook.com",
+  instagramUrl: "https://instagram.com",
+  linkedinUrl: "https://linkedin.com",
+  youtubeUrl: "https://youtube.com",
+  socialVisible: true,
+  enableLanguageSwitch: true,
+  enable3dWizardLink: true,
+  enableEmergencyDoctor: true,
+  menuLinks: [
+    { id: "1", titleBn: "প্রকল্পসমূহ (Portfolio)", titleEn: "Projects & Portfolio", url: "/projects", isVisible: true, order: 1 },
+    { id: "2", titleBn: "সেবাসমূহ", titleEn: "Landscape Services", url: "/services", isVisible: true, order: 2 },
+    { id: "3", titleBn: "মেথডোলজি ও কাজের ধাপ", titleEn: "Methodology & Process", url: "#process", isVisible: true, order: 3 },
+    { id: "4", titleBn: "প্ল্যান্ট নার্সারি ও শপ", titleEn: "Plant Nursery & Shop", url: "/shop", badge: "SHOP", isVisible: true, order: 4 },
+    { id: "5", titleBn: "ফটো গ্যালারি", titleEn: "Photo Gallery", url: "/gallery", isVisible: true, order: 5 },
+    { id: "6", titleBn: "বিফোর-আফটার রূপান্তর", titleEn: "Before & After Showcase", url: "/before-after", badge: "NEW", isVisible: true, order: 6 },
+    { id: "7", titleBn: "আমাদের টিম", titleEn: "Our Landscape Team", url: "/team", isVisible: true, order: 7 },
+    { id: "8", titleBn: "স্টুডিও পরিচিতি", titleEn: "About Studio", url: "/about", isVisible: true, order: 8 },
+    { id: "9", titleBn: "গ্রাহক মতামত", titleEn: "Client Testimonials", url: "/testimonials", isVisible: true, order: 9 },
+    { id: "10", titleBn: "সংবাদ ও ব্লগ", titleEn: "Articles & Blog", url: "/blog", isVisible: true, order: 10 },
+    { id: "11", titleBn: "সাধারণ জিজ্ঞাসা (FAQ)", titleEn: "Frequently Asked Questions", url: "/faq", isVisible: true, order: 11 },
+    { id: "12", titleBn: "ক্যারিয়ার সুযোগ", titleEn: "Careers at Studio", url: "/career", isVisible: true, order: 12 },
+    { id: "13", titleBn: "যোগাযোগ ও কনসাল্টেশন", titleEn: "Contact & Consultation", url: "/contact", isVisible: true, order: 13 },
+  ],
+};
+
 interface NavbarProps {
   onOpenEstimator?: () => void;
 }
@@ -16,6 +86,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [navConfig, setNavConfig] = useState<INavbarSettings>(DEFAULT_NAVBAR_SETTINGS);
 
   // Automatically make header solid with readable dark text on non-home pages
   const isHome = pathname === "/" || pathname === "" || !pathname;
@@ -30,6 +101,51 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Fetch dynamic navbar settings from database
+  useEffect(() => {
+    const fetchNavbarConfig = async () => {
+      try {
+        const res = await fetch(`/api/settings?_t=${Date.now()}`, { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value?.navbar_config) {
+            setNavConfig({
+              ...DEFAULT_NAVBAR_SETTINGS,
+              ...data.value.navbar_config,
+              menuLinks: data.value.navbar_config.menuLinks || DEFAULT_NAVBAR_SETTINGS.menuLinks,
+            });
+          } else if (data?.value) {
+            setNavConfig((prev) => ({
+              ...prev,
+              logoText: data.value.title || prev.logoText,
+              hotlinePhone: data.value.phone || prev.hotlinePhone,
+              facebookUrl: data.value.fbPage || prev.facebookUrl,
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load navbar settings:", err);
+      }
+    };
+
+    fetchNavbarConfig();
+
+    const handleCustomUpdate = (e: CustomEvent<INavbarSettings>) => {
+      if (e.detail) {
+        setNavConfig((prev) => ({
+          ...prev,
+          ...e.detail,
+          menuLinks: e.detail.menuLinks || prev.menuLinks,
+        }));
+      }
+    };
+
+    window.addEventListener("navbar-config-updated" as any, handleCustomUpdate as any);
+    return () => {
+      window.removeEventListener("navbar-config-updated" as any, handleCustomUpdate as any);
+    };
+  }, []);
+
   // Prevent background scrolling when menu popup is active
   useEffect(() => {
     if (menuOpen) {
@@ -41,6 +157,10 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  const activeLinks = (navConfig.menuLinks || DEFAULT_NAVBAR_SETTINGS.menuLinks)
+    .filter((l) => l.isVisible !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
 
   return (
     <>
@@ -81,101 +201,126 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             </button>
 
             {/* Language Switcher Pill Toggle */}
-            <button
-              onClick={toggleLanguage}
-              className={`text-[11px] sm:text-xs font-mono tracking-wider px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer select-none ${
-                isHeaderSolid
-                  ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
-                  : "border-white/50 hover:border-white text-white bg-black/20 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
-              }`}
-              title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
-            >
-              <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-75"}>
-                বাং
-              </span>
-              <span className="opacity-40">|</span>
-              <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-75"}>
-                EN
-              </span>
-            </button>
+            {navConfig.enableLanguageSwitch !== false && (
+              <button
+                onClick={toggleLanguage}
+                className={`text-[11px] sm:text-xs font-mono tracking-wider px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border transition-all flex items-center gap-1 cursor-pointer select-none ${
+                  isHeaderSolid
+                    ? "border-[#323232]/25 hover:border-[#323232] text-[#323232] bg-black/[0.03]"
+                    : "border-white/50 hover:border-white text-white bg-black/20 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
+                }`}
+                title={t("Switch to English", "বাংলা ভাষায় পরিবর্তন করুন")}
+              >
+                <span className={language === "bn" ? "font-bold underline underline-offset-2" : "opacity-75"}>
+                  বাং
+                </span>
+                <span className="opacity-40">|</span>
+                <span className={language === "en" ? "font-bold underline underline-offset-2" : "opacity-75"}>
+                  EN
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Column 2: Responsive Center Logo */}
           <div className="flex-1 flex items-center justify-center text-center px-1 min-w-0">
             <Link href="/" className="group inline-block max-w-[160px] xs:max-w-[190px] sm:max-w-none">
-              <span className={`font-display font-light text-xs xs:text-sm sm:text-lg md:text-[22px] lg:text-[25px] tracking-[0.08em] xs:tracking-[0.14em] sm:tracking-[0.22em] uppercase transition-colors truncate block ${
-                isHeaderSolid ? "text-[#323232]" : "text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]"
-              }`}>
-                A R GREEN GARDEN
-              </span>
+              {navConfig.logoType === "IMAGE" && navConfig.logoImage ? (
+                <img
+                  src={navConfig.logoImage}
+                  alt={navConfig.logoText || "A R GREEN GARDEN"}
+                  style={{ height: `${navConfig.logoHeight || 28}px` }}
+                  className="object-contain max-h-[48px]"
+                />
+              ) : (
+                <span
+                  className={`font-display font-light text-xs xs:text-sm sm:text-lg md:text-[22px] lg:text-[25px] uppercase transition-colors truncate block ${
+                    isHeaderSolid ? "text-[#323232]" : "text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.7)]"
+                  }`}
+                  style={{ letterSpacing: navConfig.logoTracking || "0.22em" }}
+                >
+                  {navConfig.logoText || "A R GREEN GARDEN"}
+                </span>
+              )}
             </Link>
           </div>
 
           {/* Column 3: Hotline, WhatsApp & Dashboard */}
           <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Social Icons - visible on large monitors to prevent crowding */}
-            <div className="hidden xl:flex items-center gap-3.5 text-inherit">
-              {/* Facebook */}
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-inherit hover:opacity-60 transition-opacity"
-                aria-label="Facebook"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
-                  <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
-                </svg>
-              </a>
+            {/* Social Icons */}
+            {navConfig.socialVisible !== false && (
+              <div className="hidden xl:flex items-center gap-3.5 text-inherit">
+                {navConfig.facebookUrl && (
+                  <a
+                    href={navConfig.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-inherit hover:opacity-60 transition-opacity"
+                    aria-label="Facebook"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 512 512">
+                      <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
+                    </svg>
+                  </a>
+                )}
 
-              {/* Instagram */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-inherit hover:opacity-60 transition-opacity"
-                aria-label="Instagram"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
-                  <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
-                </svg>
-              </a>
+                {navConfig.instagramUrl && (
+                  <a
+                    href={navConfig.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-inherit hover:opacity-60 transition-opacity"
+                    aria-label="Instagram"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                      <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1z"></path>
+                    </svg>
+                  </a>
+                )}
 
-              {/* LinkedIn */}
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-inherit hover:opacity-60 transition-opacity"
-                aria-label="LinkedIn"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
-                  <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
-                </svg>
-              </a>
-            </div>
+                {navConfig.linkedinUrl && (
+                  <a
+                    href={navConfig.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-inherit hover:opacity-60 transition-opacity"
+                    aria-label="LinkedIn"
+                  >
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 448 512">
+                      <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
+                    </svg>
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Hotline Phone */}
-            <a
-              href="tel:01883012641"
-              className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
-                isHeaderSolid ? "text-[#323232] border-[#323232]/35" : "text-white border-white/50 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
-              }`}
-            >
-              ০১88৩-০১২৬৪১
-            </a>
+            {navConfig.hotlineVisible !== false && (
+              <a
+                href={`tel:${navConfig.hotlinePhone || "01883012641"}`}
+                className={`text-xs font-mono tracking-wider hover:opacity-75 transition-opacity border-b pb-0.5 whitespace-nowrap hidden lg:inline ${
+                  isHeaderSolid ? "text-[#323232] border-[#323232]/35" : "text-white border-white/50 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+                }`}
+              >
+                {navConfig.hotlineDisplay || navConfig.hotlinePhone || "০১88৩-০১২৬৪১"}
+              </a>
+            )}
 
-            {/* Direct WhatsApp Action - compact on mobile */}
-            <a
-              href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1 sm:px-3 sm:py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-              title="WhatsApp"
-            >
-              <span className="text-sm sm:text-xs">💬</span>
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
+            {/* Direct WhatsApp Action */}
+            {navConfig.whatsappVisible !== false && (
+              <a
+                href={`https://wa.me/${navConfig.whatsappNumber || "8801883012641"}?text=${encodeURIComponent(
+                  navConfig.whatsappMessage || "Hello A R Green Garden, I would like to consult about my garden."
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 sm:px-3 sm:py-1 bg-[#25D366] hover:bg-[#20ba59] text-stone-950 font-bold rounded-full text-xs shadow-xs transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                title="WhatsApp"
+              >
+                <span className="text-sm sm:text-xs">💬</span>
+                <span className="hidden sm:inline">WhatsApp</span>
+              </a>
+            )}
 
             {/* Login / Dashboard Link */}
             {user ? (
@@ -249,26 +394,30 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               </button>
 
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <button
-                  onClick={() => setLanguage("bn")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
-                    language === "bn"
-                      ? "bg-emerald-500 text-stone-950 font-bold shadow"
-                      : "text-white/70 hover:text-white"
-                  }`}
-                >
-                  বাংলা
-                </button>
-                <button
-                  onClick={() => setLanguage("en")}
-                  className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
-                    language === "en"
-                      ? "bg-emerald-500 text-stone-950 font-bold shadow"
-                      : "text-white/70 hover:text-white"
-                  }`}
-                >
-                  English
-                </button>
+                {navConfig.enableLanguageSwitch !== false && (
+                  <>
+                    <button
+                      onClick={() => setLanguage("bn")}
+                      className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
+                        language === "bn"
+                          ? "bg-emerald-500 text-stone-950 font-bold shadow"
+                          : "text-white/70 hover:text-white"
+                      }`}
+                    >
+                      বাংলা
+                    </button>
+                    <button
+                      onClick={() => setLanguage("en")}
+                      className={`px-2.5 py-1 rounded-full text-xs font-sans transition-all cursor-pointer ${
+                        language === "en"
+                          ? "bg-emerald-500 text-stone-950 font-bold shadow"
+                          : "text-white/70 hover:text-white"
+                      }`}
+                    >
+                      English
+                    </button>
+                  </>
+                )}
 
                 <button
                   onClick={() => setMenuOpen(false)}
@@ -280,106 +429,85 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               </div>
             </div>
 
-            {/* Navigation Links */}
-            <div className="space-y-6 my-auto">
+            {/* Navigation Links (Dynamic from Database) */}
+            <div className="space-y-6 my-auto py-4">
               
-              {/* Primary Large Links (Project, Process, People) */}
-              <div className="space-y-3 font-display font-light">
-                <div>
-                  <a
-                    href="#projects"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                  >
-                    {t("Projects", "Projects")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#process"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                  >
-                    {t("Methodology", "Methodology")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#activities"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-3xl sm:text-[40px] font-light hover:text-[#dedad2] transition-colors block leading-tight"
-                  >
-                    {t("Our Team", "Our Team")}
-                  </a>
-                </div>
+              <div className="space-y-2.5 font-display font-light">
+                {activeLinks.map((link) => {
+                  const title = language === "bn" ? (link.titleBn || link.titleEn) : (link.titleEn || link.titleBn);
+                  const isAnchor = link.url.startsWith("#");
+
+                  if (isAnchor) {
+                    return (
+                      <div key={link.id} className="flex items-center justify-between">
+                        <a
+                          href={link.url}
+                          onClick={() => setMenuOpen(false)}
+                          className="text-2xl sm:text-[28px] font-light hover:text-[#dedad2] transition-colors block leading-tight text-white/95"
+                        >
+                          {title}
+                        </a>
+                        {link.badge && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                            {link.badge}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={link.id} className="flex items-center justify-between">
+                      <Link
+                        href={link.url}
+                        onClick={() => setMenuOpen(false)}
+                        className="text-2xl sm:text-[28px] font-light hover:text-[#dedad2] transition-colors block leading-tight text-white/95"
+                      >
+                        {title}
+                      </Link>
+                      {link.badge && (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                          {link.badge}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Secondary Medium Links */}
+              {/* Special Feature Links */}
               <div className="space-y-2.5 font-display font-light pt-4 border-t border-white/20">
-                <div>
-                  <a
-                    href="#container"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("About Studio", "About Studio")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#service"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("Services", "Services")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#activities"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("Recent News & Events", "Recent News & Events")}
-                  </a>
-                </div>
-                <div>
-                  <a
-                    href="#newsletter"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-xl sm:text-[22px] font-light text-white/90 hover:text-white transition-colors block"
-                  >
-                    {t("Contact Us", "Contact Us")}
-                  </a>
-                </div>
+                {navConfig.enable3dWizardLink !== false && (
+                  <div className="pt-1">
+                    <Link
+                      href="/design-garden"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
+                    >
+                      <span>{t("3D Garden Wizard 🎨", "3D Garden Wizard 🎨")}</span>
+                      <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
+                        {t("কাস্টম ছাদবাগান বাজেট ও নকশা", "Interactive Landscape Estimator & Design")}
+                      </span>
+                    </Link>
+                  </div>
+                )}
 
-                <div className="pt-2">
-                  <Link
-                    href="/design-garden"
-                    onClick={() => setMenuOpen(false)}
-                    className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
-                  >
-                    <span>{t("3D Garden Wizard 🎨", "3D Garden Wizard 🎨")}</span>
-                    <span className="text-xs font-sans text-emerald-200/80 block mt-0.5 font-normal">
-                      {t("কাস্টম ছাদবাগান বাজেট ও নকশা", "Interactive Landscape Estimator & Design")}
-                    </span>
-                  </Link>
-                </div>
-
-                <div>
-                  <button
-                    onClick={() => {
-                      setMenuOpen(false);
-                      window.dispatchEvent(new CustomEvent("open-tree-doctor"));
-                    }}
-                    className="text-base sm:text-lg font-normal text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
-                  >
-                    <span>{t("Emergency Tree Doctor 🚨", "Emergency Tree Doctor 🚨")}</span>
-                    <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
-                      {t("অন-কল ডাক্তার ভিজিট ও রোগ নির্ণয়", "Urgent Tree Clinic, Surgery & Visit")}
-                    </span>
-                  </button>
-                </div>
+                {navConfig.enableEmergencyDoctor !== false && (
+                  <div>
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        window.dispatchEvent(new CustomEvent("open-tree-doctor"));
+                      }}
+                      className="text-base sm:text-lg font-normal text-red-200 hover:text-white transition-colors block cursor-pointer text-left w-full"
+                    >
+                      <span>{t("Emergency Tree Doctor 🚨", "Emergency Tree Doctor 🚨")}</span>
+                      <span className="text-xs font-sans text-red-200/80 block mt-0.5 font-normal">
+                        {t("অন-কল ডাক্তার ভিজিট ও রোগ নির্ণয়", "Urgent Tree Clinic, Surgery & Visit")}
+                      </span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Drawer Auth / Dashboard Actions */}
@@ -467,10 +595,12 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               </div>
               <div className="text-[11px] leading-relaxed">
                 <p className="font-semibold text-white">
-                  {t("হটলাইন: ০১৮৮৩-০১২৬৪১", "Hotline: 01883012641")}
+                  {t("হটলাইন: ০১৮৮৩-০১২৬৪১", `Hotline: ${navConfig.hotlineDisplay || navConfig.hotlinePhone}`)}
                 </p>
                 <a
-                  href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+                  href={`https://wa.me/${navConfig.whatsappNumber || "8801883012641"}?text=${encodeURIComponent(
+                    navConfig.whatsappMessage || "Hello A R Green Garden, I would like to consult about my garden."
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-xl bg-[#25D366] text-stone-950 font-bold text-xs shadow"
