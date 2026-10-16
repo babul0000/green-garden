@@ -1,20 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireModerator, withAuthErrorHandling } from "@/lib/apiAuth";
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    await prisma.contactMessage.delete({
-      where: { id },
-    });
-    return NextResponse.json({ message: "Message deleted successfully" });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
+export const dynamic = "force-dynamic";
+
+export const DELETE = withAuthErrorHandling(async (
+  req: Request,
+  context?: { params?: Promise<{ id: string }> }
+) => {
+  await requireModerator(req);
+  const params = await context?.params;
+  const id = params?.id;
+  if (!id) {
+    return NextResponse.json({ error: "Message ID is required" }, { status: 400 });
   }
-}
+
+  await prisma.contactMessage.delete({
+    where: { id },
+  });
+  return NextResponse.json({ message: "Message deleted successfully" });
+});

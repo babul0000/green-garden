@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { requireEditor, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
 }
 
 export const POST = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireEditor(req);
   const body = await req.json();
   const {
     name, slug, clientId, clientName, clientPhone,
@@ -108,7 +108,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const PUT = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireEditor(req);
   const body = await req.json();
   const {
     id, name, slug, clientId, clientName, clientPhone,
@@ -153,7 +153,7 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const DELETE = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireEditor(req);
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return apiError("Project ID required", 400);

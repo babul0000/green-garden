@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { verifyJwtToken, AUTH_COOKIE_NAME, type AuthUser } from "@/lib/auth";
+import { canAccessSection, canEnterAdmin, type AdminSection } from "@/lib/rbac";
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -8,14 +9,14 @@ const NO_CACHE = {
 };
 
 /**
- * Get the currently authenticated user from request cookies.
+ * Get the currently authenticated user from request cookies or Authorization header.
  * Returns null if not authenticated.
  */
 export async function getCurrentUser(req: NextRequest | Request): Promise<AuthUser | null> {
   try {
     let token: string | undefined;
 
-    // 1. Check Authorization Header (Bearer token) — immune to mobile cookie blocking
+    // 1. Check Authorization Header (Bearer token)
     const authHeader = req.headers.get("authorization") || req.headers.get("Authorization");
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.substring(7).trim();
@@ -40,7 +41,7 @@ export async function getCurrentUser(req: NextRequest | Request): Promise<AuthUs
 }
 
 /**
- * Require authentication. Returns user or throws a 401 Response.
+ * Require basic authentication. Returns user or throws a 401 Response.
  */
 export async function requireAuth(req: NextRequest | Request): Promise<AuthUser> {
   const user = await getCurrentUser(req);
@@ -51,37 +52,77 @@ export async function requireAuth(req: NextRequest | Request): Promise<AuthUser>
 }
 
 /**
- * Require ADMIN or EDITOR role.
+ * Require ADMIN role strictly (Used for Finance, Staff/Careers, User Roles, Master Settings, Security).
  */
 export async function requireAdmin(req: NextRequest | Request): Promise<AuthUser> {
   const user = await requireAuth(req);
   const role = user.role?.toUpperCase();
-  if (role !== "ADMIN" && role !== "EDITOR") {
-    throw Object.assign(new Error("Admin privileges required"), { status: 403 });
+  if (role !== "ADMIN") {
+    throw Object.assign(new Error("Admin privileges required (Access Denied)"), { status: 403 });
   }
   return user;
 }
 
 /**
- * Require ADMIN, EDITOR, or MODERATOR role.
+ * Require ADMIN or MODERATOR role (Used for Overview, Messages, Reviews Approval).
  */
 export async function requireModerator(req: NextRequest | Request): Promise<AuthUser> {
   const user = await requireAuth(req);
   const role = user.role?.toUpperCase();
-  if (role !== "ADMIN" && role !== "EDITOR" && role !== "MODERATOR") {
-    throw Object.assign(new Error("Moderator privileges required"), { status: 403 });
+  if (role !== "ADMIN" && role !== "MODERATOR") {
+    throw Object.assign(new Error("Moderator or Admin privileges required"), { status: 403 });
   }
   return user;
 }
 
 /**
- * Require ADMIN, EDITOR, or EMPLOYEE role.
+ * Require ADMIN, MODERATOR, or EDITOR role (Used for Portfolio: Projects, Gallery, Blogs).
+ */
+export async function requireEditor(req: NextRequest | Request): Promise<AuthUser> {
+  const user = await requireAuth(req);
+  const role = user.role?.toUpperCase();
+  if (role !== "ADMIN" && role !== "MODERATOR" && role !== "EDITOR") {
+    throw Object.assign(new Error("Editor, Moderator, or Admin privileges required"), { status: 403 });
+  }
+  return user;
+}
+
+/**
+ * Require ADMIN, MODERATOR, or EMPLOYEE role (Used for Operations: Services, Bookings, Tree Doctor, Maintenance).
  */
 export async function requireEmployee(req: NextRequest | Request): Promise<AuthUser> {
   const user = await requireAuth(req);
   const role = user.role?.toUpperCase();
-  if (role !== "ADMIN" && role !== "EDITOR" && role !== "EMPLOYEE") {
-    throw Object.assign(new Error("Employee privileges required"), { status: 403 });
+  if (role !== "ADMIN" && role !== "MODERATOR" && role !== "EMPLOYEE") {
+    throw Object.assign(new Error("Employee or Admin privileges required"), { status: 403 });
+  }
+  return user;
+}
+
+/**
+ * Require Section-Specific Access according to the RBAC table.
+ */
+export async function requireSectionAccess(req: NextRequest | Request, section: AdminSection): Promise<AuthUser> {
+  const user = await requireAuth(req);
+  if (!canAccessSection(user.role, section)) {
+    throw Object.assign(
+      new Error(`Access denied: role '${user.role}' cannot access section '${section}'`),
+      { status: 403 }
+    );
+  }
+  return user;
+}
+
+/**
+ * Check if user is allowed to access any part of admin. Throws 403 if CLIENT.
+ */
+export async function requireAdminPortalAccess(req: NextRequest | Request): Promise<AuthUser> {
+  const user = await requireAuth(req);
+  if (!canEnterAdmin(user.role)) {
+    throw Object.assign(
+      new Error("Client role cannot access admin management APIs"),
+      { status: 403 }
+    );
   }
   return user;
 }
@@ -92,13 +133,12 @@ export async function requireEmployee(req: NextRequest | Request): Promise<AuthU
 export function isOwnerOrAdmin(user: AuthUser, resourceUserId: string | null | undefined): boolean {
   if (!resourceUserId) return false;
   const role = user.role?.toUpperCase();
-  if (role === "ADMIN" || role === "EDITOR") return true;
+  if (role === "ADMIN") return true;
   return user.id === resourceUserId;
 }
 
 /**
  * Helper: return a sanitized error response.
- * In production, hides internal error details.
  */
 export function apiError(message: string, status: number = 500): Response {
   const isDev = process.env.NODE_ENV === "development";
@@ -110,7 +150,6 @@ export function apiError(message: string, status: number = 500): Response {
 
 /**
  * Wrap a route handler with auth error handling.
- * Usage: export const GET = withAuthErrorHandling(async (req) => { ... })
  */
 export function withAuthErrorHandling(
   handler: (req: Request) => Promise<Response>

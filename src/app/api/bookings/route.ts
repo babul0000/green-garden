@@ -1,30 +1,32 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireEmployee, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
-  try {
-    const bookings = await prisma.booking.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(bookings, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
-    });
-  } catch (error: any) {
-    console.error("Error fetching bookings:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  "Pragma": "no-cache",
+  "Expires": "0",
+};
 
+// Protected GET: Admin/Moderator can view all bookings, Employee can ONLY view their assigned bookings
+export const GET = withAuthErrorHandling(async (req: Request) => {
+  const user = await requireEmployee(req);
+  const isEmployee = user.role?.toUpperCase() === "EMPLOYEE";
+
+  const bookings = await prisma.booking.findMany({
+    where: isEmployee
+      ? { assignedStaff: user.name }
+      : undefined,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(bookings, { headers: NO_CACHE });
+});
+
+// Public POST: Customers and visitors submit booking requests
 export async function POST(req: Request) {
   try {
     const body = await req.json();

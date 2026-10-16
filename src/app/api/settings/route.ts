@@ -158,12 +158,37 @@ export async function GET(req: Request) {
   }
 }
 
-// POST — Upsert a single key
-// Body: { key: "homepage_sections", value: { ... } }
-// OR backward-compat: just the value object for site_config
+// POST — Upsert a single key with RBAC validation
+// Website Studio keys: ADMIN or EDITOR
+// Master settings & Site config: ADMIN only
 export async function POST(req: Request) {
   try {
+    const { getCurrentUser } = await import("@/lib/apiAuth");
+    const user = await getCurrentUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const role = user.role?.toUpperCase();
     const body = await req.json();
+    const targetKey = body.key || "site_config";
+
+    const CONTENT_KEYS = [
+      "homepage_sections", "about_config", "faq_config", "contact_config",
+      "terms_config", "privacy_config", "career_config", "navbar_config",
+      "hero_config", "content_blocks"
+    ];
+
+    if (CONTENT_KEYS.includes(targetKey)) {
+      if (role !== "ADMIN" && role !== "EDITOR") {
+        return NextResponse.json({ error: "Access Denied: Only Admin or Editor can edit website studio content" }, { status: 403 });
+      }
+    } else {
+      // Master settings, site_config, security
+      if (role !== "ADMIN") {
+        return NextResponse.json({ error: "Access Denied: Only Admin can modify master settings" }, { status: 403 });
+      }
+    }
 
     // If body has explicit { key, value } shape — use it
     if (body.key && body.value !== undefined) {

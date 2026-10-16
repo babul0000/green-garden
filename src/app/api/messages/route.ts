@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { requireModerator, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const GET = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireModerator(req);
   const messages = await prisma.contactMessage.findMany({
     orderBy: { createdAt: "desc" },
   });

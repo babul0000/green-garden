@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { canAccessTab } from "@/lib/rbac";
 
 interface SidebarProps {
   activeTab: string;
@@ -21,7 +22,7 @@ export default function Sidebar({
   isOpen = false,
   onClose,
 }: SidebarProps) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   // Prevent body scroll when mobile drawer is open
   useEffect(() => {
@@ -304,16 +305,20 @@ export default function Sidebar({
 
       {/* 2. Scrollable Navigation Menu */}
       <div className="flex flex-col gap-4 flex-grow overflow-y-auto pr-1 custom-scrollbar my-3">
-        {menuSections.map((sec, idx) => (
-          <div key={idx} className="flex flex-col gap-0.5">
-            <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#75787B] px-3 mb-1.5">
-              {sec.sectionTitle}
-            </p>
-            <nav className="flex flex-col gap-0.5">
-              {sec.items.map((tab) => {
-                const isSelected = activeTab === tab.id;
-                return (
-                  <button
+        {menuSections.map((sec, idx) => {
+          const visibleItems = sec.items.filter((tab) => canAccessTab(user?.role, tab.id));
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={idx} className="flex flex-col gap-0.5">
+              <p className="text-[9px] uppercase font-mono font-bold tracking-[0.25em] text-[#75787B] px-3 mb-1.5">
+                {sec.sectionTitle}
+              </p>
+              <nav className="flex flex-col gap-0.5">
+                {visibleItems.map((tab) => {
+                  const isSelected = activeTab === tab.id;
+                  return (
+                    <button
                     key={tab.id}
                     type="button"
                     onClick={() => handleTabClick(tab.id)}
@@ -342,7 +347,8 @@ export default function Sidebar({
               })}
             </nav>
           </div>
-        ))}
+        );
+      })}
       </div>
 
       {/* 3. Bottom Profile & Shma Architectural Portal Link */}

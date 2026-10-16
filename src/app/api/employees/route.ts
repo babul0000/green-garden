@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const isPublic = searchParams.get("public") === "true";
     const user = await getCurrentUser(req);
-    const isAdmin = user?.role?.toUpperCase() === "ADMIN" || user?.role?.toUpperCase() === "EDITOR";
+    const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
     const employees = await prisma.employee.findMany({
       where: isPublic ? { isPublicTeam: true, status: "ACTIVE" } : undefined,

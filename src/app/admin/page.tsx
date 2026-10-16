@@ -37,24 +37,35 @@ import DigitalServiceCardTab from "@/components/admin/DigitalServiceCardTab";
 import HomepageSectionsTab from "@/components/admin/HomepageSectionsTab";
 import ContentManagerTab from "@/components/admin/ContentManagerTab";
 
+// RBAC Permissions
+import { canAccessTab, canEnterAdmin, getDefaultTabForRole } from "@/lib/rbac";
+
 export default function AdminPage() {
   const { user, loading: isPending } = useAuth();
   const sessionData = user ? { user } : null;
   const [activeTab, setActiveTab] = useState("analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Load initial tab from localStorage on mount
+  // Load initial tab from localStorage on mount and validate against user's permitted tabs
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedTab = localStorage.getItem("adminActiveTab");
-      if (savedTab) {
+    if (user) {
+      if (!canEnterAdmin(user.role)) return;
+      const savedTab = typeof window !== "undefined" ? localStorage.getItem("adminActiveTab") : null;
+      if (savedTab && canAccessTab(user.role, savedTab)) {
         setActiveTab(savedTab);
+      } else {
+        const def = getDefaultTabForRole(user.role);
+        setActiveTab(def);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("adminActiveTab", def);
+        }
       }
     }
-  }, []);
+  }, [user]);
 
-  // Save tab to localStorage on change
+  // Save tab to localStorage on change if allowed
   const handleTabChange = (tab: string) => {
+    if (user && !canAccessTab(user.role, tab)) return;
     setActiveTab(tab);
     if (typeof window !== "undefined") {
       localStorage.setItem("adminActiveTab", tab);
@@ -602,6 +613,50 @@ export default function AdminPage() {
     );
   }
 
+  // Strict Client & Unauthenticated Guard — Client role cannot access admin portal
+  if (!user || !canEnterAdmin(user.role)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#142017] text-white p-6 text-center select-none">
+        <div className="max-w-md bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl shadow-2xl flex flex-col items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-3xl">
+            🚫
+          </div>
+          <h2 className="text-xl font-bold font-serif text-white">অ্যাক্সেস সংরক্ষিত • Access Restricted</h2>
+          <p className="text-xs text-stone-300 leading-relaxed">
+            {!user
+              ? "অ্যাডমিন ড্যাশবোর্ডে প্রবেশ করতে অনুগ্রহ করে প্রথমে সাইন ইন করুন।"
+              : `আপনার বর্তমান অ্যাকাউন্টের ভূমিকা (${user.role || "Client"}) অ্যাডমিন প্যানেলে প্রবেশের অনুমতিপ্রাপ্ত নয়।`}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+            {!user ? (
+              <a
+                href="/login"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all text-center"
+              >
+                লগইন পেজে যান
+              </a>
+            ) : (
+              <a
+                href="/client-dashboard"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all text-center"
+              >
+                ক্লায়েন্ট ড্যাশবোর্ডে যান
+              </a>
+            )}
+            <a
+              href="/"
+              className="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-xl transition-all text-center"
+            >
+              মূল ওয়েবসাইটে ফিরে যান
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const isCurrentTabAllowed = canAccessTab(user.role, activeTab);
+
   return (
     <div className="bg-[#F7F6F2] text-[#121813] font-sans min-h-screen flex flex-row relative overflow-x-hidden">
       {/* Background Architectural Ambient Grid & Glow matching Shma Designs Architectural Theme */}
@@ -633,8 +688,26 @@ export default function AdminPage() {
         {/* Content Body Grid */}
         <div className="flex-grow p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
 
-          {/* TAB 1: OVERVIEW / DASHBOARD */}
-          {activeTab === "analytics" && (
+          {!isCurrentTabAllowed ? (
+            <div className="bg-white/80 border border-rose-500/30 p-10 rounded-3xl shadow-sm text-center flex flex-col items-center gap-3 my-auto max-w-lg mx-auto">
+              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center text-2xl font-bold">
+                🔒
+              </div>
+              <h3 className="text-base font-bold text-stone-800">এই সেকশনে প্রবেশের অনুমতি নেই</h3>
+              <p className="text-xs text-stone-500 max-w-md leading-relaxed">
+                আপনার বর্তমান অ্যাকাউন্টের রোল ({user.role}) এর জন্য এই নির্দিষ্ট ফিচারটি সীমাবদ্ধ রাখা হয়েছে।
+              </p>
+              <button
+                onClick={() => handleTabChange(getDefaultTabForRole(user.role))}
+                className="mt-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow"
+              >
+                অনুমোদিত সেকশনে যান
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* TAB 1: OVERVIEW / DASHBOARD */}
+              {activeTab === "analytics" && (
             <OverviewTab 
               bookings={bookings}
               projects={projects}
@@ -857,6 +930,8 @@ export default function AdminPage() {
           {activeTab === "content-manager" && (
             <ContentManagerTab />
           )}
+          </>
+        )}
         </div>
       </main>
 

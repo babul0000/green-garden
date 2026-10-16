@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { requireModerator, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -38,7 +38,7 @@ export async function GET(req: Request) {
 }
 
 export const POST = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireModerator(req);
 
   const body = await req.json();
   const { label, slug, category, desc, icon, bannerImage, pricing, features, benefits, process, faqs } = body;
@@ -60,7 +60,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const PUT = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireModerator(req);
 
   const body = await req.json();
   const { id, label, slug, category, desc, icon, bannerImage, pricing, features, benefits, process, faqs } = body;
@@ -84,7 +84,7 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const DELETE = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireModerator(req);
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { requireEditor, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     const category = searchParams.get("category");
     const featured = searchParams.get("featured");
     const limit = searchParams.get("limit");
-    const beforeAfter = searchParams.get("beforeAfter"); // only items with before image
+    const beforeAfter = searchParams.get("beforeAfter");
 
     const items = await prisma.galleryItem.findMany({
       where: {
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
 }
 
 export const POST = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireEditor(req);
   const body = await req.json();
   const { title, imageUrl, beforeImageUrl, category, caption, featured } = body;
 
@@ -59,7 +59,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const PUT = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireEditor(req);
   const body = await req.json();
   const { id, title, imageUrl, beforeImageUrl, category, caption, featured } = body;
   if (!id) return apiError("Gallery item ID required", 400);
@@ -80,7 +80,7 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const DELETE = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+  await requireEditor(req);
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return apiError("Gallery item ID required", 400);

@@ -1,30 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
-  try {
-    const applications = await prisma.careerApplication.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(applications, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
-    });
-  } catch (error: any) {
-    console.error("Error fetching careers:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+// Admin only: view all submitted career applications
+export const GET = withAuthErrorHandling(async (req: Request) => {
+  await requireAdmin(req);
+  const applications = await prisma.careerApplication.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return NextResponse.json(applications, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+    },
+  });
+});
 
+// Public: job candidates submit their applications
 export async function POST(req: Request) {
   try {
     const body = await req.json();

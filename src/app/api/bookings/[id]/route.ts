@@ -1,42 +1,67 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireEmployee, requireModerator, withAuthErrorHandling } from "@/lib/apiAuth";
 
-export async function PUT(
+export const dynamic = "force-dynamic";
+
+export const PUT = withAuthErrorHandling(async (
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const body = await req.json();
+  context?: { params?: Promise<{ id: string }> }
+) => {
+  const user = await requireEmployee(req);
+  const params = await context?.params;
+  const id = params?.id;
+  if (!id) {
+    return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
+  }
 
+  const role = user.role?.toUpperCase();
+  const body = await req.json();
+
+  // If Employee, verify they are assigned to this booking
+  if (role === "EMPLOYEE") {
+    const existing = await prisma.booking.findUnique({ where: { id } });
+    if (!existing || existing.assignedStaff !== user.name) {
+      return NextResponse.json(
+        { error: "Access denied: you can only update bookings assigned to you." },
+        { status: 403 }
+      );
+    }
+
+    // Employees cannot reassign staff, only update progress status or notes
+    const { status, notes } = body;
     const updated = await prisma.booking.update({
       where: { id },
-      data: body,
+      data: {
+        ...(status ? { status } : {}),
+        ...(notes !== undefined ? { notes } : {}),
+      },
     });
-
     return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 400 }
-    );
   }
-}
 
-export async function DELETE(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    await prisma.booking.delete({
-      where: { id },
-    });
-    return NextResponse.json({ message: "Booking deleted successfully" });
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
+  // Admin or Moderator can update any fields
+  const updated = await prisma.booking.update({
+    where: { id },
+    data: body,
+  });
+
+  return NextResponse.json(updated);
+});
+
+export const DELETE = withAuthErrorHandling(async (
+  req: Request,
+  context?: { params?: Promise<{ id: string }> }
+) => {
+  await requireModerator(req);
+  const params = await context?.params;
+  const id = params?.id;
+  if (!id) {
+    return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
   }
-}
+
+  await prisma.booking.delete({
+    where: { id },
+  });
+  return NextResponse.json({ message: "Booking deleted successfully" });
+});
