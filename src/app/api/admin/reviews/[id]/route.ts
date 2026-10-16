@@ -1,48 +1,54 @@
-import { MongoClient, ObjectId } from "mongodb";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireModerator, requireAdmin, withAuthErrorHandling, apiError } from "@/lib/apiAuth";
 
-const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/green-garden";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-interface RouteContext {
-  params: Promise<{ id: string }> | { id: string };
-}
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 
-export async function PUT(req: NextRequest, context: RouteContext) {
-  const { id } = await Promise.resolve(context.params);
-  const client = new MongoClient(mongoUri);
-  try {
-    const { status } = await req.json();
-    await client.connect();
-    const db = client.db("green-garden");
-    
-    await db.collection("reviews").updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { status } }
-    );
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  } finally {
-    await client.close();
-  }
-}
+export const PUT = withAuthErrorHandling(async (req: Request) => {
+  await requireModerator(req);
 
-export async function DELETE(_req: NextRequest, context: RouteContext) {
-  const { id } = await Promise.resolve(context.params);
-  const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-    const db = client.db("green-garden");
-    
-    await db.collection("reviews").deleteOne({ _id: new ObjectId(id) });
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  } finally {
-    await client.close();
-  }
-}
+  const url = new URL(req.url);
+  const pathSegments = url.pathname.split("/");
+  const id = pathSegments[pathSegments.length - 1];
+
+  if (!id) return apiError("Review ID is required", 400);
+
+  const body = await req.json();
+  const { status, name, rating, comment, text } = body;
+
+  const dataToUpdate: any = {};
+  if (status !== undefined) dataToUpdate.status = status;
+  if (name !== undefined) dataToUpdate.name = name;
+  if (rating !== undefined) dataToUpdate.rating = parseInt(String(rating), 10);
+  if (text !== undefined || comment !== undefined) dataToUpdate.text = text || comment;
+
+  const updated = await prisma.review.update({
+    where: { id },
+    data: dataToUpdate,
+  });
+
+  return NextResponse.json({ success: true, review: updated }, { headers: NO_CACHE });
+});
+
+export const DELETE = withAuthErrorHandling(async (req: Request) => {
+  await requireAdmin(req);
+
+  const url = new URL(req.url);
+  const pathSegments = url.pathname.split("/");
+  const id = pathSegments[pathSegments.length - 1];
+
+  if (!id) return apiError("Review ID is required", 400);
+
+  await prisma.review.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ success: true, message: "Review deleted successfully" }, { headers: NO_CACHE });
+});

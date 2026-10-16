@@ -75,6 +75,18 @@ export async function requireModerator(req: NextRequest | Request): Promise<Auth
 }
 
 /**
+ * Require ADMIN, EDITOR, or EMPLOYEE role.
+ */
+export async function requireEmployee(req: NextRequest | Request): Promise<AuthUser> {
+  const user = await requireAuth(req);
+  const role = user.role?.toUpperCase();
+  if (role !== "ADMIN" && role !== "EDITOR" && role !== "EMPLOYEE") {
+    throw Object.assign(new Error("Employee privileges required"), { status: 403 });
+  }
+  return user;
+}
+
+/**
  * Check if user owns a resource or is admin.
  */
 export function isOwnerOrAdmin(user: AuthUser, resourceUserId: string | null | undefined): boolean {

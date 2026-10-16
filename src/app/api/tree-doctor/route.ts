@@ -100,80 +100,91 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
-  try {
-    const requests = await prisma.treeDoctorRequest.findMany({
-      include: {
-        assignedDoctor: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(requests, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
-    });
-  } catch (error: any) {
-    console.error("Error fetching tree doctor requests:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
+import { requireAuth, requireModerator, requireAdmin, requireEmployee, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+
+export const GET = withAuthErrorHandling(async (req: Request) => {
+  const user = await requireAuth(req);
+  const role = user.role?.toUpperCase();
+
+  const { searchParams } = new URL(req.url);
+  const targetUserId = searchParams.get("userId");
+  const status = searchParams.get("status");
+
+  const whereClause: any = {};
+
+  if (role === "ADMIN" || role === "MODERATOR" || role === "EMPLOYEE" || role === "EDITOR") {
+    if (targetUserId) whereClause.userId = targetUserId;
+  } else {
+    // Regular clients can only access their own requests
+    whereClause.OR = [
+      { userId: user.id },
+      ...(user.phone ? [{ clientPhone: user.phone }] : []),
+    ];
   }
-}
 
-export async function PUT(req: Request) {
-  try {
-    const body = await req.json();
-    const { id, status, assignedDoctorId } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: "Tree Doctor Request ID is required" }, { status: 400 });
-    }
-
-    const updated = await prisma.treeDoctorRequest.update({
-      where: { id },
-      data: {
-        ...(status ? { status } : {}),
-        ...(assignedDoctorId !== undefined ? { assignedDoctorId: assignedDoctorId || null } : {}),
-      },
-      include: {
-        assignedDoctor: true,
-      },
-    });
-
-    return NextResponse.json({ success: true, request: updated });
-  } catch (error: any) {
-    console.error("Error updating tree doctor request:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
+  if (status) {
+    whereClause.status = status;
   }
-}
 
-export async function DELETE(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+  const requests = await prisma.treeDoctorRequest.findMany({
+    where: whereClause,
+    include: {
+      assignedDoctor: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
 
-    if (!id) {
-      return NextResponse.json({ error: "Request ID is required" }, { status: 400 });
-    }
+  return NextResponse.json(requests, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      Pragma: "no-cache",
+      Expires: "0",
+    },
+  });
+});
 
-    await prisma.treeDoctorRequest.delete({
-      where: { id },
-    });
+export const PUT = withAuthErrorHandling(async (req: Request) => {
+  await requireEmployee(req);
 
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error("Error deleting tree doctor request:", error);
-    return NextResponse.json(
-      { error: error?.message || "Internal server error" },
-      { status: 500 }
-    );
+  const body = await req.json();
+  const { id, status, assignedDoctorId, diagnosis, treatment, doctorNotes, followUpDate } = body;
+
+  if (!id) {
+    return apiError("Tree Doctor Request ID is required", 400);
   }
-}
+
+  const updated = await prisma.treeDoctorRequest.update({
+    where: { id },
+    data: {
+      ...(status ? { status } : {}),
+      ...(assignedDoctorId !== undefined ? { assignedDoctorId: assignedDoctorId || null } : {}),
+      ...(diagnosis !== undefined ? { diagnosis } : {}),
+      ...(treatment !== undefined ? { treatment } : {}),
+      ...(doctorNotes !== undefined ? { doctorNotes } : {}),
+      ...(followUpDate ? { followUpDate: new Date(followUpDate) } : {}),
+    },
+    include: {
+      assignedDoctor: true,
+    },
+  });
+
+  return NextResponse.json({ success: true, request: updated });
+});
+
+export const DELETE = withAuthErrorHandling(async (req: Request) => {
+  await requireAdmin(req);
+
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  if (!id) {
+    return apiError("Request ID is required", 400);
+  }
+
+  await prisma.treeDoctorRequest.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ success: true, message: "Tree doctor request deleted successfully" });
+});
 

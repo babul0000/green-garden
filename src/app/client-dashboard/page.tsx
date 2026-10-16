@@ -46,10 +46,12 @@ export default function ClientDashboardPage() {
   const fetchClientData = async () => {
     setDataLoading(true);
     try {
+      const clientQuery = user?.id ? `?clientId=${user.id}` : "";
+      const userParam = user?.id ? `?userId=${user.id}` : "";
       const [projRes, invRes, treeRes, plantRes, maintRes] = await Promise.all([
-        fetch("/api/projects", { cache: "no-store" }),
+        fetch(`/api/projects${clientQuery}`, { cache: "no-store" }),
         fetch("/api/invoices", { cache: "no-store" }),
-        fetch("/api/tree-doctor", { cache: "no-store" }),
+        fetch(`/api/tree-doctor${userParam}`, { cache: "no-store" }),
         fetch("/api/plant-health", { cache: "no-store" }),
         fetch("/api/maintenance", { cache: "no-store" }),
       ]);
@@ -133,10 +135,10 @@ export default function ClientDashboardPage() {
   const totalBudget =
     activeProject?.budget ||
     invoices.reduce((acc, i) => acc + (i.totalAmount || 0), 0) ||
-    250000;
+    0;
   const totalPaid = invoices.reduce((acc, i) => acc + (i.paidAmount || 0), 0);
   const totalDue = Math.max(0, totalBudget - totalPaid);
-  const projectProgress = activeProject?.progress ?? 70;
+  const projectProgress = activeProject?.progress ?? 0;
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

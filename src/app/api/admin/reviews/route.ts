@@ -1,53 +1,69 @@
-import { MongoClient } from "mongodb";
-import { NextRequest, NextResponse } from "next/server";
-
-const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/green-garden";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireModerator, withAuthErrorHandling, apiError } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
-  const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-    const db = client.db("green-garden");
-    const reviews = await db.collection("reviews").find().sort({ createdAt: -1 }).toArray();
-    return NextResponse.json(reviews, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
-    });
-  } catch (error) {
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  } finally {
-    await client.close();
-  }
-}
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 
-export async function POST(req: NextRequest) {
-  const client = new MongoClient(mongoUri);
-  try {
-    const { name, rating, comment, service, status } = await req.json();
-    await client.connect();
-    const db = client.db("green-garden");
-    
-    const result = await db.collection("reviews").insertOne({
-      name,
-      rating: parseInt(rating, 10) || 5,
-      comment,
-      service: service || "General Services",
-      status: status || "Pending",
-      createdAt: new Date()
-    });
-    
-    return NextResponse.json({ success: true, id: result.insertedId });
-  } catch (error) {
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  } finally {
-    await client.close();
+export const GET = withAuthErrorHandling(async (req: Request) => {
+  await requireModerator(req);
+
+  const reviews = await prisma.review.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
+  const formatted = reviews.map((r) => ({
+    id: r.id,
+    name: r.name,
+    rating: r.rating,
+    comment: r.text,
+    text: r.text,
+    service: r.service || "Landscape Design",
+    location: r.location || "Dhaka",
+    status: r.status,
+    createdAt: r.createdAt,
+  }));
+
+  return NextResponse.json(formatted, { headers: NO_CACHE });
+});
+
+export const POST = withAuthErrorHandling(async (req: Request) => {
+  await requireModerator(req);
+
+  const body = await req.json();
+  const { name, rating, comment, text, service, status, location } = body;
+
+  const reviewText = text || comment;
+  if (!name || !reviewText) {
+    return apiError("Name and review comment are required", 400);
   }
-}
+
+  const newReview = await prisma.review.create({
+    data: {
+      name,
+      rating: parseInt(String(rating), 10) || 5,
+      text: reviewText,
+      service: service || "General Services",
+      location: location || "Dhaka",
+      status: status || "Approved",
+    },
+  });
+
+  return NextResponse.json(
+    {
+      success: true,
+      id: newReview.id,
+      review: {
+        ...newReview,
+        comment: newReview.text,
+      },
+    },
+    { status: 201, headers: NO_CACHE }
+  );
+});

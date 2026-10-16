@@ -7,6 +7,8 @@ export interface SSLCommerzInitParams {
   customerAddress?: string;
   productName: string;
   productCategory?: string;
+  invoiceId?: string;
+  userId?: string;
 }
 
 export interface SSLCommerzSessionResult {
@@ -28,16 +30,18 @@ export async function initSSLCommerzPayment(
     ? "https://sandbox.sslcommerz.com/gwprocess/v4/api.php"
     : "https://securepay.sslcommerz.com/gwprocess/v4/api.php";
 
+  const invoiceParam = params.invoiceId ? `&invoice_id=${encodeURIComponent(params.invoiceId)}` : "";
+
   const payload = new URLSearchParams({
     store_id: storeId,
     store_passwd: storePass,
     total_amount: params.totalAmount.toFixed(2),
     currency: "BDT",
     tran_id: params.tranId,
-    success_url: `${appUrl}/api/payments/sslcommerz/callback?status=success&tran_id=${params.tranId}`,
-    fail_url: `${appUrl}/api/payments/sslcommerz/callback?status=fail&tran_id=${params.tranId}`,
-    cancel_url: `${appUrl}/api/payments/sslcommerz/callback?status=cancel&tran_id=${params.tranId}`,
-    ipn_url: `${appUrl}/api/payments/sslcommerz/ipn`,
+    success_url: `${appUrl}/api/payments/sslcommerz/callback?status=success&tran_id=${params.tranId}${invoiceParam}`,
+    fail_url: `${appUrl}/api/payments/sslcommerz/callback?status=fail&tran_id=${params.tranId}${invoiceParam}`,
+    cancel_url: `${appUrl}/api/payments/sslcommerz/callback?status=cancel&tran_id=${params.tranId}${invoiceParam}`,
+    ipn_url: `${appUrl}/api/payments/sslcommerz/callback?status=ipn`,
     shipping_method: "NO",
     product_name: params.productName || "AR Green Garden Service",
     product_category: params.productCategory || "Landscape Architecture",
@@ -48,6 +52,8 @@ export async function initSSLCommerzPayment(
     cus_city: "Dhaka",
     cus_country: "Bangladesh",
     cus_phone: params.customerPhone || "01883012641",
+    value_a: params.invoiceId || "",
+    value_b: params.userId || "",
   });
 
   try {
@@ -79,5 +85,33 @@ export async function initSSLCommerzPayment(
       status: "FAILED",
       failedReason: error?.message || "SSLCommerz server connection error",
     };
+  }
+}
+
+/**
+ * Validates a transaction with SSLCommerz server using val_id.
+ */
+export async function validateSSLCommerzPayment(valId: string): Promise<{
+  isValid: boolean;
+  data?: any;
+  error?: string;
+}> {
+  const storeId = process.env.SSLCOMMERZ_STORE_ID || "babul6a924dc43dcb0";
+  const storePass = process.env.SSLCOMMERZ_STORE_PASSWORD || "babul6a924dc43dcb0@ssl";
+  const isSandbox = process.env.SSLCOMMERZ_IS_SANDBOX !== "false";
+
+  const validationUrl = isSandbox
+    ? `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${encodeURIComponent(valId)}&store_id=${encodeURIComponent(storeId)}&store_passwd=${encodeURIComponent(storePass)}&format=json`
+    : `https://securepay.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${encodeURIComponent(valId)}&store_id=${encodeURIComponent(storeId)}&store_passwd=${encodeURIComponent(storePass)}&format=json`;
+
+  try {
+    const res = await fetch(validationUrl);
+    const data = await res.json();
+
+    const isValid = data.status === "VALID" || data.status === "VALIDATED";
+    return { isValid, data };
+  } catch (error: any) {
+    console.error("SSLCommerz Validation Error:", error);
+    return { isValid: false, error: error?.message || "Failed to validate payment" };
   }
 }

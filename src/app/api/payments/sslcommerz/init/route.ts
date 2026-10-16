@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { initSSLCommerzPayment } from "@/lib/sslcommerz";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/apiAuth";
 
 export async function POST(req: Request) {
   try {
+    const user = await getCurrentUser(req);
     const body = await req.json();
     const {
       amount,
@@ -29,11 +31,13 @@ export async function POST(req: Request) {
     const session = await initSSLCommerzPayment({
       totalAmount: parsedAmount,
       tranId,
-      customerName: customerName || "AR Green Garden Client",
-      customerEmail: customerEmail || "babulhossan.dev@gmail.com",
-      customerPhone: customerPhone || "01883012641",
+      customerName: customerName || user?.name || "AR Green Garden Client",
+      customerEmail: customerEmail || user?.email || "client@argreengarden.com",
+      customerPhone: customerPhone || user?.phone || "01883012641",
       customerAddress: customerAddress || "Dhaka, Bangladesh",
       productName: productName || "Landscape Project Payment",
+      invoiceId: invoiceId || undefined,
+      userId: user?.id || undefined,
     });
 
     if (session.status !== "SUCCESS" || !session.gatewayPageURL) {
@@ -49,7 +53,7 @@ export async function POST(req: Request) {
         await prisma.notification.create({
           data: {
             title: `💳 পেমেন্ট শুরু: ৳${parsedAmount}`,
-            message: `${customerName || "ক্লায়েন্ট"} (ট্রানজ্যাকশন: ${tranId}) ইনভয়েসের জন্য SSLCommerz পেমেন্ট শুরু করেছেন।`,
+            message: `${customerName || user?.name || "ক্লায়েন্ট"} (ট্রানজ্যাকশন: ${tranId}) ইনভয়েসের জন্য SSLCommerz পেমেন্ট শুরু করেছেন।`,
             type: "BILLING",
             link: "/admin",
           },

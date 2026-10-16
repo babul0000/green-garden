@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🌿 A R GREEN GARDEN — পূর্ণাঙ্গ ল্যান্ডস্কেপ আর্কিটেকচার ও বিজনেস প্ল্যাটফর্ম
 
-## Getting Started
+> **একটি বিশ্বমানের ডিজিটাল ল্যান্ডস্কেপিং আর্কিটেকচারাল স্টুডিও ও এন্টারপ্রাইজ সিস্টেম।**  
+> ফ্রন্টএন্ড শোকেস + স্মার্ট গার্ডেন উইজার্ড + ইমার্জেন্সি ট্রি ডক্টর + ক্লায়েন্ট পোর্টাল + এমপ্লয়ি পোর্টাল + অ্যাডমিন কন্ট্রোল সেন্টার + ইনভেন্টরি ও কোটেশন বিল্ডার + ডিজিটাল সার্ভিস কার্ড + SSLCommerz পেমেন্ট গেটওয়ে।
 
-First, run the development server:
+---
+
+## 🛠️ প্রযুক্তি স্ট্যাক (Tech Stack)
+- **Frontend Web App:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, GSAP Animations
+- **Database & ORM:** PostgreSQL (Neon Cloud) + Prisma ORM 6
+- **Storage & CDN:** Neon S3 Storage / Cloudinary CDN
+- **Payment Gateway:** SSLCommerz (Card, bKash, Nagad, Rocket)
+- **Notifications:** Gmail SMTP (Nodemailer) + WhatsApp Business API Dispatcher
+- **Security & RBAC:** Dual-layer JWT Authentication (HTTP-Only Cookie + Bearer fallback)
+
+---
+
+## 📑 সম্পূর্ণ ৪৩টি সেকশন ও কাজের বিবরণী (All 43 Features & Sections)
+
+### ১. পাবলিক ওয়েবসাইট পেজসমূহ (১৪টি)
+1. **হোমপেজ (`/`):** Shma Design অনুপ্রাণিত সিনেমাটিক হিরো সেকশন, ফিলোসফি, হাইলাইট প্রজেক্টস, ক্লায়েন্ট টেস্টিমোনিয়ালস ও ইন্টারেক্টিভ কন্টাক্ট সেকশন।
+2. **প্রজেক্টস পোর্টফোলিও (`/projects` & `/projects/[slug]`):** রেসিডেনশিয়াল, কমার্শিয়াল ও রুফটপ প্রজেক্টের ফিল্টারেবল ক্যাটালগ এবং বিস্তারিত কেস স্টাডি।
+3. **ফটো গ্যালারি (`/gallery`):** উচ্চমানের ল্যান্ডস্কেপিং কাজের ছবি, বিফোর-আফটার ও ফিল্টারিং সুবিধা।
+4. **সার্ভিসসমূহ (`/services` & `/services/[slug]`):** ছাদবাগান, সুইমিংপুল ল্যান্ডস্কেপ, ভার্টিক্যাল গার্ডেন ইত্যাদি সার্ভিসের তালিকা, প্যাকেজ ও প্রাইজ।
+5. **ট্রি ডক্টর হাসপাতাল (`/tree-doctor`):** গাছের রোগ নির্ণয়, বিশেষজ্ঞ চিকিৎসক টিম, তাৎক্ষণিক ভিজিট আবেদন ও প্রেসক্রিপশন হিস্ট্রি।
+6. **গার্ডেন ডিজাইন উইজার্ড (`/design-garden`):** স্থান নির্বাচন, ৩ডি আর্কিটেকচারাল স্টাইল, এলাকা ও বাজেটের ইন্টারেক্টিভ উইজার্ড।
+7. **বিফোর-আফটার রূপান্তর (`/before-after`):** সাইটের কাজের পূর্বের ও পরের রূপান্তরের ভিজ্যুয়াল কম্প্যারিজন স্লাইডার।
+8. **গার্ডেনিং ব্লগ ও জার্নাল (`/blog` & `/blog/[slug]`):** গাছপালা পরিচর্যার আধুনিক টিপস, রিডিং টাইম ও পাঠকদের কমেন্ট সেকশন।
+9. **নার্সারি ও প্ল্যান্ট শপ (`/shop` & `/shop/[id]`):** বিরল গাছ, প্রস্তুতকৃত জৈব মাটি, সিরামিক টব ও ড্রিপ ইরিগেশন টুলসের তালিকা।
+10. **আমাদের টিম (`/team`):** প্রধান ল্যান্ডস্কেপ আর্কিটেক্ট, হর্টিকালচারিস্ট ও প্রজেক্ট ম্যানেজারদের তালিকা।
+11. **আমাদের সম্পর্কে (`/about`):** কোম্পানির ইতিহাস, রূপকল্প, কাজের প্রক্রিয়া ও স্টুডিও কালচার।
+12. **যোগাযোগ (`/contact`):** অফিস ঠিকানা, ফোন, জরুরি হটলাইন, গুগল ম্যাপ ও সরাসরি পরামর্শ বুকিং ফর্ম।
+13. **ক্যারিয়ার (`/career`):** উন্মুক্ত চাকরির বিজ্ঞপ্তি, সুবিধার বিবরণী ও সরাসরি সিভি/রিজিউম আপলোড।
+14. **সাধারণ প্রশ্নোত্তর (`/faq`):** প্রজেক্ট সাইকেল, ওয়ারেন্টি ও মেইনটেন্যান্স সম্পর্কিত ক্লায়েন্টদের প্রশ্নের উত্তর।
+
+---
+
+### ২. বিশেষ ইন্টারেক্টিভ টুলস ও অটোমেশন (৬টি)
+15. **Emergency Tree Doctor Modal:** জরুরি মুহূর্তে ১-ক্লিকে ট্রি ডক্টর ডাকার পপআপ (অটো ইমেইল ও নোটিফিকেশন সহ)।
+16. **Weather & Plant Care Widget:** লাইভ আবহাওয়া অনুযায়ী গাছের পরিচর্যা নির্দেশিকা উইজেট।
+17. **Smart Budget Estimator:** বাগানের পরিমাপ অনুযায়ী আনুমানিক খরচের আগাম হিসাব।
+18. **SSLCommerz Digital Payment Gateway:** কার্ড, বিকাশ, নগদ ও ব্যাংকিংয়ের মাধ্যমে স্বয়ংক্রিয় ইনভয়েস রিকনসিলিয়েশন।
+19. **Digital Service Card with Dynamic QR:** প্রজেক্ট শেষ হওয়ার পর ক্লায়েন্টের আজীবন সার্ভিস ও ওয়ারেন্টি কার্ড।
+20. **WhatsApp & Email Dispatcher:** স্বয়ংক্রিয় মেইনটেন্যান্স রিমাইন্ডার, ইনভয়েস অ্যালার্ট ও ডক্টর ডিসপ্যাচ বার্তা।
+
+---
+
+### ৩. অ্যাডমিন কন্ট্রোল সেন্টার (`/admin` - ১৪টি ট্যাব)
+21. **Overview Tab:** মোট ক্লায়েন্ট, চলতি প্রজেক্ট, বার্ষিক রেভিনিউ ও পেন্ডিং টাস্কের রিয়েল-টাইম মেট্রিক্স।
+22. **Projects Tab:** প্রজেক্ট তৈরি, বাজেট নির্ধারণ, অগ্রগতি (Progress %), সাইটের ছবি আপলোড ও কর্মী অ্যাসাইনমেন্ট।
+23. **Services Tab:** নতুন ল্যান্ডস্কেপ সার্ভিস তৈরি ও প্যাকেজ এডিট।
+24. **Gallery Tab:** নতুন হাই-রেজ্যুলেশন সাইট ফটো আপলোড ও ট্যাগিং।
+25. **Bookings Tab:** সাধারণ কনসালটেশন ও ভিজিট আবেদনের স্ট্যাটাস পরিচালনা।
+26. **Design Requests Tab:** গার্ডেন উইজার্ড থেকে আসা ক্লায়েন্টদের ডিজাইন আবেদনের রিভিউ ও যোগাযোগ।
+27. **Tree Doctor Manager:** আক্রান্ত গাছের রিপোর্ট পর্যবেক্ষণ ও বিশেষজ্ঞ ডক্টর অ্যাসাইন করা।
+28. **Employees & Attendance Tab:** কর্মকর্তা-কর্মচারীদের মাসিক বেতন, ডেজিগনেশন এবং প্রতিদিনের বায়োমেট্রিক/ডিজিটাল হাজিরা।
+29. **Maintenance Scheduler Tab:** সাইটে নিয়মিত মালি ও টেকনিশিয়ানদের ভিজিট শিডিউল ক্যালেন্ডার।
+30. **Finance, Inventory & Quotations Tab:**
+    - আইটেমাইজড কোটেশন বিল্ডার ও ইনভয়েস তৈরি।
+    - গাছ, সার ও টুলের ইনভেন্টরি স্টক ট্র্যাকিং।
+    - প্রকৃত আয়, ব্যয় ও নেট প্রফিটের রিয়েল অ্যাকাউন্টিং।
+31. **Digital Service Card Tab:** ক্লায়েন্টদের জন্য ডিজিটাল কার্ড ও QR কোড জেনারেটর।
+32. **Reviews Tab:** ক্লায়েন্টদের রিভিউ অনুমোদন (Approve/Reject) ও প্রদর্শন নিয়ন্ত্রণ।
+33. **Blogs & Comments Tab:** ব্লগ আর্টিকেল পোস্ট এবং পাঠকদের কমেন্ট ফিল্টারিং।
+34. **Users & Role Management Tab:** অ্যাডমিন, মডারেটর, কর্মী ও ক্লায়েন্টদের অ্যাক্সেস পারমিশন নিয়ন্ত্রণ।
+
+---
+
+### ৪. ক্লায়েন্ট ড্যাশবোর্ড (`/client-dashboard` - ৭টি ট্যাব)
+35. **Client Overview:** নিজের রানিং প্রজেক্টের লাইভ স্ট্যাটাস ও ওয়ারেন্টির স্থায়িত্ব।
+36. **My Projects:** সাইটের কাজের চলমান ছবি, ধাপ ও প্রজেক্ট ডায়েরি।
+37. **Payments & Invoices:** অতীতের সব ইনভয়েস, পেইড এবং বকেয়া ব্যালেন্স দেখা এবং সরাসরি অনলাইনে বিল পরিশোধ।
+38. **Service Card Tab:** ডিজিটাল আইডি ও স্ক্যানযোগ্য কিউআর কোড।
+39. **Loyalty / Rewards:** রেগুলার গার্ডেন ক্লায়েন্ট রিওয়ার্ড পয়েন্টস ও বিশেষ ডিসকাউন্ট।
+40. **Dedicated Support:** সরাসরি প্রজেক্ট ম্যানেজার ও কেয়ার টিমের সাপোর্ট টিকিট।
+41. **Submit Review:** প্রজেক্ট সমাপ্তির পর রেটিং ও ফিডব্যাক প্রদান।
+
+---
+
+### ৫. অন্যান্য বিশেষ পোর্টালসমূহ (২টি)
+42. **Employee Portal (`/employee-portal`):** কর্মীদের ডিজিটাল চেক-ইন/আউট, প্রজেক্ট শিডিউল ও প্ল্যান্ট হেলথ রিপোর্ট তৈরি।
+43. **Moderator Portal (`/moderator`):** কমেন্ট, রিভিউ ও সাধারণ কনসালটেশন বুকিং যাচাইকরণ।
+
+---
+
+## 🚀 লোকাল সেটআপ ও রান করার নিয়ম (Quick Start)
 
 ```bash
+# ১. ডিপেন্ডেন্সি ইনস্টল করুন
+cd green-garden
+npm install
+
+# ২. ডাটাবেজ স্কিমা পুশ ও সিড করুন
+npx prisma db push
+npm run db:seed
+
+# ৩. ডেভেলপমেন্ট সার্ভার চালু করুন
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ব্রাউজারে ওপেন করুন: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 🔑 টেস্ট অ্যাকাউন্টসমূহ (Default Credentials):
+- **Admin Portal:** `admin@argreengarden.com` | পাসওয়ার্ড: `admin123`
+- **Employee Portal:** `doctor@argreengarden.com` | পাসওয়ার্ড: `doctor123`
+- **Client Portal:** `client@argreengarden.com` | পাসওয়ার্ড: `client123`

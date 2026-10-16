@@ -1,48 +1,77 @@
-import { MongoClient, ObjectId } from "mongodb";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, withAuthErrorHandling, apiError } from "@/lib/apiAuth";
+import { Role } from "@prisma/client";
 
-const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017/green-garden";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 
 interface RouteContext {
   params: Promise<{ id: string }> | { id: string };
 }
 
-export async function PUT(req: NextRequest, context: RouteContext) {
-  const { id } = await Promise.resolve(context.params);
-  const client = new MongoClient(mongoUri);
-  try {
-    const { name, role } = await req.json();
-    await client.connect();
-    const db = client.db("green-garden");
-    
-    await db.collection("user").updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { name, role, updatedAt: new Date() } }
-    );
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  } finally {
-    await client.close();
-  }
-}
+export const PUT = withAuthErrorHandling(async (req: Request) => {
+  await requireAdmin(req);
 
-export async function DELETE(_req: NextRequest, context: RouteContext) {
-  const { id } = await Promise.resolve(context.params);
-  const client = new MongoClient(mongoUri);
-  try {
-    await client.connect();
-    const db = client.db("green-garden");
-    
-    await db.collection("user").deleteOne({ _id: new ObjectId(id) });
-    
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const err = error as Error;
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  } finally {
-    await client.close();
+  const url = new URL(req.url);
+  const pathSegments = url.pathname.split("/");
+  const id = pathSegments[pathSegments.length - 1];
+
+  if (!id) return apiError("User ID is required", 400);
+
+  const body = await req.json();
+  const { name, role, phone } = body;
+
+  const dataToUpdate: any = {};
+  if (name !== undefined) dataToUpdate.name = name;
+  if (phone !== undefined) dataToUpdate.phone = phone;
+
+  if (role) {
+    const upperRole = String(role).toUpperCase();
+    if (upperRole in Role) {
+      dataToUpdate.role = upperRole as Role;
+    }
   }
-}
+
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: dataToUpdate,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      updatedAt: true,
+    },
+  });
+
+  return NextResponse.json({ success: true, user: updatedUser }, { headers: NO_CACHE });
+});
+
+export const DELETE = withAuthErrorHandling(async (req: Request) => {
+  const admin = await requireAdmin(req);
+
+  const url = new URL(req.url);
+  const pathSegments = url.pathname.split("/");
+  const id = pathSegments[pathSegments.length - 1];
+
+  if (!id) return apiError("User ID is required", 400);
+
+  // Prevent admin from deleting themselves
+  if (admin.id === id) {
+    return apiError("You cannot delete your own administrative account.", 400);
+  }
+
+  await prisma.user.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ success: true, message: "User deleted successfully" }, { headers: NO_CACHE });
+});

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireModerator, requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { requireAuth, requireAdmin, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,18 +12,33 @@ const NO_CACHE = {
 };
 
 export const GET = withAuthErrorHandling(async (req: Request) => {
-  // Requires moderator or admin
-  await requireModerator(req);
+  const user = await requireAuth(req);
+  const role = user.role?.toUpperCase();
 
   const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId");
+  const targetUserId = searchParams.get("userId");
   const status = searchParams.get("status");
 
+  const whereClause: any = {};
+
+  if (role === "ADMIN" || role === "MODERATOR" || role === "EDITOR") {
+    // Admin & Moderator can inspect all invoices, or filter by userId
+    if (targetUserId) whereClause.userId = targetUserId;
+  } else {
+    // Clients & regular users can strictly only view their own invoices
+    whereClause.OR = [
+      { userId: user.id },
+      ...(user.phone ? [{ clientPhone: user.phone }] : []),
+      ...(user.email ? [{ user: { email: user.email } }] : []),
+    ];
+  }
+
+  if (status) {
+    whereClause.status = status;
+  }
+
   const invoices = await prisma.invoice.findMany({
-    where: {
-      userId: userId ? userId : undefined,
-      status: status ? status : undefined,
-    },
+    where: whereClause,
     include: {
       payments: { orderBy: { paymentDate: "desc" } },
       quotation: { include: { items: true } },
@@ -36,7 +51,7 @@ export const GET = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const POST = withAuthErrorHandling(async (req: Request) => {
-  // Only admin can record payments
+  // Only admin can manually record payments
   await requireAdmin(req);
 
   const body = await req.json();
