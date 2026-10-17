@@ -4,6 +4,13 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 export const seedDemoData = async (): Promise<void> => {
+  // Safety Guard: Require explicit ALLOW_DEMO_SEED=true
+  if (process.env.ALLOW_DEMO_SEED !== "true") {
+    console.error("❌ Fatal Error: Demo seeding is disabled by default for safety.");
+    console.error("👉 To run demo seeding, explicitly set: ALLOW_DEMO_SEED=true");
+    throw new Error("Demo seeding blocked: ALLOW_DEMO_SEED environment variable must be set to 'true'");
+  }
+
   console.log("🌱 Starting AR Green Garden DEMO Seeding (Test Accounts, Services, Demo Projects & Gallery)...");
 
   // 1. Seed Demo Test Accounts (Doctor & Client)
@@ -753,6 +760,114 @@ export const seedDemoData = async (): Promise<void> => {
       ],
       featured: true,
       completionDate: new Date("2026-05-10"),
+    },
+    {
+      name: "[Demo] Dhanmondi Sky Forest & Bio-Terrace",
+      slug: "dhanmondi-sky-forest",
+      clientId: clientUser.id,
+      clientName: "Tanvir Rahman (Sample Client)",
+      clientPhone: "01811223344",
+      category: "Rooftop Garden",
+      location: "Road 9/A, Dhanmondi, Dhaka",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 450000,
+      totalExpense: 320000,
+      description: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.",
+      beforeImage: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=800&q=80",
+      afterImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+      ],
+      featured: true,
+      completionDate: new Date("2026-06-12"),
+    },
+    {
+      name: "[Demo] Gulshan Corporate Living Green Wall",
+      slug: "gulshan-corporate-green-wall",
+      clientId: clientUser.id,
+      clientName: "Green Horizon Developments (Sample Corp)",
+      clientPhone: "01711223344",
+      category: "Vertical Garden",
+      location: "Gulshan Avenue, Dhaka",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 680000,
+      totalExpense: 490000,
+      description: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air.",
+      beforeImage: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=800&auto=format&fit=crop",
+      afterImage: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
+        "https://images.unsplash.com/photo-1545241047-6083a3684587?w=1200&q=80",
+      ],
+      featured: true,
+      completionDate: new Date("2025-09-08"),
+    },
+    {
+      name: "[Demo] Cox's Bazar Coastal Eco-Resort",
+      slug: "coxs-bazar-coastal-resort",
+      clientId: clientUser.id,
+      clientName: "Ocean Paradise Retreats (Sample)",
+      clientPhone: "01811223344",
+      category: "Resort",
+      location: "Marine Drive, Cox's Bazar, Bangladesh",
+      progress: 80,
+      status: "RUNNING",
+      budget: 1250000,
+      totalExpense: 850000,
+      description: "Coastal landscape masterplan tailored for sea breezes and saline soil conditions, featuring salt-tolerant endemic trees and natural water retention ponds.",
+      beforeImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop",
+      afterImage: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
+        "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=1200&q=80",
+      ],
+      featured: true,
+      deadline: new Date("2026-12-31"),
+    },
+    {
+      name: "[Demo] Banani Royal Estate & Water Garden",
+      slug: "banani-royal-estate",
+      clientId: clientUser.id,
+      clientName: "Chowdhury Residence (Sample Client)",
+      clientPhone: "01722334455",
+      category: "Residential",
+      location: "Road 11, Banani, Dhaka",
+      progress: 100,
+      status: "COMPLETED",
+      budget: 520000,
+      totalExpense: 390000,
+      description: "Featuring architectural marble water cascades, ambient evening lighting, and rare perennial flora integrated into a private residential estate.",
+      beforeImage: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=800&auto=format&fit=crop",
+      afterImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+      ],
+      featured: true,
+      completionDate: new Date("2026-04-10"),
+    },
+    {
+      name: "[Demo] Purbachal Nature Retreat & Sunken Park",
+      slug: "purbachal-sunken-park",
+      clientId: clientUser.id,
+      clientName: "Civic Green Foundation (Sample)",
+      clientPhone: "01733445566",
+      category: "Public Realm",
+      location: "Purbachal New Town, Dhaka",
+      progress: 90,
+      status: "RUNNING",
+      budget: 950000,
+      totalExpense: 670000,
+      description: "A vibrant urban gathering place featuring sunken rain gardens, walking trails, and permeable green paving designed for community wellness.",
+      beforeImage: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=800&auto=format&fit=crop",
+      afterImage: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80",
+      images: [
+        "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80",
+      ],
+      featured: true,
+      deadline: new Date("2026-11-20"),
     },
   ];
 
