@@ -658,7 +658,7 @@ export default function GalleryPage() {
                             activePhotoIdx === pIdx ? "border-emerald-700 scale-105" : "border-transparent opacity-70"
                           }`}
                         >
-                          <img src={photo} alt="thumb" className="w-full h-full object-cover" />
+                          <img src={photo} alt={`${selectedProject.name} thumbnail ${pIdx + 1}`} className="w-full h-full object-cover" />
                         </button>
                       ))}
                     </div>

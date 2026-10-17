@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Estimator from "@/components/home/Estimator";
 import EmergencyTreeDoctorModal from "@/components/shared/EmergencyTreeDoctorModal";
+import MobileQuickContact from "@/components/layout/MobileQuickContact";
 
 export default function PublicLayout({
   children,
@@ -29,6 +30,9 @@ export default function PublicLayout({
 
       {/* Emergency Tree Doctor Floating Quick Hotline & Booking Modal */}
       <EmergencyTreeDoctorModal />
+
+      {/* Sticky Mobile Quick Call & WhatsApp Action Bar */}
+      <MobileQuickContact />
 
       {/* Footer Layout */}
       <Footer />

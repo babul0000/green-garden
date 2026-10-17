@@ -301,9 +301,26 @@ export default function Footer() {
               )}
             </div>
 
-            <p className="text-[11px] text-white/50">
-              © {siteSettings.estYear || "2026"} {siteSettings.title || "এ আর গ্রিন গার্ডেন"} • {t("সর্বস্বত্ব সংরক্ষিত", "All rights reserved.")}
-            </p>
+            {/* Bottom Copyright and Legal Bar */}
+            <div className="flex flex-col md:items-end gap-2 pt-2">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60">
+                <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                  {t("গোপনীয়তা নীতি", "Privacy Policy")}
+                </Link>
+                <span className="text-white/30">•</span>
+                <Link href="/terms" className="hover:text-white transition-colors">
+                  {t("শর্তাবলী", "Terms & Conditions")}
+                </Link>
+                <span className="text-white/30">•</span>
+                <Link href="/refund-policy" className="hover:text-white transition-colors">
+                  {t("রিফান্ড পলিসি", "Refund Policy")}
+                </Link>
+              </div>
+
+              <p className="text-[11px] text-white/50">
+                © {siteSettings.estYear || "2026"} {siteSettings.title || "এ আর গ্রিন গার্ডেন"} • {t("সর্বস্বত্ব সংরক্ষিত", "All rights reserved.")}
+              </p>
+            </div>
           </div>
 
         </div>
