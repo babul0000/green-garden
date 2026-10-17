@@ -6,81 +6,37 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting AR Green Garden PostgreSQL Seeding...");
 
-  const adminPassword = await bcrypt.hash("admin123", 10);
-  const employeePassword = await bcrypt.hash("doctor123", 10);
-  const clientPassword = await bcrypt.hash("client123", 10);
+  // 1. Enforce SEED_ADMIN_PASSWORD from environment variable
+  const rawAdminPassword = process.env.SEED_ADMIN_PASSWORD;
+  if (!rawAdminPassword || rawAdminPassword.trim().length === 0) {
+    console.error("❌ Fatal Error: Environment variable SEED_ADMIN_PASSWORD is required to seed the admin user.");
+    console.error("👉 Please set SEED_ADMIN_PASSWORD before running db:seed. Example: $env:SEED_ADMIN_PASSWORD='YourSecretPassword'");
+    throw new Error("Missing required environment variable: SEED_ADMIN_PASSWORD");
+  }
 
-  // 1. Create or upsert Admin
-  const admin = await prisma.user.upsert({
-    where: { email: "admin@argreengarden.com" },
-    update: {},
-    create: {
-      name: "AR Green Garden Admin",
-      email: "admin@argreengarden.com",
-      password: adminPassword,
-      role: Role.ADMIN,
-      phone: "01883012641",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
-    },
-  });
-  console.log("✅ Admin created:", admin.email);
-
-  // 2. Create Employee User & Employee Profile
-  const employeeUser = await prisma.user.upsert({
-    where: { email: "doctor@argreengarden.com" },
-    update: {},
-    create: {
-      name: "Md. Rahim",
-      email: "doctor@argreengarden.com",
-      password: employeePassword,
-      role: Role.EMPLOYEE,
-      phone: "01712345678",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-    },
+  // 2. Ensure Admin User exists without altering existing password or role if already present
+  const existingAdmin = await prisma.user.findFirst({
+    where: { role: Role.ADMIN },
   });
 
-  const employee = await prisma.employee.upsert({
-    where: { employeeId: "EMP-101" },
-    update: {},
-    create: {
-      employeeId: "EMP-101",
-      userId: employeeUser.id,
-      name: "Md. Rahim",
-      designation: "Senior Tree Doctor",
-      department: "Tree Doctor & Plant Health",
-      responsibility: "Plant diagnosis, disease treatment, tree surgery & pest management",
-      joiningDate: new Date("2021-03-01"),
-      experienceYears: 4,
-      experienceMonths: 6,
-      education: "B.Sc in Agriculture & Horticulture, BAU",
-      training: "Advanced Arboriculture & Tree Surgery Certified",
-      skills: ["Tree Diagnosis", "Plant Health", "Pest Management", "Soil Testing", "Fungicide Application"],
-      salary: 45000,
-      personalPhone: "01712345678",
-      personalAddress: "Dhanmondi, Dhaka",
-      status: "ACTIVE",
-      isPublicTeam: true,
-      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-    },
-  });
-  console.log("✅ Employee created:", employee.name);
+  if (existingAdmin) {
+    console.log(`ℹ️ Admin user already exists (${existingAdmin.email}). Existing password and role preserved.`);
+  } else {
+    const adminPassword = await bcrypt.hash(rawAdminPassword, 10);
+    const admin = await prisma.user.create({
+      data: {
+        name: "AR Green Garden Admin",
+        email: "admin@argreengarden.com",
+        password: adminPassword,
+        role: Role.ADMIN,
+        phone: "01883012641",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
+      },
+    });
+    console.log("✅ Admin created successfully:", admin.email);
+  }
 
-  // 3. Create Client User
-  const clientUser = await prisma.user.upsert({
-    where: { email: "client@gmail.com" },
-    update: {},
-    create: {
-      name: "Tanvir Ahmed",
-      email: "client@gmail.com",
-      password: clientPassword,
-      role: Role.CLIENT,
-      phone: "01811223344",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
-    },
-  });
-  console.log("✅ Client created:", clientUser.email);
-
-  // 4. Seed Services
+  // 3. Seed Services
   const services = [
     {
       slug: "residential-landscape",
@@ -168,7 +124,6 @@ async function main() {
     {
       slug: "dhanmondi-sky-forest",
       name: "Dhanmondi Sky Forest & Bio-Terrace",
-      clientId: clientUser.id,
       clientName: "Tanvir Rahman",
       clientPhone: "01811223344",
       category: "Rooftop Garden",
@@ -192,7 +147,6 @@ async function main() {
     {
       slug: "gulshan-corporate-green-wall",
       name: "Gulshan Corporate Living Green Wall",
-      clientId: clientUser.id,
       clientName: "Green Horizon Developments",
       clientPhone: "01711223344",
       category: "Vertical Garden",
@@ -215,7 +169,6 @@ async function main() {
     {
       slug: "coxs-bazar-coastal-resort",
       name: "Cox's Bazar Coastal Eco-Resort",
-      clientId: clientUser.id,
       clientName: "Ocean Paradise Retreats",
       category: "Resort",
       location: "Marine Drive, Cox's Bazar, Bangladesh",
@@ -233,7 +186,6 @@ async function main() {
     {
       slug: "banani-royal-estate",
       name: "Banani Royal Estate & Water Garden",
-      clientId: clientUser.id,
       clientName: "Chowdhury Residence",
       category: "Residential",
       location: "Road 11, Banani, Dhaka",
@@ -250,7 +202,6 @@ async function main() {
     {
       slug: "purbachal-sunken-park",
       name: "Purbachal Nature Retreat & Sunken Park",
-      clientId: clientUser.id,
       clientName: "Civic Green Foundation",
       category: "Public Realm",
       location: "Purbachal New Town, Dhaka",

@@ -1,11 +1,69 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 export const seedDemoData = async (): Promise<void> => {
-  console.log("🌱 Starting AR Green Garden DEMO Seeding (Services, Projects & Gallery)...");
+  console.log("🌱 Starting AR Green Garden DEMO Seeding (Test Accounts, Services, Demo Projects & Gallery)...");
 
-  // 1. All 7 Categories of Services
+  // 1. Seed Demo Test Accounts (Doctor & Client)
+  const employeePassword = await bcrypt.hash("doctor123", 10);
+  const clientPassword = await bcrypt.hash("client123", 10);
+
+  const employeeUser = await prisma.user.upsert({
+    where: { email: "doctor@argreengarden.com" },
+    update: {},
+    create: {
+      name: "Md. Rahim (Demo)",
+      email: "doctor@argreengarden.com",
+      password: employeePassword,
+      role: Role.EMPLOYEE,
+      phone: "01712345678",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+    },
+  });
+
+  await prisma.employee.upsert({
+    where: { employeeId: "EMP-101" },
+    update: {},
+    create: {
+      employeeId: "EMP-101",
+      userId: employeeUser.id,
+      name: "Md. Rahim",
+      designation: "Senior Tree Doctor",
+      department: "Tree Doctor & Plant Health",
+      responsibility: "Plant diagnosis, disease treatment, tree surgery & pest management",
+      joiningDate: new Date("2021-03-01"),
+      experienceYears: 4,
+      experienceMonths: 6,
+      education: "B.Sc in Agriculture & Horticulture, BAU",
+      training: "Advanced Arboriculture & Tree Surgery Certified",
+      skills: ["Tree Diagnosis", "Plant Health", "Pest Management", "Soil Testing", "Fungicide Application"],
+      salary: 45000,
+      personalPhone: "01712345678",
+      personalAddress: "Dhanmondi, Dhaka",
+      status: "ACTIVE",
+      isPublicTeam: true,
+      photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+    },
+  });
+  console.log("✅ Demo Employee created: doctor@argreengarden.com");
+
+  const clientUser = await prisma.user.upsert({
+    where: { email: "client@gmail.com" },
+    update: {},
+    create: {
+      name: "Tanvir Ahmed (Demo Client)",
+      email: "client@gmail.com",
+      password: clientPassword,
+      role: Role.CLIENT,
+      phone: "01811223344",
+      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
+    },
+  });
+  console.log("✅ Demo Client created: client@gmail.com");
+
+  // 2. All 7 Categories of Services
   const servicesData = [
     // ----------------------------------------------------
     // Category 1: Landscape Design & Implementation
@@ -240,7 +298,7 @@ export const seedDemoData = async (): Promise<void> => {
       faqs: [
         { q: "আমার ব্যালকনিতে খুব কম রোদ আসে, সেখানে কি বাগান সম্ভব?", a: "অবশ্যই! ছায়া ও কম আলোতে চমৎকারভাবে বেড়ে ওঠে এমন ৫০+ ইনডোর গাছের বৈচিত্র্য রয়েছে আমাদের।" },
       ],
-      bannerImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop",
+      bannerImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80&auto=format&fit=crop",
     },
 
     // ----------------------------------------------------
@@ -564,12 +622,13 @@ export const seedDemoData = async (): Promise<void> => {
   }
   console.log(`✅ Demo Services seeded (${servicesData.length} items).`);
 
-  // 2. Comprehensive Projects for all Filter Categories
+  // 3. Fictional / Sample Demo Projects (Exclusively Placeholder Content)
   const projectsData = [
     {
-      name: "Dhanmondi Sky Haven Luxury Rooftop",
-      slug: "dhanmondi-sky-haven",
-      clientName: "Tanvir Rahman",
+      name: "[Demo] Dhanmondi Sky Haven Rooftop",
+      slug: "demo-dhanmondi-sky-haven",
+      clientId: clientUser.id,
+      clientName: "Tanvir Rahman (Sample Client)",
       clientPhone: "01711223344",
       category: "Rooftop",
       location: "Road 9/A, Dhanmondi, Dhaka",
@@ -589,9 +648,10 @@ export const seedDemoData = async (): Promise<void> => {
       completionDate: new Date("2026-08-15"),
     },
     {
-      name: "Gulshan Corporate Eco-Lawn & Vertical Wall",
-      slug: "gulshan-corporate-eco-lawn",
-      clientName: "Green Horizon Developments",
+      name: "[Demo] Gulshan Corporate Eco-Lawn & Vertical Wall",
+      slug: "demo-gulshan-corporate-eco-lawn",
+      clientId: clientUser.id,
+      clientName: "Green Horizon Developments (Sample Corp)",
       clientPhone: "01819223344",
       category: "Commercial",
       location: "Gulshan Avenue, Dhaka",
@@ -610,9 +670,10 @@ export const seedDemoData = async (): Promise<void> => {
       completionDate: new Date("2026-07-20"),
     },
     {
-      name: "Banani Royal Residence Landscape",
-      slug: "banani-royal-residence",
-      clientName: "Farhan Hossain",
+      name: "[Demo] Banani Royal Residence Landscape",
+      slug: "demo-banani-royal-residence",
+      clientId: clientUser.id,
+      clientName: "Farhan Hossain (Sample Client)",
       clientPhone: "01722334455",
       category: "Residential",
       location: "Road 11, Banani, Dhaka",
@@ -631,9 +692,10 @@ export const seedDemoData = async (): Promise<void> => {
       completionDate: new Date("2026-09-02"),
     },
     {
-      name: "Sreemangal Tea Valley Resort Oasis",
-      slug: "sreemangal-resort-oasis",
-      clientName: "Grand Valley Hospitality",
+      name: "[Demo] Sreemangal Tea Valley Resort Oasis",
+      slug: "demo-sreemangal-resort-oasis",
+      clientId: clientUser.id,
+      clientName: "Grand Valley Hospitality (Sample)",
       clientPhone: "01733445566",
       category: "Resort",
       location: "Sreemangal, Sylhet",
@@ -651,9 +713,10 @@ export const seedDemoData = async (): Promise<void> => {
       completionDate: new Date("2026-06-18"),
     },
     {
-      name: "Uttara Zen Terrace Japanese Garden",
-      slug: "uttara-zen-japanese-garden",
-      clientName: "Barrister Rafiqul Alam",
+      name: "[Demo] Uttara Zen Terrace Japanese Garden",
+      slug: "demo-uttara-zen-japanese-garden",
+      clientId: clientUser.id,
+      clientName: "Barrister Rafiqul Alam (Sample)",
       clientPhone: "01744556677",
       category: "Luxury",
       location: "Sector 4, Uttara, Dhaka",
@@ -671,9 +734,10 @@ export const seedDemoData = async (): Promise<void> => {
       deadline: new Date("2026-10-30"),
     },
     {
-      name: "Bashundhara R/A Pergola & Fountain Plaza",
-      slug: "bashundhara-fountain-plaza",
-      clientName: "Architect Saiful Islam",
+      name: "[Demo] Bashundhara R/A Pergola & Fountain Plaza",
+      slug: "demo-bashundhara-fountain-plaza",
+      clientId: clientUser.id,
+      clientName: "Architect Saiful Islam (Sample)",
       clientPhone: "01755667788",
       category: "Fountain",
       location: "Block I, Bashundhara R/A, Dhaka",
@@ -690,69 +754,6 @@ export const seedDemoData = async (): Promise<void> => {
       featured: true,
       completionDate: new Date("2026-05-10"),
     },
-    {
-      name: "Mapletree Urban Wilderness Park",
-      slug: "mapletree-business-city",
-      clientName: "Apex Commercial Holdings",
-      clientPhone: "01711002233",
-      category: "Commercial",
-      location: "Alexandra Road, Singapore",
-      progress: 100,
-      status: "COMPLETED",
-      budget: 1500000,
-      totalExpense: 1200000,
-      description: "An eco-friendly nature-inspired urban wilderness landscape integrating modern corporate towers with lush native flora.",
-      beforeImage: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=800&auto=format&fit=crop",
-      afterImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop",
-      images: [
-        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=1200&auto=format&fit=crop",
-      ],
-      featured: true,
-      completionDate: new Date("2025-06-15"),
-    },
-    {
-      name: "The Standard Hua Hin Seaside Oasis",
-      slug: "the-standard-hua-hin",
-      clientName: "Royal Orchid International",
-      clientPhone: "01711003344",
-      category: "Resort",
-      location: "Prachuap Khiri Khan, Thailand",
-      progress: 100,
-      status: "COMPLETED",
-      budget: 2200000,
-      totalExpense: 1750000,
-      description: "A tranquil beachfront retreat woven around native trees, preserving coastal canopy and endemic green sanctuaries.",
-      beforeImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop",
-      afterImage: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&auto=format&fit=crop",
-      images: [
-        "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
-        "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=1200&auto=format&fit=crop",
-      ],
-      featured: true,
-      completionDate: new Date("2026-09-01"),
-    },
-    {
-      name: "One City Centre Sunken Rain Gardens",
-      slug: "one-city-centre-occ",
-      clientName: "Metropolis Urban Estates",
-      clientPhone: "01711004455",
-      category: "Public Realm",
-      location: "Ploenchit, Bangkok, Thailand",
-      progress: 100,
-      status: "COMPLETED",
-      budget: 1800000,
-      totalExpense: 1400000,
-      description: "Visionary corporate hub enveloped in sunken rain gardens, permeable green paving, and climate-resilient pedestrian promenades.",
-      beforeImage: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=800&auto=format&fit=crop",
-      afterImage: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&auto=format&fit=crop",
-      images: [
-        "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
-        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
-      ],
-      featured: true,
-      completionDate: new Date("2025-10-15"),
-    },
   ];
 
   for (const p of projectsData) {
@@ -760,6 +761,7 @@ export const seedDemoData = async (): Promise<void> => {
       where: { slug: p.slug },
       update: {
         name: p.name,
+        clientId: p.clientId,
         clientName: p.clientName,
         clientPhone: p.clientPhone,
         category: p.category,
@@ -779,6 +781,7 @@ export const seedDemoData = async (): Promise<void> => {
       create: {
         name: p.name,
         slug: p.slug,
+        clientId: p.clientId,
         clientName: p.clientName,
         clientPhone: p.clientPhone,
         category: p.category,
@@ -797,112 +800,112 @@ export const seedDemoData = async (): Promise<void> => {
       },
     });
   }
-  console.log(`✅ Demo Projects seeded (${projectsData.length} items).`);
+  console.log(`✅ Demo Projects seeded (${projectsData.length} items, labeled [Demo]).`);
 
-  // 3. Gallery Items matching all filters
+  // 4. Sample Gallery Items matching categories
   const galleryItems = [
     {
-      title: "Dhanmondi Sky Garden Transformation",
+      title: "[Demo] Dhanmondi Sky Garden Transformation",
       category: "Rooftop",
       imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
       beforeImageUrl: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=800&auto=format&fit=crop",
-      caption: "Concrete slab transformed into a lush tropical rooftop oasis.",
+      caption: "Sample rooftop transformation demonstration.",
       featured: true,
     },
     {
-      title: "Gulshan Vertical Living Wall",
+      title: "[Demo] Gulshan Vertical Living Wall",
       category: "Vertical Garden",
       imageUrl: "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=800&auto=format&fit=crop",
       beforeImageUrl: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
-      caption: "200 sqft breathing wall on commercial building exterior.",
+      caption: "Sample vertical garden demonstration.",
       featured: true,
     },
     {
-      title: "Banani Royal Residence Lawn & Mood Lighting",
+      title: "[Demo] Banani Royal Residence Lawn & Mood Lighting",
       category: "Residential",
       imageUrl: "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=800&auto=format&fit=crop",
       beforeImageUrl: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?q=80&w=800&auto=format&fit=crop",
-      caption: "Villa entrance courtyard with Bermuda carpet grass and walkway pavers.",
+      caption: "Sample residential lawn demonstration.",
       featured: true,
     },
     {
-      title: "Sreemangal Tea Resort Landscape",
+      title: "[Demo] Sreemangal Tea Resort Landscape",
       category: "Resort",
       imageUrl: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=800&auto=format&fit=crop",
       beforeImageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop",
-      caption: "Eco-friendly resort landscape overlooking the misty hills.",
+      caption: "Sample eco-resort landscape demonstration.",
       featured: true,
     },
     {
-      title: "Uttara Zen Terrace Japanese Garden",
+      title: "[Demo] Uttara Zen Terrace Japanese Garden",
       category: "Luxury",
       imageUrl: "https://images.unsplash.com/photo-1617854818583-09e7f077a156?q=80&w=800&auto=format&fit=crop",
       beforeImageUrl: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=800&auto=format&fit=crop",
-      caption: "Minimalist Japanese Zen garden with ancient bonsai and white pebbles.",
+      caption: "Sample Zen garden demonstration.",
       featured: true,
     },
     {
-      title: "Bashundhara R/A Pergola & Fountain Plaza",
+      title: "[Demo] Bashundhara R/A Pergola & Fountain Plaza",
       category: "Fountain",
       imageUrl: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=800&auto=format&fit=crop",
       beforeImageUrl: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=800&auto=format&fit=crop",
-      caption: "Illuminated nighttime fountain with cascading jets and stone tiles.",
+      caption: "Sample fountain plaza demonstration.",
       featured: true,
     },
     {
-      title: "Baridhara Diplomatic Enclave Flower Garden",
+      title: "[Demo] Baridhara Diplomatic Enclave Flower Garden",
       category: "Flower Garden",
       imageUrl: "https://images.unsplash.com/photo-1584473457406-6240486418e9?q=80&w=800&auto=format&fit=crop",
-      caption: "Seasonal multi-color perennial flower beds with automatic misting.",
+      caption: "Sample seasonal flower garden demonstration.",
       featured: true,
     },
     {
-      title: "Gulshan Tech Hub Biophilic Indoor Atrium",
+      title: "[Demo] Gulshan Tech Hub Biophilic Indoor Atrium",
       category: "Indoor",
       imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop",
-      caption: "Indoor office biophilic atrium with giant Monsteras and Ficus trees.",
+      caption: "Sample indoor biophilic demonstration.",
       featured: true,
     },
     {
-      title: "Dhanmondi Lakeview Bermuda Turf Lawn",
+      title: "[Demo] Dhanmondi Lakeview Bermuda Turf Lawn",
       category: "Lawn",
       imageUrl: "https://images.unsplash.com/photo-1589923188900-85dae523342b?q=80&w=800&auto=format&fit=crop",
-      caption: "Seamless roll-sod Bermuda turf lawn with popup underground sprinkler grid.",
+      caption: "Sample turf lawn demonstration.",
       featured: true,
     },
     {
-      title: "Motijheel Corporate Headquarters Office Landscape",
+      title: "[Demo] Motijheel Corporate Headquarters Office Landscape",
       category: "Office",
       imageUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop",
-      caption: "Executive boardroom and reception planters with low-maintenance air purifiers.",
+      caption: "Sample office greenery demonstration.",
       featured: false,
     },
     {
-      title: "Dhanmondi 27 Rooftop Alfresco Café & Bistro",
+      title: "[Demo] Dhanmondi 27 Rooftop Alfresco Café & Bistro",
       category: "Restaurant/Café",
       imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800&auto=format&fit=crop",
-      caption: "Instagram-worthy open-air cafe greenery with fairy canopy lights.",
+      caption: "Sample rooftop cafe demonstration.",
       featured: true,
     },
     {
-      title: "Mirpur DOHS Compact Balcony Mini Garden",
+      title: "[Demo] Mirpur DOHS Compact Balcony Mini Garden",
       category: "Balcony",
       imageUrl: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop",
-      caption: "Space-saving vertical railing planters and decorative stone bedding.",
+      caption: "Sample balcony mini garden demonstration.",
       featured: false,
     },
     {
-      title: "Gulshan Residence Architectural Tree Uplighting",
+      title: "[Demo] Gulshan Residence Architectural Tree Uplighting",
       category: "Lighting",
       imageUrl: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=800&auto=format&fit=crop",
-      caption: "IP68 warm 3000K waterproof landscape uplights turning trees into night art.",
+      caption: "Sample tree uplighting demonstration.",
       featured: true,
     },
     {
-      title: "Standard Home Garden Setup",
+      title: "[Demo] Standard Home Garden Setup",
       category: "Standard",
       imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d6910985b?q=80&w=800&auto=format&fit=crop",
-      caption: "Clean, tidy and budget-friendly household garden with seasonal flora.",
+      caption: "Sample standard garden demonstration.",
       featured: false,
     },
   ];
