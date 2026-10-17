@@ -70,27 +70,52 @@ export default function EmployeePortalPage() {
 
   // Field Worker "Photo-Punch" Mode State
   const [punchProjectId, setPunchProjectId] = useState<string>("");
-  const [geoLocName, setGeoLocName] = useState<string>("ধানমন্ডি ৯/এ, ঢাকা (অ্যাসাইনড সাইট)");
+  const [geoLocName, setGeoLocName] = useState<string>("অবস্থান যাচাই হচ্ছে...");
   const [beforePhotoUrl, setBeforePhotoUrl] = useState<string | null>(null);
   const [afterPhotoUrl, setAfterPhotoUrl] = useState<string | null>(null);
   const [isUploadingBefore, setIsUploadingBefore] = useState(false);
   const [isUploadingAfter, setIsUploadingAfter] = useState(false);
   const [punchNotice, setPunchNotice] = useState<string | null>(null);
+  const [employeeNotFound, setEmployeeNotFound] = useState(false);
+
+  // Helper to obtain GPS location safely without hardcoding
+  const getSafeGeolocation = (): Promise<string> => {
+    return new Promise((resolve) => {
+      if (typeof navigator !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            resolve(`GPS: ${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E`);
+          },
+          () => resolve("অবস্থান পাওয়া যায়নি"),
+          { timeout: 7000, enableHighAccuracy: true }
+        );
+      } else {
+        resolve("অবস্থান পাওয়া যায়নি");
+      }
+    });
+  };
 
   // Fetch real employee portal data from PostgreSQL
   const fetchPortalData = async () => {
     setDataLoading(true);
     try {
-      // 1. Fetch employees to match current user
+      // 1. Fetch employees to match current user strictly without arbitrary fallback
       const empRes = await fetch("/api/employees", { cache: "no-store" });
       let currentEmp: EmployeeData | null = null;
       if (empRes.ok) {
         const emps: EmployeeData[] = await empRes.json();
-        // Match by email/name or take the first doctor/employee
-        currentEmp = emps.find((e) => e.name.toLowerCase() === (user?.name || "").toLowerCase()) ||
-          emps.find((e) => e.department.includes("Doctor") || e.designation.includes("Doctor")) ||
-          emps[0] || null;
-        setEmployee(currentEmp);
+        currentEmp = emps.find((e) =>
+          (user?.id && (e as any).userId === user.id) ||
+          (e.name && user?.name && e.name.toLowerCase() === user.name.toLowerCase())
+        ) || null;
+
+        if (!currentEmp) {
+          setEmployeeNotFound(true);
+          setEmployee(null);
+        } else {
+          setEmployeeNotFound(false);
+          setEmployee(currentEmp);
+        }
       }
 
       // 2. Fetch attendance for this employee
@@ -215,15 +240,9 @@ export default function EmployeePortalPage() {
     setPunchNotice("সাইটের ছবি ও জিপিএস অবস্থান যাচাই হচ্ছে...");
 
     try {
-      // 1. Geolocation lookup
-      if (typeof navigator !== "undefined" && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            setGeoLocName(`GPS: ${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E`);
-          },
-          () => setGeoLocName("GPS: 23.7925° N, 90.4078° E (ধানমন্ডি সাইট)")
-        );
-      }
+      // 1. Geolocation lookup with strict safe fallback
+      const detectedGeo = await getSafeGeolocation();
+      setGeoLocName(detectedGeo);
 
       // 2. Upload photo
       const fd = new FormData();
@@ -252,7 +271,7 @@ export default function EmployeePortalPage() {
           body: JSON.stringify({
             employeeId: employee.id,
             action: "CHECK_IN",
-            notes: `Field Photo-Punch Check-In (${geoLocName}). Initial site photo captured.`,
+            notes: `Field Photo-Punch Check-In (${detectedGeo}). Initial site photo captured.`,
           }),
         });
       }
@@ -300,7 +319,8 @@ export default function EmployeePortalPage() {
         });
       }
 
-      // 3. Punch Checkout
+      // 3. Punch Checkout with real GPS
+      const detectedGeo = await getSafeGeolocation();
       if (employee) {
         await fetch("/api/attendance", {
           method: "POST",
@@ -308,7 +328,7 @@ export default function EmployeePortalPage() {
           body: JSON.stringify({
             employeeId: employee.id,
             action: "CHECK_OUT",
-            notes: `Field Photo-Punch Check-Out. Completed site photo submitted.`,
+            notes: `Field Photo-Punch Check-Out (${detectedGeo}). Completed site photo submitted.`,
           }),
         });
       }
@@ -362,7 +382,11 @@ export default function EmployeePortalPage() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            {!isCheckedIn ? (
+            {employeeNotFound ? (
+              <div className="text-xs text-rose-300 bg-rose-500/15 border border-rose-500/30 px-3 py-2 rounded-xl">
+                ⚠️ কর্মী প্রোফাইল যুক্ত নেই
+              </div>
+            ) : !isCheckedIn ? (
               <button
                 onClick={handleCheckIn}
                 disabled={isProcessingAttendance}
@@ -392,6 +416,17 @@ export default function EmployeePortalPage() {
             </button>
           </div>
         </div>
+
+        {/* Warning Banner if No Matching Employee Profile */}
+        {employeeNotFound && (
+          <div className="bg-rose-500/10 border border-rose-500/30 rounded-2xl p-5 text-center text-rose-200">
+            <div className="text-2xl mb-1">⚠️</div>
+            <h3 className="text-base font-bold text-white mb-1">কর্মী (Employee) প্রোফাইল পাওয়া যায়নি</h3>
+            <p className="text-xs text-rose-200/80">
+              আপনার লগইন অ্যাকাউন্টের সাথে কোনো কর্মী (Employee) প্রোফাইল যুক্ত পাওয়া যায়নি। উপস্থিতি ও ফটো-পাঞ্চ রেকর্ড করতে অ্যাডমিনকে আপনার প্রোফাইল তৈরি করতে বলুন।
+            </p>
+          </div>
+        )}
 
         {/* Quick KPI Stats from Database */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -16,21 +16,13 @@ export const AUTH_COOKIE_NAME = "gg_auth_token";
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "FATAL SECURITY ERROR: JWT_SECRET environment variable is missing. A secure JWT secret must be provided in production."
-      );
-    }
-    console.warn(
-      "⚠️ [Security Warning]: JWT_SECRET environment variable is not defined. Using temporary development key. Set JWT_SECRET in .env"
+  if (!secret || secret.trim().length === 0) {
+    throw new Error(
+      "FATAL SECURITY ERROR: JWT_SECRET environment variable is missing or empty. A secure JWT secret must be defined in .env"
     );
-    return new TextEncoder().encode("ar-green-garden-dev-only-secret-key-32b-min");
   }
   return new TextEncoder().encode(secret);
 }
-
-const JWT_SECRET = getJwtSecret();
 
 /**
  * Hash a plain-text password using bcrypt with 10 salt rounds
@@ -54,7 +46,7 @@ export async function signJwtToken(payload: AuthUser): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d") // 7 days expiration
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 /**
@@ -62,7 +54,7 @@ export async function signJwtToken(payload: AuthUser): Promise<string> {
  */
 export async function verifyJwtToken(token: string): Promise<AuthUser | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return {
       id: payload.id as string,
       name: payload.name as string,
