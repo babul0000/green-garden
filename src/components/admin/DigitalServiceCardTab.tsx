@@ -1,6 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { IProject } from "@/types";
+import ConfirmModal from "@/components/admin/shared/ConfirmModal";
 
 interface DigitalServiceCardData {
   id: string;
@@ -13,421 +16,545 @@ interface DigitalServiceCardData {
   servicesIncluded: string[];
   plantedFlora: string[];
   maintenanceFrequency: string;
-  nextFollowUpDate: string;
-  warrantyPeriod: string;
-  leadArchitect: string;
-  doctorHotline: string;
+  nextFollowUpDate?: string | null;
+  warrantyMonths: number;
+  warrantyExpiryDate: string;
+  leadArchitect?: string | null;
+  doctorHotline?: string | null;
+  status: string;
+  projectId?: string | null;
+  project?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 export default function DigitalServiceCardTab() {
-  const [cards, setCards] = useState<DigitalServiceCardData[]>([
-    {
-      id: "card-1",
-      projectCode: "ARG-2026-D01",
-      projectName: "Dhanmondi Sky Oasis Luxury Rooftop",
-      clientName: "ব্যারিস্টার এম. এ. হাসান",
-      clientPhone: "01711223344",
-      handoverDate: "15 August 2026",
-      location: "Road 9/A, Dhanmondi, Dhaka",
-      servicesIncluded: [
-        "Waterproof Rooftop Gardening",
-        "Automated Smart Drip Irrigation",
-        "Architectural Wood Pergola",
-        "Warm LED Ambience Lighting",
-      ],
-      plantedFlora: [
-        "Thai Amrapali Mango (Bonsai)",
-        "Ficus Benjamina",
-        "Bougainvillea White & Pink",
-        "Dracaena Reflexa",
-        "Korean Lawn Grass",
-      ],
-      maintenanceFrequency: "Weekly (Every Thursday)",
-      nextFollowUpDate: "15 October 2026",
-      warrantyPeriod: "1 Year Free Plant Replacement & Waterproofing Warranty",
-      leadArchitect: "Ar. Tanvir Chowdhury",
-      doctorHotline: "01883012641",
-    },
-    {
-      id: "card-2",
-      projectCode: "ARG-2026-G02",
-      projectName: "Gulshan Corporate Bio-Terrace",
-      clientName: "Apex Holdings Ltd.",
-      clientPhone: "01822334455",
-      handoverDate: "02 September 2026",
-      location: "Gulshan-2, Dhaka",
-      servicesIncluded: [
-        "Vertical Green Wall",
-        "Indoor Air-Purifying Biophilic Lounge",
-        "Custom Water Cascade Fountain",
-      ],
-      plantedFlora: [
-        "Monstera Deliciosa",
-        "Philodendron Xanadu",
-        "Snake Plant Sansevieria",
-        "Areca Palm Container",
-      ],
-      maintenanceFrequency: "Bi-Weekly (1st & 3rd Tuesday)",
-      nextFollowUpDate: "02 November 2026",
-      warrantyPeriod: "2 Years Pump & Irrigation Maintenance Warranty",
-      leadArchitect: "Ar. Nusrat Jahan",
-      doctorHotline: "01883012641",
-    },
-  ]);
-
-  const [selectedCard, setSelectedCard] = useState<DigitalServiceCardData | null>(cards[0]);
+  const [cards, setCards] = useState<DigitalServiceCardData[]>([]);
+  const [projects, setProjects] = useState<IProject[]>([]);
+  const [selectedCard, setSelectedCard] = useState<DigitalServiceCardData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DigitalServiceCardData | null>(null);
 
-  // New Card State
+  // Form Fields
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [projectCode, setProjectCode] = useState("");
   const [newProjName, setNewProjName] = useState("");
   const [newClient, setNewClient] = useState("");
   const [newPhone, setNewPhone] = useState("");
-  const [newLocation, setNewLocation] = useState("Banani, Dhaka");
-  const [newFlora, setNewFlora] = useState("Mango Bonsai, Jasmine, Mexican Grass, Ficus");
-  const [newServices, setNewServices] = useState("Rooftop Garden, Drip Irrigation, Lighting");
-  const [newMaintenance, setNewMaintenance] = useState("Monthly (1st Sunday)");
-  const [newFollowUp, setNewFollowUp] = useState("2026-11-15");
+  const [newLocation, setNewLocation] = useState("Dhanmondi, Dhaka");
+  const [newWarrantyMonths, setNewWarrantyMonths] = useState(12);
+  const [newFlora, setNewFlora] = useState("Thai Mango Bonsai, Jasmine, Mexican Grass, Ficus");
+  const [newServices, setNewServices] = useState("Waterproof Rooftop Gardening, Smart Drip Irrigation, Lighting");
+  const [newMaintenance, setNewMaintenance] = useState("Weekly");
+  const [newFollowUp, setNewFollowUp] = useState("");
+  const [leadArchitect, setLeadArchitect] = useState("Ar. Tanvir Chowdhury");
+  const [doctorHotline, setDoctorHotline] = useState("01883012641");
 
-  const handleCreateCard = (e: React.FormEvent) => {
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Fetch cards and projects
+  const fetchCards = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/service-cards");
+      if (res.ok) {
+        const data = await res.json();
+        setCards(Array.isArray(data) ? data : []);
+        if (data.length > 0 && !selectedCard) {
+          setSelectedCard(data[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch service cards:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch("/api/projects");
+      if (res.ok) {
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : data.data || [];
+        setProjects(list);
+      }
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+    fetchProjects();
+  }, []);
+
+  // When a project is selected from dropdown, autofill the form
+  const handleSelectProject = (projId: string) => {
+    setSelectedProjectId(projId);
+    if (!projId) return;
+    const proj = projects.find((p) => (p.id || (p as any)._id) === projId);
+    if (proj) {
+      setNewProjName(proj.name || proj.title || "");
+      setNewClient(proj.clientName || proj.client || "");
+      setNewPhone(proj.clientPhone || "");
+      setNewLocation(proj.location || "Dhaka, Bangladesh");
+      setProjectCode(`ARG-${new Date().getFullYear()}-${proj.slug?.slice(0, 5).toUpperCase() || "SITE"}`);
+      setNewWarrantyMonths(proj.warrantyMonths || 12);
+      if (proj.description) {
+        setNewServices("Waterproofing, Drip Irrigation, Biophilic Planting");
+      }
+    }
+  };
+
+  const handleCreateCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newProjName || !newClient) return;
+    if (!newProjName || !newClient || !newPhone) {
+      alert("প্রজেক্টের নাম, ক্লায়েন্টের নাম ও ফোন নম্বর আবশ্যক!");
+      return;
+    }
 
-    const newCard: DigitalServiceCardData = {
-      id: `card-${Date.now()}`,
-      projectCode: `ARG-${new Date().getFullYear()}-P${Math.floor(10 + Math.random() * 90)}`,
-      projectName: newProjName,
-      clientName: newClient,
-      clientPhone: newPhone,
-      handoverDate: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
-      location: newLocation,
-      servicesIncluded: newServices.split(",").map((s) => s.trim()),
-      plantedFlora: newFlora.split(",").map((s) => s.trim()),
-      maintenanceFrequency: newMaintenance,
-      nextFollowUpDate: newFollowUp,
-      warrantyPeriod: "1 Year Plant & Infrastructure Warranty",
-      leadArchitect: "Senior Landscape Architect",
-      doctorHotline: "01883012641",
-    };
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        projectId: selectedProjectId || undefined,
+        projectCode: projectCode.trim() || undefined,
+        projectName: newProjName.trim(),
+        clientName: newClient.trim(),
+        clientPhone: newPhone.trim(),
+        location: newLocation.trim(),
+        warrantyMonths: Number(newWarrantyMonths) || 12,
+        servicesIncluded: newServices.split(",").map((s) => s.trim()).filter(Boolean),
+        plantedFlora: newFlora.split(",").map((s) => s.trim()).filter(Boolean),
+        maintenanceFrequency: newMaintenance,
+        nextFollowUpDate: newFollowUp || undefined,
+        leadArchitect,
+        doctorHotline,
+      };
 
-    setCards([newCard, ...cards]);
-    setSelectedCard(newCard);
-    setIsGenerating(false);
+      const res = await fetch("/api/service-cards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "ডিজিটাল সার্ভিস কার্ড তৈরি করা যায়নি");
+      }
+
+      const json = await res.json();
+      showToast("✓ নতুন ডিজিটাল সার্ভিস কার্ড সফলভাবে ইস্যু করা হয়েছে!");
+      setIsGenerating(false);
+      fetchCards();
+      if (json.card) {
+        setSelectedCard(json.card);
+      }
+    } catch (err: any) {
+      alert(err.message || "ত্রুটি ঘটেছে");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteCard = async () => {
+    if (!deleteTarget) return;
+    try {
+      const res = await fetch(`/api/service-cards/${deleteTarget.id}`, { method: "DELETE" });
+      if (res.ok) {
+        showToast("🗑️ সার্ভিস কার্ড মুছে ফেলা হয়েছে");
+        setDeleteTarget(null);
+        fetchCards();
+        if (selectedCard?.id === deleteTarget.id) {
+          setSelectedCard(null);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in-up font-sans">
+    <div className="flex flex-col gap-6 animate-fade-in font-sans text-[#121813]">
+      
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#18221A]/85 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-lg text-[#E4E2D7]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 sm:p-7 rounded-2xl border border-[#D6D2C4] shadow-2xs">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-xs font-semibold mb-2">
-            <span>🪪</span> Digital Service Card & Handover
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#E8F5E9] border border-[#2B4D33]/20 text-[#2B4D33] text-[10px] font-mono font-bold uppercase tracking-wider mb-2">
+            <span>🪪</span> Digital Service Card & NFC Warranty
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-white tracking-tight">
-            Digital Service & Handover Card
+          <h2 className="text-xl sm:text-2xl font-display font-light uppercase tracking-wide text-[#121813]">
+            ডিজিটাল সার্ভিস ও ওয়ারেন্টি কার্ড
           </h2>
-          <p className="text-xs text-stone-400 mt-1">
-            Official handover record detailing project blueprint, flora species, warranty guarantees, and follow-up schedules.
+          <p className="text-xs text-[#75787B] font-light mt-0.5">
+            হস্তান্তরিত প্রকল্পের বোটানিক্যাল বিবরণ, গাছের স্বাস্থ্য রেকর্ড, ওয়ারেন্টি গ্যারান্টি ও লাইভ QR লিঙ্ক।
           </p>
         </div>
 
         <button
+          type="button"
           onClick={() => setIsGenerating(!isGenerating)}
-          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
+          className="min-h-[44px] px-4 py-2 bg-[#2B4D33] hover:bg-[#1E3724] text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-xs"
         >
-          {isGenerating ? "✕ Close" : "+ Issue New Digital Service Card"}
+          {isGenerating ? "✕ ফর্ম বন্ধ করুন" : "+ নতুন ডিজিটাল কার্ড ইস্যু করুন"}
         </button>
       </div>
 
-      {/* Generator Form */}
+      {/* Temporary Toast Alert */}
+      {toastMessage && (
+        <div className="p-4 bg-[#E8F5E9] border border-[#2B4D33]/40 text-[#121813] rounded-2xl text-xs font-semibold animate-fade-in flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#2B4D33] animate-ping"></span>
+            <span>{toastMessage}</span>
+          </div>
+          <button onClick={() => setToastMessage(null)} className="text-[#75787B] hover:text-[#121813] font-bold cursor-pointer">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Issue Card Form */}
       {isGenerating && (
-        <form onSubmit={handleCreateCard} className="bg-[#18221A]/95 backdrop-blur-xl p-6 rounded-3xl border border-emerald-500/30 shadow-xl space-y-4 animate-fade-in-up text-[#E4E2D7]">
-          <h4 className="font-bold text-emerald-300 text-sm border-b border-white/10 pb-2">Issue New Digital Service Card</h4>
+        <form onSubmit={handleCreateCard} className="bg-white p-6 sm:p-7 rounded-2xl border border-[#2B4D33]/30 shadow-md space-y-4 animate-scale-up">
+          <h4 className="font-bold text-xs text-[#2B4D33] uppercase tracking-wider font-mono border-b border-[#D6D2C4] pb-2">
+            ➕ ইস্যু ডিজিটাল সার্ভিস ও ওয়ারেন্টি কার্ড
+          </h4>
+
+          {/* Optional Project Selector */}
+          <div>
+            <label className="text-[11px] font-bold text-[#75787B] block mb-1">
+              বিদ্যমান প্রজেক্ট থেকে প্রি-ফিল করুন (Select Project)
+            </label>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => handleSelectProject(e.target.value)}
+              className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-xs text-[#121813] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
+            >
+              <option value="">-- নতুন একক কার্ড তৈরি করুন (অথবা প্রজেক্ট বাছুন) --</option>
+              {projects.map((p) => (
+                <option key={p.id || (p as any)._id} value={p.id || (p as any)._id}>
+                  {p.name} ({p.clientName || p.client || "ব্যক্তিগত"})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">প্রজেক্টের নাম *</label>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">প্রজেক্টের নাম *</label>
               <input
                 type="text"
                 required
-                placeholder="e.g. Banani Terrace Haven"
+                placeholder="যেমন: Banani Terrace Haven"
                 value={newProjName}
                 onChange={(e) => setNewProjName(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] placeholder-[#75787B] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">গ্রাহকের নাম *</label>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">গ্রাহকের নাম *</label>
               <input
                 type="text"
                 required
-                placeholder="e.g. ড. আহমেদ শরীফ"
+                placeholder="যেমন: ড. আহমেদ শরীফ"
                 value={newClient}
                 onChange={(e) => setNewClient(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] placeholder-[#75787B] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">ফোন নম্বর</label>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">ফোন নম্বর *</label>
               <input
                 type="tel"
+                required
                 placeholder="01XXXXXXXXX"
                 value={newPhone}
                 onChange={(e) => setNewPhone(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none font-mono"
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] placeholder-[#75787B] focus:border-[#2B4D33] focus:outline-none font-mono min-h-[44px]"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">লোকেশন</label>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">লোকেশন</label>
               <input
                 type="text"
                 value={newLocation}
                 onChange={(e) => setNewLocation(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] placeholder-[#75787B] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">সার্ভিসসমূহ (কমা দিয়ে আলাদা করুন)</label>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">প্রজেক্ট কোড (Project Code)</label>
+              <input
+                type="text"
+                placeholder="ARG-2026-C101"
+                value={projectCode}
+                onChange={(e) => setProjectCode(e.target.value)}
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] placeholder-[#75787B] focus:border-[#2B4D33] focus:outline-none font-mono min-h-[44px]"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">ওয়ারেন্টি মাস (মাস)</label>
+              <input
+                type="number"
+                value={newWarrantyMonths}
+                onChange={(e) => setNewWarrantyMonths(parseInt(e.target.value, 10))}
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] focus:border-[#2B4D33] focus:outline-none font-mono min-h-[44px]"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">সার্ভিসসমূহ (কমা দিয়ে আলাদা করুন)</label>
               <input
                 type="text"
                 value={newServices}
                 onChange={(e) => setNewServices(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">রোপিত গাছপালার তালিকা (কমা দিয়ে)</label>
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">রোপিত গাছপালা (কমা দিয়ে)</label>
               <input
                 type="text"
                 value={newFlora}
                 onChange={(e) => setNewFlora(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
               />
             </div>
+
             <div>
-              <label className="font-semibold text-stone-300 block mb-1">মেইনটেন্যান্স শিডিউল</label>
-              <input
-                type="text"
+              <label className="text-[11px] font-bold text-[#75787B] block mb-1">মেইনটেনেন্স ফ্রিকোয়েন্সি</label>
+              <select
                 value={newMaintenance}
                 onChange={(e) => setNewMaintenance(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="font-semibold text-stone-300 block mb-1">পরবর্তী ফলো-আপ ভিজিট</label>
-              <input
-                type="date"
-                value={newFollowUp}
-                onChange={(e) => setNewFollowUp(e.target.value)}
-                className="w-full bg-black/40 border border-white/15 rounded-xl p-2.5 text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none font-mono"
-              />
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-2.5 text-[#121813] focus:border-[#2B4D33] focus:outline-none min-h-[44px]"
+              >
+                <option value="Weekly">Weekly (সাপ্তাহিক)</option>
+                <option value="Bi-Weekly">Bi-Weekly (পাক্ষিক)</option>
+                <option value="Monthly">Monthly (মাসিক)</option>
+                <option value="On-Demand">On-Demand (প্রয়োজন অনুযায়ী)</option>
+              </select>
             </div>
           </div>
+
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => setIsGenerating(false)}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/70 border border-white/10 rounded-xl text-xs font-semibold cursor-pointer transition-all"
+              className="min-h-[44px] px-4 py-2 border border-[#D6D2C4] text-[#75787B] hover:text-[#121813] rounded-xl text-xs font-mono font-bold cursor-pointer"
             >
               বাতিল
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
+              disabled={isSubmitting}
+              className="min-h-[44px] px-6 py-2 bg-[#2B4D33] hover:bg-[#1E3724] text-white rounded-xl text-xs font-mono font-bold cursor-pointer transition-all disabled:opacity-50"
             >
-              ✓ কার্ড তৈরি ও প্রিভিউ দেখুন
+              {isSubmitting ? "সংরক্ষণ হচ্ছে..." : "ডিজিটাল কার্ড ইস্যু করুন"}
             </button>
           </div>
         </form>
       )}
 
-      {/* Main 2-Column Layout: Cards List & Interactive Digital Card Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Dual Pane Layout: Cards Selector & Live Card Showcase */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         {/* Left: Cards Selector List */}
-        <div className="lg:col-span-4 space-y-3">
-          <span className="text-xs font-bold text-stone-400 uppercase tracking-wider block font-mono">ISSUED DIGITAL SERVICE CARDS</span>
-          {cards.map((c) => (
-            <div
-              key={c.id}
-              onClick={() => setSelectedCard(c)}
-              className={`p-4 rounded-3xl border transition-all cursor-pointer space-y-1 ${
-                selectedCard?.id === c.id
-                  ? "bg-emerald-950/40 border-emerald-500/60 shadow-lg ring-1 ring-emerald-500/40"
-                  : "bg-[#18221A]/70 border-white/10 hover:bg-white/5"
-              }`}
-            >
-              <span className="text-[10px] font-mono font-bold text-emerald-400">{c.projectCode}</span>
-              <h4 className="font-bold text-white text-sm font-serif">{c.projectName}</h4>
-              <p className="text-xs text-stone-400">গ্রাহক: <span className="font-semibold text-stone-200">{c.clientName}</span></p>
-              <span className="text-[10px] text-stone-500 block pt-1 font-mono">হস্তান্তর: {c.handoverDate}</span>
+        <div className="lg:col-span-1 bg-white p-5 rounded-2xl border border-[#D6D2C4] shadow-2xs space-y-3">
+          <h3 className="font-bold text-xs uppercase tracking-wider text-[#2B4D33] font-mono border-b border-[#D6D2C4] pb-2">
+            ইস্যুকৃত সার্ভিস কার্ডসমূহ ({cards.length})
+          </h3>
+
+          {loading ? (
+            <div className="py-8 text-center text-xs font-mono text-[#75787B]">লোড হচ্ছে...</div>
+          ) : cards.length === 0 ? (
+            <div className="py-8 text-center text-xs font-mono text-[#75787B]">
+              এখনো কোনো ডিজিটাল সার্ভিস কার্ড তৈরি হয়নি।
             </div>
-          ))}
-        </div>
-
-        {/* Right: The High-End Digital Service Card Display */}
-        {selectedCard && (
-          <div className="lg:col-span-8 bg-gradient-to-br from-[#061e13] via-[#092b1b] to-[#04120a] text-white rounded-[36px] p-8 shadow-2xl border border-emerald-500/40 relative overflow-hidden space-y-6">
-            {/* Ambient Background Accents */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-400/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            {/* Card Header */}
-            <div className="flex justify-between items-start border-b border-emerald-800/80 pb-5 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-800 shadow-md font-bold text-xl">
-                  🌿
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-widest block">
-                    OFFICIAL CLIENT DIGITAL SERVICE CARD
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-white tracking-tight">
-                    {selectedCard.projectName}
-                  </h3>
-                  <p className="text-xs text-emerald-200/80">📍 {selectedCard.location}</p>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold px-3 py-1 rounded-full">
-                  {selectedCard.projectCode}
-                </span>
-                <span className="text-[11px] text-emerald-300/70 block mt-1.5">
-                  হস্তান্তর: {selectedCard.handoverDate}
-                </span>
-              </div>
-            </div>
-
-            {/* Client & Architect Credentials */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white/5 p-4 rounded-2xl border border-white/10 text-xs relative z-10">
-              <div>
-                <span className="text-emerald-400 block text-[10px]">ক্লায়েন্টের নাম:</span>
-                <span className="font-bold text-white text-sm">{selectedCard.clientName}</span>
-              </div>
-              <div>
-                <span className="text-emerald-400 block text-[10px]">মোবাইল:</span>
-                <span className="font-mono text-emerald-100">{selectedCard.clientPhone}</span>
-              </div>
-              <div>
-                <span className="text-emerald-400 block text-[10px]">লিড আর্কিটেক্ট:</span>
-                <span className="font-medium text-white">{selectedCard.leadArchitect}</span>
-              </div>
-              <div className="col-span-2 sm:col-span-1">
-                <span className="text-emerald-400 block text-[10px]">
-                  Lead Architect & Tree Doctor Emergency Hotline:
-                </span>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="font-mono text-amber-300 font-bold text-sm">
-                    {selectedCard.doctorHotline}
-                  </span>
-                  <a
-                    href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-1 px-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-[#25D366] text-[10px] font-bold flex items-center gap-1 transition-all border border-emerald-500/30"
-                    title="WhatsApp Emergency Hotline"
-                  >
-                    <span>💬</span> WhatsApp
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Plant Replacement Warranty & Renewal Engine */}
-            <div className="bg-gradient-to-r from-emerald-950/80 via-teal-950/60 to-emerald-900/40 p-4 rounded-2xl border border-emerald-500/40 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10 shadow-inner">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0">
-                  🛡️
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-emerald-300 font-mono">
-                      🌿 প্ল্যান্ট রিপ্লেসমেন্ট ওয়ারেন্টি: আর ৪ মাস বাকি
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                      সক্রিয় গ্যারান্টি
+          ) : (
+            <div className="space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar">
+              {cards.map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => setSelectedCard(c)}
+                  className={`p-3.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                    selectedCard?.id === c.id
+                      ? "bg-[#E8F5E9] border-[#2B4D33] shadow-xs"
+                      : "bg-[#F7F6F2] border-[#D6D2C4] hover:bg-stone-50"
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-[#121813] line-clamp-1">{c.projectName}</span>
+                    <span className="text-[10px] font-mono font-bold text-[#2B4D33] bg-white px-1.5 py-0.5 rounded border border-[#D6D2C4]">
+                      {c.projectCode}
                     </span>
                   </div>
-                  <p className="text-[11px] text-emerald-200/70 mt-0.5">
-                    ১ বছরের মধ্যে কোনো চারা ক্ষতিগ্রস্ত হলে বিনামূল্যে প্রতিস্থাপন ও বিশেষজ্ঞ চিকিৎসকের অন-সাইট সেবা।
+                  <p className="text-[11px] text-[#75787B] mt-1 font-mono">
+                    👤 {c.clientName} • 📍 {c.location}
                   </p>
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-[#D6D2C4]/60">
+                    <span className="text-[10px] text-emerald-800 font-bold">
+                      {c.warrantyMonths} মাস ওয়ারেন্টি
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget(c);
+                      }}
+                      className="text-rose-600 hover:text-rose-800 text-[10px] font-mono font-bold"
+                    >
+                      মুছুন
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Live Card Passport Render */}
+        <div className="lg:col-span-2">
+          {selectedCard ? (
+            <div className="bg-white rounded-3xl border border-[#D6D2C4] shadow-md p-6 sm:p-8 space-y-6">
+              
+              {/* Card Header & External Link Action */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#D6D2C4] pb-4">
+                <div>
+                  <span className="text-[10px] font-mono text-emerald-800 uppercase tracking-widest font-bold">
+                    Official Passport Preview
+                  </span>
+                  <h3 className="text-xl font-display font-light text-[#121813] uppercase">
+                    {selectedCard.projectName}
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/card/${selectedCard.projectCode}`}
+                    target="_blank"
+                    className="min-h-[40px] px-3.5 py-1.5 bg-[#2B4D33] text-white rounded-xl text-xs font-mono font-bold hover:bg-[#1E3724] transition-colors flex items-center gap-1 shadow-2xs"
+                  >
+                    <span>🌐 পাবলিক পেজ ও QR কোড</span> ➔
+                  </Link>
                 </div>
               </div>
-              <a
-                href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20renew%20my%20plant%20maintenance%20and%20warranty%20package."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="whitespace-nowrap px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-stone-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-              >
-                <span>🔄</span> রিনিউ মেইনটেন্যান্স প্যাকেজ
-              </a>
-            </div>
 
-            {/* Installed Plants & Tree Roster (PDF requirement) */}
-            <div className="space-y-2 relative z-10">
-              <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider block">
-                🌱 রোপিত গাছের তালিকা ও পরিচিতি (Installed Flora):
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {selectedCard.plantedFlora.map((flora, i) => (
-                  <span
-                    key={i}
-                    className="bg-emerald-900/60 border border-emerald-600/40 text-emerald-200 text-xs px-3 py-1.5 rounded-xl font-medium"
-                  >
-                    ✓ {flora}
+              {/* Passport Details Box */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F7F6F2] p-4 rounded-2xl border border-[#D6D2C4] text-xs">
+                <div>
+                  <span className="text-[10px] font-mono text-[#75787B] block">প্রজেক্ট কোড</span>
+                  <span className="font-mono font-bold text-[#121813] mt-0.5 block">{selectedCard.projectCode}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-[#75787B] block">ক্লায়েন্ট ও ফোন</span>
+                  <span className="font-bold text-[#121813] mt-0.5 block">{selectedCard.clientName}</span>
+                  <span className="text-[10px] font-mono text-[#75787B]">{selectedCard.clientPhone}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-[#75787B] block">হস্তান্তর তারিখ</span>
+                  <span className="font-mono text-[#121813] mt-0.5 block">
+                    {new Date(selectedCard.handoverDate).toLocaleDateString("bn-BD")}
                   </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Services Implemented */}
-            <div className="space-y-2 relative z-10">
-              <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider block">
-                🛠️ বাস্তবায়িত সার্ভিস ও ল্যান্ডস্কেপিং ফিচারসমূহ:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {selectedCard.servicesIncluded.map((s, i) => (
-                  <span
-                    key={i}
-                    className="bg-white/10 border border-white/15 text-white text-xs px-3 py-1.5 rounded-xl font-medium"
-                  >
-                    ✦ {s}
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-[#75787B] block">ওয়ারেন্টি মেয়াদ</span>
+                  <span className="font-bold text-[#2B4D33] mt-0.5 block">
+                    {selectedCard.warrantyMonths} মাস ({new Date(selectedCard.warrantyExpiryDate).toLocaleDateString("bn-BD")})
                   </span>
-                ))}
+                </div>
               </div>
-            </div>
 
-            {/* Maintenance & Warranty Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 relative z-10">
-              <div className="bg-black/30 p-3.5 rounded-2xl border border-white/10 text-xs">
-                <span className="text-emerald-400 block text-[10px] font-bold">মেইনটেন্যান্স শিডিউল:</span>
-                <span className="font-semibold text-white mt-0.5 block">{selectedCard.maintenanceFrequency}</span>
-              </div>
-              <div className="bg-black/30 p-3.5 rounded-2xl border border-white/10 text-xs">
-                <span className="text-amber-400 block text-[10px] font-bold">পরবর্তী ফ্রি ফলো-আপ ভিজিট:</span>
-                <span className="font-semibold text-white mt-0.5 block font-mono">📅 {selectedCard.nextFollowUpDate}</span>
-              </div>
-              <div className="bg-black/30 p-3.5 rounded-2xl border border-white/10 text-xs">
-                <span className="text-emerald-400 block text-[10px] font-bold">ওয়ারেন্টি গ্যারান্টি:</span>
-                <span className="font-semibold text-white mt-0.5 block">{selectedCard.warrantyPeriod}</span>
-              </div>
-            </div>
+              {/* Flora & Services List */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 bg-[#F7F6F2] rounded-2xl border border-[#D6D2C4] space-y-2">
+                  <span className="font-mono font-bold text-[#2B4D33] text-[11px] block">
+                    🛠️ অন্তর্ভুক্ত সেবাসমূহ:
+                  </span>
+                  <ul className="space-y-1 text-[#323232]">
+                    {selectedCard.servicesIncluded.map((s, idx) => (
+                      <li key={idx} className="flex items-center gap-1.5">
+                        <span className="text-emerald-700">✓</span> {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            {/* Actions Bar */}
-            <div className="pt-4 border-t border-emerald-800/80 flex flex-col sm:flex-row justify-between items-center gap-3 relative z-10">
-              <span className="text-[11px] text-emerald-300/70">
-                A R Green Garden ডিজিটাল সার্টিফিকেশন • ধানমন্ডি, ঢাকা
-              </span>
-              <div className="flex gap-2">
+                <div className="p-4 bg-[#F7F6F2] rounded-2xl border border-[#D6D2C4] space-y-2">
+                  <span className="font-mono font-bold text-[#2B4D33] text-[11px] block">
+                    🌿 রোপিত উদ্ভিদ প্রজাতি:
+                  </span>
+                  <ul className="space-y-1 text-[#323232]">
+                    {selectedCard.plantedFlora.map((f, idx) => (
+                      <li key={idx} className="flex items-center gap-1.5">
+                        <span className="text-emerald-600">🌱</span> {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Public URL Box */}
+              <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
+                <div>
+                  <span className="font-mono font-bold text-[#2B4D33] text-[10px] block uppercase">
+                    পাবলিক ভেরিফিকেশন লিংক:
+                  </span>
+                  <code className="text-xs font-mono text-[#121813] break-all">
+                    /card/{selectedCard.projectCode}
+                  </code>
+                </div>
                 <button
-                  onClick={() => window.print()}
-                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-emerald-950 font-bold text-xs rounded-xl transition-all shadow-lg cursor-pointer"
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      navigator.clipboard.writeText(`${window.location.origin}/card/${selectedCard.projectCode}`);
+                      showToast("✓ লিংক কপি করা হয়েছে!");
+                    }
+                  }}
+                  className="min-h-[40px] px-3.5 py-1.5 bg-white border border-[#2B4D33]/40 text-[#2B4D33] rounded-xl text-xs font-mono font-bold hover:bg-emerald-50 cursor-pointer"
                 >
-                  🖨️ কার্ড প্রিন্ট / PDF ডাউনলোড
+                  📋 লিংক কপি করুন
                 </button>
               </div>
+
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="bg-white rounded-3xl border border-[#D6D2C4] p-12 text-center text-xs text-[#75787B] font-mono">
+              বাম পাশ থেকে একটি সার্ভিস কার্ড নির্বাচন করুন অথবা নতুন কার্ড তৈরি করুন।
+            </div>
+          )}
+        </div>
+
       </div>
+
+      {/* Deletion Modal */}
+      {deleteTarget && (
+        <ConfirmModal
+          isOpen={true}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteCard}
+          title="সার্ভিস কার্ড মুছে ফেলার নিশ্চিতকরণ"
+          description={`আপনি কি নিশ্চিত যে "${deleteTarget.projectName}" এর ডিজিটাল সার্ভিস কার্ডটি মুছে ফেলতে চান?`}
+          itemName={deleteTarget.projectName}
+          confirmLabel="হ্যাঁ, মুছে ফেলুন"
+          cancelLabel="বাতিল"
+          variant="danger"
+        />
+      )}
     </div>
   );
 }

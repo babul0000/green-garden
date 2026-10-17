@@ -6,7 +6,11 @@ import InventoryStock from "./finance/InventoryStock";
 import AccountingSummary from "./finance/AccountingSummary";
 import { Quotation, InventoryItem, AccountingData } from "./finance/types";
 
-export default function FinanceInventoryTab() {
+interface FinanceInventoryTabProps {
+  initialQuotationClient?: { name: string; phone: string; email?: string; notes?: string } | null;
+}
+
+export default function FinanceInventoryTab({ initialQuotationClient }: FinanceInventoryTabProps = {}) {
   const [subTab, setSubTab] = useState<"quotation" | "inventory" | "accounting">("quotation");
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -93,7 +97,11 @@ export default function FinanceInventoryTab() {
 
       {/* SUBTAB 1: SMART QUOTATION BUILDER */}
       {subTab === "quotation" && (
-        <QuotationBuilder quotations={quotations} onRefresh={fetchFinanceData} />
+        <QuotationBuilder
+          quotations={quotations}
+          onRefresh={fetchFinanceData}
+          initialClient={initialQuotationClient}
+        />
       )}
 
       {/* SUBTAB 2: INVENTORY & STOCK MANAGEMENT */}

@@ -66,12 +66,21 @@ export default function AdminPage() {
 
   // Save tab to localStorage on change if allowed
   const handleTabChange = (tab: string) => {
-    if (user && !canAccessTab(user.role, tab)) return;
-    setActiveTab(tab);
+    const targetTab = tab === "quotations" ? "finance" : tab;
+    if (user && !canAccessTab(user.role, targetTab)) return;
+    setActiveTab(targetTab);
     if (typeof window !== "undefined") {
-      localStorage.setItem("adminActiveTab", tab);
+      localStorage.setItem("adminActiveTab", targetTab);
     }
   };
+
+  // State for prefilling Quotation from DesignRequests
+  const [quotationPrefill, setQuotationPrefill] = useState<{
+    name: string;
+    phone: string;
+    email?: string;
+    notes?: string;
+  } | null>(null);
 
   // State arrays loaded from database
   const [bookings, setBookings] = useState<IBooking[]>([]);
@@ -902,7 +911,13 @@ export default function AdminPage() {
 
           {/* TAB 14: DESIGN REQUESTS (STEP 4) */}
           {activeTab === "design-requests" && (
-            <DesignRequestsTab setActiveTab={handleTabChange} />
+            <DesignRequestsTab 
+              setActiveTab={handleTabChange}
+              onSelectForQuotation={(client) => {
+                setQuotationPrefill(client);
+                handleTabChange("finance");
+              }}
+            />
           )}
 
           {/* TAB 15: TREE DOCTOR & PLANT HEALTH (STEPS 5 & 6) */}
@@ -922,7 +937,7 @@ export default function AdminPage() {
 
           {/* TAB 18: FINANCE, INVENTORY & P&L (STEP 9) */}
           {activeTab === "finance" && (
-            <FinanceInventoryTab />
+            <FinanceInventoryTab initialQuotationClient={quotationPrefill} />
           )}
 
           {/* TAB 19: DIGITAL SERVICE CARD (STEP 10) */}

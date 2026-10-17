@@ -173,7 +173,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, status, assignedStaffId, notes } = body;
+    const { id, status, assignedStaffId, notes, scheduledDate } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Schedule ID is required" }, { status: 400 });
@@ -183,6 +183,7 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         ...(status ? { status } : {}),
+        ...(scheduledDate ? { scheduledDate: new Date(scheduledDate) } : {}),
         ...(assignedStaffId !== undefined ? { assignedStaffId: assignedStaffId || null } : {}),
         ...(notes !== undefined ? { notes } : {}),
       },

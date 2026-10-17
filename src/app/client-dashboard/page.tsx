@@ -302,7 +302,7 @@ export default function ClientDashboardPage() {
                 { id: "consultation", label: `Tree Doctor & Visits (${treeRequests.length})`, icon: "🩺" },
                 { id: "payments", label: `Payment History (${invoices.length})`, icon: "💳" },
                 { id: "service-card", label: "Digital Service Card", icon: "🪪" },
-                { id: "loyalty", label: "Loyalty & Rewards", icon: "🎁" },
+                // Loyalty tab hidden as it has no backend database model
                 { id: "support", label: "Feedback & Review", icon: "⭐" },
               ].map((item) => {
                 const isActive = activeTab === item.id;
@@ -401,7 +401,7 @@ export default function ClientDashboardPage() {
                   { id: "consultation", label: `Tree Doctor & Visits (${treeRequests.length})`, icon: "🩺" },
                   { id: "payments", label: `Payment History (${invoices.length})`, icon: "💳" },
                   { id: "service-card", label: "Digital Service Card", icon: "🪪" },
-                  { id: "loyalty", label: "Loyalty & Rewards", icon: "🎁" },
+                  // Loyalty tab hidden
                   { id: "support", label: "Feedback & Review", icon: "⭐" },
                 ].map((item) => {
                   const isActive = activeTab === item.id;

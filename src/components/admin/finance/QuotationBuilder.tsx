@@ -7,13 +7,22 @@ import { Quotation, QuotationItem, QUOTATION_CATEGORIES } from "./types";
 interface QuotationBuilderProps {
   quotations: Quotation[];
   onRefresh: () => void | Promise<void>;
+  initialClient?: { name: string; phone: string; email?: string; notes?: string } | null;
 }
 
-export default function QuotationBuilder({ quotations, onRefresh }: QuotationBuilderProps) {
+export default function QuotationBuilder({ quotations, onRefresh, initialClient }: QuotationBuilderProps) {
   // Smart Quotation Builder State
   const [isBuildingQuote, setIsBuildingQuote] = useState(false);
   const [qClientName, setQClientName] = useState("");
   const [qClientPhone, setQClientPhone] = useState("");
+
+  useEffect(() => {
+    if (initialClient) {
+      setIsBuildingQuote(true);
+      setQClientName(initialClient.name || "");
+      setQClientPhone(initialClient.phone || "");
+    }
+  }, [initialClient]);
   const [qDiscount, setQDiscount] = useState<number>(0);
   const [qAdvance, setQAdvance] = useState<number>(0);
   const [quoteItems, setQuoteItems] = useState<QuotationItem[]>([

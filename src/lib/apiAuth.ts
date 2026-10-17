@@ -151,12 +151,12 @@ export function apiError(message: string, status: number = 500): Response {
 /**
  * Wrap a route handler with auth error handling.
  */
-export function withAuthErrorHandling(
-  handler: (req: Request) => Promise<Response>
-): (req: Request) => Promise<Response> {
-  return async (req: Request): Promise<Response> => {
+export function withAuthErrorHandling<T extends (req: Request, ...args: any[]) => Promise<Response>>(
+  handler: T
+): T {
+  return (async (req: Request, ...args: any[]): Promise<Response> => {
     try {
-      return await handler(req);
+      return await handler(req, ...args);
     } catch (err: unknown) {
       if (err instanceof Error) {
         const status = (err as Error & { status?: number }).status;
@@ -170,5 +170,5 @@ export function withAuthErrorHandling(
         { status: 500, headers: NO_CACHE }
       );
     }
-  };
+  }) as T;
 }

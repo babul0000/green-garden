@@ -564,11 +564,29 @@ export default function TreeDoctorTab() {
                   <div className="flex-grow">
                     <span className="text-[10px] font-mono text-stone-400 block">{rec.location}</span>
                     <h4 className="font-bold text-white text-base font-serif">{rec.plantName}</h4>
-                    {rec.nextMaintenanceDate && (
-                      <span className="inline-block mt-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        পরবর্তী ভিজিট: {rec.nextMaintenanceDate}
-                      </span>
-                    )}
+                    {rec.nextMaintenanceDate && (() => {
+                      const nextDate = new Date(rec.nextMaintenanceDate);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const diffDays = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                      const isApproaching = diffDays >= 0 && diffDays <= 3;
+                      const isOverdue = diffDays < 0;
+
+                      return (
+                        <span
+                          className={`inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                            isOverdue
+                              ? "bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse"
+                              : isApproaching
+                              ? "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse"
+                              : "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                          }`}
+                        >
+                          {isOverdue ? "🚨 ফলো-আপ ওভারডিউ: " : isApproaching ? "⚠️ ফলো-আপ আসন্ন: " : "পরবর্তী ভিজিট: "}
+                          {rec.nextMaintenanceDate}
+                        </span>
+                      );
+                    })()}
                   </div>
                   <button
                     onClick={() => handleDeletePlantRecord(rec.id)}

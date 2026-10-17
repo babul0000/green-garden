@@ -106,6 +106,21 @@ export default function MaintenanceSchedulerTab() {
     }
   };
 
+  const handleRescheduleDate = async (id: string, newDate: string) => {
+    setSchedules((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, scheduledDate: newDate } : s))
+    );
+    try {
+      await fetch("/api/maintenance", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, scheduledDate: newDate }),
+      });
+    } catch (err) {
+      console.error("Failed to reschedule maintenance in DB:", err);
+    }
+  };
+
   const handleDeleteMaintenance = async (id: string) => {
     if (!confirm("Are you sure you want to delete this maintenance schedule?")) return;
     try {
@@ -393,6 +408,62 @@ export default function MaintenanceSchedulerTab() {
             </form>
           )}
 
+          {/* Today's Tasks Section */}
+          {(() => {
+            const todayStr = new Date().toISOString().split("T")[0];
+            const todayTasks = schedules.filter((s) => {
+              try {
+                return new Date(s.scheduledDate).toISOString().split("T")[0] === todayStr && s.status !== "COMPLETED";
+              } catch {
+                return false;
+              }
+            });
+
+            return (
+              <div className="bg-[#18221A]/90 backdrop-blur-xl p-5 rounded-3xl border border-emerald-500/30 shadow-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <h4 className="font-bold text-white text-sm">🌿 আজকের রক্ষণাবেক্ষণ কাজ (Today&apos;s Tasks)</h4>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                    {todayTasks.length}টি শিডিউল নির্ধারিত
+                  </span>
+                </div>
+
+                {todayTasks.length === 0 ? (
+                  <p className="text-xs text-stone-400 italic py-2">আজকের জন্য কোনো পেন্ডিং রক্ষণাবেক্ষণ কাজ নেই।</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {todayTasks.map((task) => (
+                      <div key={task.id} className="bg-black/40 border border-emerald-500/20 p-3.5 rounded-2xl flex flex-col justify-between space-y-2">
+                        <div>
+                          <div className="flex justify-between items-start">
+                            <span className="font-bold text-white text-xs">{task.clientName}</span>
+                            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono font-semibold">
+                              {task.frequency}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-stone-400 mt-0.5">📍 {task.location}</p>
+                          {task.notes && <p className="text-[11px] text-stone-300 mt-1 italic">&ldquo;{task.notes}&rdquo;</p>}
+                        </div>
+                        <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                          <span className="text-[10px] text-stone-400">{task.assignedStaff?.name || "👨‍🌾 মালি টিম"}</span>
+                          <button
+                            onClick={() => handleUpdateMaintenanceStatus(task.id, "COMPLETED")}
+                            className="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold rounded-lg text-[10px] transition-all cursor-pointer"
+                          >
+                            ✓ সম্পন্ন হয়েছে
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Schedule List Table */}
           <div className="bg-[#18221A]/90 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-lg">
             <div className="p-4 bg-white/[0.02] border-b border-white/10 flex justify-between items-center">
@@ -424,7 +495,16 @@ export default function MaintenanceSchedulerTab() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
-                        📅 {new Date(sc.scheduledDate).toLocaleDateString("bn-BD")}
+                        <div className="flex items-center gap-1.5">
+                          <span>📅</span>
+                          <input
+                            type="date"
+                            value={new Date(sc.scheduledDate).toISOString().split("T")[0]}
+                            onChange={(e) => handleRescheduleDate(sc.id, e.target.value)}
+                            className="bg-black/50 border border-white/15 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none focus:border-emerald-400 cursor-pointer"
+                            title="তারিখ পরিবর্তন করতে নির্বাচন করুন"
+                          />
+                        </div>
                       </td>
                       <td className="py-3.5 px-4 text-stone-300">
                         {sc.assignedStaff?.name || "👨‍🌾 মালি টিম ১"}
