@@ -60,11 +60,47 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { employeeId, action, notes } = body; // action: 'CHECK_IN' | 'CHECK_OUT'
+    const { employeeId, action, notes } = body;
 
-    if (!employeeId || !action) {
+    // Action: BULK_MARK (mark multiple employees for a given date)
+    if (action === "BULK_MARK") {
+      const { marks, date } = body;
+      const targetDate = date ? new Date(date) : new Date();
+      targetDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(targetDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      const results = [];
+      for (const m of (marks || [])) {
+        const existing = await prisma.attendance.findFirst({
+          where: {
+            employeeId: m.employeeId,
+            date: { gte: targetDate, lt: nextDay },
+          },
+        });
+        if (existing) {
+          const u = await prisma.attendance.update({
+            where: { id: existing.id },
+            data: { status: m.status },
+          });
+          results.push(u);
+        } else {
+          const c = await prisma.attendance.create({
+            data: {
+              employeeId: m.employeeId,
+              date: targetDate,
+              status: m.status,
+            },
+          });
+          results.push(c);
+        }
+      }
+      return NextResponse.json({ success: true, count: results.length, records: results });
+    }
+
+    if (!employeeId) {
       return NextResponse.json(
-        { error: "Employee ID and action (CHECK_IN / CHECK_OUT) are required." },
+        { error: "Employee ID is required." },
         { status: 400 }
       );
     }

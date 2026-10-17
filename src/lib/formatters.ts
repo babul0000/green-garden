@@ -35,6 +35,8 @@ export function formatCurrencyBn(amount: number | string, includeSymbol = true):
   return includeSymbol ? `৳${formatted}` : formatted;
 }
 
+export const formatTaka = formatCurrencyBn;
+
 /**
  * Formats a Date object or string into a Bengali localized date (e.g. ১৭ অক্টোবর ২০২৬)
  */

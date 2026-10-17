@@ -51,10 +51,56 @@ export const GET = withAuthErrorHandling(async (req: Request) => {
 });
 
 export const POST = withAuthErrorHandling(async (req: Request) => {
-  // Only admin can manually record payments
+  // Only admin can create invoices and manually record payments
   await requireAdmin(req);
 
   const body = await req.json();
+
+  // 1. Create Invoice from Quotation or Direct
+  if (body.action === "CREATE_FROM_QUOTATION" || (body.quotationId && !body.amount)) {
+    const { quotationId, dueDate, notes, clientName, clientPhone } = body;
+    let quote = null;
+    if (quotationId) {
+      quote = await prisma.quotation.findUnique({
+        where: { id: quotationId },
+        include: { items: true, project: true },
+      });
+    }
+
+    const totalAmount = quote ? quote.totalAmount : parseFloat(body.totalAmount || "0");
+    const name = clientName || quote?.clientName || "Valued Client";
+    const phone = clientPhone || quote?.clientPhone || null;
+    const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newInvoice = await prisma.invoice.create({
+      data: {
+        invoiceNumber,
+        quotationId: quote?.id || null,
+        projectId: quote?.projectId || body.projectId || null,
+        userId: body.userId || null,
+        clientName: name,
+        clientPhone: phone,
+        totalAmount,
+        paidAmount: 0,
+        dueAmount: totalAmount,
+        status: "DUE",
+        dueDate: dueDate ? new Date(dueDate) : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        notes: notes || quote?.notes || null,
+      },
+      include: {
+        quotation: { include: { items: true } },
+        project: { select: { name: true, location: true } },
+        payments: true,
+      },
+    });
+
+    return NextResponse.json(
+      { success: true, message: "Invoice created successfully", invoice: newInvoice },
+      { headers: NO_CACHE }
+    );
+  }
+
+  // 2. Record Payment on existing invoice
   const { invoiceId, amount, paymentMethod, transactionId, receivedBy, notes } = body;
 
   if (!invoiceId || !amount) {

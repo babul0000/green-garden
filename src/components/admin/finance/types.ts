@@ -57,3 +57,38 @@ export const QUOTATION_CATEGORIES = [
   "Transportation",
   "Other Costs",
 ];
+
+export interface InvoicePayment {
+  id: string;
+  amount: number;
+  paymentDate: string;
+  paymentMethod: string;
+  transactionId?: string | null;
+  receivedBy?: string | null;
+  notes?: string | null;
+}
+
+export interface InvoiceItem {
+  id: string;
+  invoiceNumber: string;
+  quotationId?: string | null;
+  projectId?: string | null;
+  clientName: string;
+  clientPhone?: string | null;
+  totalAmount: number;
+  paidAmount: number;
+  dueAmount: number;
+  status: "PAID" | "PARTIALLY_PAID" | "DUE" | "OVERDUE" | string;
+  dueDate?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  payments?: InvoicePayment[];
+  quotation?: {
+    quotationNumber?: string;
+    items?: any[];
+  } | null;
+  project?: {
+    name: string;
+    location: string;
+  } | null;
+}
