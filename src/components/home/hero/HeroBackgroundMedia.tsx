@@ -43,9 +43,21 @@ export default function HeroBackgroundMedia({
     return `${posterImageUrl}${separator}_v=${version}`;
   }, [posterImageUrl, version]);
 
+  const [preferStaticMedia, setPreferStaticMedia] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isSaveData = (navigator as any)?.connection?.saveData === true;
+      const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (isSaveData || isReducedMotion) {
+        setPreferStaticMedia(true);
+      }
+    }
+  }, []);
+
   // Only reload video if URL actually changes
   useEffect(() => {
-    if (mediaType === "video" && effectiveVideoUrl && prevVideoUrlRef.current !== effectiveVideoUrl) {
+    if (!preferStaticMedia && mediaType === "video" && effectiveVideoUrl && prevVideoUrlRef.current !== effectiveVideoUrl) {
       prevVideoUrlRef.current = effectiveVideoUrl;
       setVideoError(false);
       setIsVideoLoaded(false);
@@ -56,11 +68,11 @@ export default function HeroBackgroundMedia({
         }
       }
     }
-  }, [effectiveVideoUrl, mediaType, autoPlay, videoRef]);
+  }, [effectiveVideoUrl, mediaType, autoPlay, videoRef, preferStaticMedia]);
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#041a2e]">
-      {mediaType === "video" && !videoError && effectiveVideoUrl ? (
+      {!preferStaticMedia && mediaType === "video" && !videoError && effectiveVideoUrl ? (
         <>
           {/* Smooth poster preview layer */}
           {effectivePosterUrl && (
@@ -76,6 +88,7 @@ export default function HeroBackgroundMedia({
           <video
             ref={videoRef}
             src={effectiveVideoUrl}
+            poster={effectivePosterUrl}
             autoPlay={autoPlay}
             muted={muted}
             loop={loop}

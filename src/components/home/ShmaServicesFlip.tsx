@@ -98,7 +98,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
               const fallback = services[idx % services.length];
               return {
                 id: String(idx + 1).padStart(2, "0"),
-                icon: s.icon || fallback.icon || "🌿",
+                icon: s.icon || fallback.icon || "🌱",
                 titleBn: s.bengaliTitle || s.titleBn || fallback.titleBn || s.label || s.title || "",
                 titleEn: s.label || s.title || s.titleEn || fallback.titleEn || "",
                 descBn: s.descBn || fallback.descBn || s.desc || s.description || "",
@@ -172,7 +172,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                       {item.icon && (item.icon.startsWith("http") || item.icon.startsWith("/")) ? (
                         <img src={item.icon} alt="" className="w-6 h-6 object-contain" />
                       ) : (
-                        <span>{item.icon || "🌿"}</span>
+                        <span>{item.icon || "🌱"}</span>
                       )}
                     </div>
                   </div>
@@ -198,7 +198,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-base">{item.icon || "🌿"}</span>
+                        <span className="text-base">{item.icon || "🌱"}</span>
                         <span className="font-mono text-[11px] text-[#dedad2]/70 font-light block">
                           {t("সেবার পরিধি", "Scope & Deliverables")}
                         </span>

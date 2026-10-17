@@ -30,60 +30,6 @@ export interface HighlightProjectItem {
 
 const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
   {
-    id: "mapletree-business-city",
-    slug: "mapletree-business-city",
-    nameBn: "ম্যাপলট্রি বিজনেস সিটি ২: আরবান ওয়াইল্ডারনেস",
-    nameEn: "Mapletree Business City II",
-    categoryBn: "ইনস্টিটিউশন ও আধুনিক কর্মক্ষেত্র",
-    categoryEn: "Institution and Workplace",
-    locationBn: "সিঙ্গাপুর",
-    locationEn: "Singapore",
-    descBn: "ম্যাপলট্রি বিজনেস সিটি ২ কর্মক্ষেত্র ও প্রকৃতির মেলবন্ধনে একটি 'আরবান ওয়াইল্ডারনেস' সৃষ্টি করেছে। সংলগ্ন নেচার রিজার্ভ ও ক্রান্তীয় জলবায়ুর অনুপ্রেরণায় পরিকল্পিত এই ল্যান্ডস্কেপ জীববৈচিত্র্য ও নাগরিক স্বস্তির এক অপূর্ব দৃষ্টান্ত।",
-    descEn: "Mapletree Business City II aims to create an ‘Urban Wilderness’ by integrating modern workspaces with an eco-friendly, nature-inspired landscape. This design enhances comfort and recreation while fostering ecological balance, inspired by the adjacent nature reserve and tropical climate.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Mapletree-Business-City-II.mp4#t=1",
-    imageUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
-    year: "2024",
-    area: "28,000 sq.m",
-    client: "Mapletree Investments",
-    ecoMetrics: { tempDrop: "-3.5°C", rainwater: "85% Recycled", greenCoverage: "68%" },
-  },
-  {
-    id: "the-standard-hua-hin",
-    slug: "the-standard-hua-hin",
-    nameBn: "দ্য স্ট্যান্ডার্ড হুয়া হিন ট্রপিক্যাল রিসোর্ট",
-    nameEn: "The Standard Hua Hin",
-    categoryBn: "হসপিটালিটি ও ইকো রিসোর্ট",
-    categoryEn: "Hospitality",
-    locationBn: "প্রাচুয়াপ খিরি খান, থাইল্যান্ড",
-    locationEn: "Prachuap Khiri Khan, Thailand",
-    descBn: "প্রকৃতির পরম কোলে এক শান্ত প্রশান্তিময় আশ্রম। সাইটের বিদ্যমান বিশালাকার বনস্পতিগুলোকে অক্ষত রেখে নকশা করা হয়েছে প্রতিটি কর্নার—যেখানে আলো, গঠন ও নিসর্গ মিলেমিশে এক অভূতপূর্ব অনুভূতি সৃষ্টি করে।",
-    descEn: "The Standard Hua Hin is envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character. Each space invites guests to reconnect with nature through light, texture, and time. The forest is not just a backdrop. It is the foundation of the experience.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/Pop-up-The-standard-huahin.mp4#t=1",
-    imageUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
-    year: "2023",
-    area: "14,500 sq.m",
-    client: "Standard International",
-    ecoMetrics: { tempDrop: "-4.2°C", rainwater: "100% Retained", greenCoverage: "74%" },
-  },
-  {
-    id: "one-city-centre-occ",
-    slug: "one-city-centre-occ",
-    nameBn: "ওয়ান সিটি সেন্টার (OCC) আরবান প্লাজা",
-    nameEn: "One City Centre (OCC)",
-    categoryBn: "কর্মক্ষেত্র ও পাবলিক প্লাজা",
-    categoryEn: "Workplace & Civic Plaza",
-    locationBn: "প্লয়েনচিট, ব্যাংকক",
-    locationEn: "Ploenchit, Bangkok, Thailand",
-    descBn: "ব্যাংককের প্রাণকেন্দ্রে একটি সানকেন পাবলিক পার্ক ও জীবন্ত সবুজ প্লাজা। এটি পথচারীদের জন্য শীতল ছায়াময় পথ সৃষ্টি করে এবং নগরীর অতিরিক্ত উত্তাপ প্রশমনে সক্রিয় ভূমিকা রাখে।",
-    descEn: "A visionary high-density corporate hub enveloped in sunken gardens, shaded pedestrian corridors, and porous water plazas that substantially reduce the urban heat island effect.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/Pop-up-OCC.mp4#t=1",
-    imageUrl: "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
-    year: "2024",
-    area: "19,200 sq.m",
-    client: "Raimon Land & Mitsubishi Estate",
-    ecoMetrics: { tempDrop: "-3.8°C", rainwater: "90% Filtered", greenCoverage: "62%" },
-  },
-  {
     id: "dhanmondi-sky-forest",
     slug: "dhanmondi-sky-forest",
     nameBn: "ধানমন্ডি স্কাই ফরেস্ট ও বায়োফিলিক টেরেস",
@@ -94,7 +40,6 @@ const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
     locationEn: "Road 9/A, Dhanmondi, Dhaka, Bangladesh",
     descBn: "কংক্রিট ছাদকে রূপান্তর করা হয়েছে সবুজ বায়োফিলিক স্বর্গে—যেখানে রয়েছে মাল্টি-লেয়ার ১০০% ওয়াটারপ্রুফ ড্রেনেজ, সুপরিকল্পিত জাপানিজ কার্পেট ঘাসের লন এবং মেহগনি কাঠের ছায়ানিবিড় পারগোলা।",
     descEn: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Sky-Forest.mp4#t=1",
     imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
     year: "2026",
     area: "3,800 sq.ft",
@@ -112,7 +57,6 @@ const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
     locationEn: "Gulshan Avenue, Dhaka, Bangladesh",
     descBn: "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
     descEn: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air in central Gulshan.",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/06/สวนสาน-.mp4#t=1",
     imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=1200",
     year: "2025",
     area: "6,400 sq.ft",
@@ -130,8 +74,7 @@ const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
     locationEn: "Marine Drive, Cox's Bazar, Bangladesh",
     descBn: "সমুদ্র উপকূলের লবণাক্ত আবহাওয়া ও আর্দ্রতা উপযোগী দেশীয় উদ্ভিদের সমন্বয়ে নির্মিত উন্মুক্ত ল্যান্ডস্কেপ ও পরিবেশবান্ধব রিট্রিট মাস্টারপ্ল্যান।",
     descEn: "Coastal landscape masterplan tailored for sea breezes and saline soil conditions, featuring salt-tolerant endemic trees and natural water retention ponds along the marine coastline.",
-    imageUrl: "https://shmadesigns.com/wp-content/uploads/2026/09/3.-The-Residences-at-Mandarin-Oriental-Miami-at-One-Island-Drive_POOL-1.webp",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/07/About.mp4",
+    imageUrl: "/hero_plants.png",
     year: "2025",
     area: "35,000 sq.m",
     client: "Ocean Paradise Retreats",
@@ -200,7 +143,7 @@ const BACKUP_DISTINCT_PROJECT_IMAGES = [
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
   const isBn = language === "bn";
-  const [projectList, setProjectList] = useState<HighlightProjectItem[]>(SHMA_DEFAULT_PROJECTS);
+  const [projectList, setProjectList] = useState<HighlightProjectItem[]>([]);
   const [activeModalProject, setActiveModalProject] = useState<HighlightProjectItem | null>(null);
 
   useEffect(() => {
@@ -210,7 +153,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
         if (res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.projects || [];
-          if (items.length >= 2) {
+          if (items.length >= 1) {
             const usedImages = new Set<string>();
 
             const mapped: HighlightProjectItem[] = items.map((p: any, idx: number) => {
@@ -220,28 +163,28 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                     df.slug === p.slug ||
                     df.id === p.id ||
                     df.nameEn?.toLowerCase() === (p.name || p.title || "").toLowerCase()
-                ) || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length];
+                ) || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length] || SHMA_DEFAULT_PROJECTS[0];
 
-              const catEn = p.categoryEn || p.category || fallback.categoryEn || "Landscape Design";
+              const catEn = p.categoryEn || p.category || fallback?.categoryEn || "Landscape Design";
               const catBn =
                 p.categoryBn ||
                 CATEGORY_MAP_BN[p.category] ||
                 CATEGORY_MAP_BN[catEn] ||
-                fallback.categoryBn ||
+                fallback?.categoryBn ||
                 "ল্যান্ডস্কেপ ডিজাইন";
 
-              const locEn = p.locationEn || p.location || fallback.locationEn || "Dhaka, Bangladesh";
+              const locEn = p.locationEn || p.location || fallback?.locationEn || "Dhaka, Bangladesh";
               const locBn =
                 p.locationBn ||
                 LOCATION_MAP_BN[p.location] ||
                 LOCATION_MAP_BN[locEn] ||
-                fallback.locationBn ||
+                fallback?.locationBn ||
                 "ঢাকা, বাংলাদেশ";
 
-              const descEn = p.descEn || p.description || p.desc || fallback.descEn || "";
+              const descEn = p.descEn || p.description || p.desc || fallback?.descEn || "";
               let descBn = p.descBn;
               if (!descBn || descBn === descEn) {
-                descBn = DESC_MAP_BN[p.description] || DESC_MAP_BN[descEn] || fallback.descBn || descEn;
+                descBn = DESC_MAP_BN[p.description] || DESC_MAP_BN[descEn] || fallback?.descBn || descEn;
               }
 
               // Image deduplication logic: find candidate image not yet seen in this list
@@ -252,7 +195,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 p.image,
                 p.coverImage,
                 p.beforeImage,
-                fallback.imageUrl,
+                fallback?.imageUrl,
               ].filter(Boolean);
 
               let selectedImage = "";
@@ -265,18 +208,16 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
               }
 
               if (!selectedImage) {
-                const uniqueBackup =
-                  BACKUP_DISTINCT_PROJECT_IMAGES.find((img) => !usedImages.has(img)) ||
-                  BACKUP_DISTINCT_PROJECT_IMAGES[idx % BACKUP_DISTINCT_PROJECT_IMAGES.length];
-                selectedImage = uniqueBackup;
-                usedImages.add(selectedImage);
+                const uniqueBackup = BACKUP_DISTINCT_PROJECT_IMAGES.find((img) => !usedImages.has(img));
+                selectedImage = uniqueBackup || "/hero_plants.png";
+                if (uniqueBackup) usedImages.add(uniqueBackup);
               }
 
               return {
                 id: p._id || p.id || `proj-${idx}`,
-                slug: p.slug || fallback.slug,
-                nameBn: p.titleBn || p.nameBn || fallback.nameBn || p.title || p.name || "",
-                nameEn: p.titleEn || p.nameEn || p.title || p.name || fallback.nameEn || "",
+                slug: p.slug || fallback?.slug,
+                nameBn: p.titleBn || p.nameBn || fallback?.nameBn || p.title || p.name || "",
+                nameEn: p.titleEn || p.nameEn || p.title || p.name || fallback?.nameEn || "",
                 categoryBn: catBn,
                 categoryEn: catEn,
                 locationBn: locBn,
@@ -284,11 +225,11 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 descBn: descBn,
                 descEn: descEn,
                 imageUrl: selectedImage,
-                videoUrl: p.videoUrl || fallback.videoUrl,
-                year: p.year || fallback.year || "2026",
-                area: p.area || p.budgetRange || fallback.area || "3,500 sq.ft",
-                client: p.client || p.clientName || fallback.client || "Private Client",
-                ecoMetrics: fallback.ecoMetrics || {
+                videoUrl: p.videoUrl || fallback?.videoUrl,
+                year: p.year || fallback?.year || "2026",
+                area: p.area || p.budgetRange || fallback?.area || "3,500 sq.ft",
+                client: p.client || p.clientName || fallback?.client || "Private Client",
+                ecoMetrics: fallback?.ecoMetrics || {
                   tempDrop: "-3.5°C",
                   rainwater: "100% Drainage Safe",
                   greenCoverage: "75%",
@@ -299,11 +240,15 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
           }
         }
       } catch (e) {
-        // keep default curated Shma projects
+        // preserve empty state
       }
     };
     fetchLiveProjects();
   }, []);
+
+  if (projectList.length === 0) {
+    return null;
+  }
 
   return (
     <section id="projects" className="py-12 sm:py-24 px-4 sm:px-10 lg:px-16 max-w-[1440px] mx-auto text-[#323232] bg-white">
@@ -367,8 +312,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                       alt={item.nameEn}
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          BACKUP_DISTINCT_PROJECT_IMAGES[index % BACKUP_DISTINCT_PROJECT_IMAGES.length];
+                        (e.target as HTMLImageElement).src = "/hero_plants.png";
                       }}
                     />
                   )}

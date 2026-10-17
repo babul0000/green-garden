@@ -126,8 +126,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
                   alt={step.titleEn}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=800&auto=format&fit=crop";
+                    (e.target as HTMLImageElement).src = "/hero_plants.png";
                   }}
                 />
               </div>

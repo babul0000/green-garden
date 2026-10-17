@@ -17,7 +17,7 @@ const campaigns: CampaignItem[] = [
     titleEn: "A R GREEN GARDEN 10TH",
     subtitleBn: "আগামীর টেকসই ও সবুজ বাংলাদেশ বিনির্মাণে আমাদের অগ্রযাত্রা",
     subtitleEn: "Participating in the Sustainable Future of Bangladesh",
-    image: "https://shmadesigns.com/wp-content/uploads/2025/06/Banner-Website-Shma-19th_Artboard-1_01-1.jpg",
+    image: "/hero_plants.png",
   },
   {
     titleBn: "বায়োফিলিক বাংলাদেশ ভিশন",

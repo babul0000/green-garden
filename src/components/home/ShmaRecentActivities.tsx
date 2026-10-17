@@ -69,7 +69,7 @@ const activities: ActivityItem[] = [
 
 export default function ShmaRecentActivities() {
   const { language, t } = useLanguage();
-  const [activityList, setActivityList] = useState<ActivityItem[]>(activities);
+  const [activityList, setActivityList] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
     const fetchGallery = async () => {
@@ -83,24 +83,28 @@ export default function ShmaRecentActivities() {
               const fallback = activities[idx % activities.length];
               return {
                 id: g._id || g.id || `act-${idx}`,
-                titleBn: g.titleBn || fallback.titleBn || g.title,
-                titleEn: g.titleEn || g.title || fallback.titleEn,
-                subtitleBn: g.subtitleBn || fallback.subtitleBn || g.category || g.descBn,
-                subtitleEn: g.subtitleEn || g.category || g.descEn || fallback.subtitleEn,
-                image: g.imageUrl || g.image || fallback.image,
-                dateBn: g.dateBn || fallback.dateBn || "২০২৬",
-                dateEn: g.dateEn || fallback.dateEn || "2026",
+                titleBn: g.titleBn || g.title || fallback?.titleBn || "গ্রিন ল্যান্ডস্কেপ কার্যক্রম",
+                titleEn: g.titleEn || g.title || fallback?.titleEn || "Green Landscape Activity",
+                subtitleBn: g.subtitleBn || g.category || g.descBn || fallback?.subtitleBn || "স্টুডিও আপডেট",
+                subtitleEn: g.subtitleEn || g.category || g.descEn || fallback?.subtitleEn || "Studio Update",
+                image: g.imageUrl || g.image || fallback?.image || "/hero_plants.png",
+                dateBn: g.dateBn || fallback?.dateBn || "২০২৬",
+                dateEn: g.dateEn || fallback?.dateEn || "2026",
               };
             });
             setActivityList(mapped);
           }
         }
       } catch (e) {
-        // fallback to default
+        // Silently preserve empty state
       }
     };
     fetchGallery();
   }, []);
+
+  if (activityList.length === 0) {
+    return null;
+  }
 
   return (
     <section id="activities" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
@@ -130,8 +134,7 @@ export default function ShmaRecentActivities() {
                 alt={item.titleEn}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    activities[idx % activities.length].image;
+                  (e.target as HTMLImageElement).src = "/hero_plants.png";
                 }}
               />
               <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity"></div>

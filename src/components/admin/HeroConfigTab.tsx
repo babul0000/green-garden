@@ -6,22 +6,16 @@ import { IHeroSettings, defaultHeroSettings } from "@/types";
 // Curated Video & Poster Presets for Instant One-Click Selection
 const VIDEO_PRESETS = [
   {
-    name: "Shma Official Reel",
-    desc: "Bangkok Modern Botanical Landscape & Waterways",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2026/04/Homepage-260408.mp4",
-    posterUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
+    name: "Architectural Botany Reel",
+    desc: "Modern Botanical Landscape & Waterways",
+    videoUrl: "",
+    posterUrl: "/hero_plants.png",
   },
   {
     name: "Sky-Forest Penthouse",
     desc: "Lush residential forest rooftop with automated irrigation",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Sky-Forest.mp4",
-    posterUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1600&q=80",
-  },
-  {
-    name: "Mapletree Urban Park",
-    desc: "Biophilic commercial architecture with water cascade & lawns",
-    videoUrl: "https://shmadesigns.com/wp-content/uploads/2025/04/Shma_Mapletree-Business-City-II.mp4",
-    posterUrl: "https://images.unsplash.com/photo-1558904541-efa8c4a08931?auto=format&fit=crop&w=1600&q=80",
+    videoUrl: "",
+    posterUrl: "/featured_plant.png",
   },
 ];
 

@@ -274,14 +274,14 @@ export interface IHeroSettings {
 }
 
 export const defaultHeroSettings: IHeroSettings = {
-  mediaType: "video",
-  videoUrl: "https://shmadesigns.com/wp-content/uploads/2026/04/Homepage-260408.mp4",
-  posterImageUrl: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
+  mediaType: "image",
+  videoUrl: "",
+  posterImageUrl: "/hero_plants.png",
   autoPlay: true,
   loop: true,
   muted: true,
   playbackSpeed: 1.0,
-  imageUrl: "https://images.unsplash.com/photo-1558904541-efa8c4a08931?auto=format&fit=crop&w=2000&q=80",
+  imageUrl: "/hero_plants.png",
 
   overlayDarkness: 10,
   showTopVignette: true,

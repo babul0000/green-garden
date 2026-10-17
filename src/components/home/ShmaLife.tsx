@@ -16,7 +16,7 @@ interface IStudioLifeData {
 const DEFAULT_STUDIO_LIFE: IStudioLifeData = {
   titleEn: "Studio Life & Culture",
   titleBn: "স্টুডিও লাইফ ও কালচার",
-  image: "https://shmadesigns.com/wp-content/uploads/2025/06/Banner-Website-Shma-19th_Artboard-1_01-1.jpg",
+  image: "/hero_plants.png",
   paragraph1Bn: "ঢাকার প্রাণকেন্দ্র ধানমন্ডিতে অবস্থিত এ আর গ্রিন গার্ডেনের স্টুডিও ক্যাম্পাস। এখানে নবীন ও অভিজ্ঞ ল্যান্ডস্কেপ আর্কিটেক্ট, আরবারিস্ট এবং সিভিল ইঞ্জিনিয়াররা মিলেমিশে গড়ে তুলেছেন এক উন্মুক্ত উদ্ভাবনী পরিবেশ। প্রকৃতি ও আধুনিক স্থাপত্যের মেলবন্ধনে পরিবেশবান্ধব নগরায়ন গড়ে তোলাই আমাদের প্রতিটি কাজের মূল প্রেরণা।",
   paragraph2Bn: "আমাদের স্টুডিও কেবল গতানুগতিক কাজের জায়গা নয়, বরং এটি ধানমন্ডির বুকে এক জীবন্ত সবুজ গবেষণাগার—যেখানে পরিবেশপ্রেমী শিক্ষার্থী, নগর পরিকল্পনাবিদ ও গ্রাহকদের জন্য টেকসই ল্যান্ডস্কেপ ডিজাইন শেখা ও অভিজ্ঞতা বিনিময়ের এক উন্মুক্ত দ্বার সবসময় প্রস্তুত।",
   paragraph1En: "Located in the heart of Dhanmondi, the A R Green Garden studio is an open collaborative space where landscape architects, arborists, and civil engineers unite around climate-resilient design. Our primary motivation is to blend living botany with contemporary architecture to enrich the urban fabric of Bangladesh.",

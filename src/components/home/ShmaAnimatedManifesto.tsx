@@ -204,23 +204,18 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
           {/* Image 1: Fades in during State 2 */}
           <div ref={image1Ref} className="image-container" id="image1">
             <img
-              src="https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp"
+              src="/hero_plants.png"
               alt="Landscape Architecture"
             />
           </div>
 
-          {/* Image 2: Video reel playing during State 4 */}
+          {/* Image 2: Visual card playing during State 4 */}
           <div ref={image2Ref} className="image-container" id="image2">
-            <video
-              ref={videoRef}
-              id="animated_video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="none"
-              src="https://shmadesigns.com/wp-content/uploads/2025/07/About.mp4"
-            ></video>
+            <img
+              src="/featured_plant.png"
+              alt="Architectural Botany"
+              className="w-full h-full object-cover"
+            />
           </div>
 
         </div>
