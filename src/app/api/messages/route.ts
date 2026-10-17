@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireModerator, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -21,6 +22,11 @@ export const GET = withAuthErrorHandling(async (req: Request) => {
 
 export async function POST(req: Request) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 5, windowMs: 10 * 60 * 1000, prefix: "messages_post" });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetAt);
+    }
+
     const body = await req.json();
     const { name, email, phone, subject, message } = body;
 
@@ -43,13 +49,13 @@ export async function POST(req: Request) {
       },
     });
 
-    // Notify Admin in DB
+    // Notify Admin in DB (link to messages tab)
     await prisma.notification.create({
       data: {
         title: `📩 নতুন কন্টাক্ট মেসেজ: ${name}`,
         message: `${name} (${phone || effectiveEmail}) একটি বার্তা পাঠিয়েছেন: "${message.slice(0, 80)}..."`,
-        type: "REQUEST",
-        link: "/admin",
+        type: "INFO",
+        link: "messages",
       },
     });
 

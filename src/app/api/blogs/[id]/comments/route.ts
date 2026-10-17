@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 5, windowMs: 5 * 60 * 1000, prefix: "blog_comments_post" });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetAt);
+    }
+
     const { id } = await params;
     const body = await req.json();
     const { name, text, userId } = body;
@@ -36,6 +42,29 @@ export async function POST(
         userId: userId || null,
       },
     });
+
+    // Notify Admin (link to blogs tab)
+    await prisma.notification.create({
+      data: {
+        title: `💬 ব্লগে নতুন মন্তব্য: ${blog.title.slice(0, 30)}`,
+        message: `${name} মন্তব্য করেছেন: "${text.slice(0, 60)}..."`,
+        type: "INFO",
+        link: "blogs",
+      },
+    });
+
+    // Notify Client if logged in
+    if (userId) {
+      await prisma.notification.create({
+        data: {
+          userId,
+          title: "ব্লগে আপনার মন্তব্য জমা হয়েছে",
+          message: `'${blog.title}' আর্টিকেলে আপনার মন্তব্য গৃহীত হয়েছে।`,
+          type: "INFO",
+          link: "blogs",
+        },
+      });
+    }
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error: any) {

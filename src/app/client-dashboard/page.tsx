@@ -42,6 +42,47 @@ export default function ClientDashboardPage() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isPayingInvoice, setIsPayingInvoice] = useState<string | null>(null);
 
+  // Client Notifications State
+  const [clientNotifications, setClientNotifications] = useState<any[]>([]);
+  const [unreadNotifsCount, setUnreadNotifsCount] = useState<number>(0);
+  const [notifsDropdownOpen, setNotifsDropdownOpen] = useState(false);
+  const notifsRef = React.useRef<HTMLDivElement>(null);
+
+  const fetchClientNotifications = async () => {
+    try {
+      const res = await fetch("/api/notifications?limit=20", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setClientNotifications(data.notifications || []);
+        setUnreadNotifsCount(data.unreadCount || 0);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifsRef.current && !notifsRef.current.contains(e.target as Node)) {
+        setNotifsDropdownOpen(false);
+      }
+    };
+    if (notifsDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notifsDropdownOpen]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchClientNotifications();
+      const timer = setInterval(fetchClientNotifications, 40000);
+      return () => clearInterval(timer);
+    }
+  }, [user]);
+
   // Fetch real client data from PostgreSQL
   const fetchClientData = async () => {
     setDataLoading(true);
@@ -444,6 +485,104 @@ export default function ClientDashboardPage() {
                 <svg className="w-3.5 h-3.5 text-white/40 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+              </div>
+
+              {/* Notification Bell for Client */}
+              <div className="relative" ref={notifsRef}>
+                <button
+                  type="button"
+                  onClick={() => setNotifsDropdownOpen((prev) => !prev)}
+                  className={`w-10 h-10 rounded-full border transition-all flex items-center justify-center relative cursor-pointer shrink-0 ${
+                    notifsDropdownOpen || unreadNotifsCount > 0
+                      ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
+                      : "bg-white/5 border-white/15 text-white/70 hover:text-white hover:bg-white/10"
+                  }`}
+                  title="বিজ্ঞপ্তি"
+                  aria-label="Notifications"
+                >
+                  <span className="text-base leading-none">🔔</span>
+                  {unreadNotifsCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-rose-500 text-[9px] font-mono font-bold text-white shadow-sm animate-pulse">
+                      {unreadNotifsCount}
+                    </span>
+                  )}
+                </button>
+
+                {/* Dropdown Menu */}
+                {notifsDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-[#0d1610] border border-white/15 rounded-2xl shadow-2xl z-50 overflow-hidden font-sans animate-fade-in">
+                    <div className="px-4 py-3 bg-white/5 border-b border-white/10 flex items-center justify-between">
+                      <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                        বিজ্ঞপ্তি ({clientNotifications.length})
+                      </span>
+                      {unreadNotifsCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await fetch("/api/notifications", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ markAllRead: true }),
+                            });
+                            setClientNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+                            setUnreadNotifsCount(0);
+                          }}
+                          className="text-[10px] font-mono text-emerald-300 hover:underline cursor-pointer"
+                        >
+                          সব পঠিত করুন
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto divide-y divide-white/5">
+                      {clientNotifications.length === 0 ? (
+                        <div className="py-8 text-center text-xs font-mono text-white/40">
+                          কোনো নতুন নোটিফিকেশন নেই
+                        </div>
+                      ) : (
+                        clientNotifications.map((notif: any) => (
+                          <div
+                            key={notif.id}
+                            onClick={async () => {
+                              if (!notif.isRead) {
+                                fetch("/api/notifications", {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ id: notif.id, isRead: true }),
+                                });
+                                setClientNotifications((prev) =>
+                                  prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
+                                );
+                                setUnreadNotifsCount((c) => Math.max(0, c - 1));
+                              }
+                              setNotifsDropdownOpen(false);
+                              if (notif.link) {
+                                if (["projects", "consultation", "payments", "support"].includes(notif.link)) {
+                                  setActiveTab(notif.link);
+                                }
+                              }
+                            }}
+                            className={`p-3 text-left transition-colors cursor-pointer ${
+                              notif.isRead ? "bg-transparent text-white/60 hover:bg-white/5" : "bg-emerald-950/40 text-white hover:bg-emerald-950/60"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <h5 className="text-xs font-semibold truncate text-[#E4E2D7]">
+                                {notif.title}
+                              </h5>
+                              {!notif.isRead && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-white/60 line-clamp-2">
+                              {notif.message}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Link

@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(req: Request) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 5, windowMs: 10 * 60 * 1000, prefix: "design_requests_post" });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetAt);
+    }
+
     const body = await req.json();
     const {
       name,
@@ -47,15 +53,28 @@ export async function POST(req: Request) {
       },
     });
 
-    // Also create an automated admin Notification in PostgreSQL
+    // Also create an automated admin Notification in PostgreSQL (link to design-requests tab)
     await prisma.notification.create({
       data: {
-        title: `নতুন গার্ডেন ডিজাইন রিকোয়েস্ট: ${name}`,
+        title: `📐 নতুন গার্ডেন ডিজাইন রিকোয়েস্ট: ${name}`,
         message: `${name} (${phone}) ${spaceType} এর জন্য ${designStyle} স্টাইলে প্রজেক্ট রিকোয়েস্ট পাঠিয়েছেন। বাজেট: ${budgetRange}`,
         type: "REQUEST",
-        link: "/admin",
+        link: "design-requests",
       },
     });
+
+    // Notify Client if logged in
+    if (userId) {
+      await prisma.notification.create({
+        data: {
+          userId,
+          title: "ডিজাইন কমিশন রিকোয়েস্ট গৃহীত হয়েছে",
+          message: `আপনার ডিজাইন রিকোয়েস্টটি গৃহীত হয়েছে (রেফারেন্স: ${refCode})। আমাদের আর্কিটেকচার দল বিস্তারিত পর্যালোচনা করছে।`,
+          type: "REQUEST",
+          link: "projects",
+        },
+      });
+    }
 
     // Send Real-time Email Alert via Gmail SMTP
     try {

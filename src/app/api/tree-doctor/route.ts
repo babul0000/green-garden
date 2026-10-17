@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(req: Request) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 10, windowMs: 10 * 60 * 1000, prefix: "tree_doctor_post" });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetAt);
+    }
+
     const body = await req.json();
     const {
       clientName,
@@ -41,19 +47,32 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create an Admin Notification
+    // Create an Admin Notification (distinguish emergency type and link to tree-doctor tab)
     const alertTitle = isEmergency
-      ? `🚨 জরুরি ট্রি ডক্টর রিকোয়েস্ট: ${treeName}`
+      ? `🚨 [ইমার্জেন্সি] জরুরি ট্রি ডক্টর রিকোয়েস্ট: ${treeName}`
       : `🩺 নতুন ট্রি ডক্টর বুকিং: ${treeName}`;
 
     await prisma.notification.create({
       data: {
         title: alertTitle,
-        message: `${clientName} (${clientPhone}) - ${location} এ আক্রান্ত ${treeName} এর জন্য ডাক্তার চেয়েছেন। সমস্যা: ${problem}`,
-        type: "TREE_DOCTOR",
-        link: "/admin",
+        message: `${clientName} (${clientPhone}) - ${location} এ আক্রান্ত ${treeName} এর জন্য ${isEmergency ? "জরুরি চিকিৎসা" : "অ্যাপয়েন্টমেন্ট"} চেয়েছেন। সমস্যা: ${problem}`,
+        type: isEmergency ? "TREE_DOCTOR_EMERGENCY" : "TREE_DOCTOR",
+        link: "tree-doctor",
       },
     });
+
+    // Notify Client if logged in
+    if (userId) {
+      await prisma.notification.create({
+        data: {
+          userId,
+          title: isEmergency ? "🚨 জরুরি ট্রি ডক্টর আবেদন গৃহীত" : "🩺 ট্রি ডক্টর অ্যাপয়েন্টমেন্ট আবেদন গৃহীত",
+          message: `${treeName} এর জন্য আপনার অনুরোধটি নিবন্ধিত হয়েছে। আমাদের বিশেষ টিম দ্রুত যোগাযোগ করবে।`,
+          type: isEmergency ? "TREE_DOCTOR_EMERGENCY" : "TREE_DOCTOR",
+          link: "consultation",
+        },
+      });
+    }
 
     // Send Real-time Email Alert via Gmail SMTP
     try {

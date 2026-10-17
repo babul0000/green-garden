@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, withAuthErrorHandling } from "@/lib/apiAuth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,9 +21,14 @@ export const GET = withAuthErrorHandling(async (req: Request) => {
   });
 });
 
-// Public: job candidates submit their applications
+// Public: job candidates submit their applications (rate limited)
 export async function POST(req: Request) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 5, windowMs: 15 * 60 * 1000, prefix: "careers_post" });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetAt);
+    }
+
     const body = await req.json();
     const { name, email, phone, department, coverLetter, resumeUrl } = body;
 
@@ -45,13 +51,13 @@ export async function POST(req: Request) {
       },
     });
 
-    // Notify Admin
+    // Notify Admin (link to careers tab)
     await prisma.notification.create({
       data: {
-        title: `💼 নতুন চাকরি আবেদন: ${name}`,
-        message: `${name} (${department}) পদের জন্য আবেদন করেছেন। মোবাইল: ${phone}`,
+        title: `💼 নতুন চাকরির আবেদন (CV): ${name}`,
+        message: `${name} (${department}) পদের জন্য আবেদন ও সিভি জমা দিয়েছেন। মোবাইল: ${phone}`,
         type: "INFO",
-        link: "/admin",
+        link: "careers",
       },
     });
 
