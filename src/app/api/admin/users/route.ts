@@ -42,6 +42,18 @@ export const GET = withAuthErrorHandling(async (req: Request) => {
   return NextResponse.json(formatted, { headers: NO_CACHE });
 });
 
+import crypto from "crypto";
+
+function generateSecureRandomPassword(length = 12): string {
+  const charset = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*";
+  const bytes = crypto.randomBytes(length);
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += charset[bytes[i] % charset.length];
+  }
+  return result;
+}
+
 export const POST = withAuthErrorHandling(async (req: Request) => {
   await requireAdmin(req);
 
@@ -66,7 +78,16 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     prismaRole = upperRole as Role;
   }
 
-  const hashedPassword = await bcrypt.hash(password || "client123", 10);
+  const trimmedPassword = typeof password === "string" ? password.trim() : "";
+  let finalPassword = trimmedPassword;
+  let isGenerated = false;
+
+  if (!finalPassword) {
+    finalPassword = generateSecureRandomPassword(12);
+    isGenerated = true;
+  }
+
+  const hashedPassword = await bcrypt.hash(finalPassword, 10);
 
   const newUser = await prisma.user.create({
     data: {
@@ -85,5 +106,15 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
-  return NextResponse.json({ success: true, user: newUser }, { status: 201, headers: NO_CACHE });
+  return NextResponse.json(
+    {
+      success: true,
+      user: newUser,
+      generatedPassword: isGenerated ? finalPassword : null,
+      message: isGenerated
+        ? "User registered with a secure auto-generated password."
+        : "User registered successfully.",
+    },
+    { status: 201, headers: NO_CACHE }
+  );
 });

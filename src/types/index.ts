@@ -1,4 +1,4 @@
-export type UserRole = "client" | "admin" | "editor" | "moderator";
+export type UserRole = "client" | "admin" | "editor" | "moderator" | "employee";
 
 export interface IUser {
   id?: string;
@@ -130,8 +130,14 @@ export interface IBooking {
   size?: number;
   message?: string;
   status?: "pending" | "confirmed" | "completed" | "Pending" | "Confirmed" | "Completed";
-  paymentStatus?: "unpaid" | "paid";
   assignedStaff?: string;
+  assignedStaffId?: string;
+  assignedStaffMember?: {
+    id: string;
+    name: string;
+    designation?: string;
+    photo?: string;
+  };
   bookingDate?: string | Date;
   date?: string | Date;
   createdAt?: string | Date;

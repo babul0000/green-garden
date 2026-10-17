@@ -71,6 +71,7 @@ model Employee {
   projectAssignments    ProjectAssignment[]
   treeDoctorAssignments TreeDoctorRequest[]   @relation("DoctorAssigned")
   maintenanceTasks      MaintenanceSchedule[] @relation("TechnicianAssigned")
+  assignedBookings      Booking[]             @relation("StaffBookings")
 
   @@map("employees")
 }
@@ -128,6 +129,10 @@ model Project {
   reviews            Review[]
   serviceCard        DigitalServiceCard?
 
+  @@index([status])
+  @@index([category])
+  @@index([featured])
+  @@index([clientId])
   @@map("projects")
 }
 
@@ -221,6 +226,10 @@ model TreeDoctorRequest {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
+  @@index([status])
+  @@index([isEmergency])
+  @@index([assignedDoctorId])
+  @@index([createdAt])
   @@map("tree_doctor_requests")
 }
 
@@ -262,6 +271,10 @@ model MaintenanceSchedule {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
+  @@index([scheduledDate])
+  @@index([status])
+  @@index([projectId])
+  @@index([assignedStaffId])
   @@map("maintenance_schedules")
 }
 
@@ -288,6 +301,8 @@ model Quotation {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  @@index([status])
+  @@index([userId])
   @@map("quotations")
 }
 
@@ -326,6 +341,9 @@ model Invoice {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  @@index([status])
+  @@index([userId])
+  @@index([projectId])
   @@map("invoices")
 }
 
@@ -371,6 +389,8 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  @@index([userId, isRead])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -433,13 +453,19 @@ model Booking {
   message       String?
   status        String   @default("Pending")
   paymentStatus String   @default("unpaid")
-  assignedStaff String?  @default("Unassigned")
-  bookingDate   DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  assignedStaff       String?   @default("Unassigned")
+  assignedStaffId     String?
+  assignedStaffMember Employee? @relation("StaffBookings", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+  bookingDate         DateTime  @default(now())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  userId              String?
+  user                User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@index([status])
+  @@index([assignedStaffId])
+  @@index([userId])
+  @@index([bookingDate])
   @@map("bookings")
 }
 
@@ -475,6 +501,8 @@ model ContactMessage {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  @@index([isRead])
+  @@index([createdAt])
   @@map("contact_messages")
 }
 

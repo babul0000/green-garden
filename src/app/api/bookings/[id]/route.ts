@@ -20,33 +20,70 @@ export const PUT = withAuthErrorHandling(async (
 
   // If Employee, verify they are assigned to this booking
   if (role === "EMPLOYEE") {
+    const emp = await prisma.employee.findFirst({
+      where: {
+        OR: [
+          { userId: user.id },
+          { name: { equals: user.name, mode: "insensitive" } },
+        ],
+      },
+      select: { id: true },
+    });
+
     const existing = await prisma.booking.findUnique({ where: { id } });
-    if (!existing || existing.assignedStaff !== user.name) {
+    const isAssigned =
+      existing &&
+      ((emp?.id && existing.assignedStaffId === emp.id) ||
+        existing.assignedStaff === user.name);
+
+    if (!isAssigned) {
       return NextResponse.json(
         { error: "Access denied: you can only update bookings assigned to you." },
         { status: 403 }
       );
     }
 
-    // Employees cannot reassign staff, only update progress status or notes
-    const { status, notes } = body;
+    // Employees cannot reassign staff, only update progress status
+    const { status } = body;
     const updated = await prisma.booking.update({
       where: { id },
       data: {
         ...(status ? { status } : {}),
-        ...(notes !== undefined ? { notes } : {}),
       },
     });
     return NextResponse.json(updated);
   }
 
-  // Admin or Moderator can update any fields
+  // Admin or Moderator can update any fields including staff assignment
+  const updateData: any = { ...body };
+  let staffMemberObj: any = null;
+
+  if ("assignedStaffId" in body) {
+    if (body.assignedStaffId) {
+      const staffEmp = await prisma.employee.findUnique({
+        where: { id: body.assignedStaffId },
+        select: { id: true, name: true, designation: true, photo: true },
+      });
+      if (staffEmp) {
+        updateData.assignedStaffId = staffEmp.id;
+        updateData.assignedStaff = staffEmp.name;
+        staffMemberObj = staffEmp;
+      }
+    } else {
+      updateData.assignedStaffId = null;
+      updateData.assignedStaff = "Unassigned";
+    }
+  }
+
   const updated = await prisma.booking.update({
     where: { id },
-    data: body,
+    data: updateData,
   });
 
-  return NextResponse.json(updated);
+  return NextResponse.json({
+    ...updated,
+    assignedStaffMember: staffMemberObj,
+  });
 });
 
 export const DELETE = withAuthErrorHandling(async (

@@ -11,25 +11,59 @@ const NO_CACHE = {
   "Expires": "0",
 };
 
+const PUBLIC_GALLERY_SELECT = {
+  id: true,
+  title: true,
+  imageUrl: true,
+  beforeImageUrl: true,
+  category: true,
+  caption: true,
+  featured: true,
+  createdAt: true,
+};
+
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
     const featured = searchParams.get("featured");
-    const limit = searchParams.get("limit");
     const beforeAfter = searchParams.get("beforeAfter");
 
+    const { isPaginated, page, limit, skip, q } = parsePaginationParams(req);
+
+    const searchFilter = q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" as const } },
+            { caption: { contains: q, mode: "insensitive" as const } },
+            { category: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const where = {
+      category: category || undefined,
+      featured: featured === "true" ? true : undefined,
+      beforeImageUrl: beforeAfter === "true" ? { not: null } : undefined,
+      ...searchFilter,
+    };
+
+    const total = isPaginated ? await prisma.galleryItem.count({ where }) : 0;
+
     const items = await prisma.galleryItem.findMany({
-      where: {
-        category: category || undefined,
-        featured: featured === "true" ? true : undefined,
-        beforeImageUrl: beforeAfter === "true" ? { not: null } : undefined,
-      },
+      where,
+      select: PUBLIC_GALLERY_SELECT,
       orderBy: { createdAt: "desc" },
-      take: limit ? parseInt(limit) : undefined,
+      skip: isPaginated ? skip : undefined,
+      take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
     });
 
-    return NextResponse.json(items, { headers: NO_CACHE });
+    return NextResponse.json(
+      formatDataResponse(items, total, { isPaginated, page, limit }),
+      { headers: NO_CACHE }
+    );
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "Server error" }, { status: 500 });
   }

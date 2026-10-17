@@ -1,86 +1,102 @@
 "use client";
 
-import React, { useState } from "react";
-
-interface RolePermissions {
-  dashboard: boolean;
-  users: boolean;
-  content: boolean;
-  bookings: boolean;
-  reviews: boolean;
-  settings: boolean;
-}
+import React from "react";
+import { ROLE_PERMISSION_MATRIX, RoleMatrixItem } from "@/lib/rbac";
 
 export default function RolesTab() {
-  const [permissions, setPermissions] = useState<Record<string, RolePermissions>>({
-    admin: { dashboard: true, users: true, content: true, bookings: true, reviews: true, settings: true },
-    editor: { dashboard: true, users: false, content: true, bookings: true, reviews: true, settings: false },
-    support: { dashboard: true, users: false, content: false, bookings: true, reviews: false, settings: false }
-  });
-
-  const togglePermission = (role: string, key: keyof RolePermissions) => {
-    setPermissions(prev => ({
-      ...prev,
-      [role]: {
-        ...prev[role],
-        [key]: !prev[role][key]
-      }
-    }));
-  };
-
   return (
-    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7]">
-      <div>
-        <h3 className="font-sans font-bold text-lg text-white">রোল ও পারমিশন • Roles & Permissions</h3>
-        <p className="text-xs text-stone-400 mt-0.5">Define role permission matrix values for dashboard views, settings configs and database edits.</p>
+    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7] font-sans">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-400 mb-2">
+            🛡️ RBAC Access Security Matrix
+          </div>
+          <h3 className="font-serif font-bold text-lg text-white">রোল ও পারমিশন ম্যাট্রিক্স (শুধু দেখার জন্য)</h3>
+          <p className="text-xs text-stone-400 mt-0.5">
+            সিস্টেমের রোল-বেসড অ্যাক্সেস কন্ট্রোল (RBAC) পলিসি। এটি সার্ভার-সাইডে (rbac.ts ও apiAuth.ts) স্থায়ীভাবে কনফিগার করা।
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-xs font-mono text-stone-400">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>সার্ভার-এনফোর্সড পলিসি</span>
+        </div>
       </div>
 
-      <div className="overflow-x-auto w-full rounded-2xl border border-white/10 bg-black/30">
+      {/* Read-Only RBAC Table */}
+      <div className="overflow-x-auto w-full rounded-2xl border border-white/10 bg-black/40">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-white/10 bg-white/[0.04] text-stone-400 font-bold font-mono uppercase tracking-wider text-[10px]">
-              <th className="py-3.5 px-4">Permission Access Point</th>
-              <th className="py-3.5 px-4 text-center">Super Admin</th>
-              <th className="py-3.5 px-4 text-center">Editor</th>
-              <th className="py-3.5 px-4 text-center">Support Staff</th>
+            <tr className="border-b border-white/10 bg-white/[0.04] text-stone-300 font-bold font-mono uppercase tracking-wider text-[10px]">
+              <th className="py-3.5 px-4 min-w-[200px]">মডিউল ও সেকশন (Scope)</th>
+              <th className="py-3.5 px-3 text-center">Super Admin</th>
+              <th className="py-3.5 px-3 text-center">Moderator</th>
+              <th className="py-3.5 px-3 text-center">Editor</th>
+              <th className="py-3.5 px-3 text-center">Employee</th>
+              <th className="py-3.5 px-3 text-center">Client</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
-            {(
-              [
-                { key: "dashboard", label: "Access Analytics & Overview Studio" },
-                { key: "users", label: "Assign Roles & Permissions Control" },
-                { key: "content", label: "Perform full CRUD on Services, Projects, Blogs, Gallery" },
-                { key: "bookings", label: "Update booking status & assign experts" },
-                { key: "reviews", label: "Moderate & Publish customer reviews" },
-                { key: "settings", label: "Edit backend settings and theme colors" }
-              ] as const
-            ).map(p => (
-              <tr key={p.key} className="hover:bg-white/[0.02] transition-colors">
-                <td className="py-4 px-4 font-semibold text-stone-200">{p.label}</td>
-                <td className="py-4 px-4 text-center">
-                  <input 
-                    type="checkbox" 
-                    checked={permissions.admin[p.key]} 
-                    onChange={() => togglePermission("admin", p.key)}
-                    className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
-                  />
+          <tbody className="divide-y divide-white/5 font-sans">
+            {ROLE_PERMISSION_MATRIX.map((row: RoleMatrixItem) => (
+              <tr key={row.sectionId} className="hover:bg-white/[0.02] transition-colors">
+                <td className="py-3.5 px-4">
+                  <div className="font-bold text-white text-xs">{row.titleBn}</div>
+                  <div className="text-[11px] text-emerald-400/90 font-mono">{row.titleEn}</div>
+                  <div className="text-[10px] text-stone-400 mt-0.5 leading-snug">{row.scope}</div>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <input 
-                    type="checkbox" 
-                    checked={permissions.editor[p.key]} 
-                    onChange={() => togglePermission("editor", p.key)}
-                    className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
-                  />
+
+                {/* Admin */}
+                <td className="py-3.5 px-3 text-center">
+                  <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    ✓ Full Access
+                  </span>
                 </td>
-                <td className="py-4 px-4 text-center">
-                  <input 
-                    type="checkbox" 
-                    checked={permissions.support[p.key]} 
-                    onChange={() => togglePermission("support", p.key)}
-                    className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
-                  />
+
+                {/* Moderator */}
+                <td className="py-3.5 px-3 text-center">
+                  {row.moderator ? (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                      ✓ অনুমোদিত
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono text-stone-500 bg-white/[0.02]">
+                      — সীমাবদ্ধ
+                    </span>
+                  )}
+                </td>
+
+                {/* Editor */}
+                <td className="py-3.5 px-3 text-center">
+                  {row.editor ? (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                      ✓ অনুমোদিত
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono text-stone-500 bg-white/[0.02]">
+                      — সীমাবদ্ধ
+                    </span>
+                  )}
+                </td>
+
+                {/* Employee */}
+                <td className="py-3.5 px-3 text-center">
+                  {row.employee ? (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                      ✓ অ্যাসাইনড
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono text-stone-500 bg-white/[0.02]">
+                      — সীমাবদ্ধ
+                    </span>
+                  )}
+                </td>
+
+                {/* Client */}
+                <td className="py-3.5 px-3 text-center">
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-mono text-stone-500 bg-white/[0.02]">
+                    — নো অ্যাক্সেস
+                  </span>
                 </td>
               </tr>
             ))}
@@ -88,11 +104,17 @@ export default function RolesTab() {
         </table>
       </div>
 
-      <div className="bg-black/30 p-4 rounded-xl border border-white/10 text-xs text-stone-400 mt-2">
-        <p className="leading-relaxed">
-          <b className="text-emerald-400 font-mono">Note:</b> Changes made here apply instantly to all current user sessions matching the selected role types. Ensure permissions align with project workflow standards.
-        </p>
+      {/* Accurate System Note */}
+      <div className="bg-emerald-950/40 p-4 rounded-2xl border border-emerald-500/20 text-xs text-stone-300 flex items-start gap-3">
+        <span className="text-base shrink-0">🔒</span>
+        <div className="space-y-1">
+          <p className="font-bold text-white">সিস্টেম অথেনটিকেশন ও পারমিশন নোট:</p>
+          <p className="text-[11px] text-stone-400 leading-relaxed">
+            এই পারমিশন রুলগুলো কোডবেসে <code>src/lib/rbac.ts</code> এবং নেক্সটজেএস এপিআই রুটে <code>requireAdmin</code>, <code>requireModerator</code>, <code>requireEditor</code>, <code>requireEmployee</code> গার্ডের মাধ্যমে ব্যাকএন্ডে কঠোরভাবে প্রয়োগ করা হয়। কোনো ব্যবহারকারীর ভূমিকা পরিবর্তন করতে ইউজার ম্যানেজমেন্ট (UsersTab) ব্যবহার করুন।
+          </p>
+        </div>
       </div>
+
     </div>
   );
 }

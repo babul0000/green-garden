@@ -163,7 +163,7 @@ async function main() {
   }
   console.log("✅ Inventory seeded");
 
-  // 6. Seed High-End Architectural Projects (Inspired by Shma Designs)
+  // 6. Seed High-End Architectural Projects (Local Bangladesh Projects)
   const architecturalProjects = [
     {
       slug: "dhanmondi-sky-forest",
@@ -186,14 +186,14 @@ async function main() {
       afterImage: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
       images: [
         "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
-        "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
       ],
     },
     {
       slug: "gulshan-corporate-green-wall",
       name: "Gulshan Corporate Living Green Wall",
       clientId: clientUser.id,
-      clientName: "BTI Landmark Developments",
+      clientName: "Green Horizon Developments",
       clientPhone: "01711223344",
       category: "Vertical Garden",
       location: "Gulshan Avenue, Dhaka",
@@ -209,59 +209,7 @@ async function main() {
       afterImage: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
       images: [
         "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
-        "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
-      ],
-    },
-    {
-      slug: "mapletree-business-city",
-      name: "Mapletree Business City II",
-      clientId: clientUser.id,
-      clientName: "Mapletree Investments",
-      category: "Commercial",
-      location: "Singapore",
-      description: "Mapletree Business City II aims to create an ‘Urban Wilderness’ by integrating modern workspaces with an eco-friendly, nature-inspired landscape.",
-      progress: 100,
-      status: "COMPLETED",
-      budget: 1500000,
-      totalExpense: 1200000,
-      featured: true,
-      afterImage: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
-      images: [
-        "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2025/06/Shma_MBCII_Photo_0013.jpg.bv.webp",
-      ],
-    },
-    {
-      slug: "the-standard-hua-hin",
-      name: "The Standard Hua Hin",
-      clientId: clientUser.id,
-      clientName: "Standard International",
-      category: "Resort",
-      location: "Prachuap Khiri Khan, Thailand",
-      description: "Envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character.",
-      progress: 100,
-      status: "COMPLETED",
-      budget: 2200000,
-      featured: true,
-      afterImage: "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
-      images: [
-        "https://shmadesigns.com/wp-content/uploads/al_opt_content/IMAGE/shmadesigns.com/wp-content/uploads/2026/09/Home-pic-2.webp.bv.webp",
-      ],
-    },
-    {
-      slug: "one-city-centre-occ",
-      name: "One City Centre (OCC)",
-      clientId: clientUser.id,
-      clientName: "Raimon Land & Mitsubishi Estate",
-      category: "Public Realm",
-      location: "Ploenchit, Bangkok, Thailand",
-      description: "A visionary high-density corporate hub enveloped in sunken rain gardens, shaded pedestrian corridors, and permeable paving that significantly mitigates urban thermal heat.",
-      progress: 100,
-      status: "COMPLETED",
-      budget: 1800000,
-      featured: true,
-      afterImage: "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
-      images: [
-        "https://shmadesigns.com/wp-content/uploads/2025/10/481669737_1051237407039729_5786496014790253820_n.jpg",
+        "https://images.unsplash.com/photo-1545241047-6083a3684587?w=1200&q=80",
       ],
     },
     {
@@ -276,9 +224,10 @@ async function main() {
       status: "RUNNING",
       budget: 1250000,
       featured: true,
-      afterImage: "https://shmadesigns.com/wp-content/uploads/2026/09/3.-The-Residences-at-Mandarin-Oriental-Miami-at-One-Island-Drive_POOL-1.webp",
+      afterImage: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
       images: [
-        "https://shmadesigns.com/wp-content/uploads/2026/09/3.-The-Residences-at-Mandarin-Oriental-Miami-at-One-Island-Drive_POOL-1.webp",
+        "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
+        "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?w=1200&q=80",
       ],
     },
     {

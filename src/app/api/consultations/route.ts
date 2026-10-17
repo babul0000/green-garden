@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireModerator, withAuthErrorHandling } from "@/lib/apiAuth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function POST(req: Request) {
   try {
+    const rateCheck = checkRateLimit(req, { limit: 10, windowMs: 10 * 60 * 1000, prefix: "consultations_post" });
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetAt);
+    }
+
     const body = await req.json();
     const {
       clientName,

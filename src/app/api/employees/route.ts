@@ -28,29 +28,49 @@ export async function GET(req: Request) {
     const user = await getCurrentUser(req);
     const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
+    if (!isAdmin) {
+      const publicEmployees = await prisma.employee.findMany({
+        where: isPublic ? { isPublicTeam: true, status: "ACTIVE" } : undefined,
+        select: {
+          id: true,
+          employeeId: true,
+          name: true,
+          designation: true,
+          department: true,
+          responsibility: true,
+          joiningDate: true,
+          education: true,
+          training: true,
+          skills: true,
+          photo: true,
+          status: true,
+          isPublicTeam: true,
+        },
+        orderBy: { employeeId: "asc" },
+      });
+
+      const enriched = publicEmployees.map((emp) => {
+        const exp = calculateExperience(emp.joiningDate);
+        return {
+          ...emp,
+          experience: exp.text,
+        };
+      });
+
+      return NextResponse.json(enriched, { headers: NO_CACHE });
+    }
+
     const employees = await prisma.employee.findMany({
       where: isPublic ? { isPublicTeam: true, status: "ACTIVE" } : undefined,
-      include: isAdmin
-        ? {
-            attendances: { take: 5, orderBy: { date: "desc" } },
-            projectAssignments: { include: { project: { select: { name: true, location: true, status: true } } } },
-          }
-        : undefined,
+      include: {
+        attendances: { take: 5, orderBy: { date: "desc" } },
+        projectAssignments: { include: { project: { select: { name: true, location: true, status: true } } } },
+      },
       orderBy: { employeeId: "asc" },
     });
 
     const enriched = employees.map((emp) => {
       const exp = calculateExperience(emp.joiningDate);
-      // Always strip private fields for non-admins
-      if (isPublic || !isAdmin) {
-        return {
-          id: emp.id, employeeId: emp.employeeId, name: emp.name,
-          designation: emp.designation, department: emp.department,
-          responsibility: emp.responsibility, experience: exp.text,
-          education: emp.education, training: emp.training,
-          skills: emp.skills, photo: emp.photo,
-        };
-      }
       return { ...emp, calculatedExperience: exp.text, calculatedYears: exp.years, calculatedMonths: exp.months };
     });
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { toBnDigits } from "@/lib/formatters";
 
 export interface HighlightProjectItem {
   id: string;
@@ -183,11 +184,6 @@ const DESC_MAP_BN: Record<string, string> = {
     "ম্যাপলট্রি বিজনেস সিটি ২ কর্মক্ষেত্র ও প্রকৃতির মেলবন্ধনে একটি 'আরবান ওয়াইল্ডারনেস' সৃষ্টি করেছে। সংলগ্ন নেচার রিজার্ভের অনুপ্রেরণায় পরিকল্পিত এই ল্যান্ডস্কেপ জীববৈচিত্র্যের এক অনন্য প্রতীক।",
   "Envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character.":
     "প্রকৃতির পরম কোলে এক শান্ত প্রশান্তিময় আশ্রম। সাইটের বিদ্যমান বিশালাকার বনস্পতিগুলোকে অক্ষত রেখে নকশা করা হয়েছে প্রতিটি কর্নার—যেখানে আলো, গঠন ও নিসর্গ মিলেমিশে এক অভূতপূর্ব অনুভূতি সৃষ্টি করে।",
-};
-
-const toBnDigits = (str: string | number) => {
-  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(str).replace(/[0-9]/g, (d) => bnDigits[Number(d)]);
 };
 
 const BACKUP_DISTINCT_PROJECT_IMAGES = [

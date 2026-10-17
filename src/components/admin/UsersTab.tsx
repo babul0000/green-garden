@@ -7,6 +7,8 @@ export default function UsersTab() {
   const [users, setUsers] = useState<IUser[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
   const [role, setRole] = useState<UserRole>("client");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -37,19 +39,30 @@ export default function UsersTab() {
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, role })
+        body: JSON.stringify({
+          name,
+          email,
+          role,
+          password: password.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
+        if (data.generatedPassword) {
+          setGeneratedPassword(data.generatedPassword);
+        } else {
+          setGeneratedPassword(null);
+        }
         setName("");
         setEmail("");
+        setPassword("");
         setRole("client");
         fetchUsers();
       } else {
         setError(data.error || "Failed to create user");
       }
-    } catch (err) {
+    } catch {
       setError("Network error occurred");
     } finally {
       setLoading(false);
@@ -62,7 +75,7 @@ export default function UsersTab() {
       const res = await fetch(`/api/admin/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole })
+        body: JSON.stringify({ role: newRole }),
       });
       if (res.ok) {
         fetchUsers();
@@ -77,7 +90,7 @@ export default function UsersTab() {
     if (!confirm("Are you sure you want to delete this user?")) return;
     try {
       const res = await fetch(`/api/admin/users/${id}`, {
-        method: "DELETE"
+        method: "DELETE",
       });
       if (res.ok) {
         fetchUsers();
@@ -109,7 +122,34 @@ export default function UsersTab() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Generated Password Notification Modal/Banner */}
+        {generatedPassword && (
+          <div className="bg-amber-500/15 text-amber-200 text-xs font-semibold p-4 rounded-xl border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+            <div>
+              <div className="font-bold text-amber-300 flex items-center gap-1.5">
+                <span>🔑</span> নতুন ইউজারের তৈরি হওয়া নিরাপদ পাসওয়ার্ড:
+              </div>
+              <div className="font-mono text-sm text-amber-100 bg-black/60 px-3 py-1.5 rounded-lg border border-amber-500/30 mt-1 select-all inline-block tracking-wider">
+                {generatedPassword}
+              </div>
+              <div className="text-[10px] text-amber-200/70 mt-1">
+                ⚠️ এটি শুধুমাত্র একবারই দৃশ্যমান হবে। অনুগ্রহ করে এখনই কপি করে ইউজারকে নিরাপদে প্রদান করুন।
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(generatedPassword);
+                alert("পাসওয়ার্ড ক্লিপবোর্ডে কপি হয়েছে!");
+              }}
+              className="bg-amber-400 hover:bg-amber-300 text-stone-950 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
+            >
+              কপি করুন 📋
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <input 
             type="text" 
             required
@@ -126,6 +166,13 @@ export default function UsersTab() {
             onChange={(e) => setEmail(e.target.value)}
             className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
           />
+          <input 
+            type="password" 
+            placeholder="Password (খালি রাখলে র্যান্ডম)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:border-emerald-400 focus:outline-none"
+          />
           <select 
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
@@ -135,6 +182,7 @@ export default function UsersTab() {
             <option value="admin" className="bg-[#121A14] text-white">Super Admin</option>
             <option value="editor" className="bg-[#121A14] text-white">Editor</option>
             <option value="moderator" className="bg-[#121A14] text-white">Moderator</option>
+            <option value="employee" className="bg-[#121A14] text-white">Employee</option>
           </select>
           <button 
             type="submit" 
@@ -174,6 +222,7 @@ export default function UsersTab() {
                       <option value="admin" className="bg-[#121A14]">Super Admin</option>
                       <option value="editor" className="bg-[#121A14]">Editor</option>
                       <option value="moderator" className="bg-[#121A14]">Moderator</option>
+                      <option value="employee" className="bg-[#121A14]">Employee</option>
                     </select>
                   </td>
                   <td className="py-3.5 px-4 text-right">

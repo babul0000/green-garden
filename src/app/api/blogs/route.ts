@@ -11,30 +11,78 @@ const NO_CACHE = {
   "Expires": "0",
 };
 
+const PUBLIC_BLOG_SELECT = {
+  id: true,
+  slug: true,
+  title: true,
+  author: true,
+  coverImage: true,
+  category: true,
+  content: true,
+  readingTime: true,
+  createdAt: true,
+  updatedAt: true,
+  comments: {
+    where: { approved: true },
+    select: {
+      id: true,
+      name: true,
+      text: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" as const },
+  },
+};
+
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const slug = searchParams.get("slug");
     const category = searchParams.get("category");
-    const limit = searchParams.get("limit");
+
+    const { isPaginated, page, limit, skip, q } = parsePaginationParams(req);
 
     if (slug) {
       const blog = await prisma.blog.findUnique({
         where: { slug },
-        include: { comments: { where: { approved: true }, orderBy: { createdAt: "desc" } } },
+        select: PUBLIC_BLOG_SELECT,
       });
       if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
       return NextResponse.json(blog, { headers: NO_CACHE });
     }
 
+    const searchFilter = q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" as const } },
+            { author: { contains: q, mode: "insensitive" as const } },
+            { category: { contains: q, mode: "insensitive" as const } },
+            { content: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const where = {
+      category: category || undefined,
+      ...searchFilter,
+    };
+
+    const total = isPaginated ? await prisma.blog.count({ where }) : 0;
+
     const blogs = await prisma.blog.findMany({
-      where: { category: category || undefined },
-      include: { comments: { where: { approved: true } } },
+      where,
+      select: PUBLIC_BLOG_SELECT,
       orderBy: { createdAt: "desc" },
-      take: limit ? parseInt(limit) : undefined,
+      skip: isPaginated ? skip : undefined,
+      take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
     });
 
-    return NextResponse.json(blogs, { headers: NO_CACHE });
+    return NextResponse.json(
+      formatDataResponse(blogs, total, { isPaginated, page, limit }),
+      { headers: NO_CACHE }
+    );
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "Server error" }, { status: 500 });
   }

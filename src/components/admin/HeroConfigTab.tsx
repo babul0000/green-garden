@@ -143,7 +143,7 @@ export default function HeroConfigTab() {
       formData.append("file", file);
       formData.append("folder", "hero-posters");
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/upload/admin", {
         method: "POST",
         body: formData,
       });
@@ -179,7 +179,7 @@ export default function HeroConfigTab() {
       formData.append("file", file);
       formData.append("folder", "hero-videos");
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/upload/admin", {
         method: "POST",
         body: formData,
       });

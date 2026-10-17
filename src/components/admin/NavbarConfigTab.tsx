@@ -182,7 +182,7 @@ export default function NavbarConfigTab() {
       formData.append("file", file);
       formData.append("folder", "green-garden/branding");
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/upload/admin", {
         method: "POST",
         body: formData,
       });

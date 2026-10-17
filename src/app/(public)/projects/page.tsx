@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { toBnDigits } from "@/lib/formatters";
 
 export interface ProjectDetail {
   id: string;
@@ -290,11 +291,6 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     },
   },
 ];
-
-const toBnDigits = (str: string | number) => {
-  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
-  return String(str).replace(/[0-9]/g, (d) => bnDigits[Number(d)]);
-};
 
 export default function ProjectsPage() {
   const { language, t } = useLanguage();

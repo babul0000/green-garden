@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireEditor, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { requireEditor, apiError, withAuthErrorHandling, getCurrentUser } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,6 +11,40 @@ const NO_CACHE = {
   "Expires": "0",
 };
 
+// Strict public field selection (excludes clientPhone, budget, totalExpense, notes, materialsUsed)
+const PUBLIC_PROJECT_SELECT = {
+  id: true,
+  slug: true,
+  name: true,
+  clientId: true,
+  clientName: true,
+  category: true,
+  location: true,
+  description: true,
+  progress: true,
+  status: true,
+  startDate: true,
+  deadline: true,
+  completionDate: true,
+  warrantyMonths: true,
+  warrantyExpiryDate: true,
+  beforeImage: true,
+  afterImage: true,
+  wipImages: true,
+  images: true,
+  featured: true,
+  createdAt: true,
+  updatedAt: true,
+  assignments: {
+    include: {
+      employee: { select: { id: true, name: true, designation: true, photo: true } },
+    },
+  },
+  reviews: { where: { status: "Approved" }, select: { id: true, rating: true, name: true, text: true } },
+};
+
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -18,44 +52,98 @@ export async function GET(req: Request) {
     const clientId = searchParams.get("clientId");
     const featured = searchParams.get("featured");
     const category = searchParams.get("category");
-    const limit = searchParams.get("limit");
     const slug = searchParams.get("slug");
 
+    const { isPaginated, page, limit, skip, q } = parsePaginationParams(req);
+
+    const user = await getCurrentUser(req);
+    const role = user?.role?.toUpperCase();
+    const isStaff = role === "ADMIN" || role === "MODERATOR" || role === "EDITOR" || role === "EMPLOYEE";
+
     if (slug) {
-      const project = await prisma.project.findUnique({
-        where: { slug },
-        include: {
-          assignments: { include: { employee: { select: { id: true, name: true, designation: true, photo: true } } } },
-          plantHealthRecords: true,
-          maintenancePlans: true,
-          reviews: { where: { status: "Approved" } },
-          serviceCard: true,
-        },
-      });
-      if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
-      return NextResponse.json(project, { headers: NO_CACHE });
+      if (isStaff) {
+        const project = await prisma.project.findUnique({
+          where: { slug },
+          include: {
+            assignments: { include: { employee: { select: { id: true, name: true, designation: true, photo: true } } } },
+            plantHealthRecords: true,
+            maintenancePlans: true,
+            reviews: { where: { status: "Approved" } },
+            serviceCard: true,
+          },
+        });
+        if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+        return NextResponse.json(project, { headers: NO_CACHE });
+      } else {
+        const project = await prisma.project.findUnique({
+          where: { slug },
+          select: {
+            ...PUBLIC_PROJECT_SELECT,
+            plantHealthRecords: true,
+            maintenancePlans: true,
+            serviceCard: true,
+          },
+        });
+        if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
+        return NextResponse.json(project, { headers: NO_CACHE });
+      }
     }
 
-    const projects = await prisma.project.findMany({
-      where: {
-        status: status || undefined,
-        clientId: clientId || undefined,
-        featured: featured === "true" ? true : undefined,
-        category: category || undefined,
-      },
-      include: {
-        assignments: {
-          include: {
-            employee: { select: { id: true, name: true, designation: true, photo: true } },
-          },
-        },
-        reviews: { where: { status: "Approved" }, select: { id: true, rating: true, name: true, text: true } },
-      },
-      orderBy: { updatedAt: "desc" },
-      take: limit ? parseInt(limit) : undefined,
-    });
+    const searchFilter = q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { location: { contains: q, mode: "insensitive" as const } },
+            { clientName: { contains: q, mode: "insensitive" as const } },
+            { description: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
 
-    return NextResponse.json(projects, { headers: NO_CACHE });
+    const where = {
+      status: status || undefined,
+      clientId: clientId || undefined,
+      featured: featured === "true" ? true : undefined,
+      category: category || undefined,
+      ...searchFilter,
+    };
+
+    const total = isPaginated ? await prisma.project.count({ where }) : 0;
+
+    if (isStaff) {
+      const projects = await prisma.project.findMany({
+        where,
+        include: {
+          assignments: {
+            include: {
+              employee: { select: { id: true, name: true, designation: true, photo: true } },
+            },
+          },
+          reviews: { where: { status: "Approved" }, select: { id: true, rating: true, name: true, text: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+        skip: isPaginated ? skip : undefined,
+        take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
+      });
+
+      return NextResponse.json(
+        formatDataResponse(projects, total, { isPaginated, page, limit }),
+        { headers: NO_CACHE }
+      );
+    } else {
+      const projects = await prisma.project.findMany({
+        where,
+        select: PUBLIC_PROJECT_SELECT,
+        orderBy: { updatedAt: "desc" },
+        skip: isPaginated ? skip : undefined,
+        take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
+      });
+
+      return NextResponse.json(
+        formatDataResponse(projects, total, { isPaginated, page, limit }),
+        { headers: NO_CACHE }
+      );
+    }
   } catch (error: any) {
     console.error("Error fetching projects:", error);
     return NextResponse.json({ error: error?.message || "Server error" }, { status: 500 });

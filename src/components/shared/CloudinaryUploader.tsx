@@ -95,7 +95,7 @@ export default function CloudinaryUploader({
         xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
         xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
 
-        xhr.open("POST", `/api/upload?_t=${Date.now()}`);
+        xhr.open("POST", `/api/upload/admin?_t=${Date.now()}`);
         xhr.send(formData);
       });
 

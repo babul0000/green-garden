@@ -1,26 +1,78 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/apiAuth";
+
+const PUBLIC_PROJECT_FIELDS = {
+  id: true,
+  slug: true,
+  name: true,
+  clientId: true,
+  clientName: true,
+  category: true,
+  location: true,
+  description: true,
+  progress: true,
+  status: true,
+  startDate: true,
+  deadline: true,
+  completionDate: true,
+  warrantyMonths: true,
+  warrantyExpiryDate: true,
+  beforeImage: true,
+  afterImage: true,
+  wipImages: true,
+  images: true,
+  featured: true,
+  createdAt: true,
+  updatedAt: true,
+  assignments: {
+    include: {
+      employee: { select: { id: true, name: true, designation: true, photo: true } },
+    },
+  },
+  plantHealthRecords: true,
+  maintenancePlans: true,
+  reviews: { where: { status: "Approved" }, select: { id: true, rating: true, name: true, text: true } },
+  serviceCard: true,
+};
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const project = await prisma.project.findFirst({
-      where: {
-        OR: [{ id }, { slug: id }],
-      },
-      include: {
-        assignments: {
-          include: {
-            employee: { select: { id: true, name: true, designation: true, photo: true } },
+    const user = await getCurrentUser(req);
+    const role = user?.role?.toUpperCase();
+    const isStaff = role === "ADMIN" || role === "MODERATOR" || role === "EDITOR" || role === "EMPLOYEE";
+
+    if (isStaff) {
+      const project = await prisma.project.findFirst({
+        where: { OR: [{ id }, { slug: id }] },
+        include: {
+          assignments: {
+            include: {
+              employee: { select: { id: true, name: true, designation: true, photo: true } },
+            },
           },
+          plantHealthRecords: true,
+          maintenancePlans: true,
+          reviews: true,
+          serviceCard: true,
         },
-        plantHealthRecords: true,
-        maintenancePlans: true,
-        reviews: true,
-      },
+      });
+
+      if (!project) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(project);
+    }
+
+    // Public / Client selection (strictly excludes clientPhone, budget, totalExpense, notes, materialsUsed)
+    const project = await prisma.project.findFirst({
+      where: { OR: [{ id }, { slug: id }] },
+      select: PUBLIC_PROJECT_FIELDS,
     });
 
     if (!project) {

@@ -11,25 +11,71 @@ const NO_CACHE = {
   "Expires": "0",
 };
 
+const PUBLIC_SERVICE_SELECT = {
+  id: true,
+  slug: true,
+  label: true,
+  category: true,
+  desc: true,
+  icon: true,
+  pricing: true,
+  features: true,
+  benefits: true,
+  process: true,
+  faqs: true,
+  bannerImage: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
-    const limit = searchParams.get("limit");
     const slug = searchParams.get("slug");
 
+    const { isPaginated, page, limit, skip, q } = parsePaginationParams(req);
+
     if (slug) {
-      const service = await prisma.service.findUnique({ where: { slug } });
+      const service = await prisma.service.findUnique({
+        where: { slug },
+        select: PUBLIC_SERVICE_SELECT,
+      });
       if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
       return NextResponse.json(service, { headers: NO_CACHE });
     }
 
+    const searchFilter = q
+      ? {
+          OR: [
+            { label: { contains: q, mode: "insensitive" as const } },
+            { desc: { contains: q, mode: "insensitive" as const } },
+            { category: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {};
+
+    const where = {
+      category: category || undefined,
+      ...searchFilter,
+    };
+
+    const total = isPaginated ? await prisma.service.count({ where }) : 0;
+
     const services = await prisma.service.findMany({
-      where: { category: category || undefined },
+      where,
+      select: PUBLIC_SERVICE_SELECT,
       orderBy: { createdAt: "asc" },
-      take: limit ? parseInt(limit) : undefined,
+      skip: isPaginated ? skip : undefined,
+      take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
     });
-    return NextResponse.json(services, { headers: NO_CACHE });
+
+    return NextResponse.json(
+      formatDataResponse(services, total, { isPaginated, page, limit }),
+      { headers: NO_CACHE }
+    );
   } catch (error: unknown) {
     const isDev = process.env.NODE_ENV === "development";
     const msg = error instanceof Error ? error.message : "Server error";

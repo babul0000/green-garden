@@ -173,20 +173,32 @@ export async function POST(req: Request) {
     const body = await req.json();
     const targetKey = body.key || "site_config";
 
-    const CONTENT_KEYS = [
-      "homepage_sections", "about_config", "faq_config", "contact_config",
-      "terms_config", "privacy_config", "career_config", "navbar_config",
-      "hero_config", "content_blocks"
-    ];
+    // Permitted keys for EDITOR or ADMIN (Website Studio content)
+    const EDITOR_PERMITTED_KEYS = new Set([
+      "hero_config",
+      "navbar_config",
+      "homepage_sections",
+      "about_config",
+      "team_config",
+      "faq_config",
+      "contact_config",
+      "footer_config",
+    ]);
 
-    if (CONTENT_KEYS.includes(targetKey)) {
+    if (EDITOR_PERMITTED_KEYS.has(targetKey)) {
       if (role !== "ADMIN" && role !== "EDITOR") {
-        return NextResponse.json({ error: "Access Denied: Only Admin or Editor can edit website studio content" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Access Denied: Only Admin or Editor can edit website studio content" },
+          { status: 403 }
+        );
       }
     } else {
-      // Master settings, site_config, security
+      // All other keys (master settings, career_config, security, site_config) strictly require ADMIN
       if (role !== "ADMIN") {
-        return NextResponse.json({ error: "Access Denied: Only Admin can modify master settings" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Access Denied: Only Admin can modify master settings and administrative configurations" },
+          { status: 403 }
+        );
       }
     }
 

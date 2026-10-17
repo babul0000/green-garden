@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -9,23 +10,59 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
 
-    const items = await prisma.inventoryItem.findMany({
+    const user = await getCurrentUser(req);
+    const role = user?.role?.toUpperCase();
+    const isStaff = role === "ADMIN" || role === "MODERATOR" || role === "EDITOR" || role === "EMPLOYEE";
+
+    if (isStaff) {
+      const items = await prisma.inventoryItem.findMany({
+        where: category ? { category } : undefined,
+        orderBy: { name: "asc" },
+      });
+
+      const enriched = items.map((item) => ({
+        ...item,
+        isLowStock: item.stockQuantity <= item.minThreshold,
+      }));
+
+      const lowStockCount = enriched.filter((i) => i.isLowStock).length;
+
+      return NextResponse.json(
+        {
+          items: enriched,
+          totalItems: items.length,
+          lowStockCount,
+        },
+        {
+          headers: {
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+          },
+        }
+      );
+    }
+
+    // Public view: strictly omits unitCost, supplier, minThreshold, and internal lowStockCount
+    const publicItems = await prisma.inventoryItem.findMany({
       where: category ? { category } : undefined,
+      select: {
+        id: true,
+        name: true,
+        category: true,
+        stockQuantity: true,
+        unit: true,
+        location: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       orderBy: { name: "asc" },
     });
 
-    const enriched = items.map((item) => ({
-      ...item,
-      isLowStock: item.stockQuantity <= item.minThreshold,
-    }));
-
-    const lowStockCount = enriched.filter((i) => i.isLowStock).length;
-
     return NextResponse.json(
       {
-        items: enriched,
-        totalItems: items.length,
-        lowStockCount,
+        items: publicItems,
+        totalItems: publicItems.length,
       },
       {
         headers: {

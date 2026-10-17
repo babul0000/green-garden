@@ -52,7 +52,6 @@ export async function sendWhatsAppMessage(
       );
       const data = await res.json();
       if (res.ok && data.messages?.[0]?.id) {
-        console.log(`[WhatsApp Service] ✅ Message sent via Meta Cloud API to +${formattedPhone}`);
         return {
           success: true,
           messageId: data.messages[0].id,
@@ -76,7 +75,6 @@ export async function sendWhatsAppMessage(
         body: JSON.stringify({ to: formattedPhone, message: messageText }),
       });
       if (res.ok) {
-        console.log(`[WhatsApp Service] ✅ Message dispatched via Webhook Gateway to +${formattedPhone}`);
         return {
           success: true,
           messageId: `WH-${Date.now()}`,
@@ -91,10 +89,6 @@ export async function sendWhatsAppMessage(
   }
 
   // 3. Graceful Simulation Fallback (Development & Production sandbox)
-  console.log("------------------------------------------------------------");
-  console.log(`📱 [WhatsApp Automated Dispatch] -> To: +${formattedPhone}`);
-  console.log(messageText);
-  console.log("------------------------------------------------------------");
 
   // Save audit log to system notifications in PostgreSQL
   try {

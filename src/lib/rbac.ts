@@ -106,3 +106,106 @@ export function getDefaultTabForRole(role: string | undefined | null): string {
   if (upper === "EMPLOYEE") return "bookings";
   return "analytics";
 }
+
+export interface RoleMatrixItem {
+  sectionId: AdminSection;
+  titleBn: string;
+  titleEn: string;
+  scope: string;
+  admin: boolean;
+  moderator: boolean;
+  editor: boolean;
+  employee: boolean;
+  client: boolean;
+}
+
+export const ROLE_PERMISSION_MATRIX: RoleMatrixItem[] = [
+  {
+    sectionId: "overview",
+    titleBn: "ওভারভিউ ও অ্যানালিটিক্স",
+    titleEn: "Overview & Analytics, Contact Inbox",
+    scope: "ড্যাশবোর্ড মেট্রিক্স ও সাধারণ গ্রাহক বার্তা পর্যবেক্ষণ",
+    admin: true,
+    moderator: true,
+    editor: false,
+    employee: false,
+    client: false,
+  },
+  {
+    sectionId: "portfolio",
+    titleBn: "পোর্টফোলিও ও জার্নাল",
+    titleEn: "Portfolio (Projects, Gallery, Blogs)",
+    scope: "ল্যান্ডস্কেপ প্রকল্প, ফটো গ্যালারি ও ব্লগ প্রকাশনা",
+    admin: true,
+    moderator: true,
+    editor: true,
+    employee: false,
+    client: false,
+  },
+  {
+    sectionId: "reviews",
+    titleBn: "রিভিউ মডারেশন",
+    titleEn: "Reviews Approval",
+    scope: "গ্রাহকদের রিভিউ নিরীক্ষণ ও প্রকাশনা অনুমোদন",
+    admin: true,
+    moderator: true,
+    editor: false,
+    employee: false,
+    client: false,
+  },
+  {
+    sectionId: "services_bookings",
+    titleBn: "সার্ভিস ও অপারেশনাল টাস্ক",
+    titleEn: "Services & Bookings (Operations)",
+    scope: "বুকিং, ডিজাইন রিকোয়েস্ট, ট্রি ডক্টর, মেইনটেনেন্স ও সার্ভিস কার্ড",
+    admin: true,
+    moderator: true,
+    editor: false,
+    employee: true,
+    client: false,
+  },
+  {
+    sectionId: "finance",
+    titleBn: "ফাইন্যান্স ও ইনভেন্টরি",
+    titleEn: "Finance & Studio P&L",
+    scope: "আয়-ব্যয়, ইনভেন্টরি কস্ট, কোটেশন ও চালান",
+    admin: true,
+    moderator: false,
+    editor: false,
+    employee: false,
+    client: false,
+  },
+  {
+    sectionId: "staff_careers",
+    titleBn: "স্টাফ ও নিয়োগ কার্যক্রম",
+    titleEn: "Staff & Careers HR",
+    scope: "কর্মচারী প্রোফাইল, উপস্থিতি, বেতন ও চাকরির আবেদন যাচাই",
+    admin: true,
+    moderator: false,
+    editor: false,
+    employee: false,
+    client: false,
+  },
+  {
+    sectionId: "website_studio",
+    titleBn: "ওয়েবসাইট স্টুডিও ডিজাইন",
+    titleEn: "Website Studio (Navbar, Hero, Sections)",
+    scope: "হেডার, হিরো ব্যানার, হোমপেজ সেকশন ও টেক্সট কনটেন্ট",
+    admin: true,
+    moderator: false,
+    editor: true,
+    employee: false,
+    client: false,
+  },
+  {
+    sectionId: "security_roles",
+    titleBn: "সিকিউরিটি ও মাস্টার কনফিগ",
+    titleEn: "Security & User Roles",
+    scope: "মাস্টার সেটিংস, ইউজার অ্যাকাউন্ট ও পাসওয়ার্ড কন্ট্রোল",
+    admin: true,
+    moderator: false,
+    editor: false,
+    employee: false,
+    client: false,
+  },
+];
