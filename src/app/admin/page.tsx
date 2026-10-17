@@ -18,6 +18,7 @@ import SettingsTab from "@/components/admin/SettingsTab";
 import NavbarConfigTab from "@/components/admin/NavbarConfigTab";
 import HeroConfigTab from "@/components/admin/HeroConfigTab";
 import SecurityTab from "@/components/admin/SecurityTab";
+import ContactInboxTab from "@/components/admin/ContactInboxTab";
 
 // Import new modular admin components
 import UsersTab from "@/components/admin/UsersTab";
@@ -686,7 +687,7 @@ export default function AdminPage() {
         />
 
         {/* Content Body Grid */}
-        <div className="flex-grow p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+        <div className="flex-grow p-3 sm:p-6 lg:p-8 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
 
           {!isCurrentTabAllowed ? (
             <div className="bg-white/80 border border-rose-500/30 p-10 rounded-3xl shadow-sm text-center flex flex-col items-center gap-3 my-auto max-w-lg mx-auto">
@@ -825,7 +826,15 @@ export default function AdminPage() {
             />
           )}
 
-          {/* TAB 7: CAREERS & MESSAGES */}
+          {/* TAB: CONTACT MESSAGES INBOX (OVERVIEW GROUP) */}
+          {activeTab === "messages" && (
+            <ContactInboxTab 
+              messages={messages}
+              handleDeleteMessage={handleDeleteMessage}
+            />
+          )}
+
+          {/* TAB 7: CAREERS & CV APPLICATIONS (STUDIO ERP GROUP) */}
           {activeTab === "careers" && (
             <CareersTab 
               messages={messages}

@@ -41,7 +41,7 @@ export default function HeroTextOverlay({
           </span>
         )}
         {headline && (
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-display font-light tracking-tight leading-[1.08] uppercase text-white drop-shadow-lg">
+          <h1 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-display font-light tracking-tight leading-[1.08] uppercase text-white drop-shadow-lg">
             {headline}
           </h1>
         )}

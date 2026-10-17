@@ -617,3 +617,41 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(0);
   transition: opacity 200ms ease, transform 200ms ease;
 }
+
+/* ================= RESPONSIVE ENHANCEMENTS (360px to 1440px) ================= */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Ensure mobile form inputs are at least 16px to prevent iOS auto-zoom */
+@media screen and (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+  }
+}
+
+/* Minimum Touch Target Area (>= 44px) on Mobile Devices */
+@media screen and (max-width: 767px) {
+  .touch-target,
+  button:not(.btn-compact),
+  a[role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* Respect user's reduced-motion preference across animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

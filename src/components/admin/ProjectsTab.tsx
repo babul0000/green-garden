@@ -565,7 +565,7 @@ export default function ProjectsTab({
                     </div>
 
                     {/* Financial Summary */}
-                    <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-[#E4E2D7] text-[11px]">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-[#E4E2D7] text-[11px]">
                       <div>
                         <span className="text-[9px] uppercase font-mono text-[#75787B] block">বাজেট (Budget)</span>
                         <span className="font-mono font-bold text-[#121813]">
@@ -1478,7 +1478,7 @@ export default function ProjectsTab({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
                 onClick={handleCloseModal}

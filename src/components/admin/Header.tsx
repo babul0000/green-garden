@@ -21,11 +21,11 @@ export default function Header({
       
       {/* Left: Mobile Hamburger Trigger + Studio Title */}
       <div className="flex items-center gap-3.5">
-        {/* Mobile Hamburger Trigger */}
+        {/* Mobile Hamburger Trigger (Minimum 44px touch target) */}
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-[#D6D2C4] text-[#121813] shadow-xs hover:bg-[#E4E2D7] transition-all cursor-pointer focus:outline-none"
+          className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-white border border-[#D6D2C4] text-[#121813] shadow-xs hover:bg-[#E4E2D7] transition-all cursor-pointer focus:outline-none"
           aria-label="Open Navigation Drawer"
           title="Open Menu Drawer"
         >
@@ -36,9 +36,9 @@ export default function Header({
           </div>
         </button>
 
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-display font-light text-[#121813] tracking-[0.14em] uppercase leading-tight">
+            <h1 className="text-sm xs:text-base sm:text-2xl font-display font-light text-[#121813] tracking-[0.06em] sm:tracking-[0.14em] uppercase leading-tight truncate">
               STUDIO DASHBOARD
             </h1>
             <span className="hidden sm:inline-block text-[9px] font-mono uppercase tracking-[0.2em] text-[#2B4D33] font-bold px-2 py-0.5 rounded-full bg-[#2B4D33]/10 border border-[#2B4D33]/20">
@@ -51,23 +51,15 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right: Search, Database Refresh, Primary Commissions Button */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* Architectural Search Bar */}
-        <div className="relative w-48 lg:w-60 hidden lg:block">
-          <input
-            type="text"
-            placeholder="প্রজেক্ট বা ক্লায়েন্ট খুঁজুন..."
-            className="w-full pl-3.5 pr-8 py-1.5 border border-[#D6D2C4] rounded-full text-xs focus:outline-none focus:border-[#2B4D33] text-[#121813] bg-white placeholder:text-[#75787B] transition-all font-sans"
-          />
-          <span className="absolute right-3 top-2 text-[10px] text-[#75787B]">🔍</span>
-        </div>
+      {/* Right: Search (hidden until active), Database Refresh, Primary Commissions Button */}
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        {/* Search input is hidden until full backend search indexing is implemented */}
 
         {/* Database Refresh */}
         <button 
           type="button"
           onClick={fetchData} 
-          className="hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#2B4D33] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center gap-1.5 shrink-0 shadow-2xs"
+          className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#2B4D33] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
           title="Refresh database records"
         >
           <span>⟳</span>
@@ -78,7 +70,7 @@ export default function Header({
         <button
           type="button"
           onClick={() => setActiveTab("settings")}
-          className="hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#121813] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center gap-1.5 shrink-0 shadow-2xs"
+          className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#121813] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
           title="Master Project Settings (Facebook Hub A to Z)"
         >
           <span>⚙️</span>
@@ -89,10 +81,10 @@ export default function Header({
         <button 
           type="button" 
           onClick={() => { setActiveTab("services"); setEditingService(null); }}
-          className="bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono tracking-wider py-1.5 px-3.5 sm:px-4 rounded-full flex items-center gap-1.5 transition-all shadow-xs cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 font-medium"
+          className="min-h-[44px] bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono tracking-wider py-1.5 px-3 sm:px-4 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 font-medium"
         >
           <span>+</span>
-          <span className="whitespace-nowrap">নতুন কমিশন</span>
+          <span className="whitespace-nowrap text-[11px] sm:text-xs">নতুন কমিশন</span>
         </button>
 
         {/* Direct Landing Page Link */}

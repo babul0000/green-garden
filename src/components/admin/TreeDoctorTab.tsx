@@ -316,7 +316,7 @@ export default function TreeDoctorTab() {
                         <span className="text-stone-400 text-[10px] block">সমস্যা (Problem):</span>
                         <p className="font-semibold text-rose-300 leading-snug">{req.problem}</p>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/10 text-[11px]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-white/10 text-[11px]">
                         <div>
                           <span className="text-stone-400 text-[10px] block">লোকেশন:</span>
                           <span className="font-medium text-stone-200">{req.location}</span>

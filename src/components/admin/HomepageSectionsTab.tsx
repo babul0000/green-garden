@@ -386,7 +386,7 @@ export default function HomepageSectionsTab() {
                   />
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">ধাপ {i + 1}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input type="text" placeholder="Title (EN)" value={step.titleEn}
                     onChange={(e) => updateProcessStep(i, "titleEn", e.target.value)}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"

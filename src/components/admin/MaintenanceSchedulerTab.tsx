@@ -260,7 +260,7 @@ export default function MaintenanceSchedulerTab() {
                     </div>
 
                     {/* Budget & Expense Breakdown */}
-                    <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="bg-black/35 p-3 rounded-xl border border-white/10">
                         <span className="text-stone-400 text-[10px] block">অনুমোদিত বাজেট:</span>
                         <span className="font-bold font-mono text-white">৳{proj.budget ? proj.budget.toLocaleString() : "২,৫০,০০০"}</span>

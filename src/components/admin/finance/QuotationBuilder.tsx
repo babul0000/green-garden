@@ -144,6 +144,7 @@ export default function QuotationBuilder({ quotations, onRefresh }: QuotationBui
               <label className="font-semibold text-stone-300 block mb-1">মোবাইল নম্বর *</label>
               <input
                 type="tel"
+                inputMode="tel"
                 required
                 placeholder="01XXXXXXXXX"
                 value={qClientPhone}
@@ -390,7 +391,7 @@ export default function QuotationBuilder({ quotations, onRefresh }: QuotationBui
             </div>
 
             {/* Client Info */}
-            <div className="py-4 border-b border-white/10 text-xs grid grid-cols-2 gap-4">
+            <div className="py-4 border-b border-white/10 text-xs grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <span className="text-stone-400 block">কোটেশন প্রাপক:</span>
                 <span className="font-bold text-white text-sm">{previewQuote.clientName}</span>
