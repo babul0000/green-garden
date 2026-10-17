@@ -5,6 +5,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 interface ShmaService {
   id: string;
+  icon?: string;
   titleBn: string;
   titleEn: string;
   descBn: string;
@@ -16,6 +17,7 @@ interface ShmaService {
 const services: ShmaService[] = [
   {
     id: "01",
+    icon: "🏛️",
     titleBn: "ল্যান্ডস্কেপ স্থাপত্য ও নকশা",
     titleEn: "Landscape Architecture",
     descBn: "ভবনের মূল স্থাপত্যের সাথে বায়োফিলিক উপাদান, মাটির আর্দ্রতা এবং জীবন্ত উদ্ভিদের সমন্বয়ে সমন্বিত মাস্টার লেআউট প্রণয়ন।",
@@ -25,6 +27,7 @@ const services: ShmaService[] = [
   },
   {
     id: "02",
+    icon: "🗺️",
     titleBn: "মাস্টারপ্ল্যানিং ও বৃহৎ সবুজায়ন",
     titleEn: "Master Planning & Eco Parks",
     descBn: "রিসোর্ট, আবাসিক কমিউনিটি, বিশ্ববিদ্যালয় ক্যাম্পাস ও ইকো-পার্কের জন্য পরিবেশবান্ধব বৃহৎ মাস্টারপ্ল্যান প্রণয়ন।",
@@ -34,6 +37,7 @@ const services: ShmaService[] = [
   },
   {
     id: "03",
+    icon: "🏙️",
     titleBn: "আরবান ভিশন ও ক্লাইমেট স্ট্র্যাটেজি",
     titleEn: "Urban Biophilia & Microclimate",
     descBn: "নগরীর অতিরিক্ত তাপমাত্রা হ্রাস, বৃষ্টির পানি নিষ্কাশন এবং ছাদ বাগানের মাধ্যমে সবুজ বলয় সৃষ্টি।",
@@ -43,6 +47,7 @@ const services: ShmaService[] = [
   },
   {
     id: "04",
+    icon: "🩺",
     titleBn: "বাস্তুতন্ত্র ও বৃক্ষ চিকিৎসা ক্লিনিক",
     titleEn: "Ecology & Tree Doctor Care",
     descBn: "দেশীয় আবহাওয়ার উপযোগী দীর্ঘজীবী উদ্ভিদ নির্বাচন, বায়ু বিশুদ্ধকারী প্রজাতি এবং সার্টিফাইড বৃক্ষ চিকিৎসা সেবা।",
@@ -52,6 +57,7 @@ const services: ShmaService[] = [
   },
   {
     id: "05",
+    icon: "⛲",
     titleBn: "জলপ্রপাত ফোয়ারা ও নান্দনিক পারগোলা",
     titleEn: "Water Features & Pergolas",
     descBn: "শান্ত পানির ফোয়ারা, মার্বেল জলপ্রপাত, নান্দনিক কাঠের পারগোলা ও অ্যাম্বিয়েন্ট লাইটিং সহযোগে সামাজিক মিলনমেলা সৃষ্টি।",
@@ -61,6 +67,7 @@ const services: ShmaService[] = [
   },
   {
     id: "06",
+    icon: "💧",
     titleBn: "স্মার্ট স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি",
     titleEn: "Smart Irrigation & Automation",
     descBn: "ওয়াইফাই ও টাইমার নিয়ন্ত্রিত ড্রিপ ইরিগেশন, রেইন সেন্সর ও স্বয়ংক্রিয় ফার্টিগেশন প্রযুক্তি যা ৭০% পানি সাশ্রয় করে।",
@@ -79,7 +86,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
     setFlippedId((prev) => (prev === id ? null : id));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchServices = async () => {
       try {
         const res = await fetch(`/api/services?_t=${Date.now()}`, { cache: "no-store" });
@@ -91,8 +98,9 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
               const fallback = services[idx % services.length];
               return {
                 id: String(idx + 1).padStart(2, "0"),
-                titleBn: s.bengaliTitle || s.titleBn || fallback.titleBn || s.title || "",
-                titleEn: s.title || s.titleEn || fallback.titleEn || "",
+                icon: s.icon || fallback.icon || "🌿",
+                titleBn: s.bengaliTitle || s.titleBn || fallback.titleBn || s.label || s.title || "",
+                titleEn: s.label || s.title || s.titleEn || fallback.titleEn || "",
                 descBn: s.descBn || fallback.descBn || s.desc || s.description || "",
                 descEn: s.descEn || s.desc || s.description || fallback.descEn || "",
                 scopeBn: s.scopeBn || fallback.scopeBn || ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "ড্রেনেজ সমন্বয়", "টার্ন-কি সাইট বাস্তবায়ন"],
@@ -126,7 +134,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Our Services
+              {t("আমাদের সেবাসমূহ", "Our Services")}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
@@ -154,19 +162,30 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                 }`}
               >
                 
-                {/* FRONT FACE: Clean Beige Rectangular Box */}
-                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-[#dedad2] p-8 flex flex-col justify-between rounded-2xl">
-                  <span className="font-mono text-xs text-[#75787b] font-light">
-                    {item.id}
-                  </span>
+                {/* FRONT FACE: Clean Beige Rectangular Box with Service Icon */}
+                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-[#dedad2] p-8 flex flex-col justify-between rounded-2xl shadow-sm border border-[#3d2e17]/5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-[#75787b] font-light">
+                      {item.id}
+                    </span>
+                    <div className="w-10 h-10 rounded-xl bg-[#3d2e17]/10 flex items-center justify-center text-xl shadow-inner select-none">
+                      {item.icon && (item.icon.startsWith("http") || item.icon.startsWith("/")) ? (
+                        <img src={item.icon} alt="" className="w-6 h-6 object-contain" />
+                      ) : (
+                        <span>{item.icon || "🌿"}</span>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="my-auto text-center space-y-2">
                     <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                      {item.titleEn}
+                      {language === "bn" ? item.titleBn : item.titleEn}
                     </h3>
                     <span className="text-[11px] font-mono text-[#75787b] md:hidden block mt-1">
                       {t("ট্যাপ করে বিবরণ দেখুন ➔", "Tap to view details ➔")}
                     </span>
                   </div>
+
                   <div className="text-right">
                     <span className="text-xs font-mono uppercase tracking-widest text-[#75787b] opacity-0 group-hover:opacity-100 transition-opacity hidden md:inline">
                       {t("বিস্তারিত দেখুন →", "Hover to View Details →")}
@@ -175,12 +194,15 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                 </div>
 
                 {/* BACK FACE: Dark Brown Architectural Brief */}
-                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#3d2e17] text-white p-7 sm:p-8 flex flex-col justify-between rounded-2xl">
+                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#3d2e17] text-white p-7 sm:p-8 flex flex-col justify-between rounded-2xl shadow-xl">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-mono text-[11px] text-[#dedad2]/70 font-light block">
-                        {t("সেবার পরিধি", "Scope & Deliverables")}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{item.icon || "🌿"}</span>
+                        <span className="font-mono text-[11px] text-[#dedad2]/70 font-light block">
+                          {t("সেবার পরিধি", "Scope & Deliverables")}
+                        </span>
+                      </div>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -192,38 +214,38 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                         {t("✕ বন্ধ করুন", "✕ Close")}
                       </button>
                     </div>
-                  <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
-                    {item.titleEn}
-                  </h4>
-                  <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
-                    {language === "bn" ? item.descBn : item.descEn}
-                  </p>
+                    <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
+                      {language === "bn" ? item.titleBn : item.titleEn}
+                    </h4>
+                    <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
+                      {language === "bn" ? item.descBn : item.descEn}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5 pt-3 border-t border-white/10">
+                    {(language === "bn" ? item.scopeBn : item.scopeEn).slice(0, 3).map((s, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs font-sans text-white/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#5a9dff]"></span>
+                        <span>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2">
+                    <a
+                      href="#newsletter"
+                      className="inline-block text-xs font-mono uppercase tracking-[0.18em] text-[#5a9dff] hover:text-white transition-colors"
+                    >
+                      {t("পরামর্শ নিন →", "Consult Studio →")}
+                    </a>
+                  </div>
                 </div>
 
-                <div className="space-y-1.5 pt-3 border-t border-white/10">
-                  {(language === "bn" ? item.scopeBn : item.scopeEn).slice(0, 3).map((s, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs font-sans text-white/80">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#5a9dff]"></span>
-                      <span>{s}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-2">
-                  <a
-                    href="#newsletter"
-                    className="inline-block text-xs font-mono uppercase tracking-[0.18em] text-[#5a9dff] hover:text-white transition-colors"
-                  >
-                    {t("পরামর্শ নিন →", "Consult Studio →")}
-                  </a>
-                </div>
               </div>
-
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
 
     </section>
   );

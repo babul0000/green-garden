@@ -190,6 +190,17 @@ const toBnDigits = (str: string | number) => {
   return String(str).replace(/[0-9]/g, (d) => bnDigits[Number(d)]);
 };
 
+const BACKUP_DISTINCT_PROJECT_IMAGES = [
+  "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=1200",
+  "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=1200",
+  "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200",
+  "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
+  "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=1200",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
+  "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=1200",
+  "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=1200",
+];
+
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
   const isBn = language === "bn";
@@ -204,6 +215,8 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.projects || [];
           if (items.length >= 2) {
+            const usedImages = new Set<string>();
+
             const mapped: HighlightProjectItem[] = items.map((p: any, idx: number) => {
               const fallback =
                 SHMA_DEFAULT_PROJECTS.find(
@@ -235,6 +248,34 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 descBn = DESC_MAP_BN[p.description] || DESC_MAP_BN[descEn] || fallback.descBn || descEn;
               }
 
+              // Image deduplication logic: find candidate image not yet seen in this list
+              const candidateImages = [
+                p.afterImage,
+                ...(Array.isArray(p.images) ? p.images : []),
+                p.imageUrl,
+                p.image,
+                p.coverImage,
+                p.beforeImage,
+                fallback.imageUrl,
+              ].filter(Boolean);
+
+              let selectedImage = "";
+              for (const candidate of candidateImages) {
+                if (candidate && !usedImages.has(candidate)) {
+                  selectedImage = candidate;
+                  usedImages.add(candidate);
+                  break;
+                }
+              }
+
+              if (!selectedImage) {
+                const uniqueBackup =
+                  BACKUP_DISTINCT_PROJECT_IMAGES.find((img) => !usedImages.has(img)) ||
+                  BACKUP_DISTINCT_PROJECT_IMAGES[idx % BACKUP_DISTINCT_PROJECT_IMAGES.length];
+                selectedImage = uniqueBackup;
+                usedImages.add(selectedImage);
+              }
+
               return {
                 id: p._id || p.id || `proj-${idx}`,
                 slug: p.slug || fallback.slug,
@@ -246,12 +287,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 locationEn: locEn,
                 descBn: descBn,
                 descEn: descEn,
-                imageUrl:
-                  p.imageUrl ||
-                  p.image ||
-                  p.afterImage ||
-                  p.coverImage ||
-                  fallback.imageUrl,
+                imageUrl: selectedImage,
                 videoUrl: p.videoUrl || fallback.videoUrl,
                 year: p.year || fallback.year || "2026",
                 area: p.area || p.budgetRange || fallback.area || "3,500 sq.ft",
@@ -336,7 +372,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src =
-                          "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200";
+                          BACKUP_DISTINCT_PROJECT_IMAGES[index % BACKUP_DISTINCT_PROJECT_IMAGES.length];
                       }}
                     />
                   )}
@@ -502,6 +538,10 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                   src={activeModalProject.imageUrl}
                   alt={activeModalProject.nameEn}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      BACKUP_DISTINCT_PROJECT_IMAGES[0];
+                  }}
                 />
               )}
             </div>

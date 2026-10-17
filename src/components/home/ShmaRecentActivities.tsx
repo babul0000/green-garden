@@ -21,7 +21,7 @@ const activities: ActivityItem[] = [
     titleEn: "Microclimate Landscape Research with BUET Architecture",
     subtitleBn: "নগর তাপমাত্রা হ্রাস ও বায়োফিলিক নকশার প্রভাব নিয়ে যৌথ সমীক্ষা",
     subtitleEn: "Joint study evaluating urban heat island reduction & biophilia",
-    image: "https://shmadesigns.com/wp-content/uploads/2025/06/IMG_0246-800x600.jpg",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800&auto=format&fit=crop",
     dateBn: "সেপ্টেম্বর ২০২৬",
     dateEn: "September 2026",
   },
@@ -31,7 +31,7 @@ const activities: ActivityItem[] = [
     titleEn: "Completion of Dhanmondi Penthouse Bio-Terrace",
     subtitleBn: "৩,৮০০ বর্গফুটের রুফটপ ফরেস্ট ও ওয়াটারপ্রুফ ড্রেনেজ প্রকল্প সফল সম্পন্ন",
     subtitleEn: "3,800 sq.ft rooftop forest with multi-layer waterproof drainage",
-    image: "https://shmadesigns.com/wp-content/uploads/2025/06/IMG_1020-800x600.jpg",
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop",
     dateBn: "আগস্ট ২০২৬",
     dateEn: "August 2026",
   },
@@ -41,7 +41,7 @@ const activities: ActivityItem[] = [
     titleEn: "Heritage Tree Surgery & Clinical Care in Gulshan",
     subtitleBn: "অন-কল ট্রি ডক্টর টিম দ্বারা শতবর্ষী দুর্লভ রেইনট্রির জীবন রক্ষা",
     subtitleEn: "Emergency arborist team rescued a diseased century-old rain tree",
-    image: "https://shmadesigns.com/wp-content/uploads/2025/06/1-11-800x534.jpg",
+    image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=800&auto=format&fit=crop",
     dateBn: "জুলাই ২০২৬",
     dateEn: "July 2026",
   },
@@ -51,7 +51,7 @@ const activities: ActivityItem[] = [
     titleEn: "Keynote at Dhaka Climate Architecture Summit",
     subtitleBn: "ভার্টিক্যাল গ্রিন ওয়াল ও রেইনওয়াটার হারভেস্টিং কৌশল প্রদর্শনী",
     subtitleEn: "Showcasing living wall engineering and stormwater harvesting",
-    image: "https://shmadesigns.com/wp-content/uploads/2025/06/S__10559556-800x600.jpg",
+    image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=800&auto=format&fit=crop",
     dateBn: "জুন ২০২৬",
     dateEn: "June 2026",
   },
@@ -61,7 +61,7 @@ const activities: ActivityItem[] = [
     titleEn: "Community Rooftop & Drip Irrigation Workshop",
     subtitleBn: "গৃহমালিক ও প্রকৃতিপ্রেমীদের জন্য আধুনিক বাগান ব্যবস্থাপনার হাতে-কলমে প্রশিক্ষণ",
     subtitleEn: "Hands-on masterclass for home gardeners on organic soils and micro-drip",
-    image: "https://shmadesigns.com/wp-content/uploads/2025/06/IMG_9771-800x600.jpg",
+    image: "https://images.unsplash.com/photo-1584467735871-8e85353a8413?q=80&w=800&auto=format&fit=crop",
     dateBn: "মে ২০২৬",
     dateEn: "May 2026",
   },
@@ -71,7 +71,7 @@ export default function ShmaRecentActivities() {
   const { language, t } = useLanguage();
   const [activityList, setActivityList] = useState<ActivityItem[]>(activities);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchGallery = async () => {
       try {
         const res = await fetch(`/api/gallery?_t=${Date.now()}`, { cache: "no-store" });
@@ -110,7 +110,7 @@ export default function ShmaRecentActivities() {
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Recent Activities
+              {t("সাম্প্রতিক কার্যক্রম", "Recent Activities")}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
@@ -122,7 +122,7 @@ export default function ShmaRecentActivities() {
 
       {/* 5-Column Photo Stream */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-        {activityList.map((item) => (
+        {activityList.map((item, idx) => (
           <div key={item.id} className="space-y-3 group cursor-pointer">
             <div className="aspect-[3/4] overflow-hidden bg-stone-100 relative">
               <img
@@ -131,7 +131,7 @@ export default function ShmaRecentActivities() {
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
-                    "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=800&auto=format&fit=crop";
+                    activities[idx % activities.length].image;
                 }}
               />
               <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -141,7 +141,7 @@ export default function ShmaRecentActivities() {
                 {language === "bn" ? item.dateBn : item.dateEn}
               </p>
               <h3 className="font-sans text-xs sm:text-[13px] font-medium text-[#3d2e17] leading-snug line-clamp-2 group-hover:text-[#5a9dff] transition-colors">
-                {item.titleEn}
+                {language === "bn" ? item.titleBn : item.titleEn}
               </h3>
               <p className="font-sans text-[11px] text-[#75787b] leading-tight line-clamp-2">
                 {language === "bn" ? item.subtitleBn : item.subtitleEn}
