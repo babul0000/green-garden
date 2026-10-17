@@ -101,6 +101,21 @@ export default function TestimonialsPage() {
           <p className="text-xs text-foreground/60 leading-relaxed mt-1">
             Read verified reviews from home owners and corporate developers regarding our landscape styling and garden construction.
           </p>
+
+          {/* Aggregate Rating Badge */}
+          {reviews.length > 0 && (
+            <div className="mt-2 inline-flex items-center gap-3 bg-emerald-50 border border-emerald-200/80 px-4 py-2 rounded-2xl mx-auto shadow-2xs">
+              <div className="flex items-center gap-1 text-amber-500 text-sm font-bold">
+                <span>★</span>
+                <span className="text-[#1a3020]">
+                  {(reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)}
+                </span>
+              </div>
+              <span className="text-xs text-stone-600 font-mono">
+                গড় রেটিং (মোট {reviews.length} টি ভেরিফাইড রিভিউ)
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Reviews Grid */}

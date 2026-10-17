@@ -24,6 +24,7 @@ model User {
   role                 Role                   @default(CLIENT)
   phone                String?
   avatar               String?
+  tokenVersion         Int                    @default(0)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   
@@ -118,6 +119,8 @@ model Project {
   featured           Boolean               @default(false)
   materialsUsed      Json?
   notes              String?
+  titleBn            String?
+  descBn             String?
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
 
@@ -157,6 +160,9 @@ model Service {
   label       String
   category    String   @default("Landscape Design") // Landscape Design, Garden Services, Maintenance, Plant Health, Irrigation, Additional, Gardening Materials
   desc        String?
+  titleBn     String?
+  descBn      String?
+  order       Int      @default(0)
   icon        String?  @default("🌱")
   pricing     String?
   features    String[]
@@ -178,6 +184,7 @@ model GalleryItem {
   category       String   @default("Rooftop")
   caption        String?
   featured       Boolean  @default(false)
+  order          Int      @default(0)
   createdAt      DateTime @default(now())
 
   @@map("gallery_items")
@@ -403,6 +410,8 @@ model Review {
   location  String?
   photoUrl  String?
   status    String   @default("Approved")
+  featured  Boolean  @default(false)
+  adminReply String?
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   projectId String?
@@ -420,11 +429,15 @@ model Blog {
   coverImage  String?
   category    String    @default("Rooftop Gardening")
   content     String
+  titleBn     String?
+  descBn      String?
+  status      String    @default("PUBLISHED") // PUBLISHED, DRAFT, ARCHIVED
   readingTime String?   @default("5 mins")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   comments    Comment[]
 
+  @@index([status])
   @@map("blogs")
 }
 
@@ -530,5 +543,22 @@ model DigitalServiceCard {
   project              Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
 
   @@map("digital_service_cards")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String   @default("System")
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, STATUS_CHANGE
+  entity    String   // Project, Service, Booking, Invoice, User, etc.
+  entityId  String?
+  summary   String
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity])
+  @@index([userId])
+  @@map("activity_logs")
 }
 

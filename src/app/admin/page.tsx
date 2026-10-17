@@ -448,9 +448,9 @@ export default function AdminPage() {
   };
 
   // --- BLOGS & COMMENTS CRUD ---
-  const handleCreateOrUpdateBlog = async (e: React.FormEvent) => {
+  const handleCreateOrUpdateBlog = async (e: React.FormEvent, customPayload: any = null) => {
     e.preventDefault();
-    const payload = {
+    const payload = customPayload || {
       title: blogTitle,
       slug: blogTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       author: sessionData?.user?.name || "Admin",

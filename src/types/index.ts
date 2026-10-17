@@ -26,6 +26,9 @@ export interface IService {
   pricing?: string;
   features?: string[];
   benefits?: string[];
+  titleBn?: string;
+  descBn?: string;
+  order?: number;
   process?: { title: string; text: string }[];
   faqs?: { q: string; a: string }[];
   createdAt?: string | Date;
@@ -75,6 +78,8 @@ export interface IProject {
   featured?: boolean;
   notes?: string;
   materialsUsed?: any;
+  titleBn?: string;
+  descBn?: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
@@ -88,6 +93,8 @@ export interface IGalleryItem {
   title: string;
   caption?: string;
   watermarked?: boolean;
+  order?: number;
+  featured?: boolean;
   createdAt?: string | Date;
 }
 
@@ -111,6 +118,9 @@ export interface IBlog {
   coverImage?: string;
   category: string;
   content: string;
+  titleBn?: string;
+  descBn?: string;
+  status?: "PUBLISHED" | "DRAFT" | "ARCHIVED" | string;
   readingTime?: string;
   comments?: IBlogComment[];
   createdAt?: string | Date;
@@ -152,7 +162,11 @@ export interface IReview {
   text?: string;
   service?: string;
   location?: string;
-  status?: "Pending" | "Approved" | "Rejected";
+  status?: "Pending" | "Approved" | "Rejected" | string;
+  featured?: boolean;
+  adminReply?: string;
+  photoUrl?: string;
+  projectId?: string;
   date?: string;
   createdAt?: string | Date;
 }

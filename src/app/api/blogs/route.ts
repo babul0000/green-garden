@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireEditor, withAuthErrorHandling, apiError } from "@/lib/apiAuth";
+import { requireEditor, withAuthErrorHandling, apiError, getCurrentUser } from "@/lib/apiAuth";
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,10 +16,13 @@ const PUBLIC_BLOG_SELECT = {
   id: true,
   slug: true,
   title: true,
+  titleBn: true,
   author: true,
   coverImage: true,
   category: true,
   content: true,
+  descBn: true,
+  status: true,
   readingTime: true,
   createdAt: true,
   updatedAt: true,
@@ -34,55 +38,101 @@ const PUBLIC_BLOG_SELECT = {
   },
 };
 
-import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
-
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const slug = searchParams.get("slug");
     const category = searchParams.get("category");
+    const statusParam = searchParams.get("status");
+
+    const user = await getCurrentUser(req);
+    const role = user?.role?.toUpperCase();
+    const isStaff = role === "ADMIN" || role === "MODERATOR" || role === "EDITOR";
 
     const { isPaginated, page, limit, skip, q } = parsePaginationParams(req);
 
     if (slug) {
-      const blog = await prisma.blog.findUnique({
-        where: { slug },
-        select: PUBLIC_BLOG_SELECT,
-      });
-      if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
-      return NextResponse.json(blog, { headers: NO_CACHE });
+      if (isStaff) {
+        const blog = await prisma.blog.findUnique({
+          where: { slug },
+          include: {
+            comments: {
+              orderBy: { createdAt: "desc" },
+            },
+          },
+        });
+        if (!blog) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+        return NextResponse.json(blog, { headers: NO_CACHE });
+      } else {
+        const blog = await prisma.blog.findUnique({
+          where: { slug },
+          select: PUBLIC_BLOG_SELECT,
+        });
+        if (!blog || blog.status !== "PUBLISHED") {
+          return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+        }
+        return NextResponse.json(blog, { headers: NO_CACHE });
+      }
     }
 
     const searchFilter = q
       ? {
           OR: [
             { title: { contains: q, mode: "insensitive" as const } },
+            { titleBn: { contains: q, mode: "insensitive" as const } },
             { author: { contains: q, mode: "insensitive" as const } },
             { category: { contains: q, mode: "insensitive" as const } },
             { content: { contains: q, mode: "insensitive" as const } },
+            { descBn: { contains: q, mode: "insensitive" as const } },
           ],
         }
       : {};
 
+    // For public visitors, strictly only return PUBLISHED blogs
+    // For staff, allow filtering by status or showing all if not specified
+    const statusFilter = isStaff
+      ? (statusParam === "all" ? undefined : (statusParam || undefined))
+      : "PUBLISHED";
+
     const where = {
       category: category || undefined,
+      status: statusFilter,
       ...searchFilter,
     };
 
     const total = isPaginated ? await prisma.blog.count({ where }) : 0;
 
-    const blogs = await prisma.blog.findMany({
-      where,
-      select: PUBLIC_BLOG_SELECT,
-      orderBy: { createdAt: "desc" },
-      skip: isPaginated ? skip : undefined,
-      take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
-    });
+    if (isStaff) {
+      const blogs = await prisma.blog.findMany({
+        where,
+        include: {
+          comments: {
+            orderBy: { createdAt: "desc" },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip: isPaginated ? skip : undefined,
+        take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
+      });
 
-    return NextResponse.json(
-      formatDataResponse(blogs, total, { isPaginated, page, limit }),
-      { headers: NO_CACHE }
-    );
+      return NextResponse.json(
+        formatDataResponse(blogs, total, { isPaginated, page, limit }),
+        { headers: NO_CACHE }
+      );
+    } else {
+      const blogs = await prisma.blog.findMany({
+        where,
+        select: PUBLIC_BLOG_SELECT,
+        orderBy: { createdAt: "desc" },
+        skip: isPaginated ? skip : undefined,
+        take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
+      });
+
+      return NextResponse.json(
+        formatDataResponse(blogs, total, { isPaginated, page, limit }),
+        { headers: NO_CACHE }
+      );
+    }
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "Server error" }, { status: 500 });
   }
@@ -91,7 +141,7 @@ export async function GET(req: Request) {
 export const POST = withAuthErrorHandling(async (req: Request) => {
   await requireEditor(req);
   const body = await req.json();
-  const { title, slug, author, coverImage, category, content, readingTime } = body;
+  const { title, titleBn, slug, author, coverImage, category, content, descBn, status, readingTime } = body;
 
   if (!title || !author || !content) {
     return apiError("Title, author, and content are required.", 400);
@@ -102,11 +152,14 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
   const blog = await prisma.blog.create({
     data: {
       title,
+      titleBn: titleBn || null,
       slug: autoSlug,
       author,
       coverImage: coverImage || null,
       category: category || "Rooftop Gardening",
       content,
+      descBn: descBn || null,
+      status: status || "PUBLISHED",
       readingTime: readingTime || "5 mins",
     },
   });
@@ -117,7 +170,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 export const PUT = withAuthErrorHandling(async (req: Request) => {
   await requireEditor(req);
   const body = await req.json();
-  const { id, title, slug, author, coverImage, category, content, readingTime, comments } = body;
+  const { id, title, titleBn, slug, author, coverImage, category, content, descBn, status, readingTime, comments } = body;
 
   if (!id) return apiError("Blog ID is required.", 400);
 
@@ -125,11 +178,14 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
     where: { id },
     data: {
       title: title || undefined,
+      titleBn: titleBn !== undefined ? titleBn : undefined,
       slug: slug || undefined,
       author: author || undefined,
       coverImage: coverImage !== undefined ? coverImage : undefined,
       category: category || undefined,
       content: content || undefined,
+      descBn: descBn !== undefined ? descBn : undefined,
+      status: status || undefined,
       readingTime: readingTime || undefined,
       comments: comments !== undefined ? comments : undefined,
     },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireModerator, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,8 +16,10 @@ const PUBLIC_SERVICE_SELECT = {
   id: true,
   slug: true,
   label: true,
+  titleBn: true,
   category: true,
   desc: true,
+  descBn: true,
   icon: true,
   pricing: true,
   features: true,
@@ -24,11 +27,10 @@ const PUBLIC_SERVICE_SELECT = {
   process: true,
   faqs: true,
   bannerImage: true,
+  order: true,
   createdAt: true,
   updatedAt: true,
 };
-
-import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export async function GET(req: Request) {
   try {
@@ -51,7 +53,9 @@ export async function GET(req: Request) {
       ? {
           OR: [
             { label: { contains: q, mode: "insensitive" as const } },
+            { titleBn: { contains: q, mode: "insensitive" as const } },
             { desc: { contains: q, mode: "insensitive" as const } },
+            { descBn: { contains: q, mode: "insensitive" as const } },
             { category: { contains: q, mode: "insensitive" as const } },
           ],
         }
@@ -67,7 +71,7 @@ export async function GET(req: Request) {
     const services = await prisma.service.findMany({
       where,
       select: PUBLIC_SERVICE_SELECT,
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
       skip: isPaginated ? skip : undefined,
       take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
     });
@@ -87,7 +91,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
   await requireModerator(req);
 
   const body = await req.json();
-  const { label, slug, category, desc, icon, bannerImage, pricing, features, benefits, process, faqs } = body;
+  const { label, titleBn, slug, category, desc, descBn, icon, bannerImage, pricing, features, benefits, process, faqs, order } = body;
 
   if (!label) return apiError("Service label is required.", 400);
 
@@ -95,10 +99,20 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 
   const newService = await prisma.service.create({
     data: {
-      label, slug: calculatedSlug, category: category || "Landscape Design",
-      desc: desc || null, icon: icon || "🌱", bannerImage: bannerImage || null,
-      pricing: pricing || null, features: Array.isArray(features) ? features : [],
-      benefits: Array.isArray(benefits) ? benefits : [], process: process || null, faqs: faqs || null,
+      label,
+      titleBn: titleBn || null,
+      slug: calculatedSlug,
+      category: category || "Landscape Design",
+      desc: desc || null,
+      descBn: descBn || null,
+      icon: icon || "🌱",
+      bannerImage: bannerImage || null,
+      pricing: pricing || null,
+      features: Array.isArray(features) ? features : [],
+      benefits: Array.isArray(benefits) ? benefits : [],
+      process: process || null,
+      faqs: faqs || null,
+      order: typeof order === "number" ? order : 0,
     },
   });
 
@@ -109,20 +123,41 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
   await requireModerator(req);
 
   const body = await req.json();
-  const { id, label, slug, category, desc, icon, bannerImage, pricing, features, benefits, process, faqs } = body;
+
+  // Reorder batch update support: { items: [{ id, order }] }
+  if (Array.isArray(body.items)) {
+    await Promise.all(
+      body.items.map((item: { id: string; order: number }) =>
+        prisma.service.update({
+          where: { id: item.id },
+          data: { order: item.order },
+        })
+      )
+    );
+    return NextResponse.json({ success: true, message: "Order updated." }, { headers: NO_CACHE });
+  }
+
+  const { id, label, titleBn, slug, category, desc, descBn, icon, bannerImage, pricing, features, benefits, process, faqs, order } = body;
 
   if (!id) return apiError("Service ID is required.", 400);
 
   const updated = await prisma.service.update({
     where: { id },
     data: {
-      label: label || undefined, slug: slug || undefined, category: category || undefined,
-      desc: desc !== undefined ? desc : undefined, icon: icon !== undefined ? icon : undefined,
+      label: label || undefined,
+      titleBn: titleBn !== undefined ? titleBn : undefined,
+      slug: slug || undefined,
+      category: category || undefined,
+      desc: desc !== undefined ? desc : undefined,
+      descBn: descBn !== undefined ? descBn : undefined,
+      icon: icon !== undefined ? icon : undefined,
       bannerImage: bannerImage !== undefined ? bannerImage : undefined,
       pricing: pricing !== undefined ? pricing : undefined,
       features: Array.isArray(features) ? features : undefined,
       benefits: Array.isArray(benefits) ? benefits : undefined,
-      process: process !== undefined ? process : undefined, faqs: faqs !== undefined ? faqs : undefined,
+      process: process !== undefined ? process : undefined,
+      faqs: faqs !== undefined ? faqs : undefined,
+      order: typeof order === "number" ? order : undefined,
     },
   });
 

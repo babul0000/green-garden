@@ -21,13 +21,19 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
   if (!id) return apiError("Review ID is required", 400);
 
   const body = await req.json();
-  const { status, name, rating, comment, text } = body;
+  const { status, name, rating, comment, text, service, location, featured, adminReply, photoUrl, projectId } = body;
 
   const dataToUpdate: any = {};
   if (status !== undefined) dataToUpdate.status = status;
   if (name !== undefined) dataToUpdate.name = name;
   if (rating !== undefined) dataToUpdate.rating = parseInt(String(rating), 10);
   if (text !== undefined || comment !== undefined) dataToUpdate.text = text || comment;
+  if (service !== undefined) dataToUpdate.service = service;
+  if (location !== undefined) dataToUpdate.location = location;
+  if (featured !== undefined) dataToUpdate.featured = Boolean(featured);
+  if (adminReply !== undefined) dataToUpdate.adminReply = adminReply;
+  if (photoUrl !== undefined) dataToUpdate.photoUrl = photoUrl;
+  if (projectId !== undefined) dataToUpdate.projectId = projectId;
 
   const updated = await prisma.review.update({
     where: { id },

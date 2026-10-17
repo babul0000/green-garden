@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { IService } from "@/types";
+import CloudinaryUploader from "@/components/shared/CloudinaryUploader";
+import ConfirmModal from "@/components/admin/shared/ConfirmModal";
 
 interface ServicesTabProps {
   services?: IService[];
@@ -30,24 +32,30 @@ export default function ServicesTab({
   setEditingService,
   handleCreateOrUpdateService,
   handleEditServiceClick,
-  handleDeleteService
+  handleDeleteService,
 }: ServicesTabProps) {
-  // Extra fields for Service-specific SEO & banner images
   const [banner, setBanner] = useState("");
+  const [titleBn, setTitleBn] = useState("");
+  const [descBn, setDescBn] = useState("");
   const [seoTitle, setSeoTitle] = useState("");
   const [seoKeywords, setSeoKeywords] = useState("");
   const [seoDescription, setSeoDescription] = useState("");
   const [showSeo, setShowSeo] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<IService | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
 
-  // Sync state if editing
   useEffect(() => {
     if (editingService) {
       setBanner(editingService.banner || editingService.bannerImage || "");
+      setTitleBn(editingService.titleBn || "");
+      setDescBn(editingService.descBn || "");
       setSeoTitle((editingService as any).seoTitle || "");
       setSeoKeywords((editingService as any).seoKeywords || "");
       setSeoDescription((editingService as any).seoDescription || "");
     } else {
       setBanner("");
+      setTitleBn("");
+      setDescBn("");
       setSeoTitle("");
       setSeoKeywords("");
       setSeoDescription("");
@@ -58,146 +66,310 @@ export default function ServicesTab({
     e.preventDefault();
     const servicePayload = {
       label: serviceLabel,
+      titleBn,
+      descBn,
       icon: serviceIcon,
       desc: serviceDesc,
-      banner,
+      bannerImage: banner,
       seoTitle,
       seoKeywords,
-      seoDescription
+      seoDescription,
     };
     handleCreateOrUpdateService(e, servicePayload);
   };
 
+  // Up/Down reordering handler
+  const handleMoveOrder = async (index: number, direction: "up" | "down") => {
+    if (isReordering) return;
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= services.length) return;
+
+    const newItems = [...services];
+    const temp = newItems[index];
+    newItems[index] = newItems[targetIndex];
+    newItems[targetIndex] = temp;
+
+    setIsReordering(true);
+    try {
+      const payload = {
+        items: newItems.map((item, idx) => ({
+          id: item.id || (item as any)._id,
+          order: idx,
+        })),
+      };
+      await fetch("/api/services", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error("Failed to reorder services:", err);
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   return (
-    <div className="bg-[#18221A]/85 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl flex flex-col gap-6 animate-fade-in-up text-[#E4E2D7]">
-      <div>
-        <h3 className="font-sans font-bold text-lg text-white">সার্ভিস ক্যাটালগ • Services Catalog</h3>
-        <p className="text-xs text-stone-400 mt-0.5">Configure landing pages offering cards, banner images, and specific SEO page metadata tags.</p>
+    <div className="flex flex-col gap-6 animate-fade-in font-sans text-[#121813]">
+      {/* Header */}
+      <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#D6D2C4] shadow-2xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xl sm:text-2xl font-display font-light tracking-wide uppercase text-[#121813]">
+              🌱 সার্ভিস ক্যাটালগ ও সেবা ব্যবস্থাপনা
+            </h2>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#2B4D33] font-bold px-2 py-0.5 rounded-full bg-[#E8F5E9] border border-[#2B4D33]/20">
+              Services Catalog
+            </span>
+          </div>
+          <p className="text-xs text-[#75787B] font-light mt-1">
+            ল্যান্ডস্কেপিং, রুফটপ গার্ডেনিং ও বোটানিক্যাল সেবা কনফিগারেশন — বাংলা অনুবাদ, ব্যানার আপলোড ও ক্রম সজ্জা।
+          </p>
+        </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} autoComplete="off" className="bg-black/40 p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
-        <h4 className="font-bold text-xs text-emerald-300 uppercase tracking-wider font-mono">
-          {editingService ? `Edit Details: ${editingService.label || editingService.title}` : "Add New Offering Product"}
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input 
-            type="text" 
-            required
-            autoComplete="off"
-            placeholder="Service Name (e.g. Lawn Gardening)"
-            value={serviceLabel}
-            onChange={(e) => setServiceLabel(e.target.value)}
-            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-          />
-          <input 
-            type="text" 
-            required
-            autoComplete="off"
-            placeholder="Icon Emoji (e.g. 🏡)"
-            value={serviceIcon}
-            onChange={(e) => setServiceIcon(e.target.value)}
-            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-center text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-          />
-          <input 
-            type="text" 
-            autoComplete="off"
-            placeholder="Banner Image URL (Optional)"
-            value={banner}
-            onChange={(e) => setBanner(e.target.value)}
-            className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-          />
-        </div>
-        
-        <textarea 
-          required
-          autoComplete="off"
-          rows={2}
-          placeholder="Service description details..."
-          value={serviceDesc}
-          onChange={(e) => setServiceDesc(e.target.value)}
-          className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs resize-none text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-        />
-
-        {/* Collapsible SEO Section */}
-        <div className="border-t border-white/10 pt-3">
-          <button 
-            type="button" 
-            onClick={() => setShowSeo(!showSeo)} 
-            className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer font-mono"
-          >
-            <span>{showSeo ? "▼ Hide" : "▶ Show"} SEO Metadata Settings</span>
-          </button>
-          
-          {showSeo && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 animate-fade-in-up">
-              <input 
-                type="text" 
-                autoComplete="off"
-                placeholder="SEO Title Tag"
-                value={seoTitle}
-                onChange={(e) => setSeoTitle(e.target.value)}
-                className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-              />
-              <input 
-                type="text" 
-                autoComplete="off"
-                placeholder="SEO Keywords (comma separated)"
-                value={seoKeywords}
-                onChange={(e) => setSeoKeywords(e.target.value)}
-                className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-              />
-              <input 
-                type="text" 
-                autoComplete="off"
-                placeholder="SEO Meta Description"
-                value={seoDescription}
-                onChange={(e) => setSeoDescription(e.target.value)}
-                className="bg-black/50 border border-white/15 py-2.5 px-4 rounded-xl text-xs text-white placeholder-white/30 focus:outline-none focus:border-emerald-400"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-2 self-end">
-          <button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold font-mono text-xs py-2.5 px-6 rounded-xl cursor-pointer shadow-lg shadow-emerald-500/20 transition-all">
-            {editingService ? "Save Service" : "Add Service"}
-          </button>
+      <form onSubmit={handleSubmit} autoComplete="off" className="bg-white p-6 sm:p-7 rounded-2xl border border-[#D6D2C4] shadow-2xs flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h4 className="font-bold text-xs text-[#2B4D33] uppercase tracking-wider font-mono">
+            {editingService ? `✏️ সেবা এডিট করুন: ${editingService.label || editingService.title}` : "➕ নতুন সেবা যোগ করুন"}
+          </h4>
           {editingService && (
-            <button 
-              type="button" 
-              onClick={() => { setEditingService(null); setServiceLabel(""); setServiceDesc(""); }} 
-              className="bg-white/10 hover:bg-white/20 text-white font-bold font-mono text-xs py-2.5 px-4 rounded-xl cursor-pointer transition-all"
+            <button
+              type="button"
+              onClick={() => {
+                setEditingService(null);
+                setServiceLabel("");
+                setServiceDesc("");
+                setTitleBn("");
+                setDescBn("");
+              }}
+              className="text-xs font-mono font-bold text-[#75787B] hover:text-[#121813] cursor-pointer min-h-[44px] px-2 flex items-center"
             >
-              Cancel
+              ✕ এডিট বাতিল
             </button>
           )}
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-[11px] font-bold text-[#75787B] block mb-1">সেবার নাম (English)</label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Rooftop Gardening"
+              value={serviceLabel}
+              onChange={(e) => setServiceLabel(e.target.value)}
+              className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-[#75787B] block mb-1">সেবার বাংলা নাম (Bangla)</label>
+            <input
+              type="text"
+              placeholder="যেমন: ছাদবাগান আর্কিটেকচার ও ব্যবস্থাপনা"
+              value={titleBn}
+              onChange={(e) => setTitleBn(e.target.value)}
+              className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-[#75787B] block mb-1">আইকন ইমোজি</label>
+            <input
+              type="text"
+              required
+              placeholder="🌱"
+              value={serviceIcon}
+              onChange={(e) => setServiceIcon(e.target.value)}
+              className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-center text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-[11px] font-bold text-[#75787B] block mb-1">ইংরেজি বিবরণ (Description)</label>
+            <textarea
+              required
+              rows={2}
+              placeholder="Detailed description in English..."
+              value={serviceDesc}
+              onChange={(e) => setServiceDesc(e.target.value)}
+              className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs resize-none text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33]"
+            />
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-[#75787B] block mb-1">বাংলা বিবরণ (Bangla Description)</label>
+            <textarea
+              rows={2}
+              placeholder="সেবার সম্পূর্ণ বাংলা বিবরণ..."
+              value={descBn}
+              onChange={(e) => setDescBn(e.target.value)}
+              className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs resize-none text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33]"
+            />
+          </div>
+        </div>
+
+        {/* Banner Image Uploader */}
+        <div className="border border-[#D6D2C4] rounded-2xl p-4 bg-[#F7F6F2]/50 space-y-3">
+          <label className="text-[11px] font-bold text-[#75787B] block">
+            সার্ভিস ব্যানার ছবি (Cloudinary Uploader অথবা URL)
+          </label>
+          <CloudinaryUploader
+            value={banner}
+            onUpload={(url) => setBanner(url)}
+            label="ব্যানার ছবি আপলোড করুন"
+          />
+          <input
+            type="text"
+            placeholder="অথবা সরাসরি Banner URL লিখুন: https://..."
+            value={banner}
+            onChange={(e) => setBanner(e.target.value)}
+            className="w-full bg-white border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+          />
+        </div>
+
+        {/* Collapsible SEO Section */}
+        <div className="border-t border-[#D6D2C4] pt-3">
+          <button
+            type="button"
+            onClick={() => setShowSeo(!showSeo)}
+            className="text-xs font-bold text-[#2B4D33] hover:text-[#1E3724] flex items-center gap-1 cursor-pointer font-mono min-h-[40px]"
+          >
+            <span>{showSeo ? "▼ Hide" : "▶ Show"} SEO Metadata Settings</span>
+          </button>
+
+          {showSeo && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+              <input
+                type="text"
+                placeholder="SEO Title Tag"
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+              />
+              <input
+                type="text"
+                placeholder="SEO Keywords"
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+              />
+              <input
+                type="text"
+                placeholder="SEO Meta Description"
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
+                className="w-full bg-[#F7F6F2] border border-[#D6D2C4] py-2 px-3.5 rounded-xl text-xs text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] min-h-[44px]"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-2.5 self-end">
+          <button
+            type="submit"
+            className="min-h-[44px] bg-[#2B4D33] hover:bg-[#1E3724] text-white font-bold font-mono text-xs py-2.5 px-6 rounded-xl cursor-pointer shadow-xs transition-all"
+          >
+            {editingService ? "সেবা সংরক্ষণ করুন" : "নতুন সেবা যোগ করুন"}
+          </button>
+        </div>
       </form>
 
-      {/* List Services */}
-      <div className="flex flex-col gap-3 mt-2">
-        <h4 className="font-sans font-bold text-sm text-white font-mono">Existing Offerings ({services.length})</h4>
+      {/* Services List with Reorder Buttons */}
+      <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#D6D2C4] shadow-2xs flex flex-col gap-4">
+        <h4 className="font-bold text-sm text-[#121813] font-mono">
+          বিদ্যমান সেবাসমূহ ({services.length}) • ক্রম সাজাতে উপরে/নিচে বাটন ব্যবহার করুন
+        </h4>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {services.map(s => (
-            <div key={s.id || s._id} className="bg-black/30 border border-white/10 p-5 rounded-2xl flex justify-between items-center shadow-lg hover:border-emerald-500/40 transition-colors">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{s.icon || "🌱"}</span>
-                <div>
-                  <span className="font-bold text-white text-xs block">{s.label || s.title}</span>
-                  <span className="block text-[11px] text-stone-400 mt-0.5 leading-normal max-w-[220px]">{s.desc || s.description}</span>
-                  {(s as any).seoTitle && <span className="inline-block bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono rounded px-2 py-0.5 mt-2">SEO Configured</span>}
+          {services.map((s, index) => {
+            const serviceId = s.id || (s as any)._id;
+
+            return (
+              <div
+                key={serviceId}
+                className="bg-[#F7F6F2] border border-[#D6D2C4] p-5 rounded-2xl flex justify-between items-center shadow-2xs hover:border-[#2B4D33]/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Up / Down Order Buttons */}
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <button
+                      type="button"
+                      disabled={index === 0 || isReordering}
+                      onClick={() => handleMoveOrder(index, "up")}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#D6D2C4] flex items-center justify-center text-[11px] disabled:opacity-30 hover:bg-stone-50 cursor-pointer font-bold"
+                      title="Move Up"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === services.length - 1 || isReordering}
+                      onClick={() => handleMoveOrder(index, "down")}
+                      className="w-7 h-7 rounded-lg bg-white border border-[#D6D2C4] flex items-center justify-center text-[11px] disabled:opacity-30 hover:bg-stone-50 cursor-pointer font-bold"
+                      title="Move Down"
+                    >
+                      ▼
+                    </button>
+                  </div>
+
+                  <span className="text-2xl">{s.icon || "🌱"}</span>
+                  <div>
+                    <span className="font-bold text-[#121813] text-sm block">{s.label || s.title}</span>
+                    {s.titleBn && (
+                      <span className="text-xs text-[#2B4D33] font-medium block">{s.titleBn}</span>
+                    )}
+                    <span className="block text-[11px] text-[#75787B] mt-0.5 leading-normal max-w-[220px]">
+                      {s.desc || s.description}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 font-mono shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleEditServiceClick(s)}
+                    className="min-h-[40px] px-3 py-1 bg-white hover:bg-stone-50 text-[#2B4D33] border border-[#2B4D33]/30 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                  >
+                    ✏️ এডিট
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(s)}
+                    className="min-h-[40px] px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                  >
+                    🗑️ মুছুন
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-3 text-xs shrink-0 ml-3 font-mono">
-                <button type="button" onClick={() => handleEditServiceClick(s)} className="text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer">Edit</button>
-                <button type="button" onClick={() => handleDeleteService(s.id || s._id)} className="text-rose-400 hover:text-rose-300 font-bold cursor-pointer">Delete</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      {/* Deletion Modal */}
+      {deleteTarget && (
+        <ConfirmModal
+          isOpen={true}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={() => {
+            const targetId = deleteTarget.id || (deleteTarget as any)._id;
+            handleDeleteService(targetId);
+            setDeleteTarget(null);
+          }}
+          title="সেবা মুছে ফেলার নিশ্চিতকরণ"
+          description={`আপনি কি নিশ্চিত যে "${deleteTarget.label || deleteTarget.title}" সেবাটি মুছে ফেলতে চান?`}
+          itemName={deleteTarget.label || deleteTarget.title}
+          confirmLabel="হ্যাঁ, সেবা মুছুন"
+          cancelLabel="বাতিল"
+          variant="danger"
+        />
+      )}
     </div>
   );
 }

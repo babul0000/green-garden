@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { requireEditor, withAuthErrorHandling, apiError } from "@/lib/apiAuth";
 
 export async function POST(
   req: Request,
@@ -38,7 +39,7 @@ export async function POST(
         blogId: blog.id,
         name,
         text,
-        approved: true,
+        approved: false, // Pending moderation per 5.4
         userId: userId || null,
       },
     });
@@ -47,7 +48,7 @@ export async function POST(
     await prisma.notification.create({
       data: {
         title: `💬 ব্লগে নতুন মন্তব্য: ${blog.title.slice(0, 30)}`,
-        message: `${name} মন্তব্য করেছেন: "${text.slice(0, 60)}..."`,
+        message: `${name} মন্তব্য করেছেন: "${text.slice(0, 60)}..." (অনুমোদনের অপেক্ষায়)`,
         type: "INFO",
         link: "blogs",
       },
@@ -59,7 +60,7 @@ export async function POST(
         data: {
           userId,
           title: "ব্লগে আপনার মন্তব্য জমা হয়েছে",
-          message: `'${blog.title}' আর্টিকেলে আপনার মন্তব্য গৃহীত হয়েছে।`,
+          message: `'${blog.title}' আর্টিকেলে আপনার মন্তব্যটি অ্যাডমিন পর্যালোচনার জন্য জমা হয়েছে।`,
           type: "INFO",
           link: "blogs",
         },
@@ -75,3 +76,38 @@ export async function POST(
     );
   }
 }
+
+// Admin toggle approval
+export const PATCH = withAuthErrorHandling(async (req: Request) => {
+  await requireEditor(req);
+  const body = await req.json();
+  const { commentId, approved } = body;
+
+  if (!commentId || typeof approved !== "boolean") {
+    return apiError("commentId and approved boolean status are required", 400);
+  }
+
+  const updated = await prisma.comment.update({
+    where: { id: commentId },
+    data: { approved },
+  });
+
+  return NextResponse.json({ success: true, comment: updated });
+});
+
+// Admin delete comment
+export const DELETE = withAuthErrorHandling(async (req: Request) => {
+  await requireEditor(req);
+  const { searchParams } = new URL(req.url);
+  const commentId = searchParams.get("commentId");
+
+  if (!commentId) {
+    return apiError("commentId is required", 400);
+  }
+
+  await prisma.comment.delete({
+    where: { id: commentId },
+  });
+
+  return NextResponse.json({ success: true, message: "Comment deleted." });
+});

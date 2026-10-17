@@ -16,11 +16,13 @@ const PUBLIC_PROJECT_SELECT = {
   id: true,
   slug: true,
   name: true,
+  titleBn: true,
   clientId: true,
   clientName: true,
   category: true,
   location: true,
   description: true,
+  descBn: true,
   progress: true,
   status: true,
   startDate: true,
@@ -154,8 +156,8 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
   await requireEditor(req);
   const body = await req.json();
   const {
-    name, slug, clientId, clientName, clientPhone,
-    category, location, description, progress, status,
+    name, titleBn, slug, clientId, clientName, clientPhone,
+    category, location, description, descBn, progress, status,
     budget, totalExpense, startDate, deadline,
     beforeImage, afterImage, wipImages, images,
     materialsUsed, notes, featured, warrantyMonths,
@@ -168,6 +170,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
   const project = await prisma.project.create({
     data: {
       name,
+      titleBn: titleBn || null,
       slug: projectSlug,
       clientId: clientId || null,
       clientName: clientName || null,
@@ -175,6 +178,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
       category: category || "Residential",
       location: location || "Dhaka",
       description: description || null,
+      descBn: descBn || null,
       progress: typeof progress === "number" ? progress : 0,
       status: status || "RUNNING",
       budget: budget ? parseFloat(budget) : null,
@@ -199,8 +203,8 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
   await requireEditor(req);
   const body = await req.json();
   const {
-    id, name, slug, clientId, clientName, clientPhone,
-    category, location, description, progress, status,
+    id, name, titleBn, slug, clientId, clientName, clientPhone,
+    category, location, description, descBn, progress, status,
     budget, totalExpense, startDate, deadline, completionDate,
     beforeImage, afterImage, wipImages, images,
     materialsUsed, notes, featured, warrantyMonths,
@@ -212,6 +216,7 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
     where: { id },
     data: {
       name: name || undefined,
+      titleBn: titleBn !== undefined ? titleBn : undefined,
       slug: slug || undefined,
       clientId: clientId !== undefined ? clientId : undefined,
       clientName: clientName !== undefined ? clientName : undefined,
@@ -219,6 +224,7 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
       category: category || undefined,
       location: location || undefined,
       description: description !== undefined ? description : undefined,
+      descBn: descBn !== undefined ? descBn : undefined,
       progress: typeof progress === "number" ? progress : undefined,
       status: status || undefined,
       budget: budget !== undefined ? parseFloat(budget) : undefined,

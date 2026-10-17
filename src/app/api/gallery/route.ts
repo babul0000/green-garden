@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireEditor, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
+import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,10 +20,9 @@ const PUBLIC_GALLERY_SELECT = {
   category: true,
   caption: true,
   featured: true,
+  order: true,
   createdAt: true,
 };
-
-import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export async function GET(req: Request) {
   try {
@@ -55,7 +55,7 @@ export async function GET(req: Request) {
     const items = await prisma.galleryItem.findMany({
       where,
       select: PUBLIC_GALLERY_SELECT,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ order: "asc" }, { createdAt: "desc" }],
       skip: isPaginated ? skip : undefined,
       take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
     });
@@ -72,7 +72,28 @@ export async function GET(req: Request) {
 export const POST = withAuthErrorHandling(async (req: Request) => {
   await requireEditor(req);
   const body = await req.json();
-  const { title, imageUrl, beforeImageUrl, category, caption, featured } = body;
+
+  // Multi-item upload support
+  if (Array.isArray(body.items)) {
+    const createdItems = await Promise.all(
+      body.items.map((it: any, idx: number) =>
+        prisma.galleryItem.create({
+          data: {
+            title: it.title || "Gallery Showcase",
+            imageUrl: it.imageUrl,
+            beforeImageUrl: it.beforeImageUrl || null,
+            category: it.category || "All",
+            caption: it.caption || null,
+            featured: Boolean(it.featured),
+            order: typeof it.order === "number" ? it.order : idx,
+          },
+        })
+      )
+    );
+    return NextResponse.json({ success: true, items: createdItems }, { status: 201, headers: NO_CACHE });
+  }
+
+  const { title, imageUrl, beforeImageUrl, category, caption, featured, order } = body;
 
   if (!title || !imageUrl) {
     return apiError("Title and Image URL are required.", 400);
@@ -86,6 +107,7 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
       category: category || "All",
       caption: caption || null,
       featured: Boolean(featured),
+      order: typeof order === "number" ? order : 0,
     },
   });
 
@@ -95,7 +117,21 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 export const PUT = withAuthErrorHandling(async (req: Request) => {
   await requireEditor(req);
   const body = await req.json();
-  const { id, title, imageUrl, beforeImageUrl, category, caption, featured } = body;
+
+  // Reorder batch update support: { items: [{ id, order }] }
+  if (Array.isArray(body.items)) {
+    await Promise.all(
+      body.items.map((item: { id: string; order: number }) =>
+        prisma.galleryItem.update({
+          where: { id: item.id },
+          data: { order: item.order },
+        })
+      )
+    );
+    return NextResponse.json({ success: true, message: "Order updated." }, { headers: NO_CACHE });
+  }
+
+  const { id, title, imageUrl, beforeImageUrl, category, caption, featured, order } = body;
   if (!id) return apiError("Gallery item ID required", 400);
 
   const updated = await prisma.galleryItem.update({
@@ -107,6 +143,7 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
       category: category || undefined,
       caption: caption !== undefined ? caption : undefined,
       featured: featured !== undefined ? Boolean(featured) : undefined,
+      order: typeof order === "number" ? order : undefined,
     },
   });
 
