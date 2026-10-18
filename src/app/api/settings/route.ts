@@ -209,6 +209,18 @@ export async function POST(req: Request) {
         update: { value: body.value },
         create: { key: body.key, value: body.value },
       });
+
+      const { logActivity } = await import("@/lib/activityLog");
+      await logActivity({
+        userId: user.id,
+        userName: user.name,
+        action: "UPDATE",
+        entity: "Settings",
+        entityId: body.key,
+        summary: `স্টুডিও সেটিংস আপডেট করা হয়েছে (${body.key})`,
+        details: { key: body.key },
+      });
+
       return NextResponse.json(setting, { headers: NO_CACHE_HEADERS });
     }
 
@@ -217,6 +229,17 @@ export async function POST(req: Request) {
       where: { key: "site_config" },
       update: { value: body },
       create: { key: "site_config", value: body },
+    });
+
+    const { logActivity } = await import("@/lib/activityLog");
+    await logActivity({
+      userId: user.id,
+      userName: user.name,
+      action: "UPDATE",
+      entity: "Settings",
+      entityId: "site_config",
+      summary: "মাস্টার সাইট কনফিগ সেটিংস আপডেট করা হয়েছে",
+      details: { key: "site_config" },
     });
 
     return NextResponse.json(setting, { headers: NO_CACHE_HEADERS });

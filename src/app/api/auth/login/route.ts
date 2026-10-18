@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       role: roleString,
       phone: user.phone,
       avatar: user.avatar,
+      tokenVersion: user.tokenVersion ?? 0,
     });
 
     const response = NextResponse.json({

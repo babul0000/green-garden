@@ -36,9 +36,9 @@
 | 7.2 | Invoices & Payments Sub-tab | DONE | b2d62ac | `InvoicesPayments.tsx`, `/api/invoices/route.ts` | Search, status filter, convert quote to invoice in 1 click, record manual payments (cash, bKash, bank), printable invoice slip |
 | 7.3 | Employees Tab Modularization & Attendance Matrix | DONE | b2d62ac | `EmployeesTab.tsx`, `EmployeeDirectory.tsx`, `EmployeeAssignments.tsx`, `EmployeeAttendance.tsx`, `/api/attendance` | Decomposed (<150 lines), real-time conflict checking, monthly matrix (staff x days), bulk mark present |
 | 7.4 | Careers & CV Tracker Separation | DONE | b2d62ac | `CareersTab.tsx`, `JobPostingsManager.tsx`, `CvApplicationsTracker.tsx` | Split job postings and candidate tracker, direct CV download button |
-| 7.5 | Client SMS Alert Verification | DONE | b2d62ac | `SettingsTab.tsx` | Verified no defunct SMS gateway toggle exists in settings |
-| 9 | Responsive Design Pass (360px - 1440px) | DONE | Pending Step 9 commit | `globals.css`, `RESPONSIVE_REPORT.md` | Audited 360px, 390px, 768px, 1024px, 1440px; touch targets >= 44px, no overflow, mobile card views |
-| 10 | Notifications, Logs, Backup & Security | IN_PROGRESS | - | - | Starting Step 10 |
+| 9 | Responsive Design Pass (360px - 1440px) | DONE | a60f070 | `globals.css`, `RESPONSIVE_REPORT.md` | Audited 360px, 390px, 768px, 1024px, 1440px; touch targets >= 44px, no overflow, mobile card views |
+| 10 | Notifications, Logs, Backup & Security | DONE | Pending Step 10 commit | Multiple (Auth, ActivityLog, Backup, Security) | /api/notifications bell polling, activityLog helper & admin logs tab, full DB JSON export omitting passwords, password change form & logout from all devices via tokenVersion |
+| 11 | SEO, Legal Pages & Static Enhancements | IN_PROGRESS | - | - | Starting Step 11 |
 
 ---
 

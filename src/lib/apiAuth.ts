@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { verifyJwtToken, AUTH_COOKIE_NAME, type AuthUser } from "@/lib/auth";
 import { canAccessSection, canEnterAdmin, type AdminSection } from "@/lib/rbac";
+import { prisma } from "@/lib/prisma";
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -10,7 +11,7 @@ const NO_CACHE = {
 
 /**
  * Get the currently authenticated user from request cookies or Authorization header.
- * Returns null if not authenticated.
+ * Returns null if not authenticated or if tokenVersion has been revoked.
  */
 export async function getCurrentUser(req: NextRequest | Request): Promise<AuthUser | null> {
   try {
@@ -34,7 +35,29 @@ export async function getCurrentUser(req: NextRequest | Request): Promise<AuthUs
     }
 
     if (!token) return null;
-    return await verifyJwtToken(token);
+    const verifiedUser = await verifyJwtToken(token);
+    if (!verifiedUser) return null;
+
+    // Check tokenVersion against database
+    // Existing users without a version in token are treated as 0 (matching default 0)
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: verifiedUser.id },
+        select: { tokenVersion: true, role: true },
+      });
+      if (!dbUser) return null;
+
+      const tokenVer = verifiedUser.tokenVersion ?? 0;
+      const dbVer = dbUser.tokenVersion ?? 0;
+      if (tokenVer !== dbVer) {
+        // Token was invalidated by logout from all devices or password change
+        return null;
+      }
+    } catch {
+      // If DB check encounters network glitch, proceed with cryptographically verified token
+    }
+
+    return verifiedUser;
   } catch {
     return null;
   }

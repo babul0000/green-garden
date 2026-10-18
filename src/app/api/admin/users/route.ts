@@ -106,6 +106,19 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
+  // Log activity
+  const { logActivity } = await import("@/lib/activityLog");
+  const adminActor = await requireAdmin(req);
+  await logActivity({
+    userId: adminActor.id,
+    userName: adminActor.name,
+    action: "CREATE",
+    entity: "User",
+    entityId: newUser.id,
+    summary: `নতুন ইউজার তৈরি করা হয়েছে: ${newUser.name} (${newUser.email}, রোল: ${newUser.role})`,
+    details: { name: newUser.name, email: newUser.email, role: newUser.role },
+  });
+
   return NextResponse.json(
     {
       success: true,

@@ -94,6 +94,18 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
       },
     });
 
+    const { logActivity } = await import("@/lib/activityLog");
+    const actor = await requireAdmin(req);
+    await logActivity({
+      userId: actor.id,
+      userName: actor.name,
+      action: "CREATE",
+      entity: "Invoice",
+      entityId: newInvoice.id,
+      summary: `নতুন ইনভয়েস তৈরি করা হয়েছে: ${newInvoice.invoiceNumber} (গ্রাহক: ${newInvoice.clientName}, পরিমাণ: ৳${newInvoice.totalAmount})`,
+      details: { invoiceNumber: newInvoice.invoiceNumber, clientName: newInvoice.clientName, totalAmount: newInvoice.totalAmount },
+    });
+
     return NextResponse.json(
       { success: true, message: "Invoice created successfully", invoice: newInvoice },
       { headers: NO_CACHE }
@@ -137,6 +149,18 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     where: { id: invoiceId },
     data: { paidAmount: newPaidAmount, dueAmount: newDueAmount, status: newStatus },
     include: { payments: true },
+  });
+
+  const { logActivity } = await import("@/lib/activityLog");
+  const actor = await requireAdmin(req);
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "UPDATE",
+    entity: "Invoice",
+    entityId: updatedInvoice.id,
+    summary: `ইনভয়েস পেমেন্ট রেকর্ড করা হয়েছে: ${updatedInvoice.invoiceNumber} (জমা: ৳${payAmount}, মেথড: ${payment.paymentMethod}, বকেয়া: ৳${newDueAmount})`,
+    details: { invoiceNumber: updatedInvoice.invoiceNumber, amount: payAmount, paymentMethod: payment.paymentMethod, status: newStatus },
   });
 
   return NextResponse.json(

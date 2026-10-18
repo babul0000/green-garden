@@ -47,6 +47,7 @@ export const TAB_SECTION_MAP: Record<string, AdminSection> = {
   security: "security_roles",
   users: "security_roles",
   roles: "security_roles",
+  "activity-logs": "security_roles",
 };
 
 /**

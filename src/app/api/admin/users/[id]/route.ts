@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, withAuthErrorHandling, apiError } from "@/lib/apiAuth";
 import { Role } from "@prisma/client";
+import { logActivity } from "@/lib/activityLog";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -12,66 +12,84 @@ const NO_CACHE = {
   Expires: "0",
 };
 
-interface RouteContext {
-  params: Promise<{ id: string }> | { id: string };
-}
+export const PUT = withAuthErrorHandling(
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const adminActor = await requireAdmin(req);
+    const { id } = await params;
+    const body = await req.json();
+    const { role } = body;
 
-export const PUT = withAuthErrorHandling(async (req: Request) => {
-  await requireAdmin(req);
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, name: true, email: true, role: true },
+    });
 
-  const url = new URL(req.url);
-  const pathSegments = url.pathname.split("/");
-  const id = pathSegments[pathSegments.length - 1];
-
-  if (!id) return apiError("User ID is required", 400);
-
-  const body = await req.json();
-  const { name, role, phone } = body;
-
-  const dataToUpdate: any = {};
-  if (name !== undefined) dataToUpdate.name = name;
-  if (phone !== undefined) dataToUpdate.phone = phone;
-
-  if (role) {
-    const upperRole = String(role).toUpperCase();
-    if (upperRole in Role) {
-      dataToUpdate.role = upperRole as Role;
+    if (!existingUser) {
+      return apiError("User not found", 404);
     }
+
+    let prismaRole: Role = Role.CLIENT;
+    const upperRole = String(role || "CLIENT").toUpperCase();
+    if (upperRole in Role) {
+      prismaRole = upperRole as Role;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { role: prismaRole },
+      select: { id: true, name: true, email: true, role: true },
+    });
+
+    await logActivity({
+      userId: adminActor.id,
+      userName: adminActor.name,
+      action: "UPDATE",
+      entity: "User",
+      entityId: updatedUser.id,
+      summary: `ইউজার রোল পরিবর্তন করা হয়েছে: ${updatedUser.name} (${existingUser.role} ➔ ${updatedUser.role})`,
+      details: { previousRole: existingUser.role, newRole: updatedUser.role },
+    });
+
+    return NextResponse.json({ success: true, user: updatedUser }, { headers: NO_CACHE });
   }
+);
 
-  const updatedUser = await prisma.user.update({
-    where: { id },
-    data: dataToUpdate,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      phone: true,
-      updatedAt: true,
-    },
-  });
+export const DELETE = withAuthErrorHandling(
+  async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    const adminActor = await requireAdmin(req);
+    const { id } = await params;
 
-  return NextResponse.json({ success: true, user: updatedUser }, { headers: NO_CACHE });
-});
+    // Prevent deleting self
+    if (adminActor.id === id) {
+      return apiError("You cannot delete your own admin account", 400);
+    }
 
-export const DELETE = withAuthErrorHandling(async (req: Request) => {
-  const admin = await requireAdmin(req);
+    const existingUser = await prisma.user.findUnique({
+      where: { id },
+      select: { id: true, name: true, email: true, role: true },
+    });
 
-  const url = new URL(req.url);
-  const pathSegments = url.pathname.split("/");
-  const id = pathSegments[pathSegments.length - 1];
+    if (!existingUser) {
+      return apiError("User not found", 404);
+    }
 
-  if (!id) return apiError("User ID is required", 400);
+    await prisma.user.delete({
+      where: { id },
+    });
 
-  // Prevent admin from deleting themselves
-  if (admin.id === id) {
-    return apiError("You cannot delete your own administrative account.", 400);
+    await logActivity({
+      userId: adminActor.id,
+      userName: adminActor.name,
+      action: "DELETE",
+      entity: "User",
+      entityId: id,
+      summary: `ইউজার অ্যাকাউন্ট মুছে ফেলা হয়েছে: ${existingUser.name} (${existingUser.email}, রোল: ${existingUser.role})`,
+      details: { deletedEmail: existingUser.email, role: existingUser.role },
+    });
+
+    return NextResponse.json(
+      { success: true, message: "User deleted successfully" },
+      { headers: NO_CACHE }
+    );
   }
-
-  await prisma.user.delete({
-    where: { id },
-  });
-
-  return NextResponse.json({ success: true, message: "User deleted successfully" }, { headers: NO_CACHE });
-});
+);

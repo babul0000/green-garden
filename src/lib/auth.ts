@@ -10,6 +10,7 @@ export interface AuthUser {
   role: UserRole;
   phone?: string | null;
   avatar?: string | null;
+  tokenVersion?: number;
 }
 
 export const AUTH_COOKIE_NAME = "gg_auth_token";
@@ -42,7 +43,10 @@ export async function comparePassword(password: string, hash: string): Promise<b
  * Sign an industry-standard JWT token using jose (Edge and Node.js compatible)
  */
 export async function signJwtToken(payload: AuthUser): Promise<string> {
-  return await new SignJWT({ ...payload })
+  return await new SignJWT({
+    ...payload,
+    tokenVersion: typeof payload.tokenVersion === "number" ? payload.tokenVersion : 0,
+  })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d") // 7 days expiration
@@ -60,7 +64,9 @@ export async function verifyJwtToken(token: string): Promise<AuthUser | null> {
       name: payload.name as string,
       email: payload.email as string,
       role: (payload.role as UserRole) || "CLIENT",
-      phone: payload.phone as string | undefined
+      phone: payload.phone as string | undefined,
+      avatar: payload.avatar as string | undefined,
+      tokenVersion: typeof payload.tokenVersion === "number" ? (payload.tokenVersion as number) : 0,
     };
   } catch {
     return null;

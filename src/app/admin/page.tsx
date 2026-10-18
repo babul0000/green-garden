@@ -25,6 +25,7 @@ import UsersTab from "@/components/admin/UsersTab";
 import RolesTab from "@/components/admin/RolesTab";
 import ContentTab from "@/components/admin/ContentTab";
 import ReviewsTab from "@/components/admin/ReviewsTab";
+import ActivityLogTab from "@/components/admin/ActivityLogTab";
 
 // Import ERP Masterplan Components (Steps 4 - 10)
 import DesignRequestsTab from "@/components/admin/DesignRequestsTab";
@@ -891,6 +892,11 @@ export default function AdminPage() {
           {/* TAB 11: ROLES & PERMISSIONS */}
           {activeTab === "roles" && (
             <RolesTab />
+          )}
+
+          {/* TAB: ACTIVITY & AUDIT LOG */}
+          {activeTab === "activity-logs" && (
+            <ActivityLogTab />
           )}
 
           {/* TAB 12: CONTENT MANAGEMENT */}

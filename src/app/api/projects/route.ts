@@ -196,6 +196,18 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
+  const { logActivity } = await import("@/lib/activityLog");
+  const actor = await requireEditor(req);
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "CREATE",
+    entity: "Project",
+    entityId: project.id,
+    summary: `নতুন ল্যান্ডস্কেপ প্রজেক্ট যুক্ত করা হয়েছে: ${project.name} (${project.category || "General"})`,
+    details: { name: project.name, slug: project.slug, category: project.category, budget: project.budget },
+  });
+
   return NextResponse.json({ success: true, project }, { headers: NO_CACHE });
 });
 
@@ -243,15 +255,44 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
+  const { logActivity } = await import("@/lib/activityLog");
+  const actor = await requireEditor(req);
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "UPDATE",
+    entity: "Project",
+    entityId: updated.id,
+    summary: `প্রজেক্ট আপডেট করা হয়েছে: ${updated.name} (অগ্রগতি: ${updated.progress}%, স্ট্যাটাস: ${updated.status})`,
+    details: { name: updated.name, progress: updated.progress, status: updated.status },
+  });
+
   return NextResponse.json({ success: true, project: updated }, { headers: NO_CACHE });
 });
 
 export const DELETE = withAuthErrorHandling(async (req: Request) => {
-  await requireEditor(req);
+  const actor = await requireEditor(req);
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return apiError("Project ID required", 400);
 
+  const existing = await prisma.project.findUnique({
+    where: { id },
+    select: { id: true, name: true },
+  });
+
   await prisma.project.delete({ where: { id } });
+
+  const { logActivity } = await import("@/lib/activityLog");
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "DELETE",
+    entity: "Project",
+    entityId: id,
+    summary: `প্রজেক্ট মুছে ফেলা হয়েছে: ${existing?.name || id}`,
+    details: { id, name: existing?.name },
+  });
+
   return NextResponse.json({ success: true, message: "Project deleted." }, { headers: NO_CACHE });
 });

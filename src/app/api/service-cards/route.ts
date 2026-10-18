@@ -147,5 +147,17 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
+  const { logActivity } = await import("@/lib/activityLog");
+  const actor = await requireEditor(req);
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "CREATE",
+    entity: "DigitalServiceCard",
+    entityId: card.id,
+    summary: `ডিজিটাল সার্ভিস কার্ড ইস্যু করা হয়েছে: ${card.projectCode} (গ্রাহক: ${card.clientName}, প্রজেক্ট: ${card.projectName})`,
+    details: { projectCode: card.projectCode, clientName: card.clientName, projectName: card.projectName },
+  });
+
   return NextResponse.json({ success: true, card }, { status: 201, headers: NO_CACHE });
 });

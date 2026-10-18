@@ -88,7 +88,7 @@ export async function GET(req: Request) {
 }
 
 export const POST = withAuthErrorHandling(async (req: Request) => {
-  await requireModerator(req);
+  const actor = await requireModerator(req);
 
   const body = await req.json();
   const { label, titleBn, slug, category, desc, descBn, icon, bannerImage, pricing, features, benefits, process, faqs, order } = body;
@@ -116,11 +116,22 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
+  const { logActivity } = await import("@/lib/activityLog");
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "CREATE",
+    entity: "Service",
+    entityId: newService.id,
+    summary: `নতুন ল্যান্ডস্কেপ সার্ভিস যোগ করা হয়েছে: ${newService.label} (${newService.category})`,
+    details: { label: newService.label, category: newService.category, slug: newService.slug },
+  });
+
   return NextResponse.json({ success: true, service: newService }, { status: 201 });
 });
 
 export const PUT = withAuthErrorHandling(async (req: Request) => {
-  await requireModerator(req);
+  const actor = await requireModerator(req);
 
   const body = await req.json();
 
@@ -134,6 +145,14 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
         })
       )
     );
+    const { logActivity } = await import("@/lib/activityLog");
+    await logActivity({
+      userId: actor.id,
+      userName: actor.name,
+      action: "UPDATE",
+      entity: "Service",
+      summary: `সার্ভিস ক্রমবিন্যাস (Reorder) হালনাগাদ করা হয়েছে (${body.items.length}টি সার্ভিস)`,
+    });
     return NextResponse.json({ success: true, message: "Order updated." }, { headers: NO_CACHE });
   }
 
@@ -161,16 +180,44 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
     },
   });
 
+  const { logActivity } = await import("@/lib/activityLog");
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "UPDATE",
+    entity: "Service",
+    entityId: updated.id,
+    summary: `সার্ভিস তথ্য হালনাগাদ করা হয়েছে: ${updated.label}`,
+    details: { label: updated.label, category: updated.category },
+  });
+
   return NextResponse.json({ success: true, service: updated }, { headers: NO_CACHE });
 });
 
 export const DELETE = withAuthErrorHandling(async (req: Request) => {
-  await requireModerator(req);
+  const actor = await requireModerator(req);
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return apiError("Service ID required", 400);
 
+  const existing = await prisma.service.findUnique({
+    where: { id },
+    select: { id: true, label: true },
+  });
+
   await prisma.service.delete({ where: { id } });
+
+  const { logActivity } = await import("@/lib/activityLog");
+  await logActivity({
+    userId: actor.id,
+    userName: actor.name,
+    action: "DELETE",
+    entity: "Service",
+    entityId: id,
+    summary: `সার্ভিস মুছে ফেলা হয়েছে: ${existing?.label || id}`,
+    details: { id, label: existing?.label },
+  });
+
   return NextResponse.json({ success: true, message: "Service deleted." }, { headers: NO_CACHE });
 });

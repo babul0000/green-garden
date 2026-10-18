@@ -37,6 +37,36 @@ export default function SettingsTab({
     { id: "backup", label: "ব্যাকআপ ও রিস্টোর স্ন্যাপশট", en: "Data Backup & Sync", icon: "💾" },
   ];
 
+  const [dbExporting, setDbExporting] = useState<boolean>(false);
+
+  // Helper for Exporting Full Database as JSON File (Admin only)
+  const handleExportFullDatabase = async () => {
+    setDbExporting(true);
+    try {
+      const res = await fetch("/api/admin/backup/export");
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "ডাটাবেস এক্সপোর্ট করতে সমস্যা হয়েছে। নিশ্চিত করুন আপনি ADMIN অ্যাকাউন্টে আছেন।");
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ar_green_garden_full_db_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      setTestNotification("✓ সম্পূর্ণ ডাটাবেস ব্যাকআপ (JSON) সফলভাবে ডাউনলোড হয়েছে!");
+      setTimeout(() => setTestNotification(null), 5000);
+    } catch {
+      alert("সার্ভার থেকে ব্যাকআপ ফাইল ডাউনলোড করতে ব্যর্থ হয়েছে।");
+    } finally {
+      setDbExporting(false);
+    }
+  };
+
   // Helper for Exporting Settings as JSON File
   const handleExportJson = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
@@ -807,30 +837,62 @@ export default function SettingsTab({
                   </p>
                 </div>
 
+                {/* Full Database Export (Admin Only) */}
+                <div className="p-6 rounded-2xl bg-[#EBF3ED] border border-[#C5DEC9] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🗄️</span>
+                      <p className="text-base font-bold text-[#1E3724]">সম্পূর্ণ ডাটাবেস ব্যাকআপ এক্সপোর্ট (Full Database JSON Export)</p>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#2B4D33] text-white">ADMIN ONLY</span>
+                    </div>
+                    <p className="text-xs text-[#2D5A36] mt-1.5 max-w-2xl leading-relaxed">
+                      সমস্ত টেবিল (প্রজেক্ট, সার্ভিস, ইনভয়েস, বুকিং, গ্যালারি, রিভিউ ইত্যাদি) পাসওয়ার্ড হ্যাশ ব্যতীত সম্পূর্ণ JSON হিসেবে ডাউনলোড হবে। ক্লাউডিনারি ও সকল ছবির লাইভ URL তালিকা এই ব্যাকআপ ফাইলে সংরক্ষিত থাকবে।
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleExportFullDatabase}
+                    disabled={dbExporting}
+                    className="min-h-[44px] px-6 py-3 bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {dbExporting ? (
+                      <>
+                        <span className="animate-spin text-sm">⏳</span>
+                        এক্সপোর্ট হচ্ছে...
+                      </>
+                    ) : (
+                      <>
+                        <span>📥</span>
+                        সম্পূর্ণ ডাটাবেস এক্সপোর্ট (JSON)
+                      </>
+                    )}
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Export Box */}
+                  {/* Settings Export Box */}
                   <div className="p-5 rounded-xl bg-[#F7F6F2] border border-[#D6D2C4] flex flex-col justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-[#121813]">📥 সেটিংস ব্যাকআপ ডাউনলোড</p>
-                      <p className="text-xs text-[#75787B] mt-1">আপনার সমস্ত সেটিংস একটি নিরাপদ JSON ফাইল হিসেবে আপনার ডিভাইসে সংরক্ষণ করুন।</p>
+                      <p className="text-sm font-bold text-[#121813]">📥 শুধুমাত্র সেটিংস কনফিগ ডাউনলোড</p>
+                      <p className="text-xs text-[#75787B] mt-1">আপনার ওয়েবসাইট সেটিংস ও মেটা কনফিগারেশন একটি পৃথক JSON ফাইল হিসেবে সংরক্ষণ করুন।</p>
                     </div>
                     <button
                       type="button"
                       onClick={handleExportJson}
-                      className="w-full py-2.5 px-4 bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-xs"
+                      className="w-full min-h-[44px] py-2.5 px-4 bg-stone-700 hover:bg-stone-800 text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-xs"
                     >
-                      ডাউনলোড করুন (Export JSON)
+                      সেটিংস JSON ডাউনলোড
                     </button>
                   </div>
 
                   {/* Import Box */}
                   <div className="p-5 rounded-xl bg-[#F7F6F2] border border-[#D6D2C4] flex flex-col justify-between gap-4">
                     <div>
-                      <p className="text-sm font-bold text-[#121813]">📤 ব্যাকআপ ফাইল রিস্টোর</p>
-                      <p className="text-xs text-[#75787B] mt-1">পূর্বে ডাউনলোড করা যেকোনো JSON ব্যাকআপ আপলোড করে সমস্ত সেটিংস তাৎক্ষণিক পুনরুদ্ধার করুন।</p>
+                      <p className="text-sm font-bold text-[#121813]">📤 সেটিংস ফাইল রিস্টোর</p>
+                      <p className="text-xs text-[#75787B] mt-1">পূর্বে ডাউনলোড করা যেকোনো সেটিংস JSON আপলোড করে সমস্ত সেটিংস তাৎক্ষণিক পুনরুদ্ধার করুন।</p>
                     </div>
-                    <label className="w-full py-2.5 px-4 bg-white hover:bg-stone-50 border border-[#D6D2C4] text-[#121813] text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-xs text-center block">
-                      <span>ফাইল নির্বাচন করুন (Import JSON)</span>
+                    <label className="w-full min-h-[44px] py-2.5 px-4 bg-white hover:bg-stone-50 border border-[#D6D2C4] text-[#121813] text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-xs text-center flex items-center justify-center">
+                      <span>ফাইল নির্বাচন করুন (Import Settings JSON)</span>
                       <input type="file" accept=".json" onChange={handleImportJson} className="hidden" />
                     </label>
                   </div>
