@@ -36,6 +36,14 @@ export default function RefundPolicyPage() {
           </p>
         </div>
 
+        {/* Notice Banner */}
+        <div className="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs sm:text-sm font-medium flex items-center gap-3">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <strong className="font-bold text-amber-950">[আসল শর্ত বসাতে হবে]</strong> — এটি এ আর গ্রিন গার্ডেনের খসড়া টেমপ্লেট। স্টুডিও পরিচালনার চূড়ান্ত আইনি শর্তাবলী এখানে প্রতিস্থাপন করতে হবে।
+          </div>
+        </div>
+
         {/* Content Body */}
         <div className="space-y-10 text-sm sm:text-base leading-relaxed text-[#2C302E]">
           

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "ছাদ বাগান, ভার্টিক্যাল গ্রিন ওয়াল, সুইমিং পুল ল্যান্ডস্কেপিং ও স্মার্ট ড্রিপ ইরিগেশন সেবা।",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1558904541-efa8c4a08931?q=80&w=1200",
+        url: "/hero_plants.png",
         alt: "AR Green Garden Services",
       },
     ],

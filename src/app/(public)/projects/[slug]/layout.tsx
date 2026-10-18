@@ -11,27 +11,21 @@ export async function generateMetadata({
   try {
     const project = await prisma.project.findFirst({
       where: { OR: [{ slug }, { id: slug }] },
-      select: { name: true, category: true, challenges: true, solution: true, imageUrl: true, location: true },
+      select: { name: true, titleBn: true, description: true, descBn: true, afterImage: true, beforeImage: true },
     });
 
     if (project) {
-      const title = `${project.name} - ${project.category}`;
-      const description = project.challenges || `${project.location || "ঢাকা"} এ এ আর গ্রিন গার্ডেনের আধুনিক ল্যান্ডস্কেপ স্থাপত্য প্রজেক্ট।`;
+      const title = project.titleBn || project.name;
+      const description = project.descBn || project.description || "এ আর গ্রিন গার্ডেনের প্রিমিয়াম ল্যান্ডস্কেপ আর্কিটেকচার ও ছাদ বাগান প্রজেক্ট।";
+      const image = project.afterImage || project.beforeImage || "/hero_plants.png";
+
       return {
-        title,
+        title: `${title} | ল্যান্ডস্কেপ আর্কিটেকচার প্রজেক্ট`,
         description,
         openGraph: {
-          title,
+          title: `${title} | AR Green Garden`,
           description,
-          type: "article",
-          images: project.imageUrl
-            ? [
-                {
-                  url: project.imageUrl,
-                  alt: project.name,
-                },
-              ]
-            : undefined,
+          images: [{ url: image, alt: title }],
         },
       };
     }
@@ -39,10 +33,10 @@ export async function generateMetadata({
     // fallback
   }
 
-  const cleanTitle = slug.replace(/-/g, " ").toUpperCase();
+  const cleanTitle = slug.replace(/-/g, " ");
   return {
-    title: `${cleanTitle} - প্রজেক্ট বিবরণ`,
-    description: "এ আর গ্রিন গার্ডেনের প্রিমিয়াম ল্যান্ডস্কেপ আর্কিটেকচার প্রকল্প কেস স্টাডি।",
+    title: `${cleanTitle} - প্রজেক্ট বিবরণী | AR Green Garden`,
+    description: "এ আর গ্রিন গার্ডেনের প্রিমিয়াম ল্যান্ডস্কেপ আর্কিটেকচার ও গার্ডেন কেস স্টাডি।",
   };
 }
 
@@ -59,24 +53,46 @@ export default async function ProjectDetailLayout({
   try {
     const proj = await prisma.project.findFirst({
       where: { OR: [{ slug }, { id: slug }] },
-      select: { name: true, category: true, imageUrl: true, location: true },
+      include: {
+        reviews: {
+          where: { status: "Approved" },
+          select: { rating: true },
+        },
+      },
     });
+
     if (proj) {
+      const avgRating = proj.reviews.length > 0
+        ? (proj.reviews.reduce((acc, r) => acc + r.rating, 0) / proj.reviews.length).toFixed(1)
+        : "5.0";
+
       projectLd = {
         "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        name: proj.name,
-        genre: proj.category,
-        image: proj.imageUrl,
-        contentLocation: proj.location || "Dhaka, Bangladesh",
-        creator: {
-          "@type": "Organization",
-          name: "A R Green Garden",
+        "@type": "LocalBusiness",
+        name: `A R Green Garden - ${proj.name}`,
+        description: proj.description || proj.descBn || "Premium Landscape Architecture Project",
+        image: proj.afterImage || proj.beforeImage || "/hero_plants.png",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: proj.location || "Dhanmondi",
+          addressLocality: "Dhaka",
+          addressCountry: "BD",
         },
+        telephone: "01883012641",
+        ...(proj.reviews.length > 0
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: avgRating,
+                reviewCount: String(proj.reviews.length),
+                bestRating: "5",
+              },
+            }
+          : {}),
       };
     }
   } catch {
-    // ignore
+    // fallback
   }
 
   return (
