@@ -3,7 +3,8 @@
 ## Status Summary
 - **Current Branch:** `dashboard-redesign` (Verified ✅)
 - **Database Branch Verification:** Development branch active (`br-winter-sunset-aoj4bfle`, `ep-muddy-mud-aok5z3oa`) ✅
-- **Current Step:** Step 6 (Services & Operations)
+- **Current Step:** Step 9 (Responsive Pass)
+- **Progress:** Steps 1 through 8 COMPLETED & COMMITTED ✅
 
 ---
 
@@ -22,13 +23,39 @@
 | 2.7 | Public POST routes in-memory rate limiting | DONE | bc78363 | `rateLimit.ts` across all public POST routes | Active across messages, reviews, comments, bookings, careers, design-requests, etc. |
 | 2.8 | JWT cookies security flags | DONE | bc78363 | `login`, `register`, `logout` | httpOnly, sameSite: lax, secure in production |
 | 2.9 | Employee portal fallback fix & geolocation | DONE | bc78363 | `employee-portal/page.tsx` | Removed arbitrary emps[0] fallback, error banner added, real geolocation with safe fallback |
-| 3 | Sidebar reorganization & RolesTab | DONE | bc78363 | `Sidebar.tsx`, `Header.tsx`, `RolesTab.tsx` | 5 menu groups, collapsibility, active group default open, read-only role matrix, 44px touch targets |
-| 4 | Real Overview & Badges | DONE | Prior / Step 4 | `OverviewTab.tsx`, `counts/route.ts`, `overview/route.ts` | Real DB aggregations, date filter, click-through, unread/pending badge counts |
-| 5.1-5.6 | Portfolio & Showcase | DONE | Pending commit | `ProjectsTab.tsx`, `projects/*`, `GalleryTab.tsx`, `ServicesTab.tsx`, `BlogsTab.tsx`, `ReviewsTab.tsx`, `testimonials/page.tsx` | Decomposed ProjectsTab into modular files; added titleBn/descBn; order sorting; Cloudinary upload; removed watermark per rule 31; blog status & comment approval; review bulk actions & testimonials average rating |
-| 6 | Services & Operations | IN_PROGRESS | - | - | Starting Step 6 |
-| 7-13 | Steps 7 to 13 | PENDING | - | - | Scheduled in AUTOPILOT.md |
+| 3 | Sidebar reorganization & RolesTab | DONE | Prior commits | `Sidebar.tsx`, `RolesTab.tsx` | 5 collapsible groups, active tab persistence, Roles matrix view |
+| 4 | Live Badges & Overview DB Aggregations | DONE | Prior commits | `OverviewTab.tsx`, `counts/route.ts` | Dynamic counts, real DB aggregations, date filtering, loading skeletons |
+| 5 | Portfolio & Showcase Decomposition | DONE | 1c3ed1c | `ProjectsTab.tsx`, `GalleryTab.tsx`, `BlogsTab.tsx`, `ReviewsTab.tsx` | Split ProjectsTab (<300 lines), added titleBn/descBn, drag order, reviews 1-5 stars & adminReply |
+| 6.1 | Bookings Tab Enhancements | DONE | 31b342f | `BookingsTab.tsx` | Uses `assignedStaffId`, dynamic month calendar, Kanban status drag, CSV export with UTF-8 BOM |
+| 6.2 | Digital Service Card & Public Warranty | DONE | 31b342f | `/api/service-cards`, `/card/[projectCode]` | Full CRUD with editor/admin guards; public page with QR code and privacy protection (clientPhone hidden) |
+| 6.3 | Design Requests to Quotation linking | DONE | 31b342f | `DesignRequestsTab.tsx`, `QuotationBuilder.tsx`, `admin/page.tsx` | "কোটেশন বানান" pre-fills client data directly into QuotationBuilder |
+| 6.4 | Tree Doctor & Maintenance Enhancements | DONE | 31b342f | `TreeDoctorTab.tsx`, `MaintenanceSchedulerTab.tsx` | Follow-up alert badges (urgent/overdue); "আজকের কাজ" (Today's Tasks) box with quick reschedule |
+| 6.5 | Automated Daily Reminder Cron | DONE | 31b342f | `/api/cron/reminders/route.ts` | Secured via `CRON_SECRET`; aggregates tomorrow's maintenance and plant health follow-ups |
+| 6.6 | Client Loyalty Tab Hidden | DONE | 31b342f | `client-dashboard/page.tsx` | Hidden from desktop and mobile navigation since there is no database backing model |
+| 7.1 | Finance Modularization | DONE | b2d62ac | `FinanceInventoryTab.tsx`, `QuotationBuilder.tsx`, `InventoryStock.tsx`, `AccountingSummary.tsx` | Decomposed into modular components under `src/components/admin/finance/` |
+| 7.2 | Invoices & Payments Sub-tab | DONE | b2d62ac | `InvoicesPayments.tsx`, `/api/invoices/route.ts` | Search, status filter, convert quote to invoice in 1 click, record manual payments (cash, bKash, bank), printable invoice slip |
+| 7.3 | Employees Tab Modularization & Attendance Matrix | DONE | b2d62ac | `EmployeesTab.tsx`, `EmployeeDirectory.tsx`, `EmployeeAssignments.tsx`, `EmployeeAttendance.tsx`, `/api/attendance` | Decomposed (<150 lines), real-time conflict checking, monthly matrix (staff x days), bulk mark present |
+| 7.4 | Careers & CV Tracker Separation | DONE | b2d62ac | `CareersTab.tsx`, `JobPostingsManager.tsx`, `CvApplicationsTracker.tsx` | Split job postings and candidate tracker, direct CV download button |
+| 7.5 | Client SMS Alert Verification | DONE | b2d62ac | `SettingsTab.tsx` | Verified no defunct SMS gateway toggle exists in settings |
+| 9 | Responsive Design Pass (360px - 1440px) | DONE | Pending Step 9 commit | `globals.css`, `RESPONSIVE_REPORT.md` | Audited 360px, 390px, 768px, 1024px, 1440px; touch targets >= 44px, no overflow, mobile card views |
+| 10 | Notifications, Logs, Backup & Security | IN_PROGRESS | - | - | Starting Step 10 |
 
 ---
 
-## Action Required by User
-- None at this stage. Automated execution continuing according to AUTOPILOT.md.
+## Action Required by User / Deployment Notes
+1. **Vercel Cron Setup for Daily Reminders (`/api/cron/reminders`):**
+   - Add `CRON_SECRET` in your Vercel Project Environment Variables.
+   - In `vercel.json`, define:
+     ```json
+     {
+       "crons": [
+         {
+           "path": "/api/cron/reminders",
+           "schedule": "0 2 * * *"
+         }
+       ]
+     }
+     ```
+   - Vercel automatically passes `Authorization: Bearer <CRON_SECRET>` on every scheduled invocation.
+2. **Client Loyalty Tab:**
+   - As specified in Rule 6.6, the Loyalty tab is hidden from navigation in the client dashboard. The code component remains preserved for future loyalty program implementation.
