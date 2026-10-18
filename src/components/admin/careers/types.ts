@@ -1,3 +1,5 @@
+import type { ICareerApplication } from "@/types";
+
 export interface JobOpening {
   id: string;
   titleEn: string;
@@ -14,14 +16,4 @@ export interface JobOpening {
   descriptionBn: string;
 }
 
-export interface CareerApplication {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  department: string;
-  coverLetter?: string | null;
-  resumeUrl: string;
-  status: "Pending" | "Reviewing" | "Shortlisted" | "Rejected" | string;
-  createdAt: string;
-}
+export type CareerApplication = ICareerApplication;

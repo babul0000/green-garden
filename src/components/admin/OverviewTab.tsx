@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 
+import type { IBooking, IProject, IService } from "@/types";
+
 interface OverviewTabProps {
-  bookings?: any[];
-  projects?: any[];
-  services?: any[];
+  bookings?: IBooking[];
+  projects?: IProject[];
+  services?: IService[];
   setActiveTab?: (tab: string) => void;
 }
 

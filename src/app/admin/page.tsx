@@ -458,7 +458,7 @@ export default function AdminPage() {
   };
 
   // --- BLOGS & COMMENTS CRUD ---
-  const handleCreateOrUpdateBlog = async (e: React.FormEvent, customPayload: any = null) => {
+  const handleCreateOrUpdateBlog = async (e: React.FormEvent, customPayload: Partial<IBlog> | null = null) => {
     e.preventDefault();
     const payload = customPayload || {
       title: blogTitle,

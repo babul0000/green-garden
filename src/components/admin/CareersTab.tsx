@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import JobPostingsManager from "./careers/JobPostingsManager";
 import CvApplicationsTracker from "./careers/CvApplicationsTracker";
 
+import type { ICareerApplication, IMessage } from "@/types";
+
 interface CareersTabProps {
-  messages?: any[];
-  careers?: any[];
+  messages?: IMessage[];
+  careers?: ICareerApplication[];
   handleDeleteMessage?: (id: string) => void;
   handleUpdateCareerStatus: (id: string, status: string) => void;
   handleDeleteCareer: (id: string) => void;

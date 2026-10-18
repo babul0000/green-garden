@@ -172,16 +172,16 @@ export interface IReview {
 }
 
 export interface ICareerApplication {
-  id?: string;
+  id: string;
   _id?: string;
   name: string;
   email: string;
   phone: string;
   department: string;
-  coverLetter?: string;
+  coverLetter?: string | null;
   resumeUrl: string;
-  status?: "Pending" | "Reviewing" | "Shortlisted" | "Rejected";
-  createdAt?: string | Date;
+  status: "Pending" | "Reviewing" | "Shortlisted" | "Rejected" | string;
+  createdAt: string;
 }
 
 export interface IProduct {
