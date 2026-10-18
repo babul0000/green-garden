@@ -10,6 +10,10 @@ const NO_CACHE_HEADERS = {
   "Expires": "0",
 };
 
+const PUBLIC_CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
 // Default values for each config key
 const DEFAULTS: Record<string, any> = {
   site_config: {
@@ -122,6 +126,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const key = searchParams.get("key");
 
+    const isStaff = req.headers.get("cookie")?.includes("auth-token");
+    const headers = isStaff ? NO_CACHE_HEADERS : PUBLIC_CACHE_HEADERS;
+
     if (key) {
       // Return a single setting key
       let setting = await prisma.setting.findUnique({ where: { key } });
@@ -130,7 +137,7 @@ export async function GET(req: Request) {
         const defaultVal = DEFAULTS[key] || {};
         setting = await prisma.setting.create({ data: { key, value: defaultVal } });
       }
-      return NextResponse.json(setting, { headers: NO_CACHE_HEADERS });
+      return NextResponse.json(setting, { headers });
     }
 
     // Return ALL settings merged (backward-compatible: default key = site_config)
@@ -150,7 +157,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(
       { ...siteConf, value: siteConf, ...merged, key: "site_config" },
-      { headers: NO_CACHE_HEADERS }
+      { headers }
     );
   } catch (error: any) {
     console.error("Settings GET error:", error);

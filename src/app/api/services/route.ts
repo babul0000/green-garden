@@ -12,6 +12,10 @@ const NO_CACHE = {
   "Expires": "0",
 };
 
+const PUBLIC_CACHE = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
 const PUBLIC_SERVICE_SELECT = {
   id: true,
   slug: true,
@@ -46,7 +50,7 @@ export async function GET(req: Request) {
         select: PUBLIC_SERVICE_SELECT,
       });
       if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
-      return NextResponse.json(service, { headers: NO_CACHE });
+      return NextResponse.json(service, { headers: PUBLIC_CACHE });
     }
 
     const searchFilter = q
@@ -78,7 +82,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(
       formatDataResponse(services, total, { isPaginated, page, limit }),
-      { headers: NO_CACHE }
+      { headers: PUBLIC_CACHE }
     );
   } catch (error: unknown) {
     const isDev = process.env.NODE_ENV === "development";

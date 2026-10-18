@@ -51,6 +51,7 @@ export default function Sidebar({
   useEffect(() => {
     let active = true;
     const fetchCounts = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
       try {
         const res = await fetch("/api/admin/counts");
         if (res.ok && active) {
@@ -62,10 +63,15 @@ export default function Sidebar({
       }
     };
     fetchCounts();
-    const timer = setInterval(fetchCounts, 45000);
+    const timer = setInterval(fetchCounts, 90000);
+    const handleVisibility = () => {
+      if (!document.hidden && active) fetchCounts();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       active = false;
       clearInterval(timer);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, []);
 

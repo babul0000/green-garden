@@ -49,6 +49,7 @@ export default function ClientDashboardPage() {
   const notifsRef = React.useRef<HTMLDivElement>(null);
 
   const fetchClientNotifications = async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
     try {
       const res = await fetch("/api/notifications?limit=20", { cache: "no-store" });
       if (res.ok) {
@@ -78,8 +79,15 @@ export default function ClientDashboardPage() {
   useEffect(() => {
     if (user?.id) {
       fetchClientNotifications();
-      const timer = setInterval(fetchClientNotifications, 40000);
-      return () => clearInterval(timer);
+      const timer = setInterval(fetchClientNotifications, 90000);
+      const handleVisibility = () => {
+        if (!document.hidden) fetchClientNotifications();
+      };
+      document.addEventListener("visibilitychange", handleVisibility);
+      return () => {
+        clearInterval(timer);
+        document.removeEventListener("visibilitychange", handleVisibility);
+      };
     }
   }, [user]);
 

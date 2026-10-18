@@ -54,6 +54,7 @@ export default function Header({
 
   // Fetch notifications from /api/notifications
   const fetchNotifications = async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
     try {
       const res = await fetch("/api/notifications?limit=30", { cache: "no-store" });
       if (res.ok) {
@@ -68,9 +69,16 @@ export default function Header({
 
   useEffect(() => {
     fetchNotifications();
-    // Poll every 35 seconds (30-60s per specification, lightweight HTTP)
-    const interval = setInterval(fetchNotifications, 35000);
-    return () => clearInterval(interval);
+    // Smart visibility-aware polling every 90s, plus instant refresh on tab focus
+    const interval = setInterval(fetchNotifications, 90000);
+    const handleVisibility = () => {
+      if (!document.hidden) fetchNotifications();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
 
   // Handle click outside to dismiss notification popover

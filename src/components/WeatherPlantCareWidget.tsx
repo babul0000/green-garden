@@ -32,6 +32,7 @@ export default function WeatherPlantCareWidget() {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchDhakaWeather = async () => {
+    if (typeof document !== "undefined" && document.hidden) return;
     setRefreshing(true);
     try {
       const res = await fetch(
@@ -44,8 +45,7 @@ export default function WeatherPlantCareWidget() {
           setLastRefreshed(new Date());
         }
       }
-    } catch (err) {
-      console.warn("Open-Meteo weather fetch notice, using fallback:", err);
+    } catch {
       // Fallback simulated pleasant weather for Dhaka if offline
       setWeather({
         temperature: 29.4,
@@ -63,8 +63,15 @@ export default function WeatherPlantCareWidget() {
 
   useEffect(() => {
     fetchDhakaWeather();
-    const interval = setInterval(fetchDhakaWeather, 300000); // 5 min interval
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchDhakaWeather, 600000); // 10 min interval
+    const handleVisibility = () => {
+      if (!document.hidden) fetchDhakaWeather();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
 
   // Compute Weather-Adaptive Plant Care Advice

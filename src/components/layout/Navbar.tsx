@@ -460,6 +460,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     <div key={link.id} className="flex items-center justify-between">
                       <Link
                         href={link.url}
+                        prefetch={false}
                         onClick={() => setMenuOpen(false)}
                         className="text-2xl sm:text-[28px] font-light hover:text-[#dedad2] transition-colors block leading-tight text-white/95"
                       >
@@ -481,6 +482,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                   <div className="pt-1">
                     <Link
                       href="/design-garden"
+                      prefetch={false}
                       onClick={() => setMenuOpen(false)}
                       className="text-base sm:text-lg font-normal text-[#dedad2] hover:text-white transition-colors block"
                     >
@@ -541,6 +543,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                             ? "/moderator"
                             : "/client-dashboard"
                         }
+                        prefetch={false}
                         onClick={() => setMenuOpen(false)}
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
                       >
@@ -561,6 +564,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                   <div className="flex items-center gap-2">
                     <Link
                       href="/login"
+                      prefetch={false}
                       onClick={() => setMenuOpen(false)}
                       className="flex-1 text-center py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow"
                     >
@@ -568,6 +572,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                     </Link>
                     <Link
                       href="/register"
+                      prefetch={false}
                       onClick={() => setMenuOpen(false)}
                       className="flex-1 text-center py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs font-bold transition-all"
                     >

@@ -12,27 +12,42 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // 1. Static images and media — 1 year immutable disk cache (Drastically cuts CDN hits)
+      {
+        source: '/:path*.{jpg,jpeg,png,webp,svg,gif,ico,avif}',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      // 2. Static web fonts — 1 year immutable disk cache
+      {
+        source: '/:path*.{woff,woff2,ttf,otf}',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      // 3. Static uploads — 1 day browser cache, 7 days stale-while-revalidate
       {
         source: '/uploads/:path*',
         headers: [
-          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' },
-          { key: 'Pragma', value: 'no-cache' },
-          { key: 'Expires', value: '0' },
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
         ],
       },
+      // 4. Sensitive auth & admin endpoints — Never cache
       {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' },
-          { key: 'Pragma', value: 'no-cache' },
-          { key: 'Expires', value: '0' },
-        ],
-      },
-      {
-        source: '/:path*.{jpg,jpeg,png,webp,svg,gif,ico}',
+        source: '/api/auth/:path*',
         headers: [
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, max-age=0' },
           { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+      {
+        source: '/api/admin/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, max-age=0' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
         ],
       },
     ];

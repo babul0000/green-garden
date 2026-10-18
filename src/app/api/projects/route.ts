@@ -11,6 +11,10 @@ const NO_CACHE = {
   "Expires": "0",
 };
 
+const PUBLIC_CACHE = {
+  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+};
+
 // Strict public field selection (excludes clientPhone, budget, totalExpense, notes, materialsUsed)
 const PUBLIC_PROJECT_SELECT = {
   id: true,
@@ -87,7 +91,7 @@ export async function GET(req: Request) {
           },
         });
         if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 });
-        return NextResponse.json(project, { headers: NO_CACHE });
+        return NextResponse.json(project, { headers: PUBLIC_CACHE });
       }
     }
 
@@ -143,7 +147,7 @@ export async function GET(req: Request) {
 
       return NextResponse.json(
         formatDataResponse(projects, total, { isPaginated, page, limit }),
-        { headers: NO_CACHE }
+        { headers: PUBLIC_CACHE }
       );
     }
   } catch (error: any) {
