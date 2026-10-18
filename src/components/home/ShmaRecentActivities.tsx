@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
+import { optimizeImageUrl } from "@/lib/utils";
+
 interface ActivityItem {
   id: string;
   titleBn: string;
@@ -13,59 +15,6 @@ interface ActivityItem {
   dateBn: string;
   dateEn: string;
 }
-
-const activities: ActivityItem[] = [
-  {
-    id: "act-1",
-    titleBn: "বুয়েট স্থাপত্য বিভাগের সাথে মাইক্রোক্লাইমেট গবেষণা",
-    titleEn: "Microclimate Landscape Research with BUET Architecture",
-    subtitleBn: "নগর তাপমাত্রা হ্রাস ও বায়োফিলিক নকশার প্রভাব নিয়ে যৌথ সমীক্ষা",
-    subtitleEn: "Joint study evaluating urban heat island reduction & biophilia",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=800&auto=format&fit=crop",
-    dateBn: "সেপ্টেম্বর ২০২৬",
-    dateEn: "September 2026",
-  },
-  {
-    id: "act-2",
-    titleBn: "ধানমন্ডি পেন্টহাউস বায়োফিলিক গার্ডেন হস্তান্তর",
-    titleEn: "Completion of Dhanmondi Penthouse Bio-Terrace",
-    subtitleBn: "৩,৮০০ বর্গফুটের রুফটপ ফরেস্ট ও ওয়াটারপ্রুফ ড্রেনেজ প্রকল্প সফল সম্পন্ন",
-    subtitleEn: "3,800 sq.ft rooftop forest with multi-layer waterproof drainage",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800&auto=format&fit=crop",
-    dateBn: "আগস্ট ২০২৬",
-    dateEn: "August 2026",
-  },
-  {
-    id: "act-3",
-    titleBn: "গুলশানে হেরিটেজ গাছের সফল সার্জারি ও ট্রি ক্লিনিক",
-    titleEn: "Heritage Tree Surgery & Clinical Care in Gulshan",
-    subtitleBn: "অন-কল ট্রি ডক্টর টিম দ্বারা শতবর্ষী দুর্লভ রেইনট্রির জীবন রক্ষা",
-    subtitleEn: "Emergency arborist team rescued a diseased century-old rain tree",
-    image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=800&auto=format&fit=crop",
-    dateBn: "জুলাই ২০২৬",
-    dateEn: "July 2026",
-  },
-  {
-    id: "act-4",
-    titleBn: "ঢাকা ক্লাইমেট আর্কিটেকচার সামিটে মূল প্রবন্ধ উপস্থাপন",
-    titleEn: "Keynote at Dhaka Climate Architecture Summit",
-    subtitleBn: "ভার্টিক্যাল গ্রিন ওয়াল ও রেইনওয়াটার হারভেস্টিং কৌশল প্রদর্শনী",
-    subtitleEn: "Showcasing living wall engineering and stormwater harvesting",
-    image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=800&auto=format&fit=crop",
-    dateBn: "জুন ২০২৬",
-    dateEn: "June 2026",
-  },
-  {
-    id: "act-5",
-    titleBn: "কমিউনিটি ছাদবাগান ও ড্রিপ সেচ প্রশিক্ষণ কর্মশালা",
-    titleEn: "Community Rooftop & Drip Irrigation Workshop",
-    subtitleBn: "গৃহমালিক ও প্রকৃতিপ্রেমীদের জন্য আধুনিক বাগান ব্যবস্থাপনার হাতে-কলমে প্রশিক্ষণ",
-    subtitleEn: "Hands-on masterclass for home gardeners on organic soils and micro-drip",
-    image: "https://images.unsplash.com/photo-1584467735871-8e85353a8413?q=80&w=800&auto=format&fit=crop",
-    dateBn: "মে ২০২৬",
-    dateEn: "May 2026",
-  },
-];
 
 export default function ShmaRecentActivities() {
   const { language, t } = useLanguage();
@@ -80,16 +29,15 @@ export default function ShmaRecentActivities() {
           const items = Array.isArray(data) ? data : data?.items || [];
           if (items.length > 0) {
             const mapped: ActivityItem[] = items.slice(0, 5).map((g: any, idx: number) => {
-              const fallback = activities[idx % activities.length];
               return {
                 id: g._id || g.id || `act-${idx}`,
-                titleBn: g.titleBn || g.title || fallback?.titleBn || "গ্রিন ল্যান্ডস্কেপ কার্যক্রম",
-                titleEn: g.titleEn || g.title || fallback?.titleEn || "Green Landscape Activity",
-                subtitleBn: g.subtitleBn || g.category || g.descBn || fallback?.subtitleBn || "স্টুডিও আপডেট",
-                subtitleEn: g.subtitleEn || g.category || g.descEn || fallback?.subtitleEn || "Studio Update",
-                image: g.imageUrl || g.image || fallback?.image || "/hero_plants.png",
-                dateBn: g.dateBn || fallback?.dateBn || "২০২৬",
-                dateEn: g.dateEn || fallback?.dateEn || "2026",
+                titleBn: g.titleBn || g.title || "স্টুডিও ল্যান্ডস্কেপ প্রকল্প",
+                titleEn: g.titleEn || g.title || "Studio Landscape Showcase",
+                subtitleBn: g.category || g.descBn || "স্থাপত্য ও সবুজায়ন",
+                subtitleEn: g.category || g.descEn || "Landscape Architecture",
+                image: g.imageUrl || g.image || (idx % 2 === 0 ? "/hero_plants.png" : "/featured_plant.png"),
+                dateBn: g.dateBn || "২০২৬",
+                dateEn: g.dateEn || "2026",
               };
             });
             setActivityList(mapped);
@@ -130,7 +78,7 @@ export default function ShmaRecentActivities() {
           <div key={item.id} className="space-y-3 group cursor-pointer">
             <div className="aspect-[3/4] overflow-hidden bg-stone-100 relative">
               <img
-                src={item.image}
+                src={optimizeImageUrl(item.image, 600)}
                 alt={item.titleEn}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 onError={(e) => {

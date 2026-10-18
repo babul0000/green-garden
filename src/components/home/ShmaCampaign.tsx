@@ -24,7 +24,7 @@ const campaigns: CampaignItem[] = [
     titleEn: "BIOPHILIC BANGLADESH",
     subtitleBn: "শহুরে ধূসর কংক্রিটে জীবন্ত ইকোসিস্টেম ও নির্মল বাতাসের মেলবন্ধন",
     subtitleEn: "Restoring Living Natural Ecosystems to Urban Architecture",
-    image: "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1600&auto=format&fit=crop",
+    image: "/featured_plant.png",
   },
 ];
 
@@ -71,8 +71,7 @@ export default function ShmaCampaign({ campaignConfig }: { campaignConfig?: Camp
           alt={language === "bn" ? active.titleBn : active.titleEn}
           className="w-full h-full object-cover transition-all duration-1000 scale-100"
           onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1600&auto=format&fit=crop";
+            (e.target as HTMLImageElement).src = "/hero_plants.png";
           }}
         />
         <div className="absolute inset-0 bg-black/50"></div>

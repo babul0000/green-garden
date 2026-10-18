@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "বাংলাদেশের শীর্ষস্থানীয় আবাসিক, বাণিজ্যিক ও রিসোর্ট ল্যান্ডস্কেপ আর্কিটেকচার প্রকল্পের গ্যালারি ও কেস স্টাডি।",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
+        url: "/hero_plants.png",
         alt: "AR Green Garden Landscape Portfolio",
       },
     ],
@@ -20,7 +20,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "A R Green Garden",
-  image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
+  image: "/hero_plants.png",
   telephone: "01883012641",
   email: "info@argreengarden.com",
   address: {

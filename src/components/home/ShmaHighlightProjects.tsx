@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { toBnDigits } from "@/lib/formatters";
 
+import { optimizeImageUrl } from "@/lib/utils";
+
 export interface HighlightProjectItem {
   id: string;
   slug?: string;
@@ -16,8 +18,8 @@ export interface HighlightProjectItem {
   locationEn: string;
   descBn: string;
   descEn: string;
+  imageUrl: string;
   videoUrl?: string;
-  imageUrl?: string;
   year?: string;
   area?: string;
   client?: string;
@@ -27,60 +29,6 @@ export interface HighlightProjectItem {
     greenCoverage?: string;
   };
 }
-
-const SHMA_DEFAULT_PROJECTS: HighlightProjectItem[] = [
-  {
-    id: "dhanmondi-sky-forest",
-    slug: "dhanmondi-sky-forest",
-    nameBn: "ধানমন্ডি স্কাই ফরেস্ট ও বায়োফিলিক টেরেস",
-    nameEn: "Dhanmondi Sky Forest & Bio-Terrace",
-    categoryBn: "লাক্সারি ছাদবাগান ও রেসিডেন্সিয়াল",
-    categoryEn: "Luxury Rooftop & Residential",
-    locationBn: "রোড ৯/এ, ধানমন্ডি, ঢাকা, বাংলাদেশ",
-    locationEn: "Road 9/A, Dhanmondi, Dhaka, Bangladesh",
-    descBn: "কংক্রিট ছাদকে রূপান্তর করা হয়েছে সবুজ বায়োফিলিক স্বর্গে—যেখানে রয়েছে মাল্টি-লেয়ার ১০০% ওয়াটারপ্রুফ ড্রেনেজ, সুপরিকল্পিত জাপানিজ কার্পেট ঘাসের লন এবং মেহগনি কাঠের ছায়ানিবিড় পারগোলা।",
-    descEn: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.",
-    imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
-    year: "2026",
-    area: "3,800 sq.ft",
-    client: "Tanvir Rahman",
-    ecoMetrics: { tempDrop: "-5.0°C", rainwater: "100% Drainage Safe", greenCoverage: "80%" },
-  },
-  {
-    id: "gulshan-green-tower",
-    slug: "gulshan-green-tower",
-    nameBn: "গুলশান করপোরেট লিভিং গ্রিন ওয়াল",
-    nameEn: "Gulshan Corporate Living Green Wall",
-    categoryBn: "কর্মক্ষেত্র ও বায়োফিলিক স্থাপত্য",
-    categoryEn: "Corporate Workplace & Vertical Forest",
-    locationBn: "গুলশান এভিনিউ, ঢাকা, বাংলাদেশ",
-    locationEn: "Gulshan Avenue, Dhaka, Bangladesh",
-    descBn: "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
-    descEn: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air in central Gulshan.",
-    imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=1200",
-    year: "2025",
-    area: "6,400 sq.ft",
-    client: "BTI Landmark",
-    ecoMetrics: { tempDrop: "-3.2°C", rainwater: "Automated Drip", greenCoverage: "95%" },
-  },
-  {
-    id: "coxs-bazar-resort",
-    slug: "coxs-bazar-resort",
-    nameBn: "কক্সবাজার ট্রপিক্যাল ইকো রিসোর্ট",
-    nameEn: "Cox's Bazar Tropical Eco Resort",
-    categoryBn: "রিসোর্ট ও হসপিটালিটি ল্যান্ডস্কেপ",
-    categoryEn: "Resort & Hospitality Landscape",
-    locationBn: "মেরিন ড্রাইভ, কক্সবাজার, বাংলাদেশ",
-    locationEn: "Marine Drive, Cox's Bazar, Bangladesh",
-    descBn: "সমুদ্র উপকূলের লবণাক্ত আবহাওয়া ও আর্দ্রতা উপযোগী দেশীয় উদ্ভিদের সমন্বয়ে নির্মিত উন্মুক্ত ল্যান্ডস্কেপ ও পরিবেশবান্ধব রিট্রিট মাস্টারপ্ল্যান।",
-    descEn: "Coastal landscape masterplan tailored for sea breezes and saline soil conditions, featuring salt-tolerant endemic trees and natural water retention ponds along the marine coastline.",
-    imageUrl: "/hero_plants.png",
-    year: "2025",
-    area: "35,000 sq.m",
-    client: "Ocean Paradise Retreats",
-    ecoMetrics: { tempDrop: "-4.0°C", rainwater: "Retention Ponds", greenCoverage: "70%" },
-  },
-];
 
 const CATEGORY_MAP_BN: Record<string, string> = {
   "Rooftop Garden": "লাক্সারি ছাদবাগান",
@@ -110,9 +58,6 @@ const LOCATION_MAP_BN: Record<string, string> = {
   "Dhaka, Bangladesh": "ঢাকা, বাংলাদেশ",
   "Marine Drive, Cox's Bazar, Bangladesh": "মেরিন ড্রাইভ, কক্সবাজার, বাংলাদেশ",
   "Cox's Bazar, Bangladesh": "কক্সবাজার, বাংলাদেশ",
-  "Prachuap Khiri Khan, Thailand": "প্রাচুয়াপ খিরি খান, থাইল্যান্ড",
-  "Ploenchit, Bangkok, Thailand": "প্লয়েনচিট, ব্যাংকক, থাইল্যান্ড",
-  "Singapore": "সিঙ্গাপুর",
   "Purbachal New Town, Dhaka, Bangladesh": "পূর্বাচল নিউ টাউন, ঢাকা, বাংলাদেশ",
 };
 
@@ -123,21 +68,11 @@ const DESC_MAP_BN: Record<string, string> = {
     "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
   "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air in central Gulshan.":
     "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
-  "Mapletree Business City II aims to create an ‘Urban Wilderness’ by integrating modern workspaces with an eco-friendly, nature-inspired landscape.":
-    "ম্যাপলট্রি বিজনেস সিটি ২ কর্মক্ষেত্র ও প্রকৃতির মেলবন্ধনে একটি 'আরবান ওয়াইল্ডারনেস' সৃষ্টি করেছে। সংলগ্ন নেচার রিজার্ভের অনুপ্রেরণায় পরিকল্পিত এই ল্যান্ডস্কেপ জীববৈচিত্র্যের এক অনন্য প্রতীক।",
-  "Envisioned as a tranquil retreat embraced by nature. The design weaves around existing trees, preserving the site’s forest character.":
-    "প্রকৃতির পরম কোলে এক শান্ত প্রশান্তিময় আশ্রম। সাইটের বিদ্যমান বিশালাকার বনস্পতিগুলোকে অক্ষত রেখে নকশা করা হয়েছে প্রতিটি কর্নার—যেখানে আলো, গঠন ও নিসর্গ মিলেমিশে এক অভূতপূর্ব অনুভূতি সৃষ্টি করে।",
 };
 
 const BACKUP_DISTINCT_PROJECT_IMAGES = [
-  "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=1200",
-  "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?q=80&w=1200",
-  "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200",
-  "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
-  "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=1200",
-  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
-  "https://images.unsplash.com/photo-1558904541-efa8c3a30fc9?q=80&w=1200",
-  "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=1200",
+  "/hero_plants.png",
+  "/featured_plant.png",
 ];
 
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
@@ -157,34 +92,24 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
             const usedImages = new Set<string>();
 
             const mapped: HighlightProjectItem[] = items.map((p: any, idx: number) => {
-              const fallback =
-                SHMA_DEFAULT_PROJECTS.find(
-                  (df) =>
-                    df.slug === p.slug ||
-                    df.id === p.id ||
-                    df.nameEn?.toLowerCase() === (p.name || p.title || "").toLowerCase()
-                ) || SHMA_DEFAULT_PROJECTS[idx % SHMA_DEFAULT_PROJECTS.length] || SHMA_DEFAULT_PROJECTS[0];
-
-              const catEn = p.categoryEn || p.category || fallback?.categoryEn || "Landscape Design";
+              const catEn = p.categoryEn || p.category || "Landscape Architecture";
               const catBn =
                 p.categoryBn ||
                 CATEGORY_MAP_BN[p.category] ||
                 CATEGORY_MAP_BN[catEn] ||
-                fallback?.categoryBn ||
-                "ল্যান্ডস্কেপ ডিজাইন";
+                "ল্যান্ডস্কেপ স্থাপত্য";
 
-              const locEn = p.locationEn || p.location || fallback?.locationEn || "Dhaka, Bangladesh";
+              const locEn = p.locationEn || p.location || "Dhaka, Bangladesh";
               const locBn =
                 p.locationBn ||
                 LOCATION_MAP_BN[p.location] ||
                 LOCATION_MAP_BN[locEn] ||
-                fallback?.locationBn ||
                 "ঢাকা, বাংলাদেশ";
 
-              const descEn = p.descEn || p.description || p.desc || fallback?.descEn || "";
+              const descEn = p.descEn || p.description || p.desc || "";
               let descBn = p.descBn;
               if (!descBn || descBn === descEn) {
-                descBn = DESC_MAP_BN[p.description] || DESC_MAP_BN[descEn] || fallback?.descBn || descEn;
+                descBn = DESC_MAP_BN[p.description] || DESC_MAP_BN[descEn] || descEn;
               }
 
               // Image deduplication logic: find candidate image not yet seen in this list
@@ -195,7 +120,6 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 p.image,
                 p.coverImage,
                 p.beforeImage,
-                fallback?.imageUrl,
               ].filter(Boolean);
 
               let selectedImage = "";
@@ -209,30 +133,30 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
 
               if (!selectedImage) {
                 const uniqueBackup = BACKUP_DISTINCT_PROJECT_IMAGES.find((img) => !usedImages.has(img));
-                selectedImage = uniqueBackup || "/hero_plants.png";
+                selectedImage = uniqueBackup || candidateImages[0] || "/hero_plants.png";
                 if (uniqueBackup) usedImages.add(uniqueBackup);
               }
 
               return {
                 id: p._id || p.id || `proj-${idx}`,
-                slug: p.slug || fallback?.slug,
-                nameBn: p.titleBn || p.nameBn || fallback?.nameBn || p.title || p.name || "",
-                nameEn: p.titleEn || p.nameEn || p.title || p.name || fallback?.nameEn || "",
+                slug: p.slug || p._id || p.id,
+                nameBn: p.titleBn || p.nameBn || p.title || p.name || "",
+                nameEn: p.titleEn || p.nameEn || p.title || p.name || "",
                 categoryBn: catBn,
                 categoryEn: catEn,
                 locationBn: locBn,
                 locationEn: locEn,
                 descBn: descBn,
                 descEn: descEn,
-                imageUrl: selectedImage,
-                videoUrl: p.videoUrl || fallback?.videoUrl,
-                year: p.year || fallback?.year || "2026",
-                area: p.area || p.budgetRange || fallback?.area || "3,500 sq.ft",
-                client: p.client || p.clientName || fallback?.client || "Private Client",
-                ecoMetrics: fallback?.ecoMetrics || {
-                  tempDrop: "-3.5°C",
-                  rainwater: "100% Drainage Safe",
-                  greenCoverage: "75%",
+                imageUrl: optimizeImageUrl(selectedImage, 1200),
+                videoUrl: p.videoUrl,
+                year: p.year || "২০২৬",
+                area: p.area || p.budgetRange || "৩,৫০০ বর্গফুট",
+                client: p.client || p.clientName || "প্রাইভেট ক্লায়েন্ট",
+                ecoMetrics: {
+                  tempDrop: "-৩.৫°C",
+                  rainwater: "১০০% নিরাপদ ড্রেনেজ",
+                  greenCoverage: "৭৫%",
                 },
               };
             });
@@ -243,7 +167,6 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
         // preserve empty state
       }
     };
-    fetchLiveProjects();
   }, []);
 
   if (projectList.length === 0) {

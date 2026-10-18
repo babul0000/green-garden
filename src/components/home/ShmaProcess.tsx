@@ -3,6 +3,8 @@
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
+import { optimizeImageUrl } from "@/lib/utils";
+
 interface ProcessStep {
   titleBn: string;
   titleEn: string;
@@ -15,30 +17,30 @@ const steps: ProcessStep[] = [
   {
     titleBn: "সমস্যা ও সাইট বিশ্লেষণ",
     titleEn: "Define Problem & Site Survey",
-    descBn: "ক্লায়েন্টের নির্দিষ্ট চাহিদা ও সাইটের পারিপার্শ্বিক চ্যালেঞ্জ গভীরভাবে পর্যবেক্ষণ করে প্রকল্পের সর্বোচ্চ সম্ভাবনা নিশ্চিত করা।",
+    descBn: "ক্লায়েন্টের নির্দিষ্ট চাহিদা ও সাইটের পারিপার্স্বিক চ্যালেঞ্জ গভীরভাবে পর্যবেক্ষণ করে প্রকল্পের সর্বোচ্চ সম্ভাবনা নিশ্চিত করা।",
     descEn: "Connecting with the client to understand requirements, analyzing spatial constraints, and uncovering true ecological potential.",
-    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=800&auto=format&fit=crop",
+    image: "/hero_plants.png",
   },
   {
     titleBn: "নকশা ও সৃজনশীল ধারণা",
     titleEn: "Idea & Biophilic Concept",
     descBn: "সাইট জরিপ ও গবেষণার মাধ্যমে সমাজ এবং প্রকৃতির জন্য টেকসই পরিবেশ সৃষ্টিতে আধুনিক স্থাপত্য নকশার রূপরেখা প্রণয়ন।",
     descEn: "Translating ecological research and client aspiration into cohesive biophilic master concepts and spatial zoning.",
-    image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+    image: "/featured_plant.png",
   },
   {
     titleBn: "বৈজ্ঞানিক ডেটা ও সিমুলেশন",
     titleEn: "Data Driven & Microclimate",
     descBn: "মাইক্রোক্লাইমেট, সূর্যালোকের ব্যাপ্তি ও বৃষ্টির পানি প্রবাহের ডিজিটাল সিমুলেশন করে বৈজ্ঞানিক ভিত্তিতে পরিকল্পনা চূড়ান্তকরণ।",
     descEn: "Simulating microclimate, sunlight patterns, soil biology, and rainfall catchment for environmentally grounded decisions.",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=800&auto=format&fit=crop",
+    image: "/hero_plants.png",
   },
   {
     titleBn: "টার্ন-কি বাস্তবায়ন ও যত্ন",
     titleEn: "Prototyping & Execution",
     descBn: "থ্রিডি মডেল, পরীক্ষামূলক উদ্ভিদ নির্বাচন এবং শতভাগ ওয়াটারপ্রুফ মেমব্রেনসহ দক্ষ প্রকৌশলীদের দিয়ে সাইটে নিখুঁত বাস্তবায়ন।",
     descEn: "Transforming concepts into living landscapes through physical trials, waterproof layers, and turnkey engineering oversight.",
-    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+    image: "/featured_plant.png",
   },
 ];
 
@@ -64,7 +66,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         titleEn: s.titleEn || steps[idx % steps.length]?.titleEn || "",
         descBn: s.descBn || steps[idx % steps.length]?.descBn || "",
         descEn: s.descEn || steps[idx % steps.length]?.descEn || "",
-        image: s.image || steps[idx % steps.length]?.image || "",
+        image: s.image || steps[idx % steps.length]?.image || "/hero_plants.png",
       }))
     : steps;
 
@@ -76,7 +78,9 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {t("আমাদের কার্যপ্রণালী", "Our Methodology")}
+              {language === "bn"
+                ? (processConfig?.titleBn || t("আমাদের কার্যপ্রণালী", "Our Methodology"))
+                : (processConfig?.titleEn || t("Our Methodology", "আমাদের কার্যপ্রণালী"))}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
@@ -93,19 +97,15 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         <div className="lg:col-span-3 space-y-3">
           <h3 className="font-display font-light text-2xl sm:text-3xl text-[#3d2e17] leading-tight">
             {language === "bn" ? (
-              processConfig?.titleBn || (
-                <>
-                  টেকসই ও আধুনিক সমাধানের
-                  <span className="block text-[#5a9dff] mt-1">সুপরিকল্পিত যাত্রা</span>
-                </>
-              )
+              <>
+                টেকসই ও আধুনিক সমাধানের
+                <span className="block text-[#5a9dff] mt-1">সুপরিকল্পিত যাত্রা</span>
+              </>
             ) : (
-              processConfig?.titleEn || (
-                <>
-                  A Thoughtful Journey to
-                  <span className="block text-[#5a9dff] mt-1">Transformative Solutions</span>
-                </>
-              )
+              <>
+                A Thoughtful Journey to
+                <span className="block text-[#5a9dff] mt-1">Transformative Solutions</span>
+              </>
             )}
           </h3>
           <p className="font-sans text-xs sm:text-sm text-[#75787b] font-light leading-relaxed pt-2">
@@ -122,7 +122,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
             <div key={idx} className="space-y-3 group">
               <div className="aspect-[4/3] overflow-hidden bg-stone-100">
                 <img
-                  src={step.image}
+                  src={optimizeImageUrl(step.image, 600)}
                   alt={step.titleEn}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={(e) => {

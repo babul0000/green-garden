@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { toBnDigits } from "@/lib/formatters";
+import { optimizeImageUrl } from "@/lib/utils";
 
 export interface ProjectDetail {
   id: string;
@@ -61,7 +62,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     challengesEn: "Micro-fissures in the existing roof slab caused moisture seepage to lower apartments, alongside strict dead-load limitations.",
     solutionBn: "৩ স্তরের ইলাস্টোমেরিক পলিমার মেমব্রেন, লাইটওয়েট এক্সপ্যান্ডেড ক্লে অ্যাগ্রিগেট এবং স্বয়ংক্রিয় রুট-জোন ড্রিপ সেচ স্থাপন।",
     solutionEn: "Applied 3-stage elastomeric waterproofing membranes, lightweight expanded clay aggregates with cocopeat media, and precision subsurface drip fertigation.",
-    imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200",
+    imageUrl: "/hero_plants.png",
     metrics: {
       tempDrop: "-4.5°C",
       rainwater: "100% Drainage Safe",
@@ -94,7 +95,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     challengesEn: "High ambient midday heat and turbulent wind corridors along Gulshan Avenue that quickly desiccate conventional vertical walls.",
     solutionBn: "স্মার্ট সেন্সর নিয়ন্ত্রিত ড্রিপ ইমিটার, টেকসই জিওটেক্সটাইল পকেট এবং বায়ুপ্রবাহ সহনশীল স্থানীয় ভ্যারাইটি নির্বাচন।",
     solutionEn: "Zone-modulated pressure compensating drippers with solar sensors, UV-stabilized geotextile cellular pockets, and wind-hardy air filtering plants.",
-    imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?q=80&w=1200",
+    imageUrl: "/featured_plant.png",
     metrics: {
       tempDrop: "-3.8°C",
       rainwater: "70% Water Saved",
@@ -152,7 +153,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     area: "5,200 sq.ft",
     descBn: "মার্বেল পাথরের নান্দনিক জলপ্রপাত, উষ্ণ ল্যান্ডস্কেপ লাইটিং এবং সুবিন্যস্ত বহুবর্ষজীবী বাগান উদ্ভিদের সমাহারে নির্মিত এক অনন্য অভিজাত ব্যক্তিগত অঙ্গন।",
     descEn: "Featuring architectural marble water cascades, ambient evening lighting, and rare perennial flora integrated into a private residential estate.",
-    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200",
+    imageUrl: "/hero_plants.png",
     metrics: {
       tempDrop: "-3.0°C",
       rainwater: "Filtered Recirculation",
@@ -181,7 +182,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     area: "42,000 sq.m",
     descBn: "নগরবাসীর শারীরিক ও মানসিক প্রশান্তির জন্য সানকেন প্লাজা, হাঁটার ট্রেইল এবং বৃষ্টির পানি সংরক্ষণের সমন্বয়ে পরিকল্পিত আধুনিক গ্রিন স্পেস।",
     descEn: "A vibrant urban gathering place featuring sunken rain gardens, walking trails, and permeable green paving designed for community wellness.",
-    imageUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1200",
+    imageUrl: "/featured_plant.png",
     metrics: {
       tempDrop: "-4.8°C",
       rainwater: "Zero-Runoff Bioswales",
@@ -372,12 +373,11 @@ export default function ProjectsPage() {
                   />
                 ) : (
                   <img
-                    src={project.imageUrl}
+                    src={optimizeImageUrl(project.imageUrl, 1200)}
                     alt={project.nameEn}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200";
+                      (e.target as HTMLImageElement).src = "/hero_plants.png";
                     }}
                   />
                 )}
@@ -479,7 +479,7 @@ export default function ProjectsPage() {
                 />
               ) : (
                 <img
-                  src={selectedProject.imageUrl}
+                  src={optimizeImageUrl(selectedProject.imageUrl, 1600)}
                   alt={selectedProject.nameEn}
                   className="w-full h-full object-cover"
                 />

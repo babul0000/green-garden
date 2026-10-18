@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop",
+        url: "/hero_plants.png",
         width: 1200,
         height: 630,
         alt: "AR Green Garden - Landscape Architecture Studio",

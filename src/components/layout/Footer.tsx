@@ -82,7 +82,7 @@ export default function Footer() {
         {/* Background Image Overlay */}
         <div className="absolute inset-0 w-full h-full opacity-25">
           <img
-            src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1600&auto=format&fit=crop"
+            src="/hero_plants.png"
             alt="Community background"
             className="w-full h-full object-cover"
           />

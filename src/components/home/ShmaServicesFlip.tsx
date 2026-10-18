@@ -79,7 +79,7 @@ const services: ShmaService[] = [
 
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
-  const [serviceList, setServiceList] = useState<ShmaService[]>(services);
+  const [serviceList, setServiceList] = useState<ShmaService[]>([]);
   const [flippedId, setFlippedId] = useState<string | null>(null);
 
   const toggleFlip = (id: string) => {
@@ -98,24 +98,28 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
               const fallback = services[idx % services.length];
               return {
                 id: String(idx + 1).padStart(2, "0"),
-                icon: s.icon || fallback.icon || "🌱",
-                titleBn: s.bengaliTitle || s.titleBn || fallback.titleBn || s.label || s.title || "",
-                titleEn: s.label || s.title || s.titleEn || fallback.titleEn || "",
-                descBn: s.descBn || fallback.descBn || s.desc || s.description || "",
-                descEn: s.descEn || s.desc || s.description || fallback.descEn || "",
-                scopeBn: s.scopeBn || fallback.scopeBn || ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "ড্রেনেজ সমন্বয়", "টার্ন-কি সাইট বাস্তবায়ন"],
-                scopeEn: s.scopeEn || s.features || fallback.scopeEn || ["Concept & 3D Visualization", "Drainage Architecture", "Turn-key Implementation"],
+                icon: s.icon || fallback?.icon || "🌱",
+                titleBn: s.titleBn || s.bengaliTitle || fallback?.titleBn || s.label || s.title || "",
+                titleEn: s.titleEn || s.label || s.title || fallback?.titleEn || "",
+                descBn: s.descBn || fallback?.descBn || s.desc || s.description || "",
+                descEn: s.descEn || s.desc || s.description || fallback?.descEn || "",
+                scopeBn: s.scopeBn || fallback?.scopeBn || ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "ড্রেনেজ সমন্বয়", "টার্ন-কি সাইট বাস্তবায়ন"],
+                scopeEn: s.scopeEn || s.features || fallback?.scopeEn || ["Concept & 3D Visualization", "Drainage Architecture", "Turn-key Implementation"],
               };
             });
             setServiceList(mapped);
           }
         }
       } catch (e) {
-        // fallback to default
+        // preserve empty state
       }
     };
     fetchServices();
   }, []);
+
+  if (serviceList.length === 0) {
+    return null;
+  }
 
   const gridColsClass =
     columns === 1

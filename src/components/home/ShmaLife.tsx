@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { optimizeImageUrl } from "@/lib/utils";
 
 interface IStudioLifeData {
   titleEn: string;
@@ -61,12 +62,11 @@ export default function ShmaLife() {
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
         <img
-          src={data.image || DEFAULT_STUDIO_LIFE.image}
+          src={optimizeImageUrl(data.image || DEFAULT_STUDIO_LIFE.image, 1600)}
           alt={language === "bn" ? data.titleBn : data.titleEn}
           className="w-full h-full object-cover transition-opacity duration-700"
           onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop";
+            (e.target as HTMLImageElement).src = "/hero_plants.png";
           }}
         />
         <div className="absolute inset-0 bg-black/75 backdrop-blur-[1px]"></div>

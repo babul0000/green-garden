@@ -81,8 +81,9 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
     const video = videoRef.current;
 
     const isMobile = window.innerWidth <= 768;
+    const isReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (isMobile) {
+    if (isMobile || isReducedMotion) {
       gsap.set(enable, { color: states.state4.line01 });
       gsap.set([change, for_text, earth], { color: states.state4.allText });
       gsap.set(container, { backgroundColor: states.state4.bgColor });

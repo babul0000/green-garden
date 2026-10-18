@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import type { IProject } from "@/types";
+import { optimizeImageUrl } from "@/lib/utils";
 
 export default function ProjectDetailsPage() {
   const params = useParams();
@@ -36,7 +37,7 @@ export default function ProjectDetailsPage() {
         slug: slug,
         client: "Private Client",
         category: "Landscaping",
-        imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+        imageUrl: "/hero_plants.png",
         location: "Dhaka, Bangladesh",
         duration: "3 Weeks",
         budgetRange: "BDT 3.5 Lakhs",
@@ -85,7 +86,7 @@ export default function ProjectDetailsPage() {
 
         {/* Hero image */}
         <div className="h-64 md:h-[450px] rounded-3xl overflow-hidden shadow-md">
-          <img src={project.imageUrl} className="w-full h-full object-cover" alt={project.name} />
+          <img src={optimizeImageUrl(project.imageUrl, 1200)} className="w-full h-full object-cover" alt={project.name} />
         </div>
 
         {/* Grid Details */}
