@@ -85,5 +85,13 @@
 - **Automated Alerts:** Verified daily reminder cron route authorization guards against `CRON_SECRET`.
 - **Infrastructure Sync:** Staged deployment configuration for zero-downtime execution.
 
+---
+
+## 📅 October 23, 2026 — Observability & Security Hardening
+- **Health Probe Endpoint:** Implemented `/api/health` providing real-time PostgreSQL database latency and service diagnostics.
+- **Security Headers:** Added `X-Content-Type-Options`, `X-Frame-Options`, and `Referrer-Policy` across all routes via `next.config.mjs`.
+- **Cache Isolation:** Enforced `no-store` cache controls on monitoring probe to prevent stale status reports.
+
+
 
 
