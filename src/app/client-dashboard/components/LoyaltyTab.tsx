@@ -9,9 +9,34 @@ interface LoyaltyTabProps {
 
 export default function LoyaltyTab({ user }: LoyaltyTabProps) {
   const { t } = useLanguage();
+  const [claimStatus, setClaimStatus] = React.useState<string | null>(null);
+
+  const handleClaim = () => {
+    setClaimStatus(
+      t(
+        "আপনার ফ্রি সয়েল টেস্ট রিকোয়েস্ট অ্যাডমিন টিমের কাছে সফলভাবে পাঠানো হয়েছে! আমাদের প্রতিনিধি শীঘ্রই যোগাযোগ করবেন।",
+        "Your complimentary soil test request was sent to our team! An agent will contact you shortly."
+      )
+    );
+    setTimeout(() => setClaimStatus(null), 5000);
+  };
 
   return (
     <div className="space-y-6 mt-6 animate-fade-in-up">
+      {claimStatus && (
+        <div className="p-4 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl flex items-center justify-between text-emerald-300 text-xs font-mono animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span>✅</span>
+            <span>{claimStatus}</span>
+          </div>
+          <button
+            onClick={() => setClaimStatus(null)}
+            className="text-white/60 hover:text-white ml-2 text-sm"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       <div className="flex justify-between items-center pb-4 border-b border-white/10">
         <div>
           <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest block">
@@ -137,7 +162,7 @@ export default function LoyaltyTab({ user }: LoyaltyTabProps) {
               {t("বিনামূল্যে অন্তর্ভুক্ত", "Complimentary")}
             </span>
             <button
-              onClick={() => alert("আপনার ফ্রি সয়েল টেস্ট রিকোয়েস্ট অ্যাডমিন টিমের কাছে পাঠানো হয়েছে!")}
+              onClick={handleClaim}
               className="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-white border border-white/15 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer"
             >
               {t("ক্লেম করুন", "Claim Service")}
