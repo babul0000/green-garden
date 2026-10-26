@@ -398,65 +398,7 @@ export default function Sidebar({
     },
   ];
 
-  // Helper to find the group containing a specific tabId
-  const getGroupIdForTab = (tabId: string): string => {
-    for (const group of menuGroups) {
-      if (group.items.some((i) => i.id === tabId)) {
-        return group.id;
-      }
-    }
-    return "group_overview";
-  };
-
-  // State to track collapsed/expanded groups with localStorage persistence
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem("adminSidebarCollapsedGroups");
-        if (stored) {
-          return JSON.parse(stored);
-        }
-      }
-    } catch (err) {
-      console.warn("Failed to read sidebar groups from localStorage:", err);
-    }
-    return {};
-  });
-
-  // Ensure active tab's group is open by default whenever activeTab changes
-  useEffect(() => {
-    const activeGroupId = getGroupIdForTab(activeTab);
-    setCollapsedGroups((prev) => {
-      if (prev[activeGroupId] === true) {
-        const updated = { ...prev, [activeGroupId]: false };
-        try {
-          if (typeof window !== "undefined") {
-            localStorage.setItem("adminSidebarCollapsedGroups", JSON.stringify(updated));
-          }
-        } catch (e) {
-          console.warn("Failed to save sidebar group state:", e);
-        }
-        return updated;
-      }
-      return prev;
-    });
-  }, [activeTab]);
-
-  // Toggle group expansion state
-  const toggleGroup = (groupId: string) => {
-    setCollapsedGroups((prev) => {
-      const isCurrentlyCollapsed = !!prev[groupId];
-      const updated = { ...prev, [groupId]: !isCurrentlyCollapsed };
-      try {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("adminSidebarCollapsedGroups", JSON.stringify(updated));
-        }
-      } catch (err) {
-        console.warn("Failed to store sidebar group state:", err);
-      }
-      return updated;
-    });
-  };
+  // Groups are always expanded — no collapse state needed
 
   // Prevent background scroll when mobile drawer is open
   useEffect(() => {
@@ -481,10 +423,19 @@ export default function Sidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleTabClick = (tabId: string) => {
+  const handleTabClick = (tabId: string, isMobileView = false) => {
     setActiveTab(tabId);
-    if (onClose) {
+    // Only close drawer on mobile — desktop sidebar stays visible permanently
+    if (isMobileView && onClose) {
       onClose();
+    }
+  };
+
+  const handleGroupHeaderClick = (group: MenuGroup, isMobileView = false) => {
+    // Clicking a group header navigates to its first accessible item
+    const firstItem = group.items.find((i) => canAccessTab(user?.role, i.id));
+    if (firstItem) {
+      handleTabClick(firstItem.id, isMobileView);
     }
   };
 
@@ -535,84 +486,80 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* 2. Scrollable Collapsible Navigation Menu */}
-      <div className="flex flex-col gap-3.5 flex-grow overflow-y-auto pr-1 custom-scrollbar my-3">
+      {/* 2. Scrollable Navigation Menu — Always Expanded Groups */}
+      <div className="flex flex-col gap-3 flex-grow overflow-y-auto pr-1 custom-scrollbar my-3">
         {menuGroups.map((group) => {
           // Filter items based strictly on RBAC
           const visibleItems = group.items.filter((tab) => canAccessTab(user?.role, tab.id));
           if (visibleItems.length === 0) return null;
 
-          const isCollapsed = !!collapsedGroups[group.id];
           const hasActiveItem = visibleItems.some((i) => i.id === activeTab);
 
           return (
-            <div key={group.id} className="flex flex-col rounded-2xl bg-black/[0.015] border border-[#D6D2C4]/50 overflow-hidden">
+            <div key={group.id} className="flex flex-col">
               
-              {/* Collapsible Group Header Button (Minimum 44px Touch Target) */}
+              {/* Group Label — clickable, navigates to first item, never collapses */}
               <button
                 type="button"
-                onClick={() => toggleGroup(group.id)}
-                className={`min-h-[44px] w-full flex items-center justify-between px-3 py-2.5 transition-colors cursor-pointer select-none text-left ${
-                  hasActiveItem ? "bg-[#2B4D33]/10 text-[#2B4D33]" : "hover:bg-black/[0.04] text-[#4A4D50]"
+                onClick={() => handleGroupHeaderClick(group, isMobileView)}
+                className={`flex items-center justify-between px-2 py-1.5 mb-1 rounded-lg transition-colors cursor-pointer text-left group ${
+                  hasActiveItem ? "text-[#2B4D33]" : "text-[#75787B] hover:text-[#4A4D50]"
                 }`}
-                aria-expanded={!isCollapsed}
-                title={`Toggle ${group.title}`}
+                title={`Go to ${group.title}`}
               >
-                <div className="flex items-center gap-2 min-w-0 pr-1">
-                  <span className={`text-[10px] transition-transform duration-200 text-[#75787B] ${isCollapsed ? "-rotate-90" : "rotate-0"}`}>
-                    ▼
-                  </span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${
+                    hasActiveItem ? "bg-[#2B4D33]" : "bg-[#D6D2C4] group-hover:bg-[#75787B]"
+                  }`} />
                   <span className="text-[10px] uppercase font-mono font-bold tracking-[0.18em] truncate">
                     {group.title}
                   </span>
                 </div>
-                <span className="text-[10px] font-mono text-[#75787B] shrink-0">
+                <span className="text-[10px] font-mono text-[#D6D2C4] shrink-0">
                   {visibleItems.length}
                 </span>
               </button>
 
-              {/* Group Items (Collapsed / Expanded) */}
-              {!isCollapsed && (
-                <nav className="flex flex-col gap-1 p-1.5 pt-0.5">
-                  {visibleItems.map((tab) => {
-                    const isSelected = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => handleTabClick(tab.id)}
-                        className={`min-h-[44px] flex items-center justify-between w-full py-2.5 px-3 rounded-xl text-xs tracking-wide transition-all cursor-pointer ${
-                          isSelected
-                            ? "text-white bg-[#2B4D33] font-semibold shadow-xs"
-                            : "text-[#323232] hover:text-[#121813] hover:bg-black/[0.04]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 truncate min-w-0">
-                          <span className={`shrink-0 transition-colors ${isSelected ? "text-emerald-200" : "text-[#75787B]"}`}>
-                            {tab.icon}
-                          </span>
-                          <div className="flex flex-col text-left truncate min-w-0">
-                            <span className="truncate leading-snug">{tab.labelBn}</span>
-                            <span className={`text-[9px] font-mono truncate leading-none mt-0.5 ${
-                              isSelected ? "text-emerald-100/75" : "text-[#75787B]"
-                            }`}>
-                              {tab.labelEn}
-                            </span>
-                          </div>
-                        </div>
-
-                        {tab.badge !== undefined && (
-                          <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
-                            isSelected ? "bg-white text-[#2B4D33]" : "bg-[#C85A32] text-white"
+              {/* Group Items — always visible, no collapse */}
+              <nav className="flex flex-col gap-0.5 pl-1">
+                {visibleItems.map((tab) => {
+                  const isSelected = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => handleTabClick(tab.id, isMobileView)}
+                      className={`min-h-[40px] flex items-center justify-between w-full py-2 px-3 rounded-xl text-xs tracking-wide transition-all cursor-pointer ${
+                        isSelected
+                          ? "text-white bg-[#2B4D33] font-semibold shadow-xs"
+                          : "text-[#323232] hover:text-[#121813] hover:bg-black/[0.05]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 truncate min-w-0">
+                        <span className={`shrink-0 transition-colors ${isSelected ? "text-emerald-200" : "text-[#75787B]"}`}>
+                          {tab.icon}
+                        </span>
+                        <div className="flex flex-col text-left truncate min-w-0">
+                          <span className="truncate leading-snug">{tab.labelBn}</span>
+                          <span className={`text-[9px] font-mono truncate leading-none mt-0.5 ${
+                            isSelected ? "text-emerald-100/75" : "text-[#75787B]"
                           }`}>
-                            {tab.badge}
+                            {tab.labelEn}
                           </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </nav>
-              )}
+                        </div>
+                      </div>
+
+                      {tab.badge !== undefined && (
+                        <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
+                          isSelected ? "bg-white text-[#2B4D33]" : "bg-[#C85A32] text-white"
+                        }`}>
+                          {tab.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
           );
         })}
