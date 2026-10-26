@@ -423,24 +423,22 @@ export default function Sidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleTabClick = (tabId: string, isMobileView = false) => {
+  const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    // Only close drawer on mobile — desktop sidebar stays visible permanently
-    if (isMobileView && onClose) {
-      onClose();
-    }
+    // DO NOT close drawer on mobile — user should freely navigate all sections
+    // The drawer has its own Close button (X and bottom button)
   };
 
-  const handleGroupHeaderClick = (group: MenuGroup, isMobileView = false) => {
+  const handleGroupHeaderClick = (group: MenuGroup) => {
     // Clicking a group header navigates to its first accessible item
     const firstItem = group.items.find((i) => canAccessTab(user?.role, i.id));
     if (firstItem) {
-      handleTabClick(firstItem.id, isMobileView);
+      handleTabClick(firstItem.id);
     }
   };
 
   const renderSidebarContent = (isMobileView = false) => (
-    <div className="flex flex-col h-full justify-between select-none">
+    <div className="flex flex-col h-full min-h-0 select-none">
       
       {/* 1. Header / Architectural Logo */}
       <div className="space-y-4 pb-4 border-b border-[#D6D2C4] shrink-0">
@@ -487,7 +485,7 @@ export default function Sidebar({
       </div>
 
       {/* 2. Scrollable Navigation Menu — Always Expanded Groups */}
-      <div className="flex flex-col gap-3 flex-grow overflow-y-auto pr-1 custom-scrollbar my-3">
+      <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar my-3">
         {menuGroups.map((group) => {
           // Filter items based strictly on RBAC
           const visibleItems = group.items.filter((tab) => canAccessTab(user?.role, tab.id));
@@ -501,7 +499,7 @@ export default function Sidebar({
               {/* Group Label — clickable, navigates to first item, never collapses */}
               <button
                 type="button"
-                onClick={() => handleGroupHeaderClick(group, isMobileView)}
+                onClick={() => handleGroupHeaderClick(group)}
                 className={`flex items-center justify-between px-2 py-1.5 mb-1 rounded-lg transition-colors cursor-pointer text-left group ${
                   hasActiveItem ? "text-[#2B4D33]" : "text-[#75787B] hover:text-[#4A4D50]"
                 }`}
@@ -528,7 +526,7 @@ export default function Sidebar({
                     <button
                       key={tab.id}
                       type="button"
-                      onClick={() => handleTabClick(tab.id, isMobileView)}
+                      onClick={() => handleTabClick(tab.id)}
                       className={`min-h-[40px] flex items-center justify-between w-full py-2 px-3 rounded-xl text-xs tracking-wide transition-all cursor-pointer ${
                         isSelected
                           ? "text-white bg-[#2B4D33] font-semibold shadow-xs"
@@ -565,9 +563,9 @@ export default function Sidebar({
         })}
       </div>
 
-      {/* 3. Bottom Profile & Studio Portal Link */}
+      {/* 3. Bottom: Profile + Close Button (mobile) + Portal Link */}
       <div className="pt-3 border-t border-[#D6D2C4] flex flex-col gap-2 shrink-0">
-        {/* Public Landing Page Link (Minimum 44px touch target) */}
+        {/* Public Landing Page Link */}
         <Link
           href="/"
           className="min-h-[44px] flex items-center justify-between py-2 px-3 rounded-xl bg-white hover:bg-stone-50 text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
@@ -579,7 +577,7 @@ export default function Sidebar({
           <span className="text-[11px] text-[#2B4D33] group-hover:translate-x-0.5 transition-transform">➔</span>
         </Link>
 
-        {/* User Card & Logout (Minimum 44px touch target) */}
+        {/* User Card & Logout */}
         <div className="min-h-[44px] flex items-center justify-between p-2 rounded-xl bg-white/80 border border-[#D6D2C4] shadow-2xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#2B4D33] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
@@ -607,6 +605,18 @@ export default function Sidebar({
             </svg>
           </button>
         </div>
+
+        {/* Mobile-only: Close Drawer Button */}
+        {isMobileView && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="min-h-[48px] w-full flex items-center justify-center gap-2 rounded-xl bg-[#2B4D33] text-white text-sm font-semibold font-sans cursor-pointer hover:bg-[#3a6645] transition-colors shadow-sm"
+          >
+            <span>✕</span>
+            <span>মেনু বন্ধ করুন</span>
+          </button>
+        )}
       </div>
 
     </div>
