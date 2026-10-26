@@ -35,7 +35,7 @@ const DEFAULT_CONFIG: HomepageConfig = {
   sections: [
     { id: "hero", label: "🎥 Hero Video", visible: true, order: 1, width: "full", columns: 1, padding: "none" },
     { id: "manifesto", label: "✨ Animated Manifesto", visible: true, order: 2, width: "full", columns: 1, padding: "none" },
-    { id: "projects", label: "🏗️ Highlight Projects", visible: true, order: 3, width: "contained", columns: 2, padding: "normal" },
+    { id: "projects", label: "🏗️ Highlight Projects", visible: true, order: 3, width: "full", columns: 1, padding: "none" },
     { id: "services", label: "🌿 Services Flip Cards", visible: true, order: 4, width: "contained", columns: 3, padding: "normal" },
     { id: "process", label: "📐 Our Process", visible: true, order: 5, width: "contained", columns: 4, padding: "normal" },
     { id: "campaign", label: "📣 Campaign Banner", visible: true, order: 6, width: "full", columns: 1, padding: "small" },

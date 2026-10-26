@@ -294,16 +294,16 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
   }
 
   return (
-    <section id="projects" className="py-12 sm:py-24 px-4 sm:px-10 lg:px-16 max-w-[1440px] mx-auto text-[#323232] bg-white">
+    <section id="projects" className="py-14 sm:py-24 px-4 sm:px-8 lg:px-12 w-full max-w-[1600px] mx-auto text-[#323232] bg-white">
       {/* 1. ARCHITECTURAL SECTION HEADER (MATCHING SHMA DESIGNS) */}
-      <div className="mb-10 sm:mb-20">
+      <div className="mb-10 sm:mb-16">
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="space-y-1">
             <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#75787b] block">
               {t("নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
             </span>
             <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
-              Highlight Project
+              Highlight Projects
             </h2>
           </div>
           <Link
@@ -317,150 +317,145 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
-      {/* 2. ASYMMETRIC ALTERNATING ARCHITECTURAL SHOWCASE (SHMA SIGNATURE) */}
-      <div className="space-y-24 sm:space-y-32">
-        {projectList.map((item, index) => {
-          const isEven = index % 2 === 0;
-
+      {/* 2. FULL-SCREEN CINEMATIC ARCHITECTURAL SHOWCASE */}
+      <div className="space-y-20 sm:space-y-28">
+        {projectList.map((item) => {
           return (
-            <div
-              key={item.id}
-              className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center ${
-                isEven ? "" : "lg:grid-flow-dense"
-              }`}
-            >
-              {/* Media Container (Video / Image with Aspect 16/10) */}
+            <div key={item.id} className="space-y-6 sm:space-y-8">
+              {/* Full Width Cinematic Media with Ambient Zoom & Tags */}
               <div
-                className={`lg:col-span-7 ${
-                  isEven ? "lg:order-1" : "lg:col-start-6 lg:order-2"
-                }`}
+                onClick={() => setActiveModalProject(item)}
+                className="group relative w-full aspect-[16/9] md:aspect-[21/9] min-h-[360px] sm:min-h-[500px] overflow-hidden bg-[#dedad2] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-700"
               >
-                <div
-                  onClick={() => setActiveModalProject(item)}
-                  className="group relative aspect-[16/10] overflow-hidden bg-[#dedad2] cursor-pointer shadow-sm hover:shadow-xl transition-all duration-700"
-                >
-                  {item.videoUrl ? (
-                    <video
-                      src={item.videoUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                    />
-                  ) : (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.nameEn}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/hero_plants.png";
-                      }}
-                    />
+                {item.videoUrl ? (
+                  <video
+                    src={item.videoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  />
+                ) : (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.nameEn}
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/hero_plants.png";
+                    }}
+                  />
+                )}
+
+                {/* Subtle Ambient Vignette Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-500" />
+
+                {/* Top Floating Category & Year Badges */}
+                <div className="absolute top-5 left-5 sm:top-7 sm:left-7 z-10 flex flex-wrap items-center gap-2 sm:gap-3">
+                  <span className="font-mono text-[11px] sm:text-xs uppercase tracking-wider text-white bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 shadow-sm">
+                    {isBn ? item.categoryBn : item.categoryEn}
+                  </span>
+                  {item.year && (
+                    <span className="font-mono text-[11px] sm:text-xs text-white/90 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
+                      {isBn ? toBnDigits(item.year) : item.year}
+                    </span>
                   )}
+                </div>
 
-                  {/* Shma Subtle Ambient Vignette & Interactive Hover Banner */}
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors duration-500" />
-                  
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <span className="px-5 py-2.5 bg-white/95 text-[#3d1916] text-xs font-mono uppercase tracking-[0.2em] backdrop-blur-sm shadow-md">
-                      {t("কেস স্টাডি দেখুন ➔", "Explore Project ➔")}
-                    </span>
-                  </div>
+                {/* Center Hover Action Banner */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  <span className="px-6 py-3 bg-white/95 text-[#3d1916] text-xs font-mono uppercase tracking-[0.25em] backdrop-blur-sm shadow-xl font-medium">
+                    {t("কেস স্টাডি দেখুন ➔", "Explore Case Study ➔")}
+                  </span>
+                </div>
 
-                  {/* Corner Category Tag */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-white bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full">
-                      {isBn ? item.categoryBn : item.categoryEn}
-                    </span>
+                {/* Bottom Floating Title Bar on Full Screen Media */}
+                <div className="absolute bottom-5 left-5 right-5 sm:bottom-8 sm:left-8 sm:right-8 z-10 flex items-end justify-between text-white pointer-events-none">
+                  <div className="space-y-1 sm:space-y-2 max-w-3xl">
+                    <p className="font-mono text-xs tracking-widest uppercase text-white/80">
+                      {isBn ? item.locationBn : item.locationEn}
+                    </p>
+                    <h3 className="font-display font-light text-2xl sm:text-4xl md:text-5xl text-white tracking-tight drop-shadow-md">
+                      {item.nameEn || item.nameBn}
+                    </h3>
                   </div>
+                  <span className="hidden sm:inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-white/90 border-b border-white/60 pb-1">
+                    <span>{t("বিস্তারিত সমীক্ষা", "Case Study")}</span>
+                    <span>➔</span>
+                  </span>
                 </div>
               </div>
 
-              {/* Text & Architectural Narrative Container */}
-              <div
-                className={`lg:col-span-5 space-y-6 ${
-                  isEven ? "lg:order-2" : "lg:col-start-1 lg:order-1"
-                }`}
-              >
-                {/* Typology & Location */}
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="inline-block px-3 py-1 text-xs font-mono tracking-wider uppercase text-[#3d1916] bg-[#dedad2]/70 rounded-full">
-                      {isBn ? item.categoryBn : item.categoryEn}
-                    </span>
-                    {item.year && (
-                      <span className="font-mono text-xs text-[#75787b]">
-                        {isBn ? toBnDigits(item.year) : item.year}
-                      </span>
-                    )}
-                  </div>
+              {/* Full Width Info, Narrative & Ecological Metrics */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start pt-2 border-b border-[#e7e7e7] pb-12 sm:pb-16">
+                <div className="lg:col-span-4 space-y-2">
                   <p className="font-mono text-xs tracking-wider uppercase text-[#75787b]">
                     {isBn ? item.locationBn : item.locationEn}
                   </p>
+                  <h4
+                    onClick={() => setActiveModalProject(item)}
+                    className="font-display font-light text-xl sm:text-2xl text-[#3d1916] leading-snug tracking-tight hover:text-[#5a9dff] transition-colors cursor-pointer"
+                  >
+                    {item.nameEn || item.nameBn}
+                  </h4>
+                  <p className="font-mono text-xs text-[#75787b]">
+                    {t("ক্লায়েন্ট:", "Client:")} {item.client} • {isBn ? toBnDigits(item.area || "৩,৫০০ বর্গফুট") : (item.area || "3,500 sq.ft")}
+                  </p>
                 </div>
 
-                {/* Project Title (Architectural Display Typeface) */}
-                <h3
-                  onClick={() => setActiveModalProject(item)}
-                  className="font-display font-light text-2xl sm:text-3xl md:text-4xl text-[#3d1916] leading-tight tracking-tight hover:text-[#5a9dff] transition-colors cursor-pointer"
-                >
-                  {item.nameEn || item.nameBn}
-                </h3>
+                <div className="lg:col-span-5 space-y-4">
+                  <p className="font-sans text-sm sm:text-[15px] font-light text-[#54595f] leading-relaxed">
+                    {isBn ? item.descBn : item.descEn}
+                  </p>
+                  <div>
+                    <button
+                      onClick={() => setActiveModalProject(item)}
+                      className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] pb-1 border-b border-[#3d1916] hover:border-[#5a9dff] transition-all cursor-pointer font-medium"
+                    >
+                      <span>{t("স্থাপত্য সমীক্ষা ও কেস স্টাডি", "Architectural Case Study")}</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
 
-                {/* Narrative Description */}
-                <p className="font-sans text-sm sm:text-[15px] font-light text-[#54595f] leading-relaxed">
-                  {isBn ? item.descBn : item.descEn}
-                </p>
-
-                {/* Eco Metric Quick Summary */}
+                {/* Eco Metric 3-Grid */}
                 {item.ecoMetrics && (
-                  <div className="pt-2 border-t border-[#e7e7e7] grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                  <div className="lg:col-span-3 grid grid-cols-3 gap-2 p-3 bg-[#f8faf9] border border-[#e7e7e7] text-center rounded-sm">
                     <div>
-                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
+                      <span className="block font-display text-base sm:text-lg text-[#3d1916] font-medium">
                         {isBn ? toBnDigits(item.ecoMetrics.tempDrop) : item.ecoMetrics.tempDrop}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
+                      <span className="text-[9px] font-mono text-[#75787b] uppercase tracking-wider block">
                         {t("মাইক্রোক্লাইমেট", "Microclimate")}
                       </span>
                     </div>
                     <div>
-                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
+                      <span className="block font-display text-base sm:text-lg text-[#3d1916] font-medium">
                         {isBn ? toBnDigits(item.ecoMetrics.greenCoverage) : item.ecoMetrics.greenCoverage}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
+                      <span className="text-[9px] font-mono text-[#75787b] uppercase tracking-wider block">
                         {t("বায়োফিলিয়া", "Biophilia")}
                       </span>
                     </div>
                     <div>
-                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
+                      <span className="block font-display text-base sm:text-lg text-[#3d1916] font-medium">
                         {isBn
                           ? item.ecoMetrics.rainwater
-                              .replace("100% Drainage Safe", "১০০% নিরাপদ ড্রেনেজ")
-                              .replace("100% Retained", "১০০% সংরক্ষিত পানি")
-                              .replace("90% Filtered", "৯০% ফিল্টার্ড ড্রেনেজ")
-                              .replace("Automated Drip", "স্বয়ংক্রিয় ড্রিপ সেচ")
-                              .replace("Retention Ponds", "ধারণ জলাধার")
+                              .replace("100% Drainage Safe", "১০০% ড্রেনেজ")
+                              .replace("100% Retained", "সংরক্ষিত")
+                              .replace("70% Water Saved", "৭০% সেভ")
+                              .replace("Filtered Recirculation", "রিসার্কুলেশন")
+                              .replace("Zero-Runoff Bioswales", "বায়োসয়েল")
+                              .replace("Rain Retention Ponds", "ধারণ জলাধার")
                           : item.ecoMetrics.rainwater}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
-                        {t("হাইড্রোলজি", "Hydrology")}
+                      <span className="text-[9px] font-mono text-[#75787b] uppercase tracking-wider block">
+                        {t("ড্রেনেজ", "Drainage")}
                       </span>
                     </div>
                   </div>
                 )}
-
-                {/* Call-to-action button */}
-                <div className="pt-2 flex items-center gap-4">
-                  <button
-                    onClick={() => setActiveModalProject(item)}
-                    className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] pb-1 border-b border-[#3d1916] hover:border-[#5a9dff] transition-all cursor-pointer"
-                  >
-                    <span>{t("প্রকল্পের বিস্তারিত", "Project Case Study")}</span>
-                    <span>→</span>
-                  </button>
-                </div>
               </div>
             </div>
           );
