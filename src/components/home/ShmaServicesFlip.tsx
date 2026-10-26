@@ -79,7 +79,7 @@ const services: ShmaService[] = [
 
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
-  const [serviceList, setServiceList] = useState<ShmaService[]>([]);
+  const [serviceList, setServiceList] = useState<ShmaService[]>(services);
   const [flippedId, setFlippedId] = useState<string | null>(null);
 
   const toggleFlip = (id: string) => {
@@ -89,8 +89,16 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch(`/api/services?_t=${Date.now()}`, { cache: "no-store" });
-        if (res.ok) {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}` : '';
+        const primaryUrl = `/api/services?_t=${Date.now()}`;
+        const fallbackUrl = apiBase ? `${apiBase}/services?_t=${Date.now()}` : null;
+
+        let res = await fetch(primaryUrl, { cache: "no-store" }).catch(() => null);
+        if ((!res || !res.ok) && fallbackUrl) {
+          res = await fetch(fallbackUrl, { cache: "no-store" }).catch(() => null);
+        }
+
+        if (res && res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.services || [];
           if (items.length > 0) {
@@ -111,7 +119,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
           }
         }
       } catch (e) {
-        // preserve empty state
+        // Keeps default services on network failure
       }
     };
     fetchServices();

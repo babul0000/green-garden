@@ -71,21 +71,139 @@ const DESC_MAP_BN: Record<string, string> = {
 };
 
 const BACKUP_DISTINCT_PROJECT_IMAGES = [
+  "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
+  "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
   "/hero_plants.png",
   "/featured_plant.png",
+];
+
+const DEFAULT_HIGHLIGHT_PROJECTS: HighlightProjectItem[] = [
+  {
+    id: "proj-1",
+    slug: "dhanmondi-sky-forest",
+    nameBn: "ধানমন্ডি স্কাই ফরেস্ট ও বায়োফিলিক টেরেস",
+    nameEn: "Dhanmondi Sky Forest & Bio-Terrace",
+    categoryBn: "লাক্সারি ছাদবাগান ও রেসিডেন্সিয়াল",
+    categoryEn: "Luxury Rooftop & Residential",
+    locationBn: "রোড ৯/এ, ধানমন্ডি, ঢাকা, বাংলাদেশ",
+    locationEn: "Road 9/A, Dhanmondi, Dhaka, Bangladesh",
+    descBn: "কংক্রিট ছাদকে রূপান্তর করা হয়েছে সবুজ বায়োফিলিক স্বর্গে—যেখানে রয়েছে সম্পূর্ণ ১০০% ওয়াটারপ্রুফ ড্রেনেজ, সুপরিকল্পিত জাপানিজ কার্পেট ঘাসের লন এবং মেহগনি কাঠের ছায়ানিবিড় পারগোলা।",
+    descEn: "Transforming a bare concrete rooftop into a biophilic sanctuary, complete with multi-layer waterproof drainage, Japanese carpet lawn, and a handcrafted mahogany pergola overlooking the Dhanmondi skyline.",
+    imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
+    year: "২০২৬",
+    area: "৩,৮০০ বর্গফুট",
+    client: "তানভীর রহমান",
+    ecoMetrics: {
+      tempDrop: "-৪.৫°C",
+      rainwater: "১০০% নিরাপদ ড্রেনেজ",
+      greenCoverage: "৮৫%",
+    },
+  },
+  {
+    id: "proj-2",
+    slug: "gulshan-living-green-wall",
+    nameBn: "গুলশান করপোরেট লিভিং গ্রিন ওয়াল",
+    nameEn: "Gulshan Corporate Living Green Wall",
+    categoryBn: "করপোরেট কর্মক্ষেত্র ও ভার্টিক্যাল ফরেস্ট",
+    categoryEn: "Corporate Workplace & Vertical Forest",
+    locationBn: "গুলশান এভিনিউ, ঢাকা, বাংলাদেশ",
+    locationEn: "Gulshan Avenue, Dhaka, Bangladesh",
+    descBn: "করপোরেট ভবনের সম্মুখভাগে স্থাপিত ৪,২০০-র বেশি জীবন্ত এয়ার-পিউরিফাইং গাছ ও স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি, যা কর্মক্ষেত্রের তাপমাত্রা কমায় ও নির্মল অক্সিজেন নিশ্চিত করে।",
+    descEn: "Over 4,200 air-purifying endemic plants installed along corporate facades with automated root fertigation to cool workspace temperatures and clean urban air in central Gulshan.",
+    imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
+    year: "২০২৬",
+    area: "৪,৫০০ বর্গফুট",
+    client: "প্রাইম হোল্ডিংস",
+    ecoMetrics: {
+      tempDrop: "-৩.৮°C",
+      rainwater: "৭০% পানির পুনর্ব্যবহার",
+      greenCoverage: "৯০%",
+    },
+  },
+  {
+    id: "proj-3",
+    slug: "standard-hua-hin-resort",
+    nameBn: "দ্য স্ট্যান্ডার্ড বিচফ্রন্ট ইকো রিসোর্ট",
+    nameEn: "The Standard Hua Hin & Beachfront",
+    categoryBn: "রিসোর্ট ও হসপিটালিটি ল্যান্ডস্কেপ",
+    categoryEn: "Resort & Hospitality Landscape",
+    locationBn: "মেরিন ড্রাইভ, কক্সবাজার, বাংলাদেশ",
+    locationEn: "Marine Drive, Cox's Bazar, Bangladesh",
+    descBn: "সমুদ্র উপকূলের লবণাক্ত আবহাওয়া ও আর্দ্রতা উপযোগী দেশীয় উদ্ভিদের সমন্বয়ে নির্মিত উন্মুক্ত ল্যান্ডস্কেপ ও পরিবেশবান্ধব রিট্রিট মাস্টারপ্ল্যান।",
+    descEn: "A climate-resilient coastal masterplan engineered for marine salt sprays, featuring native dune stabilizers, cascading water gardens, and shaded timber walkways.",
+    imageUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
+    year: "২০২৫",
+    area: "৩৫,০০০ বর্গমিটার",
+    client: "গ্রিন হরাইজন লিমিটেড",
+    ecoMetrics: {
+      tempDrop: "-৪.০°C",
+      rainwater: "ধারণ জলাধার",
+      greenCoverage: "৮০%",
+    },
+  },
+  {
+    id: "proj-4",
+    slug: "private-residence-waterfall-courtyard",
+    nameBn: "প্রাইভেট রেসিডেন্স ওয়াটারফল কোর্টইয়ার্ড",
+    nameEn: "Private Residence Waterfall Courtyard",
+    categoryBn: "লাক্সারি ছাদবাগান ও রেসিডেন্সিয়াল",
+    categoryEn: "Luxury Rooftop & Residential",
+    locationBn: "রোড ১১, বনানী, ঢাকা, বাংলাদেশ",
+    locationEn: "Road 11, Banani, Dhaka, Bangladesh",
+    descBn: "মার্বেল পাথরের নান্দনিক জলপ্রপাত, উষ্ণ ল্যান্ডস্কেপ লাইটিং এবং সুবিন্যস্ত বহুবর্ষজীবী বাগান উদ্ভিদের সমাহারে নির্মিত এক অনন্য অভিজাত ব্যক্তিগত অঙ্গন।",
+    descEn: "Featuring architectural marble water cascades, ambient evening lighting, and rare perennial flora integrated into a private residential estate.",
+    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+    year: "২০২৫",
+    area: "৫,২০০ বর্গফুট",
+    client: "ফারহান চৌধুরী",
+    ecoMetrics: {
+      tempDrop: "-৩.০°C",
+      rainwater: "ফিল্টার্ড ড্রেনেজ",
+      greenCoverage: "৭০%",
+    },
+  },
+  {
+    id: "proj-5",
+    slug: "mapletree-civic-plaza",
+    nameBn: "ম্যাপলট্রি আরবান সিভিক প্লাজা ও রেইন গার্ডেন",
+    nameEn: "Mapletree Civic Plaza & Rain Garden",
+    categoryBn: "পাবলিক রিয়েলম ও আরবান পার্ক",
+    categoryEn: "Public Realm & Urban Park",
+    locationBn: "পূর্বাচল নিউ টাউন, ঢাকা, বাংলাদেশ",
+    locationEn: "Purbachal New Town, Dhaka, Bangladesh",
+    descBn: "নগরবাসীর শারীরিক ও মানসিক প্রশান্তির জন্য সানকেন প্লাজা, হাঁটার ট্রেইল এবং বৃষ্টির পানি সংরক্ষণের সমন্বয়ে পরিকল্পিত আধুনিক গ্রিন স্পেস।",
+    descEn: "A vibrant urban gathering place featuring sunken rain gardens, walking trails, and permeable green paving designed for community wellness.",
+    imageUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80",
+    year: "২০২৪",
+    area: "৪২,০০০ বর্গমিটার",
+    client: "আরবান ডেভেলপমেন্ট কাউন্সিল",
+    ecoMetrics: {
+      tempDrop: "-৪.৮°C",
+      rainwater: "১০০% সংরক্ষিত পানি",
+      greenCoverage: "৯৫%",
+    },
+  },
 ];
 
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
   const isBn = language === "bn";
-  const [projectList, setProjectList] = useState<HighlightProjectItem[]>([]);
+  const [projectList, setProjectList] = useState<HighlightProjectItem[]>(DEFAULT_HIGHLIGHT_PROJECTS);
   const [activeModalProject, setActiveModalProject] = useState<HighlightProjectItem | null>(null);
 
   useEffect(() => {
     const fetchLiveProjects = async () => {
       try {
-        const res = await fetch(`/api/projects?featured=true&_t=${Date.now()}`, { cache: "no-store" });
-        if (res.ok) {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}` : '';
+        const primaryUrl = `/api/projects?featured=true&_t=${Date.now()}`;
+        const fallbackUrl = apiBase ? `${apiBase}/projects?featured=true&_t=${Date.now()}` : null;
+
+        let res = await fetch(primaryUrl, { cache: "no-store" }).catch(() => null);
+        if ((!res || !res.ok) && fallbackUrl) {
+          res = await fetch(fallbackUrl, { cache: "no-store" }).catch(() => null);
+        }
+
+        if (res && res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.projects || [];
           if (items.length >= 1) {
@@ -133,7 +251,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
 
               if (!selectedImage) {
                 const uniqueBackup = BACKUP_DISTINCT_PROJECT_IMAGES.find((img) => !usedImages.has(img));
-                selectedImage = uniqueBackup || candidateImages[0] || "/hero_plants.png";
+                selectedImage = uniqueBackup || candidateImages[0] || "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80";
                 if (uniqueBackup) usedImages.add(uniqueBackup);
               }
 
@@ -164,9 +282,11 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
           }
         }
       } catch (e) {
-        // preserve empty state
+        // Keeps default highlight projects on network failure
       }
     };
+
+    fetchLiveProjects();
   }, []);
 
   if (projectList.length === 0) {
