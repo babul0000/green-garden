@@ -294,7 +294,8 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
   }
 
   return (
-    <section id="projects" className="py-12 sm:py-24 px-4 sm:px-10 lg:px-16 max-w-[1440px] mx-auto text-[#323232] bg-white">
+    <section id="projects" className="py-12 sm:py-24 text-[#323232] bg-white">
+      <div className="px-4 sm:px-10 lg:px-16">
       {/* 1. ARCHITECTURAL SECTION HEADER (MATCHING SHMA DESIGNS) */}
       <div className="mb-10 sm:mb-20">
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
@@ -475,6 +476,8 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
         >
           {t("সকল প্রকল্প ও কেস স্টাডি দেখুন", "Explore Complete Portfolio")}
         </Link>
+      </div>
+
       </div>
 
       {/* 4. LUXURY ARCHITECTURAL MODAL / DRAWER */}

@@ -71,7 +71,8 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
     : steps;
 
   return (
-    <section id="process" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
+    <section id="process" className="py-20 text-[#323232] bg-white">
+      <div className="px-6 sm:px-10">
       
       {/* Header */}
       <div className="mb-14">
@@ -142,6 +143,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
           ))}
         </div>
 
+      </div>
       </div>
 
     </section>

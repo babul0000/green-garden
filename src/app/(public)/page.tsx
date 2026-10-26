@@ -87,13 +87,7 @@ export default function Home() {
 
   const renderSection = (section: HomeSection) => {
     const isHero = section.id === "hero";
-    const widthClass = isHero
-      ? "w-full"
-      : section.width === "compact"
-      ? "max-w-4xl mx-auto px-4"
-      : section.width === "contained"
-      ? "max-w-7xl mx-auto px-4 sm:px-6"
-      : "w-full";
+    const widthClass = "w-full";
 
     const paddingClass =
       isHero || section.padding === "none"

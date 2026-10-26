@@ -139,7 +139,8 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
       : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
 
   return (
-    <section id="service" className="py-20 px-6 sm:px-10 max-w-[1380px] mx-auto text-[#323232] bg-white">
+    <section id="service" className="py-20 text-[#323232] bg-white">
+      <div className="px-6 sm:px-10">
       
       {/* Header */}
       <div className="mb-14">
@@ -257,6 +258,8 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
             </div>
           );
         })}
+      </div>
+
       </div>
 
     </section>
