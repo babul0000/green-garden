@@ -62,7 +62,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     challengesEn: "Micro-fissures in the existing roof slab caused moisture seepage to lower apartments, alongside strict dead-load limitations.",
     solutionBn: "৩ স্তরের ইলাস্টোমেরিক পলিমার মেমব্রেন, লাইটওয়েট এক্সপ্যান্ডেড ক্লে অ্যাগ্রিগেট এবং স্বয়ংক্রিয় রুট-জোন ড্রিপ সেচ স্থাপন।",
     solutionEn: "Applied 3-stage elastomeric waterproofing membranes, lightweight expanded clay aggregates with cocopeat media, and precision subsurface drip fertigation.",
-    imageUrl: "/hero_plants.png",
+    imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=1200&q=80",
     metrics: {
       tempDrop: "-4.5°C",
       rainwater: "100% Drainage Safe",
@@ -95,7 +95,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     challengesEn: "High ambient midday heat and turbulent wind corridors along Gulshan Avenue that quickly desiccate conventional vertical walls.",
     solutionBn: "স্মার্ট সেন্সর নিয়ন্ত্রিত ড্রিপ ইমিটার, টেকসই জিওটেক্সটাইল পকেট এবং বায়ুপ্রবাহ সহনশীল স্থানীয় ভ্যারাইটি নির্বাচন।",
     solutionEn: "Zone-modulated pressure compensating drippers with solar sensors, UV-stabilized geotextile cellular pockets, and wind-hardy air filtering plants.",
-    imageUrl: "/featured_plant.png",
+    imageUrl: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=1200&q=80",
     metrics: {
       tempDrop: "-3.8°C",
       rainwater: "70% Water Saved",
@@ -124,7 +124,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     area: "35,000 sq.m",
     descBn: "সমুদ্র উপকূলের লবণাক্ত আবহাওয়া ও আর্দ্রতা উপযোগী দেশীয় উদ্ভিদের সমন্বয়ে নির্মিত উন্মুক্ত ল্যান্ডস্কেপ ও পরিবেশবান্ধব রিট্রিট মাস্টারপ্ল্যান।",
     descEn: "A climate-resilient coastal masterplan engineered for marine salt sprays, featuring native dune stabilizers, cascading water gardens, and shaded timber walkways.",
-    imageUrl: "/hero_plants.png",
+    imageUrl: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1200&q=80",
     metrics: {
       tempDrop: "-4.0°C",
       rainwater: "Rain Retention Ponds",
@@ -153,7 +153,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     area: "5,200 sq.ft",
     descBn: "মার্বেল পাথরের নান্দনিক জলপ্রপাত, উষ্ণ ল্যান্ডস্কেপ লাইটিং এবং সুবিন্যস্ত বহুবর্ষজীবী বাগান উদ্ভিদের সমাহারে নির্মিত এক অনন্য অভিজাত ব্যক্তিগত অঙ্গন।",
     descEn: "Featuring architectural marble water cascades, ambient evening lighting, and rare perennial flora integrated into a private residential estate.",
-    imageUrl: "/hero_plants.png",
+    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
     metrics: {
       tempDrop: "-3.0°C",
       rainwater: "Filtered Recirculation",
@@ -182,7 +182,7 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
     area: "42,000 sq.m",
     descBn: "নগরবাসীর শারীরিক ও মানসিক প্রশান্তির জন্য সানকেন প্লাজা, হাঁটার ট্রেইল এবং বৃষ্টির পানি সংরক্ষণের সমন্বয়ে পরিকল্পিত আধুনিক গ্রিন স্পেস।",
     descEn: "A vibrant urban gathering place featuring sunken rain gardens, walking trails, and permeable green paving designed for community wellness.",
-    imageUrl: "/featured_plant.png",
+    imageUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&q=80",
     metrics: {
       tempDrop: "-4.8°C",
       rainwater: "Zero-Runoff Bioswales",
@@ -258,7 +258,13 @@ export default function ProjectsPage() {
                 challengesEn: p.challengesEn || p.challenges || fallback.challengesEn,
                 solutionBn: p.solutionBn || fallback.solutionBn,
                 solutionEn: p.solutionEn || p.solution || fallback.solutionEn,
-                imageUrl: p.imageUrl || p.image || p.coverImage || fallback.imageUrl,
+                imageUrl:
+                  p.afterImage ||
+                  (Array.isArray(p.images) && p.images[0]) ||
+                  p.imageUrl ||
+                  p.image ||
+                  p.coverImage ||
+                  fallback.imageUrl,
                 videoUrl: p.videoUrl || fallback.videoUrl,
                 metrics: fallback.metrics,
                 clientTestimonial: p.clientTestimonial || fallback.clientTestimonial,
