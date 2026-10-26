@@ -89,43 +89,6 @@ export default function Sidebar({
   // Search filter query
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Independent section collapse state: ALL sections are OPEN by default!
-  // Expanding or collapsing one NEVER affects any other section (real-world modern sidebar system).
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    group_overview: true,
-    group_portfolio: true,
-    group_operations: true,
-    group_studio: true,
-    group_settings: true,
-  });
-
-  const toggleSection = (groupId: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [groupId]: !prev[groupId],
-    }));
-  };
-
-  const expandAll = () => {
-    setOpenSections({
-      group_overview: true,
-      group_portfolio: true,
-      group_operations: true,
-      group_studio: true,
-      group_settings: true,
-    });
-  };
-
-  const collapseAll = () => {
-    setOpenSections({
-      group_overview: false,
-      group_portfolio: false,
-      group_operations: false,
-      group_studio: false,
-      group_settings: false,
-    });
-  };
-
   // Navigation Menu Groups with clear section separation
   const menuGroups: MenuGroup[] = useMemo(
     () => [
@@ -400,7 +363,7 @@ export default function Sidebar({
             icon: (
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0 1.51 1z" />
               </svg>
             ),
           },
@@ -466,6 +429,66 @@ export default function Sidebar({
     ]
   );
 
+  // Identify which group contains the activeTab
+  const activeGroupId = useMemo(() => {
+    for (const group of menuGroups) {
+      if (group.items.some((item) => item.id === activeTab)) {
+        return group.id;
+      }
+    }
+    return "group_overview";
+  }, [activeTab, menuGroups]);
+
+  // Accordion state:
+  // By default, ONLY the active section is OPEN!
+  // All other sections are neatly closed with a visible Down arrow [▼].
+  // When a section header is clicked, it opens its items, and lower sections push down cleanly.
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => ({
+    group_overview: activeGroupId === "group_overview",
+    group_portfolio: activeGroupId === "group_portfolio",
+    group_operations: activeGroupId === "group_operations",
+    group_studio: activeGroupId === "group_studio",
+    group_settings: activeGroupId === "group_settings",
+  }));
+
+  // Auto-expand section if activeTab switches to a different group
+  useEffect(() => {
+    if (activeGroupId) {
+      setOpenSections((prev) => ({
+        ...prev,
+        [activeGroupId]: true,
+      }));
+    }
+  }, [activeGroupId]);
+
+  // Toggle single section on header click
+  const toggleSection = (groupId: string) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [groupId]: !prev[groupId],
+    }));
+  };
+
+  const expandAll = () => {
+    setOpenSections({
+      group_overview: true,
+      group_portfolio: true,
+      group_operations: true,
+      group_studio: true,
+      group_settings: true,
+    });
+  };
+
+  const collapseAll = () => {
+    setOpenSections({
+      group_overview: false,
+      group_portfolio: false,
+      group_operations: false,
+      group_studio: false,
+      group_settings: false,
+    });
+  };
+
   // Filter groups and items by search query and RBAC
   const filteredGroups = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -515,9 +538,6 @@ export default function Sidebar({
 
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
-    // Real-world behavior:
-    // Does NOT close drawer automatically so the user can easily explore and switch sections!
-    // The user has a prominent "Close Menu" button and background overlay tap to close whenever ready.
   };
 
   const renderSidebarContent = (isMobileView = false) => (
@@ -554,11 +574,11 @@ export default function Sidebar({
         </div>
 
         {/* Studio Practice Badge & Role Indicator */}
-        <div className="bg-white/80 border border-[#D6D2C4] rounded-xl px-3 py-2 flex items-center justify-between text-xs shadow-2xs">
+        <div className="bg-white/90 border border-[#D6D2C4] rounded-xl px-3 py-2 flex items-center justify-between text-xs shadow-2xs">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#2B4D33] animate-pulse"></span>
             <span className="font-mono text-[10px] tracking-wider uppercase text-[#121813] font-bold">
-              Studio ERP v2.4
+              Studio ERP Active
             </span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#2B4D33]/10 text-[#2B4D33] font-bold uppercase">
@@ -573,7 +593,7 @@ export default function Sidebar({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="মেনু বা পেজ খুঁজুন... / Search..."
-            className="w-full h-8.5 pl-8 pr-7 text-xs bg-white/90 border border-[#D6D2C4] rounded-xl text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] focus:ring-1 focus:ring-[#2B4D33] transition-all"
+            className="w-full h-8.5 pl-8 pr-7 text-xs bg-white/95 border border-[#D6D2C4] rounded-xl text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] focus:ring-1 focus:ring-[#2B4D33] transition-all"
           />
           <svg
             className="w-3.5 h-3.5 text-[#75787B] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -626,10 +646,10 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* ── 2. SCROLLABLE NAVIGATION MENU: CLEARLY ORGANIZED SECTION CARDS ── */}
+      {/* ── 2. SCROLLABLE NAVIGATION MENU: CLEARLY SEPARATED SECTION ACCORDIONS ── */}
       <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto pr-1 py-2 custom-scrollbar my-1">
         {filteredGroups.length === 0 ? (
-          <div className="bg-white/80 border border-dashed border-[#D6D2C4] rounded-2xl p-6 text-center text-xs text-[#75787B] my-4 flex flex-col items-center gap-2">
+          <div className="bg-white/90 border border-dashed border-[#D6D2C4] rounded-2xl p-6 text-center text-xs text-[#75787B] my-4 flex flex-col items-center gap-2">
             <span className="text-2xl">🔍</span>
             <p className="font-semibold text-[#121813]">কোনো মেনু আইটেম পাওয়া যায়নি</p>
             <p className="text-[11px]">অন্য কোনো কি-ওয়ার্ড দিয়ে আবার চেষ্টা করুন।</p>
@@ -644,27 +664,30 @@ export default function Sidebar({
         ) : (
           filteredGroups.map((group) => {
             const hasActiveItem = group.items.some((i) => i.id === activeTab);
-            // If searching, keep section open; otherwise use individual section state (default true)
-            const isSectionOpen = searchQuery ? true : (openSections[group.id] ?? true);
+            // If user is searching, automatically show matching items;
+            // Otherwise use the section's independent open/collapse state.
+            const isSectionOpen = searchQuery ? true : !!openSections[group.id];
 
             return (
               <div
                 key={group.id}
                 className={`rounded-2xl transition-all duration-200 border ${
                   hasActiveItem
-                    ? "bg-white/95 border-[#2B4D33]/40 shadow-sm ring-1 ring-[#2B4D33]/15"
-                    : "bg-white/75 hover:bg-white/90 border-[#D6D2C4]/80 shadow-2xs"
+                    ? "bg-white border-[#2B4D33]/50 shadow-sm ring-1 ring-[#2B4D33]/20"
+                    : "bg-white/90 hover:bg-white border-[#D6D2C4] shadow-2xs"
                 } overflow-hidden`}
               >
-                {/* ── Section Header Bar ── */}
-                <div
+                {/* ── Section Header Button with Prominent UP / DOWN Icon ── */}
+                <button
+                  type="button"
                   onClick={() => toggleSection(group.id)}
-                  className={`px-3 py-2.5 flex items-center justify-between cursor-pointer transition-colors select-none ${
+                  className={`w-full px-3 py-2.5 flex items-center justify-between text-left transition-colors cursor-pointer select-none ${
                     hasActiveItem
-                      ? "bg-[#2B4D33]/[0.07] border-b border-[#2B4D33]/15"
-                      : "bg-black/[0.02] border-b border-[#D6D2C4]/60 hover:bg-black/[0.04]"
+                      ? "bg-[#2B4D33]/[0.08] hover:bg-[#2B4D33]/[0.12]"
+                      : "bg-white hover:bg-[#F5F4EE]"
                   }`}
-                  title={`${group.title} (ক্লিক করে সেকশনটি খুলুন বা বন্ধ করুন)`}
+                  aria-expanded={isSectionOpen}
+                  title={`${group.title} (${isSectionOpen ? "ক্লিক করে সংক্ষেপ করুন" : "ক্লিক করে খুলুন"})`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
@@ -679,7 +702,7 @@ export default function Sidebar({
                     <span className="text-sm shrink-0">{group.iconEmoji}</span>
                     <div className="flex flex-col min-w-0">
                       <span
-                        className={`text-[10px] font-mono font-bold uppercase tracking-wider truncate leading-tight ${
+                        className={`text-[10.5px] font-mono font-bold uppercase tracking-wider truncate leading-tight ${
                           hasActiveItem ? "text-[#2B4D33]" : "text-[#121813]"
                         }`}
                       >
@@ -691,7 +714,7 @@ export default function Sidebar({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                  <div className="flex items-center gap-2 shrink-0 ml-1">
                     <span
                       className={`text-[9.5px] font-mono font-semibold px-2 py-0.5 rounded-full ${
                         hasActiveItem
@@ -701,92 +724,115 @@ export default function Sidebar({
                     >
                       {group.items.length}
                     </span>
-                    <span
-                      className={`w-5 h-5 flex items-center justify-center text-[#75787B] hover:text-[#121813] transition-transform duration-200 ${
-                        isSectionOpen ? "rotate-180" : "rotate-0"
+
+                    {/* UP / DOWN Icon Toggle Button */}
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 shrink-0 ${
+                        isSectionOpen
+                          ? "bg-[#2B4D33] text-white shadow-xs"
+                          : "bg-black/5 text-[#555] hover:bg-black/10"
                       }`}
+                      title={isSectionOpen ? "সংক্ষেপ করুন (▲)" : "খুলুন (▼)"}
                     >
-                      <svg
-                        className="w-3.5 h-3.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </span>
-                  </div>
-                </div>
-
-                {/* ── Section Menu Items ── */}
-                {isSectionOpen && (
-                  <nav className="p-1.5 flex flex-col gap-1">
-                    {group.items.map((tab) => {
-                      const isSelected = activeTab === tab.id;
-                      return (
-                        <button
-                          key={tab.id}
-                          type="button"
-                          onClick={() => handleTabClick(tab.id)}
-                          className={`w-full min-h-[42px] px-2.5 py-2 rounded-xl text-left flex items-center justify-between transition-all duration-150 cursor-pointer group ${
-                            isSelected
-                              ? "bg-[#2B4D33] text-white shadow-sm font-semibold"
-                              : "text-[#2A2E2B] hover:bg-black/[0.05] hover:text-[#121813]"
-                          }`}
+                      {isSectionOpen ? (
+                        // UP ICON ▲
+                        <svg
+                          className="w-3.5 h-3.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span
-                              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                isSelected
-                                  ? "bg-white/20 text-white"
-                                  : "bg-black/[0.04] text-[#75787B] group-hover:text-[#2B4D33] group-hover:bg-white border border-black/[0.04]"
-                              }`}
-                            >
-                              {tab.icon}
-                            </span>
-                            <div className="flex flex-col min-w-0 truncate">
-                              <span
-                                className={`text-xs truncate leading-snug ${
-                                  isSelected ? "text-white font-bold" : "text-[#121813] font-medium"
-                                }`}
-                              >
-                                {tab.labelBn}
-                              </span>
-                              <span
-                                className={`text-[9px] font-mono truncate leading-none mt-0.5 ${
-                                  isSelected ? "text-emerald-100" : "text-[#75787B]"
-                                }`}
-                              >
-                                {tab.labelEn}
-                              </span>
-                            </div>
-                          </div>
+                          <polyline points="18 15 12 9 6 15" />
+                        </svg>
+                      ) : (
+                        // DOWN ICON ▼
+                        <svg
+                          className="w-3.5 h-3.5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </button>
 
-                          <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                            {tab.badge !== undefined && (
+                {/* ── Distinct Inner Sub-items Container (Never bleeds into other sections) ── */}
+                {isSectionOpen && (
+                  <div className="bg-[#FAF9F5] border-t border-[#E5E2D6] p-2 flex flex-col gap-1">
+                    <nav className="border-l-2 border-l-[#2B4D33]/40 pl-2 flex flex-col gap-1">
+                      {group.items.map((tab) => {
+                        const isSelected = activeTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => handleTabClick(tab.id)}
+                            className={`w-full min-h-[40px] px-2.5 py-1.5 rounded-xl text-left flex items-center justify-between transition-all duration-150 cursor-pointer group ${
+                              isSelected
+                                ? "bg-[#2B4D33] text-white shadow-sm font-semibold"
+                                : "text-[#2A2E2B] hover:bg-white hover:shadow-2xs hover:text-[#121813]"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
                               <span
-                                className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                                   isSelected
-                                    ? "bg-white text-[#2B4D33]"
-                                    : typeof tab.badge === "number"
-                                    ? "bg-[#C85A32] text-white animate-pulse"
-                                    : "bg-[#2B4D33]/15 text-[#2B4D33]"
+                                    ? "bg-white/20 text-white"
+                                    : "bg-white text-[#75787B] group-hover:text-[#2B4D33] border border-black/[0.06] shadow-2xs"
                                 }`}
                               >
-                                {tab.badge}
+                                {tab.icon}
                               </span>
-                            )}
-                            {isSelected && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 shrink-0" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </nav>
+                              <div className="flex flex-col min-w-0 truncate">
+                                <span
+                                  className={`text-xs truncate leading-snug ${
+                                    isSelected ? "text-white font-bold" : "text-[#121813] font-medium"
+                                  }`}
+                                >
+                                  {tab.labelBn}
+                                </span>
+                                <span
+                                  className={`text-[9px] font-mono truncate leading-none mt-0.5 ${
+                                    isSelected ? "text-emerald-100" : "text-[#75787B]"
+                                  }`}
+                                >
+                                  {tab.labelEn}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                              {tab.badge !== undefined && (
+                                <span
+                                  className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                    isSelected
+                                      ? "bg-white text-[#2B4D33]"
+                                      : typeof tab.badge === "number"
+                                      ? "bg-[#C85A32] text-white animate-pulse"
+                                      : "bg-[#2B4D33]/15 text-[#2B4D33]"
+                                  }`}
+                                >
+                                  {tab.badge}
+                                </span>
+                              )}
+                              {isSelected && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 shrink-0" />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
                 )}
               </div>
             );
@@ -799,7 +845,7 @@ export default function Sidebar({
         {/* Public Website Link */}
         <Link
           href="/"
-          className="min-h-[40px] flex items-center justify-between py-2 px-3 rounded-xl bg-white/80 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
+          className="min-h-[40px] flex items-center justify-between py-2 px-3 rounded-xl bg-white/90 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <span>🌐</span>
