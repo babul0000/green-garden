@@ -38,20 +38,22 @@ export async function getCurrentUser(req: NextRequest | Request): Promise<AuthUs
     const verifiedUser = await verifyJwtToken(token);
     if (!verifiedUser) return null;
 
-    // Check tokenVersion against database
-    // Existing users without a version in token are treated as 0 (matching default 0)
+    // Check tokenVersion against database if user record exists
     try {
       const dbUser = await prisma.user.findUnique({
         where: { id: verifiedUser.id },
         select: { tokenVersion: true, role: true },
       });
-      if (!dbUser) return null;
-
-      const tokenVer = verifiedUser.tokenVersion ?? 0;
-      const dbVer = dbUser.tokenVersion ?? 0;
-      if (tokenVer !== dbVer) {
-        // Token was invalidated by logout from all devices or password change
-        return null;
+      if (dbUser) {
+        const tokenVer = verifiedUser.tokenVersion ?? 0;
+        const dbVer = dbUser.tokenVersion ?? 0;
+        if (tokenVer !== dbVer) {
+          // Token was invalidated by logout from all devices or password change
+          return null;
+        }
+        if (dbUser.role) {
+          verifiedUser.role = dbUser.role as any;
+        }
       }
     } catch {
       // If DB check encounters network glitch, proceed with cryptographically verified token

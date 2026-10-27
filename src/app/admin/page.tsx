@@ -39,6 +39,9 @@ import DigitalServiceCardTab from "@/components/admin/DigitalServiceCardTab";
 import HomepageSectionsTab from "@/components/admin/HomepageSectionsTab";
 import ContentManagerTab from "@/components/admin/ContentManagerTab";
 
+// Mobile Shell Navigation (Phase 1)
+import MobileBottomBar from "@/components/admin/MobileBottomBar";
+
 // RBAC Permissions
 import { canAccessTab, canEnterAdmin, getDefaultTabForRole } from "@/lib/rbac";
 
@@ -48,30 +51,76 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Load initial tab from localStorage on mount and validate against user's permitted tabs
+  // Helper to read ?tab= parameter safely on client without SSR window access
+  const getTabFromUrl = (): string | null => {
+    if (typeof window === "undefined") return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab");
+  };
+
+  // Load initial tab on client mount: Priority: ?tab= from URL -> localStorage -> role default
   useEffect(() => {
-    if (user) {
-      if (!canEnterAdmin(user.role)) return;
-      const savedTab = typeof window !== "undefined" ? localStorage.getItem("adminActiveTab") : null;
-      if (savedTab && canAccessTab(user.role, savedTab)) {
-        setActiveTab(savedTab);
-      } else {
-        const def = getDefaultTabForRole(user.role);
-        setActiveTab(def);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("adminActiveTab", def);
-        }
+    if (!user) return;
+    if (!canEnterAdmin(user.role)) return;
+
+    const urlTab = getTabFromUrl();
+    const savedTab = typeof window !== "undefined" ? localStorage.getItem("adminActiveTab") : null;
+
+    let targetTab: string;
+    if (urlTab && canAccessTab(user.role, urlTab)) {
+      targetTab = urlTab;
+    } else if (savedTab && canAccessTab(user.role, savedTab)) {
+      targetTab = savedTab;
+    } else {
+      targetTab = getDefaultTabForRole(user.role);
+    }
+
+    setActiveTab(targetTab);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("adminActiveTab", targetTab);
+      // Synchronize URL without adding an extra history stack entry on initial page load
+      const currentUrl = new URL(window.location.href);
+      if (currentUrl.searchParams.get("tab") !== targetTab) {
+        currentUrl.searchParams.set("tab", targetTab);
+        window.history.replaceState({ tab: targetTab }, "", currentUrl.toString());
       }
     }
   }, [user]);
 
-  // Save tab to localStorage on change if allowed
-  const handleTabChange = (tab: string) => {
+  // Listen to browser / Android Back & Forward buttons (popstate)
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const poppedTab = event.state?.tab || getTabFromUrl();
+      if (poppedTab && user && canAccessTab(user.role, poppedTab)) {
+        setActiveTab(poppedTab);
+        setSidebarOpen(false);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("adminActiveTab", poppedTab);
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [user]);
+
+  // Save tab to URL (pushState) and localStorage on tab switch, and auto-close mobile drawer
+  const handleTabChange = (tab: string, pushHistory = true) => {
     const targetTab = tab === "quotations" ? "finance" : tab;
     if (user && !canAccessTab(user.role, targetTab)) return;
+    
     setActiveTab(targetTab);
+    setSidebarOpen(false);
+
     if (typeof window !== "undefined") {
       localStorage.setItem("adminActiveTab", targetTab);
+      if (pushHistory) {
+        const currentUrl = new URL(window.location.href);
+        if (currentUrl.searchParams.get("tab") !== targetTab) {
+          currentUrl.searchParams.set("tab", targetTab);
+          window.history.pushState({ tab: targetTab }, "", currentUrl.toString());
+        }
+      }
     }
   };
 
@@ -694,10 +743,11 @@ export default function AdminPage() {
           setEditingService={setEditingService} 
           fetchData={fetchData}
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+          activeTab={activeTab}
         />
 
-        {/* Content Body Grid */}
-        <div className="flex-grow p-3 sm:p-6 lg:p-8 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
+        {/* Content Body Grid with bottom clearance for Mobile Bottom Bar & Next.js badge */}
+        <div className="flex-grow p-4 sm:p-6 lg:p-8 pb-28 lg:pb-8 flex flex-col gap-6 w-full max-w-full overflow-x-hidden">
 
           {!isCurrentTabAllowed ? (
             <div className="bg-white/80 border border-rose-500/30 p-10 rounded-3xl shadow-sm text-center flex flex-col items-center gap-3 my-auto max-w-lg mx-auto">
@@ -964,6 +1014,13 @@ export default function AdminPage() {
         )}
         </div>
       </main>
+
+      {/* 3. MOBILE FIXED BOTTOM NAVIGATION BAR (Phase 1) */}
+      <MobileBottomBar
+        activeTab={activeTab}
+        setActiveTab={handleTabChange}
+        onOpenMenu={() => setSidebarOpen(true)}
+      />
 
     </div>
   );

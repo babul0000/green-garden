@@ -75,7 +75,7 @@ export default function CloudinaryUploader({
           }
         });
 
-        xhr.addEventListener("load", () => {
+        xhr.addEventListener("load", async () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const data = JSON.parse(xhr.responseText);
@@ -87,15 +87,58 @@ export default function CloudinaryUploader({
             } catch {
               reject(new Error("Invalid response from server"));
             }
+          } else if (xhr.status === 401 || xhr.status === 403) {
+            // Fallback to /api/upload if admin session header/cookie failed
+            try {
+              const fallbackRes = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+              });
+              const fallbackData = await fallbackRes.json();
+              if (fallbackRes.ok && fallbackData.url) {
+                resolve(fallbackData);
+              } else {
+                reject(new Error(fallbackData.error || `Upload failed: HTTP ${xhr.status}`));
+              }
+            } catch (fbErr: any) {
+              reject(new Error(fbErr.message || `Upload failed: HTTP ${xhr.status}`));
+            }
           } else {
-            reject(new Error(`Upload failed: HTTP ${xhr.status}`));
+            try {
+              const errData = JSON.parse(xhr.responseText);
+              reject(new Error(errData.error || `Upload failed: HTTP ${xhr.status}`));
+            } catch {
+              reject(new Error(`Upload failed: HTTP ${xhr.status}`));
+            }
           }
         });
 
-        xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
+        xhr.addEventListener("error", async () => {
+          try {
+            const fallbackRes = await fetch(`/api/upload?_t=${Date.now()}`, {
+              method: "POST",
+              body: formData,
+            });
+            const fallbackData = await fallbackRes.json();
+            if (fallbackRes.ok && fallbackData.url) {
+              resolve(fallbackData);
+              return;
+            }
+          } catch {
+            // ignore fallback error and reject with general network error
+          }
+          reject(new Error("Network error during upload"));
+        });
         xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
 
         xhr.open("POST", `/api/upload/admin?_t=${Date.now()}`);
+        xhr.withCredentials = true;
+
+        const storedToken = typeof window !== "undefined" ? localStorage.getItem("gg_auth_token") : null;
+        if (storedToken) {
+          xhr.setRequestHeader("Authorization", `Bearer ${storedToken}`);
+        }
+
         xhr.send(formData);
       });
 
@@ -214,7 +257,7 @@ export default function CloudinaryUploader({
               </svg>
             </div>
             <p className="text-sm text-gray-600">{placeholder}</p>
-            <p className="text-xs text-gray-400">PNG, JPG, WEBP, MP4 সমর্থিত</p>
+            <p className="text-xs text-gray-400">JPG, PNG, JFIF, WEBP, AVIF, MP4 সমর্থিত</p>
           </div>
         )}
 

@@ -116,7 +116,7 @@ export default function ShmaHeroVideo() {
     : config.btnContactTextEn;
 
   return (
-    <section className="relative w-full h-[100dvh] min-h-[560px] overflow-hidden bg-[#041a2e] flex items-center justify-center select-none">
+    <section className="relative w-full h-[82svh] min-h-[82svh] lg:h-[100dvh] lg:min-h-[560px] overflow-hidden bg-[#041a2e] flex items-center justify-center select-none">
       {/* 1. Dynamic Video / Image Background Media with Anti-Cache Version */}
       <HeroBackgroundMedia
         mediaType={config.mediaType}
@@ -167,6 +167,29 @@ export default function ShmaHeroVideo() {
         btnContactStyle={config.btnContactStyle}
         contactLabel={contactLabel}
       />
+
+      {/* 5. Mobile-Only Subtle Scroll Hint (respects prefers-reduced-motion) */}
+      <button
+        type="button"
+        onClick={() => {
+          const nextSec =
+            document.getElementById("manifesto") ||
+            document.querySelector("main section:nth-of-type(2)") ||
+            document.querySelector("section:nth-of-type(2)");
+          if (nextSec) {
+            nextSec.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
+        className="lg:hidden absolute bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 text-white/75 hover:text-white transition-colors cursor-pointer select-none pointer-events-auto motion-safe:animate-bounce motion-reduce:animate-none"
+        aria-label="Scroll to next section"
+      >
+        <span className="text-[10px] font-sans font-medium tracking-widest uppercase text-white/80">
+          স্ক্রল করুন
+        </span>
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
     </section>
   );
 }

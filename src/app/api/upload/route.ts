@@ -7,8 +7,8 @@ import path from "path";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// Maximum allowed file size for public uploads: 5MB
-const MAX_PUBLIC_FILE_SIZE = 5 * 1024 * 1024;
+// Maximum allowed file size for media uploads: 100MB
+const MAX_PUBLIC_FILE_SIZE = 100 * 1024 * 1024;
 
 // IP Rate Limiter Configuration (20 uploads per 10 minutes per IP)
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -16,6 +16,17 @@ const MAX_UPLOADS_PER_WINDOW = 20;
 const ipRateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function isIpRateLimited(ip: string): boolean {
+  // Never rate-limit loopback / localhost or non-production environments
+  if (
+    ip === "127.0.0.1" ||
+    ip === "::1" ||
+    ip === "::ffff:127.0.0.1" ||
+    ip === "localhost" ||
+    process.env.NODE_ENV !== "production"
+  ) {
+    return false;
+  }
+
   const now = Date.now();
   const entry = ipRateLimitMap.get(ip);
 
@@ -56,9 +67,9 @@ function verifyMagicBytes(buffer: Buffer, extension: string): { valid: boolean; 
     return { valid: false, error: "File buffer is corrupted or empty." };
   }
 
-  // 1. JPEG / JPG: FF D8 FF
+  // 1. JPEG / JPG / JFIF: FF D8 FF
   if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
-    if (!["jpg", "jpeg"].includes(extension)) {
+    if (!["jpg", "jpeg", "jfif", "pjpeg", "pjp"].includes(extension)) {
       return { valid: false, error: "File extension does not match genuine JPEG binary signature." };
     }
     return { valid: true };
@@ -121,7 +132,27 @@ function verifyMagicBytes(buffer: Buffer, extension: string): { valid: boolean; 
     return { valid: true };
   }
 
-  // 6. SVG: XML text containing <svg and strictly free of executable scripts
+  // 6. BMP: 42 4D ('BM')
+  if (buffer.length >= 2 && buffer[0] === 0x42 && buffer[1] === 0x4D) {
+    if (extension !== "bmp") {
+      return { valid: false, error: "File extension does not match genuine BMP binary signature." };
+    }
+    return { valid: true };
+  }
+
+  // 7. AVIF: 4 bytes length, 'ftyp', 'avif' / 'avis'
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(4, 8).toString("ascii") === "ftyp" &&
+    ["avif", "avis"].includes(buffer.subarray(8, 12).toString("ascii").toLowerCase())
+  ) {
+    if (extension !== "avif") {
+      return { valid: false, error: "File extension does not match genuine AVIF binary signature." };
+    }
+    return { valid: true };
+  }
+
+  // 8. SVG: XML text containing <svg and strictly free of executable scripts
   if (extension === "svg") {
     const textSample = buffer.subarray(0, Math.min(buffer.length, 2048)).toString("utf8").toLowerCase();
     const hasSvgTag = textSample.includes("<svg") || (textSample.includes("<?xml") && textSample.includes("<svg"));
@@ -140,7 +171,43 @@ function verifyMagicBytes(buffer: Buffer, extension: string): { valid: boolean; 
     return { valid: true };
   }
 
-  return { valid: false, error: "Unsupported or invalid file format. Only JPG, PNG, WEBP, GIF, SVG, and PDF are permitted." };
+  // 9. MP4 / MOV / M4V (ISO Base Media file with ftyp box)
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(4, 8).toString("ascii") === "ftyp"
+  ) {
+    if (!["mp4", "mov", "m4v", "avif", "avis"].includes(extension)) {
+      return { valid: false, error: "File extension does not match genuine MP4/MOV binary signature." };
+    }
+    return { valid: true };
+  }
+
+  // 10. WebM / MKV: 1A 45 DF A3 (EBML header)
+  if (
+    buffer.length >= 4 &&
+    buffer[0] === 0x1A &&
+    buffer[1] === 0x45 &&
+    buffer[2] === 0xDF &&
+    buffer[3] === 0xA3
+  ) {
+    if (!["webm", "mkv"].includes(extension)) {
+      return { valid: false, error: "File extension does not match genuine WebM binary signature." };
+    }
+    return { valid: true };
+  }
+
+  // 11. OGG: 4F 67 67 53 ('OggS')
+  if (
+    buffer.length >= 4 &&
+    buffer.subarray(0, 4).toString("ascii") === "OggS"
+  ) {
+    if (extension !== "ogg") {
+      return { valid: false, error: "File extension does not match genuine OGG binary signature." };
+    }
+    return { valid: true };
+  }
+
+  return { valid: false, error: "Unsupported or invalid file format. Permitted formats: images (JPG, PNG, WEBP, GIF, SVG, JFIF, AVIF, BMP), PDF, and videos (MP4, WEBM, MOV, OGG)." };
 }
 
 export async function POST(req: Request) {

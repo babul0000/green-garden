@@ -8,6 +8,7 @@ interface HeaderProps {
   setEditingService: (service: any) => void;
   fetchData: () => void;
   onToggleSidebar?: () => void;
+  activeTab?: string;
 }
 
 interface NotificationItem {
@@ -20,6 +21,34 @@ interface NotificationItem {
   isRead: boolean;
   createdAt: string;
 }
+
+const TAB_TITLES: Record<string, { bn: string; en: string }> = {
+  analytics: { bn: "ড্যাশবোর্ড ওভারভিউ", en: "Overview" },
+  messages: { bn: "কন্টাক্ট ইনবক্স", en: "Inbox" },
+  projects: { bn: "প্রজেক্ট মাস্টারপ্ল্যান", en: "Projects" },
+  gallery: { bn: "ফটো গ্যালারি", en: "Gallery" },
+  reviews: { bn: "গ্রাহক রিভিউ", en: "Reviews" },
+  blogs: { bn: "জার্নাল ও ব্লগ", en: "Blogs" },
+  services: { bn: "ল্যান্ডস্কেপ সার্ভিসেস", en: "Services" },
+  "design-requests": { bn: "ডিজাইন কমিশন", en: "Clients" },
+  bookings: { bn: "ক্লায়েন্ট বুকিং", en: "Bookings" },
+  "tree-doctor": { bn: "ট্রি ডক্টর ও ক্লিনিক", en: "Tree Doctor" },
+  maintenance: { bn: "বোটানিক্যাল কেয়ার", en: "Maintenance" },
+  "service-card": { bn: "ডিজিটাল সার্ভিস কার্ড", en: "Service Card" },
+  employees: { bn: "আর্কিটেক্ট ও স্টাফ", en: "Employees" },
+  careers: { bn: "ক্যারিয়ার ও আবেদন", en: "Careers" },
+  finance: { bn: "স্টুডিও ফাইন্যান্স", en: "Finance" },
+  "header-nav": { bn: "হেডার ও নেভবার", en: "Navbar" },
+  hero: { bn: "হিরো ভিডিও স্টুডিও", en: "Hero Studio" },
+  "homepage-sections": { bn: "হোমপেজ সেকশন", en: "Sections" },
+  "content-manager": { bn: "কনটেন্ট ম্যানেজার", en: "Content" },
+  content: { bn: "কনটেন্ট হাব", en: "Content Hub" },
+  settings: { bn: "মাস্টার সেটিংস হাব", en: "Settings" },
+  users: { bn: "ইউজার অ্যাকাউন্টস", en: "Users" },
+  security: { bn: "সিকিউরিটি অ্যাক্সেস", en: "Security" },
+  roles: { bn: "রোল পারমিশন", en: "Roles" },
+  "activity-logs": { bn: "অ্যাক্টিভিটি ও অডিট লগ", en: "Audit Logs" },
+};
 
 function formatTimeAgoBn(dateString: string): string {
   try {
@@ -44,13 +73,16 @@ export default function Header({
   setEditingService,
   fetchData,
   onToggleSidebar,
+  activeTab = "analytics",
 }: HeaderProps) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [overflowOpen, setOverflowOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const overflowRef = useRef<HTMLDivElement>(null);
 
   // Fetch notifications from /api/notifications
   const fetchNotifications = async () => {
@@ -81,20 +113,23 @@ export default function Header({
     };
   }, []);
 
-  // Handle click outside to dismiss notification popover
+  // Handle click outside to dismiss notification popover and overflow menu
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setOverflowOpen(false);
+      }
     };
-    if (isOpen) {
+    if (isOpen || overflowOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, overflowOpen]);
 
   // Mark all notifications as read
   const handleMarkAllRead = async () => {
@@ -187,28 +222,39 @@ export default function Header({
   };
 
   return (
-    <header className="h-20 bg-[#F7F6F2]/95 backdrop-blur-md border-b border-[#D6D2C4] flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 shrink-0 text-[#121813] font-sans">
+    <header className="h-14 lg:h-20 bg-[#F7F6F2]/95 backdrop-blur-md border-b border-[#D6D2C4] flex items-center justify-between px-3.5 sm:px-6 lg:px-8 sticky top-0 z-30 shrink-0 text-[#121813] font-sans">
       
-      {/* Left: Mobile Hamburger Trigger + Studio Title */}
-      <div className="flex items-center gap-3.5">
+      {/* Left: Mobile Hamburger Trigger + Dynamic Page Title (Mobile) / Studio Title (Desktop) */}
+      <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
         {/* Mobile Hamburger Trigger (Minimum 44px touch target) */}
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-white border border-[#D6D2C4] text-[#121813] shadow-xs hover:bg-[#E4E2D7] transition-all cursor-pointer focus:outline-none"
+          className="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-[#D6D2C4] text-[#121813] shadow-xs hover:bg-[#E4E2D7] active:scale-95 transition-all cursor-pointer focus:outline-none shrink-0"
           aria-label="Open Navigation Drawer"
           title="Open Menu Drawer"
         >
-          <div className="flex flex-col gap-1 w-5">
+          <div className="flex flex-col gap-1 w-4.5">
             <span className="w-full h-[1.5px] bg-[#121813]"></span>
             <span className="w-full h-[1.5px] bg-[#121813]"></span>
             <span className="w-full h-[1.5px] bg-[#121813]"></span>
           </div>
         </button>
 
-        <div className="min-w-0">
+        {/* Dynamic Mobile Page Title (below lg) */}
+        <div className="lg:hidden min-w-0 flex items-center gap-2 truncate">
+          <h1 className="text-base sm:text-lg font-display font-bold text-[#121813] tracking-tight truncate leading-tight">
+            {(TAB_TITLES[activeTab] || { bn: "ড্যাশবোর্ড", en: "Dashboard" }).bn}
+          </h1>
+          <span className="text-[10px] font-mono text-[#2B4D33] font-bold px-1.5 py-0.5 rounded-full bg-[#2B4D33]/10 hidden xs:inline-block shrink-0">
+            {(TAB_TITLES[activeTab] || { bn: "ড্যাশবোর্ড", en: "Dashboard" }).en}
+          </span>
+        </div>
+
+        {/* Full Desktop Architectural Header (lg and above, unchanged) */}
+        <div className="hidden lg:block min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-sm xs:text-base sm:text-2xl font-display font-light text-[#121813] tracking-[0.06em] sm:tracking-[0.14em] uppercase leading-tight truncate">
+            <h1 className="text-xl sm:text-2xl font-display font-light text-[#121813] tracking-[0.14em] uppercase leading-tight truncate">
               STUDIO DASHBOARD
             </h1>
             <span className="hidden sm:inline-block text-[9px] font-mono uppercase tracking-[0.2em] text-[#2B4D33] font-bold px-2 py-0.5 rounded-full bg-[#2B4D33]/10 border border-[#2B4D33]/20">
@@ -221,15 +267,15 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right: Notifications, Database Refresh, Settings Hub, Primary Action */}
-      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      {/* Right: Notifications + Actions (Compact on mobile, full on desktop) */}
+      <div className="flex items-center gap-2 shrink-0">
         
         {/* Notification Bell Dropdown Container */}
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
-            className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-full border transition-all flex items-center justify-center gap-1.5 relative cursor-pointer shadow-2xs ${
+            className={`min-h-[40px] min-w-[40px] lg:min-h-[44px] lg:min-w-[44px] px-2.5 lg:px-3 py-1.5 rounded-xl lg:rounded-full border transition-all flex items-center justify-center gap-1.5 relative cursor-pointer shadow-2xs ${
               isOpen || unreadCount > 0
                 ? "bg-white border-[#2B4D33] text-[#2B4D33]"
                 : "bg-white hover:bg-[#E4E2D7] border-[#D6D2C4] text-[#121813]"
@@ -239,11 +285,11 @@ export default function Header({
             aria-expanded={isOpen}
           >
             <span className="text-base leading-none">🔔</span>
-            <span className="hidden md:inline text-xs font-mono font-semibold">বিজ্ঞপ্তি</span>
+            <span className="hidden lg:inline text-xs font-mono font-semibold">বিজ্ঞপ্তি</span>
             
             {/* Unread Counter Badge */}
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-rose-600 text-[10px] font-mono font-bold text-white shadow-sm animate-pulse">
+              <span className="absolute -top-1 -right-1 flex h-4.5 min-w-[18px] lg:h-5 lg:min-w-[20px] px-1 items-center justify-center rounded-full bg-rose-600 text-[9px] lg:text-[10px] font-mono font-bold text-white shadow-sm animate-pulse">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
@@ -251,7 +297,7 @@ export default function Header({
 
           {/* Dropdown Menu Modal */}
           {isOpen && (
-            <div className="absolute right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[calc(100vw-32px)] sm:w-96 max-w-[400px] bg-[#FDFBF7] border border-[#D6D2C4] rounded-2xl shadow-2xl z-50 overflow-hidden font-sans animate-fade-in">
+            <div className="absolute right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 mt-2 w-[calc(100vw-24px)] sm:w-96 max-w-[400px] bg-[#FDFBF7] border border-[#D6D2C4] rounded-2xl shadow-2xl z-50 overflow-hidden font-sans animate-fade-in">
               {/* Popover Header */}
               <div className="px-4 py-3 bg-[#F4F1EA] border-b border-[#D6D2C4] flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -331,47 +377,126 @@ export default function Header({
           )}
         </div>
 
-        {/* Database Refresh */}
-        <button 
-          type="button"
-          onClick={fetchData} 
-          className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#2B4D33] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
-          title="Refresh database records"
-        >
-          <span>⟳</span>
-          <span className="hidden sm:inline">রিফ্রেশ</span>
-        </button>
+        {/* Mobile Overflow Menu Button (below lg) */}
+        <div className="relative lg:hidden" ref={overflowRef}>
+          <button
+            type="button"
+            onClick={() => setOverflowOpen((prev) => !prev)}
+            className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer shadow-2xs ${
+              overflowOpen
+                ? "bg-[#2B4D33] text-white border-[#2B4D33]"
+                : "bg-white hover:bg-[#E4E2D7] border-[#D6D2C4] text-[#121813]"
+            }`}
+            title="More Actions"
+            aria-label="More Quick Actions"
+            aria-expanded={overflowOpen}
+          >
+            <span className="text-lg leading-none font-bold">⋮</span>
+          </button>
 
-        {/* Master Project Settings Hub Shortcut (Facebook Style) */}
-        <button
-          type="button"
-          onClick={() => setActiveTab("settings")}
-          className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#121813] bg-white hover:bg-[#E4E2D7] px-3 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
-          title="Master Project Settings (Facebook Hub A to Z)"
-        >
-          <span>⚙️</span>
-          <span className="hidden md:inline">সেটিংস হাব</span>
-        </button>
+          {overflowOpen && (
+            <div className="absolute right-0 mt-2 w-52 bg-white border border-[#D6D2C4] rounded-2xl shadow-xl py-2 z-50 font-sans animate-fade-in text-xs divide-y divide-[#E4E2D7]/60">
+              <div className="p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    fetchData();
+                    setOverflowOpen(false);
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl hover:bg-[#F7F6F2] flex items-center gap-2.5 text-left text-[#121813] font-medium transition-colors cursor-pointer"
+                >
+                  <span className="text-sm text-[#2B4D33]">⟳</span>
+                  <span>ডাটাবেস রিফ্রেশ</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("settings");
+                    setOverflowOpen(false);
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl hover:bg-[#F7F6F2] flex items-center gap-2.5 text-left text-[#121813] font-medium transition-colors cursor-pointer"
+                >
+                  <span className="text-sm">⚙️</span>
+                  <span>মাস্টার সেটিংস হাব</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("services");
+                    setEditingService(null);
+                    setOverflowOpen(false);
+                  }}
+                  className="w-full px-3 py-2.5 rounded-xl hover:bg-[#F7F6F2] flex items-center gap-2.5 text-left text-[#121813] font-medium transition-colors cursor-pointer"
+                >
+                  <span className="text-sm text-[#2B4D33] font-bold">+</span>
+                  <span>নতুন কমিশন / সার্ভিস</span>
+                </button>
+              </div>
 
-        {/* New Commission / Service Action */}
-        <button 
-          type="button" 
-          onClick={() => { setActiveTab("services"); setEditingService(null); }}
-          className="min-h-[44px] bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono tracking-wider py-1.5 px-3 sm:px-4 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 font-medium"
-        >
-          <span>+</span>
-          <span className="whitespace-nowrap text-[11px] sm:text-xs">নতুন কমিশন</span>
-        </button>
+              <div className="p-1">
+                <Link
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOverflowOpen(false)}
+                  className="w-full px-3 py-2.5 rounded-xl hover:bg-[#F7F6F2] flex items-center justify-between text-left text-[#121813] font-medium transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-sm">🌐</span>
+                    <span>মূল ওয়েবসাইট দেখুন</span>
+                  </div>
+                  <span className="text-[10px] text-[#75787B]">➔</span>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
 
-        {/* Direct Landing Page Link */}
-        <Link
-          href="/"
-          className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#D6D2C4] bg-white hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono transition-colors shrink-0 shadow-2xs cursor-pointer"
-          title="Visit Home Page"
-        >
-          <span>🌐</span>
-          <span>সাইট দেখুন</span>
-        </Link>
+        {/* Desktop-Only Action Buttons (lg and above, unchanged) */}
+        <div className="hidden lg:flex items-center gap-2.5">
+          {/* Database Refresh */}
+          <button 
+            type="button"
+            onClick={fetchData} 
+            className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#2B4D33] bg-white hover:bg-[#E4E2D7] px-3.5 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
+            title="Refresh database records"
+          >
+            <span>⟳</span>
+            <span>রিফ্রেশ</span>
+          </button>
+
+          {/* Master Project Settings Hub Shortcut */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("settings")}
+            className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#121813] bg-white hover:bg-[#E4E2D7] px-3.5 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
+            title="Master Project Settings (Facebook Hub A to Z)"
+          >
+            <span>⚙️</span>
+            <span>সেটিংস হাব</span>
+          </button>
+
+          {/* New Commission / Service Action */}
+          <button 
+            type="button" 
+            onClick={() => { setActiveTab("services"); setEditingService(null); }}
+            className="min-h-[44px] bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono tracking-wider py-1.5 px-4 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer hover:scale-[1.02] active:scale-[0.98] shrink-0 font-medium"
+          >
+            <span>+</span>
+            <span className="whitespace-nowrap text-xs">নতুন কমিশন</span>
+          </button>
+
+          {/* Direct Landing Page Link */}
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#D6D2C4] bg-white hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono transition-colors shrink-0 shadow-2xs cursor-pointer"
+            title="Visit Home Page"
+          >
+            <span>🌐</span>
+            <span>সাইট দেখুন</span>
+          </Link>
+        </div>
+
       </div>
 
     </header>

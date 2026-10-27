@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { canAccessTab } from "@/lib/rbac";
 
@@ -440,53 +441,31 @@ export default function Sidebar({
   }, [activeTab, menuGroups]);
 
   // Accordion state:
-  // By default, ONLY the active section is OPEN!
-  // All other sections are neatly closed with a visible Down arrow [▼].
-  // When a section header is clicked, it opens its items, and lower sections push down cleanly.
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => ({
-    group_overview: activeGroupId === "group_overview",
-    group_portfolio: activeGroupId === "group_portfolio",
-    group_operations: activeGroupId === "group_operations",
-    group_studio: activeGroupId === "group_studio",
-    group_settings: activeGroupId === "group_settings",
-  }));
+  // Only ONE section open at a time. Auto-opens the section containing the active route.
+  const [openSectionId, setOpenSectionId] = useState<string | null>(() => activeGroupId);
+  const [showAllSections, setShowAllSections] = useState(false);
 
   // Auto-expand section if activeTab switches to a different group
   useEffect(() => {
     if (activeGroupId) {
-      setOpenSections((prev) => ({
-        ...prev,
-        [activeGroupId]: true,
-      }));
+      setShowAllSections(false);
+      setOpenSectionId(activeGroupId);
     }
   }, [activeGroupId]);
 
-  // Toggle single section on header click
+  // Toggle single section on header click: opens clicked section, closes others
   const toggleSection = (groupId: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [groupId]: !prev[groupId],
-    }));
+    setShowAllSections(false);
+    setOpenSectionId((prev) => (prev === groupId ? null : groupId));
   };
 
   const expandAll = () => {
-    setOpenSections({
-      group_overview: true,
-      group_portfolio: true,
-      group_operations: true,
-      group_studio: true,
-      group_settings: true,
-    });
+    setShowAllSections(true);
   };
 
   const collapseAll = () => {
-    setOpenSections({
-      group_overview: false,
-      group_portfolio: false,
-      group_operations: false,
-      group_studio: false,
-      group_settings: false,
-    });
+    setShowAllSections(false);
+    setOpenSectionId(null);
   };
 
   // Filter groups and items by search query and RBAC
@@ -513,16 +492,62 @@ export default function Sidebar({
       .filter((group) => group.items.length > 0);
   }, [menuGroups, searchQuery, user?.role]);
 
-  // Prevent background scroll when mobile drawer is open
+  // Auto-close drawer when route changes
+  const pathname = usePathname();
+  useEffect(() => {
+    if (isOpen && onClose) {
+      onClose();
+    }
+  }, [pathname]);
+
+  // Touch handlers for swipe-to-close on mobile drawer (threshold: 60px left swipe)
+  const drawerRef = useRef<HTMLElement | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+    // Check if horizontal swipe to the left exceeds threshold (~60px) and is more horizontal than vertical
+    if (deltaX < -60 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (onClose) onClose();
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
+  // Prevent background scroll when mobile drawer is open, cleanly restore on close & unmount
   useEffect(() => {
     if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      const originalTouchAction = document.body.style.touchAction;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+      document.body.style.touchAction = "none";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.touchAction = originalTouchAction;
+      };
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
+  }, [isOpen]);
+
+  // Accessibility: Return focus to previous active element upon drawer close
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null;
+      if (drawerRef.current) {
+        drawerRef.current.focus();
+      }
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
   }, [isOpen]);
 
   // Handle ESC key to close mobile drawer
@@ -536,45 +561,56 @@ export default function Sidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Tapping leaf sub-item closes the mobile drawer automatically
   const handleTabClick = (tabId: string) => {
     setActiveTab(tabId);
+    if (onClose) {
+      onClose();
+    }
   };
 
-  const renderSidebarContent = (isMobileView = false) => (
+  const renderSidebarContent = () => (
     <div className="flex flex-col h-full min-h-0 select-none">
       
       {/* ── 1. HEADER: BRAND & ARCHITECTURAL BADGE ── */}
-      <div className="space-y-3 pb-3 border-b border-[#D6D2C4] shrink-0">
+      <div className="space-y-2.5 pb-2.5 border-b border-[#D6D2C4] shrink-0">
         <div className="flex items-center justify-between px-1">
           <Link
             href="/"
             className="group flex flex-col focus:outline-none cursor-pointer"
             title="A R Green Garden Public Home"
           >
-            <span className="font-display font-light text-[17px] sm:text-[18px] tracking-[0.2em] uppercase text-[#121813] group-hover:text-[#2B4D33] transition-colors leading-tight">
+            {/* Desktop Brand Logo */}
+            <span className="hidden lg:block font-display font-light text-[17px] sm:text-[18px] tracking-[0.2em] uppercase text-[#121813] group-hover:text-[#2B4D33] transition-colors leading-tight">
               A R GREEN GARDEN
             </span>
-            <span className="font-mono text-[9px] tracking-[0.26em] text-[#2B4D33] uppercase mt-0.5 font-semibold">
+            <span className="hidden lg:block font-mono text-[9px] tracking-[0.26em] text-[#2B4D33] uppercase mt-0.5 font-semibold">
               LANDSCAPE ARCHITECTURE STUDIO
+            </span>
+
+            {/* Mobile Compact Brand Logo */}
+            <span className="lg:hidden font-display font-light text-[15px] tracking-[0.16em] uppercase text-[#121813] leading-tight">
+              A R GREEN GARDEN
+            </span>
+            <span className="lg:hidden font-mono text-[8.5px] tracking-[0.2em] text-[#2B4D33] uppercase font-semibold">
+              LANDSCAPE ARCHITECTURE
             </span>
           </Link>
 
-          {/* Close Button on Mobile Drawer */}
-          {isMobileView && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="min-w-[42px] min-h-[42px] rounded-xl bg-black/5 hover:bg-black/10 active:scale-95 text-[#121813] flex items-center justify-center text-sm font-bold cursor-pointer transition-all focus:outline-none"
-              aria-label="Close Sidebar"
-              title="Close Drawer"
-            >
-              ✕
-            </button>
-          )}
+          {/* Close Button on Mobile Drawer (44px touch target, hidden on desktop) */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="lg:hidden w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-black/5 hover:bg-black/10 active:scale-95 text-[#121813] flex items-center justify-center text-base font-bold cursor-pointer transition-all focus:outline-none shrink-0"
+            aria-label="Close Sidebar"
+            title="Close Drawer"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Studio Practice Badge & Role Indicator */}
-        <div className="bg-white/90 border border-[#D6D2C4] rounded-xl px-3 py-2 flex items-center justify-between text-xs shadow-2xs">
+        {/* Studio Practice Badge & Role Indicator (Desktop Only: hidden lg:flex) */}
+        <div className="hidden lg:flex bg-white/90 border border-[#D6D2C4] rounded-xl px-3 py-2 items-center justify-between text-xs shadow-2xs">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#2B4D33] animate-pulse"></span>
             <span className="font-mono text-[10px] tracking-wider uppercase text-[#121813] font-bold">
@@ -586,17 +622,17 @@ export default function Sidebar({
           </span>
         </div>
 
-        {/* Search Bar for fast menu navigation */}
+        {/* Search Bar for fast menu navigation (44px & 16px font on mobile, compact on desktop) */}
         <div className="relative">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="মেনু বা পেজ খুঁজুন... / Search..."
-            className="w-full h-8.5 pl-8 pr-7 text-xs bg-white/95 border border-[#D6D2C4] rounded-xl text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] focus:ring-1 focus:ring-[#2B4D33] transition-all"
+            className="w-full h-11 lg:h-8.5 pl-9 lg:pl-8 pr-8 lg:pr-7 text-[16px] lg:text-xs bg-white/95 border border-[#D6D2C4] rounded-xl text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] focus:ring-1 focus:ring-[#2B4D33] transition-all"
           />
           <svg
-            className="w-3.5 h-3.5 text-[#75787B] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-[#75787B] absolute left-3 lg:left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -611,7 +647,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-black/10 hover:bg-black/20 text-[#121813] flex items-center justify-center text-[10px] cursor-pointer"
+              className="absolute right-2.5 lg:right-2 top-1/2 -translate-y-1/2 w-5 h-5 lg:w-4 lg:h-4 rounded-full bg-black/10 hover:bg-black/20 text-[#121813] flex items-center justify-center text-xs lg:text-[10px] cursor-pointer"
               title="Clear search"
             >
               ✕
@@ -619,8 +655,8 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Section Quick Controls */}
-        <div className="flex items-center justify-between px-1 text-[10px] font-mono text-[#75787B]">
+        {/* Section Quick Controls (Desktop Only: hidden lg:flex) */}
+        <div className="hidden lg:flex items-center justify-between px-1 text-[10px] font-mono text-[#75787B]">
           <span className="uppercase tracking-wider font-semibold">
             {searchQuery ? `ফলাফল (${filteredGroups.length} সেকশন)` : `সেকশন তালিকা (${filteredGroups.length})`}
           </span>
@@ -664,14 +700,13 @@ export default function Sidebar({
         ) : (
           filteredGroups.map((group) => {
             const hasActiveItem = group.items.some((i) => i.id === activeTab);
-            // If user is searching, automatically show matching items;
-            // Otherwise use the section's independent open/collapse state.
-            const isSectionOpen = searchQuery ? true : !!openSections[group.id];
+            // If user is searching or clicked show all, show items; otherwise strictly only openSectionId
+            const isSectionOpen = searchQuery ? true : showAllSections ? true : openSectionId === group.id;
 
             return (
               <div
                 key={group.id}
-                className={`rounded-2xl transition-all duration-200 border ${
+                className={`shrink-0 rounded-2xl transition-all duration-200 border ${
                   hasActiveItem
                     ? "bg-white border-[#2B4D33]/50 shadow-sm ring-1 ring-[#2B4D33]/20"
                     : "bg-white/90 hover:bg-white border-[#D6D2C4] shadow-2xs"
@@ -765,87 +800,112 @@ export default function Sidebar({
                   </div>
                 </button>
 
-                {/* ── Distinct Inner Sub-items Container (Never bleeds into other sections) ── */}
-                {isSectionOpen && (
-                  <div className="bg-[#FAF9F5] border-t border-[#E5E2D6] p-2 flex flex-col gap-1">
-                    <nav className="border-l-2 border-l-[#2B4D33]/40 pl-2 flex flex-col gap-1">
-                      {group.items.map((tab) => {
-                        const isSelected = activeTab === tab.id;
-                        return (
-                          <button
-                            key={tab.id}
-                            type="button"
-                            onClick={() => handleTabClick(tab.id)}
-                            className={`w-full min-h-[40px] px-2.5 py-1.5 rounded-xl text-left flex items-center justify-between transition-all duration-150 cursor-pointer group ${
-                              isSelected
-                                ? "bg-[#2B4D33] text-white shadow-sm font-semibold"
-                                : "text-[#2A2E2B] hover:bg-white hover:shadow-2xs hover:text-[#121813]"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                  isSelected
-                                    ? "bg-white/20 text-white"
-                                    : "bg-white text-[#75787B] group-hover:text-[#2B4D33] border border-black/[0.06] shadow-2xs"
-                                }`}
-                              >
-                                {tab.icon}
-                              </span>
-                              <div className="flex flex-col min-w-0 truncate">
+                {/* ── Smooth CSS Grid Accordion Content (No Fixed Heights, Zero Clipping) ── */}
+                <div
+                  className="grid transition-[grid-template-rows] duration-250 ease-in-out"
+                  style={{
+                    gridTemplateRows: isSectionOpen ? "1fr" : "0fr",
+                  }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="bg-[#FAF9F5] border-t border-[#E5E2D6] p-2 flex flex-col gap-1">
+                      <nav className="border-l-2 border-l-[#2B4D33]/40 pl-2 flex flex-col gap-1">
+                        {group.items.map((tab) => {
+                          const isSelected = activeTab === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => handleTabClick(tab.id)}
+                              className={`w-full min-h-[44px] px-3 py-2 rounded-xl text-left flex items-center justify-between transition-all duration-150 cursor-pointer group ${
+                                isSelected
+                                  ? "bg-[#2B4D33] text-white shadow-sm font-semibold"
+                                  : "text-[#121813] hover:bg-white hover:shadow-2xs"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
                                 <span
-                                  className={`text-xs truncate leading-snug ${
-                                    isSelected ? "text-white font-bold" : "text-[#121813] font-medium"
-                                  }`}
-                                >
-                                  {tab.labelBn}
-                                </span>
-                                <span
-                                  className={`text-[9px] font-mono truncate leading-none mt-0.5 ${
-                                    isSelected ? "text-emerald-100" : "text-[#75787B]"
-                                  }`}
-                                >
-                                  {tab.labelEn}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                              {tab.badge !== undefined && (
-                                <span
-                                  className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                                     isSelected
-                                      ? "bg-white text-[#2B4D33]"
-                                      : typeof tab.badge === "number"
-                                      ? "bg-[#C85A32] text-white animate-pulse"
-                                      : "bg-[#2B4D33]/15 text-[#2B4D33]"
+                                      ? "bg-white/20 text-white"
+                                      : "bg-white text-[#75787B] group-hover:text-[#2B4D33] border border-black/[0.06] shadow-2xs"
                                   }`}
                                 >
-                                  {tab.badge}
+                                  {tab.icon}
                                 </span>
-                              )}
-                              {isSelected && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 shrink-0" />
-                              )}
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </nav>
+                                <div className="flex flex-col min-w-0 truncate">
+                                  <span
+                                    className={`text-xs sm:text-[13px] truncate leading-snug ${
+                                      isSelected ? "text-white font-bold" : "text-[#121813] font-semibold"
+                                    }`}
+                                  >
+                                    {tab.labelBn}
+                                  </span>
+                                  <span
+                                    className={`text-[12px] font-mono truncate leading-none mt-0.5 ${
+                                      isSelected ? "text-emerald-100 font-normal" : "text-[#3E433E] font-medium"
+                                    }`}
+                                  >
+                                    {tab.labelEn}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                                {tab.badge !== undefined && (
+                                  <span
+                                    className={`font-mono text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                      isSelected
+                                        ? "bg-white text-[#2B4D33]"
+                                        : typeof tab.badge === "number"
+                                        ? "bg-[#C85A32] text-white animate-pulse"
+                                        : "bg-[#2B4D33]/15 text-[#2B4D33]"
+                                    }`}
+                                  >
+                                    {tab.badge}
+                                  </span>
+                                )}
+                                {isSelected && (
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 shrink-0" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </nav>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })
         )}
+
+        {/* ── Mobile-Only: Back to website leaf link inside the scroll area (lg:hidden) ── */}
+        <div className="lg:hidden pt-1 pb-1">
+          <Link
+            href="/"
+            onClick={() => {
+              if (onClose) onClose();
+            }}
+            className="min-h-[44px] flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-white/90 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-base">🌐</span>
+              <span className="font-sans font-medium text-xs text-[#121813]">ওয়েবসাইটে ফিরে যান</span>
+            </div>
+            <span className="text-xs text-[#2B4D33] group-hover:translate-x-0.5 transition-transform font-bold">➔</span>
+          </Link>
+        </div>
       </div>
 
-      {/* ── 3. BOTTOM: USER PROFILE, PORTAL LINK & MOBILE CLOSE ── */}
-      <div className="pt-2.5 border-t border-[#D6D2C4] flex flex-col gap-2 shrink-0">
-        {/* Public Website Link */}
+      {/* ── 3. BOTTOM: USER PROFILE, PORTAL LINK & LOGOUT ── */}
+
+      {/* Desktop Bottom Section: Public Website Link & Full User Card (hidden lg:flex) */}
+      <div className="hidden lg:flex flex-col gap-2 pt-2.5 border-t border-[#D6D2C4] pb-4 shrink-0">
         <Link
           href="/"
-          className="min-h-[40px] flex items-center justify-between py-2 px-3 rounded-xl bg-white/90 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
+          className="min-h-[44px] flex items-center justify-between py-2.5 px-3 rounded-xl bg-white/90 hover:bg-white text-[#121813] border border-[#D6D2C4] text-xs font-mono tracking-wider transition-all shadow-2xs group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <span>🌐</span>
@@ -854,14 +914,13 @@ export default function Sidebar({
           <span className="text-[11px] text-[#2B4D33] group-hover:translate-x-0.5 transition-transform">➔</span>
         </Link>
 
-        {/* User Card & Logout */}
-        <div className="min-h-[42px] flex items-center justify-between p-2 rounded-xl bg-white/90 border border-[#D6D2C4] shadow-2xs">
+        <div className="min-h-[48px] flex items-center justify-between p-2.5 rounded-xl bg-white/90 border border-[#D6D2C4] shadow-2xs">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl overflow-hidden bg-[#2B4D33] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
               {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <p className="text-[9px] uppercase font-mono tracking-wider text-[#2B4D33] font-bold leading-none truncate">
+              <p className="text-[10px] uppercase font-mono tracking-wider text-[#2B4D33] font-bold leading-none truncate">
                 {user?.role || "STUDIO DIRECTOR"}
               </p>
               <p className="text-xs font-bold text-[#121813] mt-0.5 truncate">
@@ -873,7 +932,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={() => logout()}
-            className="w-8 h-8 flex items-center justify-center text-[#75787B] hover:text-rose-600 transition-colors rounded-lg hover:bg-stone-100 cursor-pointer text-xs"
+            className="w-9 h-9 flex items-center justify-center text-[#75787B] hover:text-rose-600 transition-colors rounded-lg hover:bg-stone-100 cursor-pointer text-xs"
             title="Log Out"
             aria-label="Log Out"
           >
@@ -884,18 +943,42 @@ export default function Sidebar({
             </svg>
           </button>
         </div>
+      </div>
 
-        {/* Mobile-only: Close Drawer Action Button */}
-        {isMobileView && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] w-full flex items-center justify-center gap-2 rounded-xl bg-[#2B4D33] hover:bg-[#355f3f] active:scale-[0.99] text-white text-xs font-semibold font-sans cursor-pointer transition-all shadow-sm"
-          >
-            <span>✕</span>
-            <span>মেনু বন্ধ করে ড্যাশবোর্ডে দেখুন</span>
-          </button>
-        )}
+      {/* Mobile-Only Compact Bottom Row: Admin avatar + name on left, 44px logout icon button on right (~56px tall, lg:hidden) */}
+      <div 
+        className="lg:hidden border-t border-[#D6D2C4] pt-2 flex items-center justify-between px-1 shrink-0"
+        style={{
+          paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)",
+        }}
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-xl overflow-hidden bg-[#2B4D33] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
+            {sessionData?.user?.name ? sessionData.user.name.charAt(0).toUpperCase() : "A"}
+          </div>
+          <div className="min-w-0">
+            <p className="text-[9.5px] uppercase font-mono tracking-wider text-[#2B4D33] font-bold leading-none truncate">
+              {user?.role || "ADMIN"}
+            </p>
+            <p className="text-xs font-bold text-[#121813] mt-0.5 truncate">
+              {sessionData?.user?.name || "Admin User"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => logout()}
+          className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer shrink-0"
+          title="Log Out"
+          aria-label="Log Out"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
       </div>
 
     </div>
@@ -903,15 +986,15 @@ export default function Sidebar({
 
   return (
     <>
-      {/* ================= 1. DESKTOP PERMANENT SIDEBAR ================= */}
-      <aside className="hidden md:flex md:w-[295px] lg:w-[305px] bg-[#E4E2D7] text-[#323232] flex-col px-3.5 py-4 sticky top-0 h-screen shrink-0 shadow-sm border-r border-[#D6D2C4] z-20 font-sans">
-        {renderSidebarContent(false)}
+      {/* ================= 1. DESKTOP PERMANENT SIDEBAR (lg and above) ================= */}
+      <aside className="hidden lg:flex lg:w-[305px] bg-[#E4E2D7] text-[#323232] flex-col px-3.5 py-4 sticky top-0 h-screen max-h-screen shrink-0 shadow-sm border-r border-[#D6D2C4] z-20 font-sans">
+        {renderSidebarContent()}
       </aside>
 
-      {/* ================= 2. MOBILE & TABLET SLIDE-IN DRAWER ================= */}
+      {/* ================= 2. MOBILE & TABLET SLIDE-IN DRAWER (below lg) ================= */}
       <div
-        className={`fixed inset-0 z-50 md:hidden transition-all duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-50 lg:hidden transition-[opacity,visibility] duration-250 ease-out motion-reduce:transition-none ${
+          isOpen ? "opacity-100 visible pointer-events-auto" : "opacity-0 invisible pointer-events-none delay-250"
         }`}
         role="dialog"
         aria-modal="true"
@@ -920,19 +1003,23 @@ export default function Sidebar({
         {/* Backdrop Overlay */}
         <div
           onClick={onClose}
-          className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 cursor-pointer ${
+          className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-250 ease-out motion-reduce:transition-none cursor-pointer ${
             isOpen ? "opacity-100" : "opacity-0"
           }`}
           aria-hidden="true"
         />
 
-        {/* Left Slide-out Drawer Container */}
+        {/* Left Slide-out Drawer Container: width 85vw with max-width 360px, 100dvh flex column */}
         <aside
-          className={`relative w-[320px] max-w-[88vw] h-full bg-[#E4E2D7] text-[#323232] flex flex-col px-3.5 py-4 shadow-2xl border-r border-[#D6D2C4] z-10 transition-transform duration-300 ease-out font-sans ${
+          ref={drawerRef}
+          tabIndex={-1}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className={`relative w-[85vw] max-w-[360px] h-[100dvh] max-h-[100dvh] bg-[#E4E2D7] text-[#323232] flex flex-col px-3.5 pt-3.5 shadow-2xl border-r border-[#D6D2C4] z-10 transition-transform duration-250 ease-out motion-reduce:transition-none motion-reduce:transform-none font-sans focus:outline-none ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          {renderSidebarContent(true)}
+          {renderSidebarContent()}
         </aside>
       </div>
     </>

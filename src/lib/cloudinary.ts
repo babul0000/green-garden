@@ -19,6 +19,14 @@ export async function uploadToCloudinary(
   folder: string = "green-garden",
   filename?: string
 ): Promise<CloudinaryUploadResult> {
+  // Ensure Cloudinary is initialized with current environment variables
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+
   return new Promise((resolve, reject) => {
     // Generate clean unique public_id with timestamp to bust CDN cache
     let publicId: string | undefined = undefined;

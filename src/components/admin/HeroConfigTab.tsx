@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { IHeroSettings, defaultHeroSettings } from "@/types";
 import HeroLivePreview from "./hero/HeroLivePreview";
 import HeroSettingsPanels from "./hero/HeroSettingsPanels";
+import { uploadClientMedia } from "@/lib/clientUpload";
 
 // Curated Video & Poster Presets for Instant One-Click Selection
 const VIDEO_PRESETS = [
@@ -134,31 +135,19 @@ export default function HeroConfigTab() {
 
     try {
       setUploadingPoster(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "hero-posters");
-
-      const res = await fetch("/api/upload/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.url) {
-          setConfig((prev) => ({
-            ...prev,
-            posterImageUrl: data.url,
-            imageUrl: data.url,
-          }));
-        }
-      } else {
-        alert("ফাইল আপলোড ব্যর্থ হয়েছে।");
+      const result = await uploadClientMedia(file, "hero-posters");
+      if (result.url) {
+        setConfig((prev) => ({
+          ...prev,
+          posterImageUrl: result.url,
+          imageUrl: result.url,
+        }));
       }
-    } catch {
-      alert("ছবি আপলোড করার সময় সমস্যা হয়েছে।");
+    } catch (err: any) {
+      alert(err?.message || "ছবি আপলোড করার সময় সমস্যা হয়েছে।");
     } finally {
       setUploadingPoster(false);
+      e.target.value = "";
     }
   };
 
@@ -169,34 +158,22 @@ export default function HeroConfigTab() {
 
     try {
       setUploadingVideo(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "hero-videos");
-
-      const res = await fetch("/api/upload/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.url) {
-          const timestamp = Date.now();
-          setConfig((prev) => ({
-            ...prev,
-            videoUrl: data.url,
-            mediaType: "video",
-            version: timestamp,
-            updatedAt: timestamp,
-          }));
-        }
-      } else {
-        alert("ভিডিও ফাইল আপলোড ব্যর্থ হয়েছে।");
+      const result = await uploadClientMedia(file, "hero-videos");
+      if (result.url) {
+        const timestamp = Date.now();
+        setConfig((prev) => ({
+          ...prev,
+          videoUrl: result.url,
+          mediaType: "video",
+          version: timestamp,
+          updatedAt: timestamp,
+        }));
       }
-    } catch {
-      alert("ভিডিও আপলোড করার সময় সমস্যা হয়েছে।");
+    } catch (err: any) {
+      alert(err?.message || "ভিডিও আপলোড করার সময় সমস্যা হয়েছে।");
     } finally {
       setUploadingVideo(false);
+      e.target.value = "";
     }
   };
 

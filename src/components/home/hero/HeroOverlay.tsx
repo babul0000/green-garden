@@ -32,9 +32,9 @@ export default function HeroOverlay({
       )}
       {showBottomVignette && (
         <div
-          className="absolute inset-x-0 bottom-0 h-48 pointer-events-none z-10"
+          className="absolute inset-x-0 bottom-0 h-52 sm:h-64 pointer-events-none z-10"
           style={{
-            background: "linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.35) 50%, rgba(0, 0, 0, 0) 100%)",
+            background: "linear-gradient(to top, rgba(4, 26, 46, 0.95) 0%, rgba(4, 26, 46, 0.6) 40%, rgba(4, 26, 46, 0.2) 75%, transparent 100%)",
           }}
         />
       )}

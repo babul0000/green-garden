@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { uploadClientMedia } from "@/lib/clientUpload";
 
 export interface IMenuLink {
   id: string;
@@ -178,30 +179,20 @@ export default function NavbarConfigTab() {
 
     try {
       setUploadingLogo(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "green-garden/branding");
-
-      const res = await fetch("/api/upload/admin", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok && data.url) {
+      const result = await uploadClientMedia(file, "green-garden/branding");
+      if (result.url) {
         setConfig((prev) => ({
           ...prev,
           logoType: "IMAGE",
-          logoImage: data.url,
+          logoImage: result.url,
         }));
-      } else {
-        alert(data.error || "Logo upload failed");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Upload error:", err);
-      alert("Failed to upload logo image");
+      alert(err?.message || "Failed to upload logo image");
     } finally {
       setUploadingLogo(false);
+      e.target.value = "";
     }
   };
 

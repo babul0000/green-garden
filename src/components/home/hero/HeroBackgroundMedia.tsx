@@ -88,7 +88,7 @@ export default function HeroBackgroundMedia({
           <video
             ref={videoRef}
             src={effectiveVideoUrl}
-            poster={effectivePosterUrl}
+            poster={effectivePosterUrl || "/hero_plants.png"}
             autoPlay={autoPlay}
             muted={muted}
             loop={loop}

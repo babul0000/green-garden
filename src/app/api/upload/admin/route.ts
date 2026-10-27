@@ -12,8 +12,12 @@ export const revalidate = 0;
 const MAX_ADMIN_FILE_SIZE = 100 * 1024 * 1024;
 
 const ALLOWED_ADMIN_EXTENSIONS = new Set([
-  "jpg", "jpeg", "png", "webp", "gif", "svg", "pdf",
-  "mp4", "webm", "mov", "avi", "mkv", "ogg"
+  // Images (standard web, raw camera, and browser interchange formats like JFIF)
+  "jpg", "jpeg", "jfif", "pjpeg", "pjp", "png", "webp", "gif", "svg", "avif", "heic", "heif", "bmp", "ico", "tiff", "tif",
+  // Documents
+  "pdf",
+  // Videos
+  "mp4", "webm", "mov", "avi", "mkv", "ogg", "m4v"
 ]);
 
 export async function POST(req: Request) {
@@ -49,7 +53,7 @@ export async function POST(req: Request) {
     const extension = file.name.split(".").pop()?.toLowerCase() || "";
     if (!ALLOWED_ADMIN_EXTENSIONS.has(extension)) {
       return NextResponse.json(
-        { error: `File format '.${extension}' is not permitted. Permitted formats: images (JPG, PNG, WEBP, GIF, SVG), PDF, and videos (MP4, WEBM, MOV, OGG).` },
+        { error: `File format '.${extension}' is not permitted. Permitted formats: images (JPG, JPEG, JFIF, PNG, WEBP, AVIF, GIF, SVG, BMP, HEIC), PDF, and videos (MP4, WEBM, MOV, OGG).` },
         { status: 400 }
       );
     }
