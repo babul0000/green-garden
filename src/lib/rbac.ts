@@ -50,6 +50,28 @@ export const TAB_SECTION_MAP: Record<string, AdminSection> = {
   "activity-logs": "security_roles",
 };
 
+let cachedDynamicMatrix: RoleMatrixItem[] | null = null;
+
+export function setCustomRoleMatrix(matrix: RoleMatrixItem[]) {
+  cachedDynamicMatrix = matrix;
+}
+
+export function getCustomRoleMatrix(): RoleMatrixItem[] {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("custom_rbac_matrix");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          cachedDynamicMatrix = parsed;
+          return parsed;
+        }
+      }
+    } catch {}
+  }
+  return cachedDynamicMatrix || ROLE_PERMISSION_MATRIX;
+}
+
 /**
  * Check if a role has access to a dashboard section
  */
@@ -57,6 +79,17 @@ export function canAccessSection(role: string | undefined | null, section: Admin
   if (!role) return false;
   const upper = role.toUpperCase();
   if (upper === "ADMIN") return true;
+
+  // Check dynamic role matrix if available
+  const matrix = getCustomRoleMatrix();
+  const row = matrix.find((r) => r.sectionId === section);
+  if (row) {
+    if (upper === "MODERATOR") return Boolean(row.moderator);
+    if (upper === "EDITOR") return Boolean(row.editor);
+    if (upper === "EMPLOYEE") return Boolean(row.employee);
+    if (upper === "CLIENT" || upper === "CUSTOMER") return Boolean(row.client);
+  }
+
   if (upper === "CLIENT" || upper === "CUSTOMER") return false;
 
   switch (section) {
@@ -93,7 +126,14 @@ export function canAccessTab(role: string | undefined | null, tabId: string): bo
 export function canEnterAdmin(role: string | undefined | null): boolean {
   if (!role) return false;
   const upper = role.toUpperCase();
-  return upper === "ADMIN" || upper === "MODERATOR" || upper === "EDITOR" || upper === "EMPLOYEE";
+  if (upper === "ADMIN") return true;
+
+  const matrix = getCustomRoleMatrix();
+  const roleKey = upper.toLowerCase() as "moderator" | "editor" | "employee" | "client";
+  const hasAnyAccess = matrix.some((row) => Boolean(row[roleKey]));
+  if (hasAnyAccess) return true;
+
+  return upper === "MODERATOR" || upper === "EDITOR" || upper === "EMPLOYEE";
 }
 
 /**
