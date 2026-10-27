@@ -43,6 +43,35 @@ export default function HeroBackgroundMedia({
     return `${posterImageUrl}${separator}_v=${version}`;
   }, [posterImageUrl, version]);
 
+  const effectiveImageUrl = React.useMemo(() => {
+    const target = imageUrl || posterImageUrl;
+    if (!target) return "/hero_plants.png";
+    if (!version) return target;
+    const separator = target.includes("?") ? "&" : "?";
+    return `${target}${separator}_v=${version}`;
+  }, [imageUrl, posterImageUrl, version]);
+
+  const [activeImageSrc, setActiveImageSrc] = useState<string>(() => {
+    return imageUrl || posterImageUrl || "/hero_plants.png";
+  });
+  const [isImgReady, setIsImgReady] = useState(true);
+
+  useEffect(() => {
+    const target = effectiveImageUrl;
+    if (!target || target === activeImageSrc) return;
+
+    const img = new Image();
+    img.src = target;
+    img.onload = () => {
+      setActiveImageSrc(target);
+      setIsImgReady(true);
+    };
+    img.onerror = () => {
+      setActiveImageSrc(target);
+      setIsImgReady(true);
+    };
+  }, [effectiveImageUrl, activeImageSrc]);
+
   const [preferStaticMedia, setPreferStaticMedia] = useState(false);
 
   useEffect(() => {
@@ -108,9 +137,12 @@ export default function HeroBackgroundMedia({
         </>
       ) : (
         <img
-          src={imageUrl || effectivePosterUrl}
+          key={activeImageSrc}
+          src={activeImageSrc}
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 opacity-100"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            isImgReady ? "opacity-100" : "opacity-90"
+          }`}
         />
       )}
     </div>

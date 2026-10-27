@@ -106,6 +106,9 @@ export default function HeroConfigTab() {
       if (res.ok) {
         setConfig(updatedHeroConfig);
         setSavedSuccess(true);
+        try {
+          localStorage.setItem("cached_hero_config", JSON.stringify(updatedHeroConfig));
+        } catch {}
         // Dispatch live event to immediately update any open homepage components
         window.dispatchEvent(
           new CustomEvent("hero-config-updated", { detail: updatedHeroConfig })

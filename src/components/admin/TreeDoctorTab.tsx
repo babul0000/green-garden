@@ -205,6 +205,37 @@ export default function TreeDoctorTab() {
     return true;
   });
 
+function parseTreeProblem(rawProblem: string, existingPhoto?: string | null) {
+  let displaySymptoms = rawProblem || "";
+  let photoUrl = existingPhoto || null;
+  let parsedTree = "";
+
+  if (displaySymptoms.includes("EMERGENCY TREE DOCTOR REQUEST:")) {
+    const treeMatch = displaySymptoms.match(/Tree\/Plant:\s*([^\n\r]+)/i);
+    if (treeMatch) parsedTree = treeMatch[1].trim();
+
+    const symMatch = displaySymptoms.match(/Symptoms:\s*([^\n\r]+)/i);
+    if (symMatch) displaySymptoms = symMatch[1].trim();
+
+    const photoMatch = displaySymptoms.match(/Photo:\s*(https?:\/\/[^\s\n\r]+)/i);
+    if (photoMatch && !photoUrl) {
+      photoUrl = photoMatch[1].trim();
+    }
+  } else {
+    const urlMatch = displaySymptoms.match(/(https?:\/\/[^\s]+)/i);
+    if (urlMatch) {
+      if (!photoUrl) photoUrl = urlMatch[1];
+      displaySymptoms = displaySymptoms.replace(urlMatch[1], "").replace(/Photo:?/i, "").trim();
+    }
+  }
+
+  if (!displaySymptoms) {
+    displaySymptoms = "গাছের জরুরি চিকিৎসা ও পর্যবেক্ষণ প্রয়োজন।";
+  }
+
+  return { displaySymptoms, photoUrl, parsedTree };
+}
+
   const emergencyCount = requests.filter((r) => r.isEmergency).length;
 
   return (
@@ -283,60 +314,81 @@ export default function TreeDoctorTab() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredRequests.map((req) => (
+              {filteredRequests.map((req) => {
+                const { displaySymptoms, photoUrl, parsedTree } = parseTreeProblem(req.problem, req.treePhotoUrl);
+                const effectiveTreeName = req.treeName || parsedTree || "গাছের রোগী";
+
+                return (
                 <div
                   key={req.id}
-                  className={`bg-[#18221A]/90 backdrop-blur-xl rounded-3xl p-5 border shadow-lg transition-all flex flex-col justify-between ${
+                  className={`bg-[#18221A]/90 backdrop-blur-xl rounded-3xl p-5 border shadow-lg transition-all flex flex-col justify-between overflow-hidden ${
                     req.isEmergency
                       ? "border-rose-500/60 ring-1 ring-rose-500/30"
                       : "border-white/10 hover:border-emerald-500/40"
                   }`}
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     {/* Header */}
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-2 border-b border-white/10 pb-3">
                       <div>
                         {req.isEmergency && (
-                          <span className="inline-block bg-rose-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full mb-1">
-                            🚨 EMERGENCY VISIT
+                          <span className="inline-flex items-center gap-1 bg-rose-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full mb-1">
+                            <span>🚨</span> EMERGENCY VISIT
                           </span>
                         )}
-                        <h3 className="font-bold text-white text-base font-serif">{req.treeName}</h3>
-                        <p className="text-xs text-stone-400">ক্লায়েন্ট: <span className="font-semibold text-stone-200">{req.clientName}</span></p>
+                        <h3 className="font-bold text-white text-base font-serif">{effectiveTreeName}</h3>
+                        <p className="text-xs text-stone-300 mt-0.5">
+                          ক্লায়েন্ট: <span className="font-semibold text-white">{req.clientName}</span>
+                        </p>
                       </div>
 
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0 font-mono">
                         {req.status}
                       </span>
                     </div>
 
-                    {/* Problem Description */}
-                    <div className="bg-black/35 p-3 rounded-2xl border border-white/10 text-xs space-y-1.5">
+                    {/* Problem Description with clean wrapping and no raw URLs */}
+                    <div className="bg-black/40 p-3 rounded-2xl border border-white/10 text-xs space-y-2 overflow-hidden">
                       <div>
-                        <span className="text-stone-400 text-[10px] block">সমস্যা (Problem):</span>
-                        <p className="font-semibold text-rose-300 leading-snug">{req.problem}</p>
+                        <span className="text-stone-400 text-[10px] uppercase font-bold tracking-wider block mb-1">
+                          সমস্যা ও লক্ষণ (Symptoms):
+                        </span>
+                        <p className="text-rose-200 text-xs leading-relaxed font-sans break-words whitespace-pre-line">
+                          {displaySymptoms}
+                        </p>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-white/10 text-[11px]">
-                        <div>
-                          <span className="text-stone-400 text-[10px] block">লোকেশন:</span>
-                          <span className="font-medium text-stone-200">{req.location}</span>
+
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10 text-[11px]">
+                        <div className="min-w-0">
+                          <span className="text-stone-400 text-[10px] block font-mono">📍 লোকেশন:</span>
+                          <span className="font-medium text-stone-200 truncate block" title={req.location}>
+                            {req.location || "উল্লেখ নেই"}
+                          </span>
                         </div>
-                        <div>
-                          <span className="text-stone-400 text-[10px] block">পছন্দের সময়:</span>
-                          <span className="font-medium text-stone-200">{req.preferredVisitTime || "যে কোনো সময়"}</span>
+                        <div className="min-w-0">
+                          <span className="text-stone-400 text-[10px] block font-mono">🕒 সময়:</span>
+                          <span className="font-medium text-stone-200 truncate block" title={req.preferredVisitTime}>
+                            {req.preferredVisitTime || "যে কোনো সময়"}
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Tree Photo Thumbnail */}
-                    {req.treePhotoUrl && (
+                    {/* Tree Photo Thumbnail with Modal View */}
+                    {photoUrl && (
                       <div
-                        onClick={() => setSelectedPhoto(req.treePhotoUrl || null)}
-                        className="relative group rounded-xl overflow-hidden aspect-[16/9] border border-white/10 cursor-pointer bg-black/40"
+                        onClick={() => setSelectedPhoto(photoUrl)}
+                        className="relative group rounded-2xl overflow-hidden aspect-[16/9] border border-white/15 cursor-pointer bg-black/60 shadow-md"
                       >
-                        <img src={req.treePhotoUrl} alt={req.treeName} className="w-full h-full object-cover group-hover:scale-105 transition-all" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all">
-                          🔍 আক্রান্ত গাছের ছবি দেখুন
+                        <img
+                          src={photoUrl}
+                          alt={effectiveTreeName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-2.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[11px] font-mono text-emerald-300 font-bold flex items-center gap-1.5">
+                            <span>🔍</span> আক্রান্ত গাছের ছবি বড় করে দেখুন
+                          </span>
                         </div>
                       </div>
                     )}
@@ -408,7 +460,8 @@ export default function TreeDoctorTab() {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>

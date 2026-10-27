@@ -11,7 +11,20 @@ import HeroSlideOutCTA from "./hero/HeroSlideOutCTA";
 export default function ShmaHeroVideo() {
   const { language } = useLanguage();
   const isBn = language === "bn";
-  const [config, setConfig] = useState<IHeroSettings>(defaultHeroSettings);
+  const [config, setConfig] = useState<IHeroSettings>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("cached_hero_config");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.imageUrl || parsed.videoUrl || parsed.posterImageUrl || parsed.mediaType)) {
+            return { ...defaultHeroSettings, ...parsed };
+          }
+        }
+      } catch {}
+    }
+    return defaultHeroSettings;
+  });
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -34,11 +47,14 @@ export default function ShmaHeroVideo() {
             data?.value?.hero_config ||
             (data?.key === "hero_config" ? data?.value : null);
 
-          if (heroConfig && (heroConfig.videoUrl || heroConfig.mediaType)) {
+          if (heroConfig && (heroConfig.videoUrl || heroConfig.mediaType || heroConfig.imageUrl || heroConfig.posterImageUrl)) {
             setConfig((prev) => ({
               ...prev,
               ...heroConfig,
             }));
+            try {
+              localStorage.setItem("cached_hero_config", JSON.stringify(heroConfig));
+            } catch {}
           }
         }
       } catch (err) {
@@ -52,6 +68,9 @@ export default function ShmaHeroVideo() {
     const handleLiveUpdate = (e: any) => {
       if (e.detail) {
         setConfig((prev) => ({ ...prev, ...e.detail }));
+        try {
+          localStorage.setItem("cached_hero_config", JSON.stringify(e.detail));
+        } catch {}
       }
     };
 
