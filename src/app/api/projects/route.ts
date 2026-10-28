@@ -248,14 +248,14 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
       startDate: startDate ? new Date(startDate) : undefined,
       deadline: deadline ? new Date(deadline) : undefined,
       completionDate: completionDate ? new Date(completionDate) : undefined,
-      beforeImage: beforeImage !== undefined ? beforeImage : undefined,
-      afterImage: afterImage !== undefined ? afterImage : undefined,
+      beforeImage: beforeImage !== undefined ? (beforeImage || null) : undefined,
+      afterImage: afterImage !== undefined ? (afterImage || null) : undefined,
       wipImages: Array.isArray(wipImages) ? wipImages : undefined,
       images: Array.isArray(images) ? images : undefined,
       materialsUsed: materialsUsed !== undefined ? materialsUsed : undefined,
-      notes: notes !== undefined ? notes : undefined,
+      notes: notes !== undefined ? (notes || null) : undefined,
       featured: featured !== undefined ? Boolean(featured) : undefined,
-      warrantyMonths: warrantyMonths || undefined,
+      warrantyMonths: warrantyMonths !== undefined ? (Number(warrantyMonths) || null) : undefined,
     },
   });
 

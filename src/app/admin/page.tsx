@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import type { IBooking, IProject, IGalleryItem, IBlog, IService, IMessage, ICareerApplication, ISetting } from "@/types";
 
@@ -47,7 +47,7 @@ import { canAccessTab, canEnterAdmin, getDefaultTabForRole } from "@/lib/rbac";
 
 export default function AdminPage() {
   const { user, loading: isPending } = useAuth();
-  const sessionData = user ? { user } : null;
+  const sessionData = useMemo(() => (user ? { user } : null), [user]);
   const [activeTab, setActiveTab] = useState("analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -199,38 +199,35 @@ export default function AdminPage() {
   const norm = (arr: any) =>
     Array.isArray(arr) ? arr.map((x: any) => ({ ...x, _id: x.id || x._id, id: x.id || x._id })) : [];
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      // Bookings
-      const resBookings = await fetch("/api/bookings", { cache: "no-store" });
+      const [
+        resBookings,
+        resProjects,
+        resGallery,
+        resBlogs,
+        resServices,
+        resMsg,
+        resCar,
+        resSettings,
+      ] = await Promise.all([
+        fetch("/api/bookings", { cache: "no-store" }),
+        fetch("/api/projects", { cache: "no-store" }),
+        fetch("/api/gallery", { cache: "no-store" }),
+        fetch("/api/blogs", { cache: "no-store" }),
+        fetch("/api/services", { cache: "no-store" }),
+        fetch("/api/messages", { cache: "no-store" }),
+        fetch("/api/careers", { cache: "no-store" }),
+        fetch("/api/settings", { cache: "no-store" }),
+      ]);
+
       if (resBookings.ok) setBookings(norm(await resBookings.json()));
-
-      // Projects
-      const resProjects = await fetch("/api/projects", { cache: "no-store" });
       if (resProjects.ok) setProjects(norm(await resProjects.json()));
-
-      // Gallery
-      const resGallery = await fetch("/api/gallery", { cache: "no-store" });
       if (resGallery.ok) setGallery(norm(await resGallery.json()));
-
-      // Blogs
-      const resBlogs = await fetch("/api/blogs", { cache: "no-store" });
       if (resBlogs.ok) setBlogs(norm(await resBlogs.json()));
-
-      // Services
-      const resServices = await fetch("/api/services", { cache: "no-store" });
       if (resServices.ok) setServices(norm(await resServices.json()));
-
-      // Messages
-      const resMsg = await fetch("/api/messages", { cache: "no-store" });
       if (resMsg.ok) setMessages(norm(await resMsg.json()));
-
-      // Careers
-      const resCar = await fetch("/api/careers", { cache: "no-store" });
       if (resCar.ok) setCareers(norm(await resCar.json()));
-
-      // Settings
-      const resSettings = await fetch("/api/settings", { cache: "no-store" });
       if (resSettings.ok) {
         const data = await resSettings.json();
         if (data?.value) setSettings(data.value);
@@ -238,14 +235,16 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Database fetch failed:", error);
     }
-  };
+  }, []);
+
+  const userRole = String(user?.role || "").toUpperCase();
+  const userId = user?.id;
 
   useEffect(() => {
-    const userRole = String((sessionData?.user as any)?.role || "").toUpperCase();
-    if (sessionData?.user && (userRole === "ADMIN" || userRole === "EDITOR" || userRole === "MODERATOR")) {
+    if (user && (userRole === "ADMIN" || userRole === "EDITOR" || userRole === "MODERATOR")) {
       fetchData();
     }
-  }, [sessionData]);
+  }, [userId, userRole, fetchData]);
 
   // --- BOOKING OPERATIONS ---
   const handleUpdateBooking = async (id: string, status: string, staff: string) => {
@@ -512,7 +511,7 @@ export default function AdminPage() {
     const payload = customPayload || {
       title: blogTitle,
       slug: blogTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      author: sessionData?.user?.name || "Admin",
+      author: user?.name || "Admin",
       coverImage: blogUrl,
       category: blogCategory,
       content: blogContent,

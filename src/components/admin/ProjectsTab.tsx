@@ -230,9 +230,10 @@ export default function ProjectsTab({
         totalExpense: formData.totalExpense ? parseFloat(formData.totalExpense) : 0,
         afterImage: formData.afterImage.trim() || null,
         beforeImage: formData.beforeImage.trim() || null,
-        images: allGalleryImages.length > 0 ? allGalleryImages : formData.afterImage ? [formData.afterImage] : [],
+        images: allGalleryImages,
         description: formData.description.trim() || null,
         descBn: formData.descBn?.trim() || null,
+        warrantyMonths: formData.warrantyMonths ? Number(formData.warrantyMonths) : 12,
         notes: `Duration: ${formData.duration} | Challenges: ${formData.challenges} | Solution: ${formData.solution} | Warranty: ${formData.warrantyMonths} Months`,
         materialsUsed: {
           duration: formData.duration,

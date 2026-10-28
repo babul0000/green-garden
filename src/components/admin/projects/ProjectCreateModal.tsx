@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { IProject } from "@/types";
+import { uploadClientMedia } from "@/lib/clientUpload";
 
 export interface ProjectFormData {
   name: string;
@@ -53,6 +54,99 @@ export default function ProjectCreateModal({
   statusOptions,
 }: ProjectCreateModalProps) {
   const [formActiveSection, setFormActiveSection] = useState<"general" | "scope" | "media" | "casestudy">("general");
+  const [isUploadingAfter, setIsUploadingAfter] = useState(false);
+  const [isUploadingBefore, setIsUploadingBefore] = useState(false);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showRawGalleryUrls, setShowRawGalleryUrls] = useState(false);
+
+  const afterFileInputRef = useRef<HTMLInputElement>(null);
+  const beforeFileInputRef = useRef<HTMLInputElement>(null);
+  const galleryFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAfterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingAfter(true);
+    setUploadError(null);
+    try {
+      const res = await uploadClientMedia(file, "green-garden/projects");
+      if (res?.url) {
+        setFormData((prev) => ({ ...prev, afterImage: res.url }));
+      }
+    } catch (err: any) {
+      setUploadError("কভার ছবি আপলোড ব্যর্থ হয়েছে: " + err.message);
+    } finally {
+      setIsUploadingAfter(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleBeforeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingBefore(true);
+    setUploadError(null);
+    try {
+      const res = await uploadClientMedia(file, "green-garden/projects");
+      if (res?.url) {
+        setFormData((prev) => ({ ...prev, beforeImage: res.url }));
+      }
+    } catch (err: any) {
+      setUploadError("পূর্বের ছবি আপলোড ব্যর্থ হয়েছে: " + err.message);
+    } finally {
+      setIsUploadingBefore(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setIsUploadingGallery(true);
+    setUploadError(null);
+    try {
+      const newUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const res = await uploadClientMedia(files[i], "green-garden/projects");
+        if (res?.url) newUrls.push(res.url);
+      }
+      setFormData((prev) => {
+        const existing = prev.galleryImagesText
+          .split(/[\n,]+/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        return {
+          ...prev,
+          galleryImagesText: [...existing, ...newUrls].join("\n"),
+        };
+      });
+    } catch (err: any) {
+      setUploadError("গ্যালারি ছবি আপলোড ব্যর্থ হয়েছে: " + err.message);
+    } finally {
+      setIsUploadingGallery(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleDeleteGalleryImage = (indexToDelete: number) => {
+    setFormData((prev) => {
+      const list = prev.galleryImagesText
+        .split(/[\n,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const updated = list.filter((_, idx) => idx !== indexToDelete);
+      return {
+        ...prev,
+        galleryImagesText: updated.join("\n"),
+      };
+    });
+  };
+
+  const galleryList = formData.galleryImagesText
+    .split(/[\n,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return (
     <div
@@ -377,54 +471,361 @@ export default function ProjectCreateModal({
 
             {/* SECTION 3: MEDIA & PHOTO GALLERY */}
             {formActiveSection === "media" && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-[#75787B] font-bold">
-                    প্রধান ছবি / কাজের পরের ছবি (Cover / Finished After Image URL) *
-                  </label>
+              <div className="space-y-6 animate-fade-in">
+                {uploadError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center justify-between">
+                    <span>⚠️ {uploadError}</span>
+                    <button
+                      type="button"
+                      onClick={() => setUploadError(null)}
+                      className="text-red-500 font-bold ml-2 cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* 1. COVER / FINISHED AFTER IMAGE */}
+                <div className="p-4 rounded-2xl bg-[#F7F6F2] border border-[#D6D2C4] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-[#121813] uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🖼️</span> প্রধান কভার ছবি (Cover / Finished Image) *
+                      </h4>
+                      <p className="text-[10px] text-[#75787B]">
+                        ল্যান্ডস্কেপ প্রজেক্টের সমাপ্ত কাজের প্রধান ছবি (কার্ড ও ব্যানারে দেখাবে)।
+                      </p>
+                    </div>
+                    {formData.afterImage && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, afterImage: "" })}
+                        className="px-2.5 py-1 text-[11px] font-mono font-bold text-red-600 hover:text-white hover:bg-red-600 border border-red-300 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                        title="কভার ছবি ডিলিট করুন"
+                      >
+                        <span>🗑️</span> ছবিটি মুছুন (Delete)
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Hidden file input */}
                   <input
-                    type="url"
-                    value={formData.afterImage}
-                    onChange={(e) => setFormData({ ...formData, afterImage: e.target.value })}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl px-3.5 py-2.5 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                    type="file"
+                    ref={afterFileInputRef}
+                    onChange={handleAfterUpload}
+                    accept="image/*"
+                    className="hidden"
                   />
-                  {formData.afterImage && (
-                    <div className="mt-2 h-36 rounded-xl border border-[#D6D2C4] overflow-hidden bg-stone-100 flex items-center justify-center">
-                      <img src={formData.afterImage} alt="After Preview" className="w-full h-full object-cover" />
+
+                  {formData.afterImage ? (
+                    <div className="space-y-2">
+                      <div className="relative h-44 rounded-xl border border-[#D6D2C4] overflow-hidden bg-stone-100 group">
+                        <img
+                          src={formData.afterImage}
+                          alt="Cover Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => afterFileInputRef.current?.click()}
+                            disabled={isUploadingAfter}
+                            className="px-3 py-1.5 bg-white text-[#121813] text-xs font-bold rounded-lg shadow-md hover:bg-stone-100 cursor-pointer"
+                          >
+                            🔄 ছবি পরিবর্তন করুন
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, afterImage: "" })}
+                            className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg shadow-md hover:bg-red-700 cursor-pointer"
+                          >
+                            🗑️ মুছুন
+                          </button>
+                        </div>
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-mono">
+                          বর্তমান কভার ছবি
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => afterFileInputRef.current?.click()}
+                          disabled={isUploadingAfter}
+                          className="px-3 py-2 bg-white border border-[#D6D2C4] hover:border-[#2B4D33] text-xs font-semibold rounded-xl text-[#121813] flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                        >
+                          {isUploadingAfter ? "⏳ আপলোড হচ্ছে..." : "📁 নতুন ছবি আপলোড"}
+                        </button>
+                        <input
+                          type="url"
+                          value={formData.afterImage}
+                          onChange={(e) => setFormData({ ...formData, afterImage: e.target.value })}
+                          placeholder="https://images.unsplash.com/photo-..."
+                          className="flex-grow bg-white border border-[#D6D2C4] rounded-xl px-3 py-2 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-[#D6D2C4] rounded-xl p-5 text-center bg-white space-y-3">
+                      <div className="w-12 h-12 mx-auto rounded-full bg-[#EBF2EC] text-[#2B4D33] flex items-center justify-center text-xl">
+                        📸
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-[#121813]">এখনও কোনো কভার ছবি নির্ধারণ করা হয়নি</p>
+                        <p className="text-[10px] text-[#75787B]">কম্পিউটার বা মোবাইল থেকে ছবি আপলোড করুন অথবা নিচে সরাসরি লিংক দিন</p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => afterFileInputRef.current?.click()}
+                          disabled={isUploadingAfter}
+                          className="px-4 py-2 bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-xs disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {isUploadingAfter ? "⏳ আপলোড হচ্ছে..." : "📤 কভার ছবি আপলোড করুন"}
+                        </button>
+                        <span className="text-[10px] text-[#75787B] font-mono">অথবা ইউআরএল:</span>
+                        <input
+                          type="url"
+                          value={formData.afterImage}
+                          onChange={(e) => setFormData({ ...formData, afterImage: e.target.value })}
+                          placeholder="https://..."
+                          className="w-full sm:w-60 bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl px-3 py-1.5 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-[#75787B] font-bold">
-                    কাজের পূর্বের ছবি (Before Image URL - Optional)
-                  </label>
+                {/* 2. BEFORE IMAGE (OPTIONAL) */}
+                <div className="p-4 rounded-2xl bg-[#F7F6F2] border border-[#D6D2C4] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-[#121813] uppercase tracking-wider flex items-center gap-1.5">
+                        <span>⏳</span> কাজের পূর্বের ছবি (Before Image - Optional)
+                      </h4>
+                      <p className="text-[10px] text-[#75787B]">
+                        কাজ শুরুর আগের সাইট পরিস্থিতি (বিফোর-আফটার কম্প্যারিজনে দেখানো হবে)।
+                      </p>
+                    </div>
+                    {formData.beforeImage && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, beforeImage: "" })}
+                        className="px-2.5 py-1 text-[11px] font-mono font-bold text-red-600 hover:text-white hover:bg-red-600 border border-red-300 rounded-lg transition-all cursor-pointer flex items-center gap-1"
+                        title="পূর্বের ছবি ডিলিট করুন"
+                      >
+                        <span>🗑️</span> পূর্বের ছবি মুছুন (Delete)
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Hidden file input */}
                   <input
-                    type="url"
-                    value={formData.beforeImage}
-                    onChange={(e) => setFormData({ ...formData, beforeImage: e.target.value })}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl px-3.5 py-2.5 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                    type="file"
+                    ref={beforeFileInputRef}
+                    onChange={handleBeforeUpload}
+                    accept="image/*"
+                    className="hidden"
                   />
-                  {formData.beforeImage && (
-                    <div className="mt-2 h-36 rounded-xl border border-[#D6D2C4] overflow-hidden bg-stone-100 flex items-center justify-center">
-                      <img src={formData.beforeImage} alt="Before Preview" className="w-full h-full object-cover" />
+
+                  {formData.beforeImage ? (
+                    <div className="space-y-2">
+                      <div className="relative h-44 rounded-xl border border-[#D6D2C4] overflow-hidden bg-stone-100 group">
+                        <img
+                          src={formData.beforeImage}
+                          alt="Before Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => beforeFileInputRef.current?.click()}
+                            disabled={isUploadingBefore}
+                            className="px-3 py-1.5 bg-white text-[#121813] text-xs font-bold rounded-lg shadow-md hover:bg-stone-100 cursor-pointer"
+                          >
+                            🔄 ছবি পরিবর্তন করুন
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, beforeImage: "" })}
+                            className="px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-lg shadow-md hover:bg-red-700 cursor-pointer"
+                          >
+                            🗑️ মুছুন
+                          </button>
+                        </div>
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] font-mono">
+                          কাজের পূর্বের সাইট ছবি
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => beforeFileInputRef.current?.click()}
+                          disabled={isUploadingBefore}
+                          className="px-3 py-2 bg-white border border-[#D6D2C4] hover:border-[#2B4D33] text-xs font-semibold rounded-xl text-[#121813] flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                        >
+                          {isUploadingBefore ? "⏳ আপলোড হচ্ছে..." : "📁 পূর্বের ছবি আপলোড"}
+                        </button>
+                        <input
+                          type="url"
+                          value={formData.beforeImage}
+                          onChange={(e) => setFormData({ ...formData, beforeImage: e.target.value })}
+                          placeholder="https://images.unsplash.com/photo-..."
+                          className="flex-grow bg-white border border-[#D6D2C4] rounded-xl px-3 py-2 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-[#D6D2C4] rounded-xl p-5 text-center bg-white space-y-3">
+                      <div className="w-12 h-12 mx-auto rounded-full bg-stone-100 text-[#75787B] flex items-center justify-center text-xl">
+                        🏚️
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-[#121813]">কোনো পূর্বের ছবি যুক্ত করা হয়নি (ঐচ্ছিক)</p>
+                        <p className="text-[10px] text-[#75787B]">বিফোর/আফটার স্লাইডারে প্রদর্শনের জন্য ছবি আপলোড করতে পারেন</p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => beforeFileInputRef.current?.click()}
+                          disabled={isUploadingBefore}
+                          className="px-4 py-2 bg-stone-800 hover:bg-stone-900 text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-xs disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {isUploadingBefore ? "⏳ আপলোড হচ্ছে..." : "📤 পূর্বের ছবি আপলোড করুন"}
+                        </button>
+                        <span className="text-[10px] text-[#75787B] font-mono">অথবা ইউআরএল:</span>
+                        <input
+                          type="url"
+                          value={formData.beforeImage}
+                          onChange={(e) => setFormData({ ...formData, beforeImage: e.target.value })}
+                          placeholder="https://..."
+                          className="w-full sm:w-60 bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl px-3 py-1.5 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-[#75787B] font-bold">
-                    অতিরিক্ত গ্যালারি ছবি (Gallery Image URLs — প্রতি লাইনে একটি করে লিংক দিন)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.galleryImagesText}
-                    onChange={(e) => setFormData({ ...formData, galleryImagesText: e.target.value })}
-                    placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg"
-                    className="w-full bg-[#F7F6F2] border border-[#D6D2C4] rounded-xl p-3 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                {/* 3. GALLERY IMAGES (MULTIPLE PHOTOS) */}
+                <div className="p-4 rounded-2xl bg-[#F7F6F2] border border-[#D6D2C4] space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <h4 className="text-xs font-bold text-[#121813] uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📸</span> অতিরিক্ত গ্যালারি ছবি (Project Photo Gallery)
+                        <span className="px-2 py-0.5 rounded-full bg-[#2B4D33]/10 text-[#2B4D33] text-[10px] font-mono font-bold">
+                          {galleryList.length}টি ছবি
+                        </span>
+                      </h4>
+                      <p className="text-[10px] text-[#75787B]">
+                        প্রজেক্টের কাজের বিভিন্ন কোণ, ড্রেনেজ, প্ল্যান্টেশন ইত্যাদির গ্যালারি ফটো।
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {galleryList.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, galleryImagesText: "" })}
+                          className="px-2.5 py-1.5 text-[10px] font-mono font-bold text-red-600 hover:bg-red-50 border border-red-200 rounded-lg transition-all cursor-pointer"
+                        >
+                          সব মুছুন (Clear All)
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => galleryFileInputRef.current?.click()}
+                        disabled={isUploadingGallery}
+                        className="px-3.5 py-1.5 bg-[#2B4D33] hover:bg-[#1E3724] text-white text-xs font-mono font-bold rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        <span>{isUploadingGallery ? "⏳" : "➕"}</span>
+                        <span>{isUploadingGallery ? "আপলোড হচ্ছে..." : "ছবি আপলোড করুন"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Hidden multiple file input */}
+                  <input
+                    type="file"
+                    ref={galleryFileInputRef}
+                    onChange={handleGalleryUpload}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
                   />
+
+                  {/* Gallery Visual Grid */}
+                  {galleryList.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {galleryList.map((url, idx) => (
+                        <div
+                          key={idx}
+                          className="group relative rounded-xl border border-[#D6D2C4] overflow-hidden bg-stone-100 aspect-square shadow-xs"
+                        >
+                          <img
+                            src={url}
+                            alt={`Gallery ${idx + 1}`}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+
+                          {/* Index badge */}
+                          <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-mono">
+                            #{idx + 1}
+                          </span>
+
+                          {/* Delete button on top-right */}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteGalleryImage(idx)}
+                            className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center text-xs font-bold shadow-md transition-all cursor-pointer"
+                            title="এই ছবিটি গ্যালারি থেকে মুছুন"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border border-[#D6D2C4] rounded-xl p-4 text-center bg-white">
+                      <p className="text-xs text-[#75787B]">
+                        বর্তমানে কোনো অতিরিক্ত গ্যালারি ছবি নেই। &quot;ছবি আপলোড করুন&quot; বাটনে ক্লিক করে এক বা একাধিক ছবি যুক্ত করতে পারেন।
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Collapsible raw text editor for power users */}
+                  <div className="pt-2 border-t border-[#D6D2C4]/50">
+                    <button
+                      type="button"
+                      onClick={() => setShowRawGalleryUrls(!showRawGalleryUrls)}
+                      className="text-[11px] font-mono text-[#2B4D33] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>{showRawGalleryUrls ? "▲" : "▼"}</span>
+                      <span>
+                        {showRawGalleryUrls
+                          ? "টেক্সট আকারে ইউআরএল লুকান"
+                          : "টেক্সট আকারে ইউআরএল দেখুন বা বাল্ক পেস্ট করুন"}
+                      </span>
+                    </button>
+
+                    {showRawGalleryUrls && (
+                      <div className="mt-2 space-y-1 animate-fade-in">
+                        <textarea
+                          rows={3}
+                          value={formData.galleryImagesText}
+                          onChange={(e) =>
+                            setFormData({ ...formData, galleryImagesText: e.target.value })
+                          }
+                          placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg"
+                          className="w-full bg-white border border-[#D6D2C4] rounded-xl p-3 text-xs text-[#121813] font-mono focus:outline-none focus:border-[#2B4D33]"
+                        />
+                        <p className="text-[10px] text-[#75787B]">
+                          প্রতি লাইনে একটি করে ছবির ইউআরএল দিন। উপরের ভিজ্যুয়াল কার্ডের সাথে এটি স্বয়ংক্রিয়ভাবে সিঙ্ক হবে।
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
