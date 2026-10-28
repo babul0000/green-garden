@@ -65,10 +65,10 @@ export default function HeroSlideOutCTA({
       <div
         onMouseEnter={ctaTriggerMode === "hover" ? onMouseEnter : undefined}
         onMouseLeave={ctaTriggerMode === "hover" ? onMouseLeave : undefined}
-        className={`absolute bottom-8 sm:bottom-16 left-4 sm:left-12 z-30 flex items-center transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`hidden md:flex absolute bottom-8 sm:bottom-16 left-4 sm:left-12 z-30 items-center transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           showCta
             ? "translate-x-0 opacity-100 pointer-events-auto scale-100"
-            : "max-md:translate-x-0 max-md:opacity-100 max-md:pointer-events-auto -translate-x-[calc(100%+4rem)] opacity-0 pointer-events-none scale-95"
+            : "-translate-x-[calc(100%+4rem)] opacity-0 pointer-events-none scale-95"
         }`}
         style={{ willChange: "transform, opacity" }}
       >

@@ -335,6 +335,137 @@ export default function HeroSettingsPanels({
               </div>
             </div>
           )}
+
+          {/* Sizing, Full Visibility & Position Controls */}
+          <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-4 pt-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <div>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📐</span> মিডিয়া সাইজ, ফিট ও ফুল ভিজিবিলিটি (Full Visibility & Sizing)
+                </h4>
+                <p className="text-[10px] text-white/50">
+                  ভিডিও বা ছবির পূর্ণ দৃশ্যমানতা (কাটাকুটি ছাড়া), উচ্চতা ও ফোকাস পয়েন্ট নির্ধারণ করুন।
+                </p>
+              </div>
+            </div>
+
+            {/* Display Fit Mode */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono font-bold text-white/70 block">
+                  ডেস্কটপ ডিসপ্লে মোড (Desktop Fit):
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfig({ ...config, mediaFit: "cover" })}
+                    className={`p-2.5 rounded-xl border text-xs font-mono transition-all text-left ${
+                      (config.mediaFit || "cover") === "cover"
+                        ? "bg-emerald-500/20 border-emerald-400 text-white font-bold"
+                        : "bg-black/30 border-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    <span className="block font-bold">📐 Cover (স্ক্রিন পূর্ণ)</span>
+                    <span className="text-[10px] text-white/40 block mt-0.5">স্ক্রিন জুড়ে ব্যাকগ্রাউন্ড</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfig({ ...config, mediaFit: "contain" })}
+                    className={`p-2.5 rounded-xl border text-xs font-mono transition-all text-left ${
+                      config.mediaFit === "contain"
+                        ? "bg-emerald-500/20 border-emerald-400 text-white font-bold"
+                        : "bg-black/30 border-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    <span className="block font-bold">🖼️ Full (কাটবে না)</span>
+                    <span className="text-[10px] text-white/40 block mt-0.5">১০০% সম্পূর্ণ মিডিয়া ফ্রেম</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono font-bold text-white/70 block">
+                  মোবাইল ডিসপ্লে মোড (Mobile Fit):
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfig({ ...config, mobileMediaFit: "contain" })}
+                    className={`p-2.5 rounded-xl border text-xs font-mono transition-all text-left ${
+                      (config.mobileMediaFit || "contain") === "contain"
+                        ? "bg-emerald-500/20 border-emerald-400 text-white font-bold"
+                        : "bg-black/30 border-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    <span className="block font-bold">📱 Full (কাটবে না)</span>
+                    <span className="text-[10px] text-white/40 block mt-0.5">মোবাইলে পুরো ছবি/ভিডিও</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfig({ ...config, mobileMediaFit: "cover" })}
+                    className={`p-2.5 rounded-xl border text-xs font-mono transition-all text-left ${
+                      config.mobileMediaFit === "cover"
+                        ? "bg-emerald-500/20 border-emerald-400 text-white font-bold"
+                        : "bg-black/30 border-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    <span className="block font-bold">📱 Cover (স্ক্রিন পূর্ণ)</span>
+                    <span className="text-[10px] text-white/40 block mt-0.5">মোবাইল স্ক্রিন পূর্ণ</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Position & Heights */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono font-bold text-white/70 block">
+                  ফোকাস পয়েন্ট (Media Focus Position):
+                </label>
+                <select
+                  value={config.mediaPosition || "center"}
+                  onChange={(e) => setConfig({ ...config, mediaPosition: e.target.value as any })}
+                  className="w-full bg-black/60 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-emerald-400 focus:outline-none"
+                >
+                  <option value="center">মাঝখানে (Center Focus)</option>
+                  <option value="top">উপরের অংশ (Top Focus - মুখ বা মূল দৃশ্য)</option>
+                  <option value="bottom">নিচের অংশ (Bottom Focus)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono font-bold text-white/70 block">
+                  ডেস্কটপ উচ্চতা (Desktop Height):
+                </label>
+                <select
+                  value={config.desktopHeight || "100vh"}
+                  onChange={(e) => setConfig({ ...config, desktopHeight: e.target.value as any })}
+                  className="w-full bg-black/60 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-emerald-400 focus:outline-none"
+                >
+                  <option value="100vh">100vh (পূর্ণ স্ক্রিন ফুলভিউ)</option>
+                  <option value="85vh">85vh (স্ট্যান্ডার্ড সিনেমাটিক)</option>
+                  <option value="75vh">75vh (কম্প্যাক্ট উচ্চতা)</option>
+                  <option value="auto">Auto (ছবির স্বাভাবিক সাইজ)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-mono font-bold text-white/70 block">
+                  মোবাইল উচ্চতা (Mobile Height):
+                </label>
+                <select
+                  value={config.mobileHeight || "82svh"}
+                  onChange={(e) => setConfig({ ...config, mobileHeight: e.target.value as any })}
+                  className="w-full bg-black/60 border border-white/20 rounded-xl px-3 py-2 text-xs text-white font-mono focus:border-emerald-400 focus:outline-none"
+                >
+                  <option value="100svh">100svh (পূর্ণ মোবাইল স্ক্রিন)</option>
+                  <option value="82svh">82svh (স্ট্যান্ডার্ড মোবাইল)</option>
+                  <option value="70svh">70svh (কম্প্যাক্ট মোবাইল)</option>
+                  <option value="auto">Auto (স্বাভাবিক রেশিও)</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -72,17 +72,7 @@ export default function MobileQuickContact() {
       role="region"
       aria-label="Quick Mobile Contact"
     >
-      {/* 1. Call Button - Circular Floating Action Button */}
-      <a
-        href={`tel:${cleanPhone}`}
-        className="w-11 h-11 sm:w-12 sm:h-12 min-w-[44px] min-h-[44px] rounded-full bg-[#121813]/90 hover:bg-[#121813] text-white flex items-center justify-center shadow-xl border border-white/20 active:scale-90 transition-all cursor-pointer backdrop-blur-md"
-        aria-label="Call studio hotline"
-        title={t("কল করুন", "Call Now")}
-      >
-        <span className="text-base sm:text-lg">📞</span>
-      </a>
-
-      {/* 2. WhatsApp Button - Circular Floating Action Button */}
+      {/* WhatsApp Button - Circular Floating Action Button */}
       <a
         href={whatsappHref}
         target="_blank"

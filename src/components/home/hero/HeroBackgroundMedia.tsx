@@ -12,6 +12,9 @@ interface HeroBackgroundMediaProps {
   loop: boolean;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   version?: number | string;
+  mediaFit?: "cover" | "contain" | "fill";
+  mediaPosition?: "center" | "top" | "bottom";
+  mobileMediaFit?: "cover" | "contain";
 }
 
 export default function HeroBackgroundMedia({
@@ -24,6 +27,9 @@ export default function HeroBackgroundMedia({
   loop,
   videoRef,
   version,
+  mediaFit = "cover",
+  mediaPosition = "center",
+  mobileMediaFit,
 }: HeroBackgroundMediaProps) {
   const [videoError, setVideoError] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -99,8 +105,41 @@ export default function HeroBackgroundMedia({
     }
   }, [effectiveVideoUrl, mediaType, autoPlay, videoRef, preferStaticMedia]);
 
+  const desktopFitClass =
+    mediaFit === "contain"
+      ? "md:object-contain"
+      : mediaFit === "fill"
+      ? "md:object-fill"
+      : "md:object-cover";
+
+  const effectiveMobileFit = mobileMediaFit || (mediaFit === "contain" ? "contain" : "cover");
+  const mobileFitClass =
+    effectiveMobileFit === "contain"
+      ? "max-md:object-contain"
+      : "max-md:object-cover";
+
+  const positionClass =
+    mediaPosition === "top"
+      ? "object-top"
+      : mediaPosition === "bottom"
+      ? "object-bottom"
+      : "object-center";
+
+  const isContainMode = mediaFit === "contain" || effectiveMobileFit === "contain";
+
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#041a2e]">
+    <div className="absolute inset-0 w-full h-full overflow-hidden bg-[#041a2e] flex items-center justify-center">
+      {/* Ambient background glow when contain is active for full video/photo visibility */}
+      {isContainMode && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-45 select-none" aria-hidden="true">
+          <img
+            src={activeImageSrc || effectivePosterUrl}
+            alt=""
+            className="w-full h-full object-cover blur-3xl scale-125"
+          />
+        </div>
+      )}
+
       {!preferStaticMedia && mediaType === "video" && !videoError && effectiveVideoUrl ? (
         <>
           {/* Smooth poster preview layer */}
@@ -108,7 +147,7 @@ export default function HeroBackgroundMedia({
             <img
               src={effectivePosterUrl}
               alt="Hero Preview"
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              className={`absolute inset-0 w-full h-full ${desktopFitClass} ${mobileFitClass} ${positionClass} transition-opacity duration-1000 ${
                 isVideoLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
               }`}
             />
@@ -130,7 +169,7 @@ export default function HeroBackgroundMedia({
               console.warn("Video failed to play from URL:", videoUrl, "falling back to poster/image");
               setVideoError(true);
             }}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            className={`w-full h-full ${desktopFitClass} ${mobileFitClass} ${positionClass} transition-opacity duration-700 ${
               isVideoLoaded ? "opacity-100" : "opacity-90"
             }`}
           />
@@ -140,7 +179,7 @@ export default function HeroBackgroundMedia({
           key={activeImageSrc}
           src={activeImageSrc}
           alt="Hero Background"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+          className={`w-full h-full ${desktopFitClass} ${mobileFitClass} ${positionClass} transition-opacity duration-700 ${
             isImgReady ? "opacity-100" : "opacity-90"
           }`}
         />

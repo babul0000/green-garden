@@ -134,8 +134,26 @@ export default function ShmaHeroVideo() {
     ? config.btnContactTextBn || config.btnContactTextEn
     : config.btnContactTextEn;
 
+  const desktopHeightClass =
+    config.desktopHeight === "85vh"
+      ? "lg:h-[85vh] lg:min-h-[520px]"
+      : config.desktopHeight === "75vh"
+      ? "lg:h-[75vh] lg:min-h-[460px]"
+      : config.desktopHeight === "auto"
+      ? "lg:h-auto lg:min-h-[500px]"
+      : "lg:h-[100dvh] lg:min-h-[560px]";
+
+  const mobileHeightClass =
+    config.mobileHeight === "100svh"
+      ? "h-[100svh] min-h-[100svh]"
+      : config.mobileHeight === "70svh"
+      ? "h-[70svh] min-h-[70svh]"
+      : config.mobileHeight === "auto"
+      ? "h-auto min-h-[50svh]"
+      : "h-[82svh] min-h-[82svh]";
+
   return (
-    <section className="relative w-full h-[82svh] min-h-[82svh] lg:h-[100dvh] lg:min-h-[560px] overflow-hidden bg-[#041a2e] flex items-center justify-center select-none">
+    <section className={`relative w-full ${mobileHeightClass} ${desktopHeightClass} overflow-hidden bg-[#041a2e] flex items-center justify-center select-none`}>
       {/* 1. Dynamic Video / Image Background Media with Anti-Cache Version */}
       <HeroBackgroundMedia
         mediaType={config.mediaType}
@@ -147,6 +165,9 @@ export default function ShmaHeroVideo() {
         loop={config.loop}
         videoRef={videoRef}
         version={config.version || config.updatedAt}
+        mediaFit={config.mediaFit}
+        mediaPosition={config.mediaPosition}
+        mobileMediaFit={config.mobileMediaFit}
       />
 
       {/* 2. Visual Depth & Cinematic Vignette Overlays */}

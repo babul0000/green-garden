@@ -69,6 +69,17 @@ export default function HeroLivePreview({
         onMouseLeave={onPreviewLeave}
         className="relative w-full h-[320px] sm:h-[380px] rounded-xl overflow-hidden bg-black select-none border border-white/10 shadow-inner group cursor-crosshair"
       >
+        {/* Ambient Blur Backdrop when Contain / Full View is active */}
+        {config.mediaFit === "contain" && (
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 select-none" aria-hidden="true">
+            <img
+              src={config.imageUrl || config.posterImageUrl}
+              alt=""
+              className="w-full h-full object-cover blur-2xl scale-125"
+            />
+          </div>
+        )}
+
         {/* Media */}
         {config.mediaType === "video" ? (
           <video
@@ -78,7 +89,19 @@ export default function HeroLivePreview({
             loop={config.loop}
             playsInline
             poster={config.posterImageUrl}
-            className="absolute inset-0 w-full h-full object-cover"
+            className={`w-full h-full relative z-0 ${
+              config.mediaFit === "contain"
+                ? "object-contain"
+                : config.mediaFit === "fill"
+                ? "object-fill"
+                : "object-cover"
+            } ${
+              config.mediaPosition === "top"
+                ? "object-top"
+                : config.mediaPosition === "bottom"
+                ? "object-bottom"
+                : "object-center"
+            }`}
           >
             <source src={config.videoUrl} type="video/mp4" />
           </video>
@@ -86,7 +109,19 @@ export default function HeroLivePreview({
           <img
             src={config.imageUrl || config.posterImageUrl}
             alt="Preview"
-            className="absolute inset-0 w-full h-full object-cover"
+            className={`w-full h-full relative z-0 ${
+              config.mediaFit === "contain"
+                ? "object-contain"
+                : config.mediaFit === "fill"
+                ? "object-fill"
+                : "object-cover"
+            } ${
+              config.mediaPosition === "top"
+                ? "object-top"
+                : config.mediaPosition === "bottom"
+                ? "object-bottom"
+                : "object-center"
+            }`}
           />
         )}
 

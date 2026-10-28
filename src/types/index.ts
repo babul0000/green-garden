@@ -234,6 +234,13 @@ export interface IHeroSettings {
   playbackSpeed: number;
   imageUrl?: string;
 
+  // Media Sizing, Fit & Full Visibility Controls
+  mediaFit?: "cover" | "contain" | "fill";
+  mediaPosition?: "center" | "top" | "bottom";
+  desktopHeight?: "100vh" | "85vh" | "75vh" | "auto";
+  mobileHeight?: "100svh" | "82svh" | "70svh" | "auto";
+  mobileMediaFit?: "cover" | "contain";
+
   // 2. Visual Vignette & Overlay
   overlayDarkness: number; // 0 - 80 %
   showTopVignette: boolean;
@@ -282,6 +289,12 @@ export const defaultHeroSettings: IHeroSettings = {
   muted: true,
   playbackSpeed: 1.0,
   imageUrl: "/hero_plants.png",
+
+  mediaFit: "cover",
+  mediaPosition: "center",
+  desktopHeight: "100vh",
+  mobileHeight: "82svh",
+  mobileMediaFit: "contain",
 
   overlayDarkness: 10,
   showTopVignette: true,
