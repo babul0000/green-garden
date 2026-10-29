@@ -104,3 +104,11 @@ npm run dev
 - **Admin Portal:** `admin@argreengarden.com` | পাসওয়ার্ড: `admin123`
 - **Employee Portal:** `doctor@argreengarden.com` | পাসওয়ার্ড: `doctor123`
 - **Client Portal:** `client@argreengarden.com` | পাসওয়ার্ড: `client123`
+
+---
+
+## 📅 রিলিজ ও সিস্টেম আপডেট লগ (Release & Maintenance Log)
+- **২৯ অক্টোবর, ২০২৬ (29 October 2026):**
+  - হিরো সেকশন এবং প্রজেক্টস মিডিয়া আপলোডার অপ্টিমাইজেশন সম্পন্ন।
+  - অ্যাডমিন সিকিউরিটি ও ডাইনামিক আরবিক্স (RBAC) রোলস পারমিশন ইঞ্জিনের স্ট্যাটাস সিঙ্ক।
+  - ফ্রন্টএন্ড ও ব্যাকএন্ড সিস্টেম ইন্টিগ্রেশন ভেরিফিকেশন ও সর্বশেষ কোডবেস আপডেট।
