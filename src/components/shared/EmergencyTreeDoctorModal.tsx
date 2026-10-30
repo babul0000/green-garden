@@ -91,22 +91,7 @@ Photo: ${photoUrl || "No photo attached"}`,
 
   return (
     <>
-      {/* Floating Emergency Action Pill */}
-      {pathname !== "/" && (
-        <div className="fixed bottom-4 sm:bottom-6 right-3 sm:right-6 z-40 flex flex-col items-end gap-2">
-          <button
-            onClick={() => {
-              setIsOpen(true);
-              setIsSubmitted(false);
-            }}
-            className="group relative flex items-center gap-1.5 sm:gap-2.5 px-3 py-2 sm:px-4 sm:py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] sm:text-xs rounded-full shadow-2xl hover:shadow-red-600/50 transition-all duration-300 hover:scale-105 border-2 border-white/80 cursor-pointer animate-pulse"
-          >
-            <span className="text-sm sm:text-base">🚨</span>
-            <span className="hidden xs:inline">{t("জরুরি বৃক্ষ চিকিৎসা", "Emergency Tree Doctor")}</span>
-            <span className="xs:hidden">{t("জরুরি ডাক্তার", "Doctor")}</span>
-          </button>
-        </div>
-      )}
+      {/* Floating trigger is managed in MobileQuickContact */}
 
       {/* Emergency Modal */}
       {isOpen && (
