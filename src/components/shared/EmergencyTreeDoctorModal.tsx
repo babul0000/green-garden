@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -139,6 +140,28 @@ Photo: ${photoUrl || "No photo attached"}`,
               >
                 <span>💬</span> WhatsApp
               </a>
+            </div>
+
+            {/* AI Plant Doctor Instant Assistant Card */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">🤖</span>
+                <div>
+                  <h4 className="text-xs font-bold text-emerald-900">
+                    {t("ফ্রি স্মার্ট এআই ডক্টর চ্যাট", "Free Smart AI Plant Doctor")}
+                  </h4>
+                  <p className="text-[10px] text-emerald-700">
+                    {t("ছবি দিয়ে তাৎক্ষণিক রোগ নির্ণয় ও প্রেসক্রিপশন পান", "Diagnose tree diseases with photo instantly")}
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/ai-tools"
+                onClick={() => setIsOpen(false)}
+                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-xl shadow-xs transition-all whitespace-nowrap"
+              >
+                {t("এআই চ্যাট →", "AI Chat →")}
+              </Link>
             </div>
 
             {isSubmitted ? (

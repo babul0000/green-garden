@@ -73,6 +73,7 @@ const DEFAULT_NAVBAR_SETTINGS: INavbarSettings = {
     { id: "11", titleBn: "সাধারণ জিজ্ঞাসা (FAQ)", titleEn: "Frequently Asked Questions", url: "/faq", isVisible: true, order: 11 },
     { id: "12", titleBn: "ক্যারিয়ার সুযোগ", titleEn: "Careers at Studio", url: "/career", isVisible: true, order: 12 },
     { id: "13", titleBn: "যোগাযোগ ও কনসাল্টেশন", titleEn: "Contact & Consultation", url: "/contact", isVisible: true, order: 13 },
+    { id: "14", titleBn: "স্মার্ট এআই গার্ডেন সহকারী", titleEn: "Smart AI Tree Assistant", url: "/ai-tools", badge: "AI", isVisible: true, order: 14 },
   ],
 };
 
