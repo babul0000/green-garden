@@ -4,12 +4,16 @@ import { requireEditor, withAuthErrorHandling, apiError, getCurrentUser } from "
 import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 120;
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
   "Pragma": "no-cache",
   "Expires": "0",
+};
+
+const PUBLIC_CACHE = {
+  "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
 };
 
 const PUBLIC_BLOG_SELECT = {
@@ -71,7 +75,7 @@ export async function GET(req: Request) {
         if (!blog || blog.status !== "PUBLISHED") {
           return NextResponse.json({ error: "Blog not found" }, { status: 404 });
         }
-        return NextResponse.json(blog, { headers: NO_CACHE });
+        return NextResponse.json(blog, { headers: PUBLIC_CACHE });
       }
     }
 
@@ -117,7 +121,7 @@ export async function GET(req: Request) {
 
       return NextResponse.json(
         formatDataResponse(blogs, total, { isPaginated, page, limit }),
-        { headers: NO_CACHE }
+        { headers: isStaff ? NO_CACHE : PUBLIC_CACHE }
       );
     } else {
       const blogs = await prisma.blog.findMany({

@@ -90,12 +90,12 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
     const fetchServices = async () => {
       try {
         const apiBase = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}` : '';
-        const primaryUrl = `/api/services?_t=${Date.now()}`;
-        const fallbackUrl = apiBase ? `${apiBase}/services?_t=${Date.now()}` : null;
+        const primaryUrl = "/api/services";
+        const fallbackUrl = apiBase ? `${apiBase}/services` : null;
 
-        let res = await fetch(primaryUrl, { cache: "no-store" }).catch(() => null);
+        let res = await fetch(primaryUrl).catch(() => null);
         if ((!res || !res.ok) && fallbackUrl) {
-          res = await fetch(fallbackUrl, { cache: "no-store" }).catch(() => null);
+          res = await fetch(fallbackUrl).catch(() => null);
         }
 
         if (res && res.ok) {

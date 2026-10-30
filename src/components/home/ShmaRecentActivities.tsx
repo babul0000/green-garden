@@ -23,7 +23,7 @@ export default function ShmaRecentActivities() {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await fetch(`/api/gallery?_t=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch("/api/gallery");
         if (res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data?.items || [];

@@ -195,12 +195,12 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
     const fetchLiveProjects = async () => {
       try {
         const apiBase = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}` : '';
-        const primaryUrl = `/api/projects?featured=true&_t=${Date.now()}`;
-        const fallbackUrl = apiBase ? `${apiBase}/projects?featured=true&_t=${Date.now()}` : null;
+        const primaryUrl = "/api/projects?featured=true";
+        const fallbackUrl = apiBase ? `${apiBase}/projects?featured=true` : null;
 
-        let res = await fetch(primaryUrl, { cache: "no-store" }).catch(() => null);
+        let res = await fetch(primaryUrl).catch(() => null);
         if ((!res || !res.ok) && fallbackUrl) {
-          res = await fetch(fallbackUrl, { cache: "no-store" }).catch(() => null);
+          res = await fetch(fallbackUrl).catch(() => null);
         }
 
         if (res && res.ok) {

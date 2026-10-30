@@ -33,13 +33,7 @@ export default function ShmaHeroVideo() {
   useEffect(() => {
     const fetchHeroConfig = async () => {
       try {
-        const res = await fetch(`/api/settings?_t=${Date.now()}`, {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            Pragma: "no-cache",
-          },
-        });
+        const res = await fetch("/api/settings?key=hero_config");
         if (res.ok) {
           const data = await res.json();
           const heroConfig =

@@ -31,7 +31,7 @@ export default function ShmaLife() {
   useEffect(() => {
     const fetchStudioLife = async () => {
       try {
-        const res = await fetch(`/api/settings?key=homepage_sections&_t=${Date.now()}`, { cache: "no-store" });
+        const res = await fetch("/api/settings?key=homepage_sections");
         if (res.ok) {
           const json = await res.json();
           if (json?.value?.studioLife) {

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireEditor, apiError, withAuthErrorHandling, getCurrentUser } from "@/lib/apiAuth";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -12,7 +12,35 @@ const NO_CACHE = {
 };
 
 const PUBLIC_CACHE = {
-  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+  "Cache-Control": "public, max-age=60, s-maxage=180, stale-while-revalidate=600",
+};
+
+// Lightweight projection for public listings & homepage (avoids heavy assignments & reviews joins)
+const PUBLIC_PROJECT_LIST_SELECT = {
+  id: true,
+  slug: true,
+  name: true,
+  titleBn: true,
+  clientId: true,
+  clientName: true,
+  category: true,
+  location: true,
+  description: true,
+  descBn: true,
+  progress: true,
+  status: true,
+  startDate: true,
+  deadline: true,
+  completionDate: true,
+  warrantyMonths: true,
+  warrantyExpiryDate: true,
+  beforeImage: true,
+  afterImage: true,
+  wipImages: true,
+  images: true,
+  featured: true,
+  createdAt: true,
+  updatedAt: true,
 };
 
 // Strict public field selection (excludes clientPhone, budget, totalExpense, notes, materialsUsed)
@@ -139,7 +167,7 @@ export async function GET(req: Request) {
     } else {
       const projects = await prisma.project.findMany({
         where,
-        select: PUBLIC_PROJECT_SELECT,
+        select: PUBLIC_PROJECT_LIST_SELECT,
         orderBy: { updatedAt: "desc" },
         skip: isPaginated ? skip : undefined,
         take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),

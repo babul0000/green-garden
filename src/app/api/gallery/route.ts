@@ -4,12 +4,16 @@ import { requireEditor, apiError, withAuthErrorHandling } from "@/lib/apiAuth";
 import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 120;
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
   "Pragma": "no-cache",
   "Expires": "0",
+};
+
+const PUBLIC_CACHE = {
+  "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
 };
 
 const PUBLIC_GALLERY_SELECT = {
@@ -60,9 +64,11 @@ export async function GET(req: Request) {
       take: isPaginated ? limit : (searchParams.get("limit") ? parseInt(searchParams.get("limit")!) : undefined),
     });
 
+    const isStaff = req.headers.get("cookie")?.includes("auth-token") || req.headers.get("authorization");
+    const headers = isStaff ? NO_CACHE : PUBLIC_CACHE;
     return NextResponse.json(
       formatDataResponse(items, total, { isPaginated, page, limit }),
-      { headers: NO_CACHE }
+      { headers }
     );
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || "Server error" }, { status: 500 });

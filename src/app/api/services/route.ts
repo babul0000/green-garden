@@ -4,7 +4,7 @@ import { requireModerator, apiError, withAuthErrorHandling } from "@/lib/apiAuth
 import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 120;
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -13,7 +13,7 @@ const NO_CACHE = {
 };
 
 const PUBLIC_CACHE = {
-  "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+  "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600",
 };
 
 const PUBLIC_SERVICE_SELECT = {
