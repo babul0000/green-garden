@@ -147,7 +147,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {t("আমাদের সেবাসমূহ", "Our Services")}
+              Our Services
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
@@ -192,7 +192,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
 
                   <div className="my-auto text-center space-y-2">
                     <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                      {language === "bn" ? item.titleBn : item.titleEn}
+                      {item.titleEn || item.titleBn}
                     </h3>
                     <span className="text-[11px] font-mono text-[#75787b] md:hidden block mt-1">
                       {t("ট্যাপ করে বিবরণ দেখুন ➔", "Tap to view details ➔")}
@@ -228,10 +228,10 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                       </button>
                     </div>
                     <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
-                      {language === "bn" ? item.titleBn : item.titleEn}
+                      {item.titleEn || item.titleBn}
                     </h4>
                     <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
-                      {language === "bn" ? item.descBn : item.descEn}
+                      {item.descBn || item.descEn}
                     </p>
                   </div>
 

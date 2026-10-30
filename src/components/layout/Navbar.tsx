@@ -432,46 +432,55 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             {/* Navigation Links (Dynamic from Database) */}
             <div className="space-y-6 my-auto py-4">
               
-              <div className="space-y-2.5 font-display font-light">
+              <div className="space-y-3 font-display font-light">
                 {activeLinks.map((link) => {
-                  const title = language === "bn" ? (link.titleBn || link.titleEn) : (link.titleEn || link.titleBn);
+                  const headline = link.titleEn || link.titleBn;
+                  const description = link.titleBn;
                   const isAnchor = link.url.startsWith("#");
 
-                  if (isAnchor) {
-                    return (
-                      <div key={link.id} className="flex items-center justify-between">
-                        <a
-                          href={link.url}
-                          onClick={() => setMenuOpen(false)}
-                          className="text-2xl sm:text-[28px] font-light hover:text-[#dedad2] transition-colors block leading-tight text-white/95"
-                        >
-                          {title}
-                        </a>
+                  const linkInner = (
+                    <div className="group block py-1 cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl sm:text-[27px] font-light group-hover:text-[#dedad2] transition-colors block leading-tight text-white/95">
+                          {headline}
+                        </span>
                         {link.badge && (
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
                             {link.badge}
                           </span>
                         )}
                       </div>
+                      {description && (
+                        <span className="text-xs font-sans text-emerald-200/75 group-hover:text-emerald-200 transition-colors block mt-0.5 font-normal">
+                          {description}
+                        </span>
+                      )}
+                    </div>
+                  );
+
+                  if (isAnchor) {
+                    return (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        onClick={() => setMenuOpen(false)}
+                        className="block"
+                      >
+                        {linkInner}
+                      </a>
                     );
                   }
 
                   return (
-                    <div key={link.id} className="flex items-center justify-between">
-                      <Link
-                        href={link.url}
-                        prefetch={false}
-                        onClick={() => setMenuOpen(false)}
-                        className="text-2xl sm:text-[28px] font-light hover:text-[#dedad2] transition-colors block leading-tight text-white/95"
-                      >
-                        {title}
-                      </Link>
-                      {link.badge && (
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                          {link.badge}
-                        </span>
-                      )}
-                    </div>
+                    <Link
+                      key={link.id}
+                      href={link.url}
+                      prefetch={false}
+                      onClick={() => setMenuOpen(false)}
+                      className="block"
+                    >
+                      {linkInner}
+                    </Link>
                   );
                 })}
               </div>

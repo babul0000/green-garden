@@ -79,9 +79,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {language === "bn"
-                ? (processConfig?.titleBn || t("আমাদের কার্যপ্রণালী", "Our Methodology"))
-                : (processConfig?.titleEn || t("Our Methodology", "আমাদের কার্যপ্রণালী"))}
+              {processConfig?.titleEn || "Our Methodology"}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
@@ -133,10 +131,10 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
               </div>
               <div className="space-y-1.5">
                 <h4 className="font-display font-light text-lg text-[#3d2e17]">
-                  {language === "bn" ? step.titleBn : step.titleEn}
+                  {step.titleEn || step.titleBn}
                 </h4>
                 <p className="font-sans text-xs text-[#54595f] font-light leading-relaxed">
-                  {language === "bn" ? step.descBn : step.descEn}
+                  {step.descBn || step.descEn}
                 </p>
               </div>
             </div>

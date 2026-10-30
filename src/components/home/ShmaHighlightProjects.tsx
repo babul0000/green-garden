@@ -304,7 +304,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
               {t("নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
             </span>
             <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
-              Highlight Project
+              Highlight Projects
             </h2>
           </div>
           <Link

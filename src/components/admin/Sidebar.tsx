@@ -839,14 +839,14 @@ export default function Sidebar({
                                       isSelected ? "text-white font-bold" : "text-[#121813] font-semibold"
                                     }`}
                                   >
-                                    {tab.labelBn}
+                                    {tab.labelEn || tab.labelBn}
                                   </span>
                                   <span
-                                    className={`text-[12px] font-mono truncate leading-none mt-0.5 ${
-                                      isSelected ? "text-emerald-100 font-normal" : "text-[#3E433E] font-medium"
+                                    className={`text-[11px] font-sans truncate leading-none mt-0.5 ${
+                                      isSelected ? "text-emerald-100 font-normal" : "text-[#75787B] font-normal"
                                     }`}
                                   >
-                                    {tab.labelEn}
+                                    {tab.labelBn}
                                   </span>
                                 </div>
                               </div>

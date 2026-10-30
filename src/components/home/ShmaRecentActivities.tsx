@@ -63,7 +63,7 @@ export default function ShmaRecentActivities() {
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {t("সাম্প্রতিক কার্যক্রম", "Recent Activities")}
+              Recent Activities
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
@@ -93,10 +93,10 @@ export default function ShmaRecentActivities() {
                 {language === "bn" ? item.dateBn : item.dateEn}
               </p>
               <h3 className="font-sans text-xs sm:text-[13px] font-medium text-[#3d2e17] leading-snug line-clamp-2 group-hover:text-[#5a9dff] transition-colors">
-                {language === "bn" ? item.titleBn : item.titleEn}
+                {item.titleEn || item.titleBn}
               </h3>
               <p className="font-sans text-[11px] text-[#75787b] leading-tight line-clamp-2">
-                {language === "bn" ? item.subtitleBn : item.subtitleEn}
+                {item.subtitleBn || item.subtitleEn}
               </p>
             </div>
           </div>
