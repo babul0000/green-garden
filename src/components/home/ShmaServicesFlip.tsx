@@ -1,267 +1,105 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 
-interface ShmaService {
+interface ServiceCategory {
   id: string;
-  icon?: string;
-  titleBn: string;
+  slug: string;
   titleEn: string;
-  descBn: string;
-  descEn: string;
-  scopeBn: string[];
-  scopeEn: string[];
+  titleBn: string;
+  image: string;
 }
 
-const services: ShmaService[] = [
+const figmaServices: ServiceCategory[] = [
   {
     id: "01",
-    icon: "🏛️",
-    titleBn: "ল্যান্ডস্কেপ স্থাপত্য ও নকশা",
-    titleEn: "Landscape Architecture",
-    descBn: "ভবনের মূল স্থাপত্যের সাথে বায়োফিলিক উপাদান, মাটির আর্দ্রতা এবং জীবন্ত উদ্ভিদের সমন্বয়ে সমন্বিত মাস্টার লেআউট প্রণয়ন।",
-    descEn: "Comprehensive spatial design integrating built architecture with biophilic elements, soil hydrology, and living plant canopies.",
-    scopeBn: ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "স্ট্রাকচারাল লোড ও ড্রেনেজ সমন্বয়", "১০০% ওয়াটারপ্রুফ মেমব্রেন আর্কিটেকচার", "টার্ন-কি সাইট বাস্তবায়ন"],
-    scopeEn: ["Concept & 3D Visualization", "Structural Load & Drainage", "100% Waterproofing Architecture", "Turn-key Site Implementation"],
+    slug: "landscape-design",
+    titleEn: "Landscape design",
+    titleBn: "ল্যান্ডস্কেপ ডিজাইন",
+    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&q=80",
   },
   {
     id: "02",
-    icon: "🗺️",
-    titleBn: "মাস্টারপ্ল্যানিং ও বৃহৎ সবুজায়ন",
-    titleEn: "Master Planning & Eco Parks",
-    descBn: "রিসোর্ট, আবাসিক কমিউনিটি, বিশ্ববিদ্যালয় ক্যাম্পাস ও ইকো-পার্কের জন্য পরিবেশবান্ধব বৃহৎ মাস্টারপ্ল্যান প্রণয়ন।",
-    descEn: "Macro-scale zoning and environmental landscape masterplans for resorts, residential communities, campuses, and industrial eco-parks.",
-    scopeBn: ["সাইট জরিপ ও টপোগ্রাফি", "প্রাকৃতিক ড্রেনেজ নেটওয়ার্ক", "হাঁটার ট্রেইল ও সাইকেল লেন", "স্থানীয় প্রতিবেশ সংরক্ষণ"],
-    scopeEn: ["Site Analysis & Topography", "Hydrological Drainage Network", "Pedestrian Trails & Green Corridors", "Ecological Preservation"],
+    slug: "rooftop-gardens",
+    titleEn: "Rooftop gardens",
+    titleBn: "ছাদবাগান ও ড্রেনেজ",
+    image: "https://images.unsplash.com/photo-1530731141654-59610f3b729f?w=800&q=80",
   },
   {
     id: "03",
-    icon: "🏙️",
-    titleBn: "আরবান ভিশন ও ক্লাইমেট স্ট্র্যাটেজি",
-    titleEn: "Urban Biophilia & Microclimate",
-    descBn: "নগরীর অতিরিক্ত তাপমাত্রা হ্রাস, বৃষ্টির পানি নিষ্কাশন এবং ছাদ বাগানের মাধ্যমে সবুজ বলয় সৃষ্টি।",
-    descEn: "Strategic urban green infrastructure frameworks addressing urban heat mitigation, stormwater management, and rooftop biophilia.",
-    scopeBn: ["নগর তাপমাত্রা হ্রাস ও শেডিং", "বৃষ্টির পানি সঞ্চয় ও পুনব্যবহার", "ছায়ানিবিড় পথচারী করিডোর", "কমিউনিটি পকেট পার্ক ডিজাইন"],
-    scopeEn: ["Urban Heat Mitigation", "Rainwater Harvesting & Reuse", "Shaded Pedestrian Corridors", "Public Pocket Park Design"],
+    slug: "planting-maintenance",
+    titleEn: "Planting & maintenance",
+    titleBn: "রোপণ ও নিয়মিত পরিচর্যা",
+    image: "/featured_plant.png",
   },
   {
     id: "04",
-    icon: "🩺",
-    titleBn: "বাস্তুতন্ত্র ও বৃক্ষ চিকিৎসা ক্লিনিক",
-    titleEn: "Ecology & Tree Doctor Care",
-    descBn: "দেশীয় আবহাওয়ার উপযোগী দীর্ঘজীবী উদ্ভিদ নির্বাচন, বায়ু বিশুদ্ধকারী প্রজাতি এবং সার্টিফাইড বৃক্ষ চিকিৎসা সেবা।",
-    descEn: "Scientific curation of endemic Bangladeshi and tropical flora, air-purifying vertical species, soil conditioning, and tree doctor care.",
-    scopeBn: ["দেশীয় দীর্ঘজীবী প্রজাতি নির্বাচন", "বৃক্ষ সার্জারি ও রোগ নিরাময় ক্লিনিক", "উন্নত জৈব পুষ্টি ও মাটির মিশ্রণ", "পরাগায়ন সহায়ক বাগান"],
-    scopeEn: ["Endemic Hardy Species Selection", "Tree Surgery & Clinic Care", "Substrate Media Engineering", "Pollinator Sanctuaries"],
-  },
-  {
-    id: "05",
-    icon: "⛲",
-    titleBn: "জলপ্রপাত ফোয়ারা ও নান্দনিক পারগোলা",
-    titleEn: "Water Features & Pergolas",
-    descBn: "শান্ত পানির ফোয়ারা, মার্বেল জলপ্রপাত, নান্দনিক কাঠের পারগোলা ও অ্যাম্বিয়েন্ট লাইটিং সহযোগে সামাজিক মিলনমেলা সৃষ্টি।",
-    descEn: "Designing tactile gathering spaces with reflective water plazas, cascading streams, custom pergolas, and evening ambient illumination.",
-    scopeBn: ["আধুনিক হাইড্রলিক ফোয়ারা", "নান্দনিক কাঠের ও স্টিল পারগোলা", "লো-ভোল্টেজ অ্যাম্বিয়েন্ট লাইটিং", "আউটডোর সানকেন লাউঞ্জ"],
-    scopeEn: ["Hydraulic Water Fountains", "Timber & Steel Pergolas", "Low-Voltage Mood Lighting", "Sunken Social Lounges"],
-  },
-  {
-    id: "06",
-    icon: "💧",
-    titleBn: "স্মার্ট স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি",
-    titleEn: "Smart Irrigation & Automation",
-    descBn: "ওয়াইফাই ও টাইমার নিয়ন্ত্রিত ড্রিপ ইরিগেশন, রেইন সেন্সর ও স্বয়ংক্রিয় ফার্টিগেশন প্রযুক্তি যা ৭০% পানি সাশ্রয় করে।",
-    descEn: "WiFi-controlled automated micro-drip networks, moisture sensors, and root-zone fertigation systems saving 70% water.",
-    scopeBn: ["ডিজিটাল স্মার্ট কন্ট্রোলার", "প্রেশার ড্রিপার নেটওয়ার্ক", "সুষম তরল সার প্রয়োগ ব্যবস্থা", "মোবাইল রিমোট মনিটরিং"],
-    scopeEn: ["Digital Smart Controllers", "Pressure Compensating Drippers", "Root-zone Fertigation System", "Mobile App Remote Monitoring"],
+    slug: "tree-doctor",
+    titleEn: "Tree Doctor",
+    titleBn: "বৃক্ষ চিকিৎসা ও ক্লিনিক",
+    image: "/hero_plants.png",
   },
 ];
 
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
-  const [serviceList, setServiceList] = useState<ShmaService[]>(services);
-  const [flippedId, setFlippedId] = useState<string | null>(null);
-
-  const toggleFlip = (id: string) => {
-    setFlippedId((prev) => (prev === id ? null : id));
-  };
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}` : '';
-        const primaryUrl = "/api/services";
-        const fallbackUrl = apiBase ? `${apiBase}/services` : null;
-
-        let res = await fetch(primaryUrl).catch(() => null);
-        if ((!res || !res.ok) && fallbackUrl) {
-          res = await fetch(fallbackUrl).catch(() => null);
-        }
-
-        if (res && res.ok) {
-          const data = await res.json();
-          const items = Array.isArray(data) ? data : data?.services || [];
-          if (items.length > 0) {
-            const mapped: ShmaService[] = items.slice(0, 6).map((s: any, idx: number) => {
-              const fallback = services[idx % services.length];
-              return {
-                id: String(idx + 1).padStart(2, "0"),
-                icon: s.icon || fallback?.icon || "🌱",
-                titleBn: s.titleBn || s.bengaliTitle || fallback?.titleBn || s.label || s.title || "",
-                titleEn: s.titleEn || s.label || s.title || fallback?.titleEn || "",
-                descBn: s.descBn || fallback?.descBn || s.desc || s.description || "",
-                descEn: s.descEn || s.desc || s.description || fallback?.descEn || "",
-                scopeBn: s.scopeBn || fallback?.scopeBn || ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "ড্রেনেজ সমন্বয়", "টার্ন-কি সাইট বাস্তবায়ন"],
-                scopeEn: s.scopeEn || s.features || fallback?.scopeEn || ["Concept & 3D Visualization", "Drainage Architecture", "Turn-key Implementation"],
-              };
-            });
-            setServiceList(mapped);
-          }
-        }
-      } catch (e) {
-        // Keeps default services on network failure
-      }
-    };
-    fetchServices();
-  }, []);
-
-  if (serviceList.length === 0) {
-    return null;
-  }
-
-  const gridColsClass =
-    columns === 1
-      ? "grid-cols-1 max-w-2xl mx-auto"
-      : columns === 2
-      ? "grid-cols-1 md:grid-cols-2"
-      : columns === 4
-      ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+  const isBn = language === "bn";
 
   return (
-    <section id="service" className="py-20 text-[#323232] bg-white">
-      <div className="px-6 sm:px-10">
-      
-      {/* Header */}
-      <div className="mb-14">
-        <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
-          <div className="flex items-baseline gap-3">
-            <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Our Services
-            </h2>
-          </div>
-          <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("স্থাপত্য ও নকশা শৃঙ্খলা", "Architectural Disciplines")}
+    <section id="service" className="py-16 sm:py-24 text-[#183A2D] bg-[#FAFAF8] border-b border-[#DADFD5]/50">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-12 lg:px-16">
+        {/* 1. Header (Figma Spec) */}
+        <div className="mb-10 sm:mb-14 space-y-2">
+          <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#6B746C] block font-medium">
+            {isBn ? "আমরা যা করি" : "WHAT WE DO"}
           </span>
+          <h2 className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] font-normal tracking-tight text-[#183A2D] leading-[1.1]">
+            {isBn ? "বীজ রোপণ থেকে চিরস্থায়ী ছায়া পর্যন্ত।" : "From first seed to lasting shade."}
+          </h2>
         </div>
-        <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
-      </div>
 
-      {/* Dynamic Flip-Box Grid */}
-      <div className={`grid ${gridColsClass} gap-6 sm:gap-8`}>
-        {serviceList.map((item) => {
-          const isFlipped = flippedId === item.id;
-
-          return (
-            <div
-              key={item.id}
-              onClick={() => toggleFlip(item.id)}
-              className="group relative h-[300px] sm:h-[340px] [perspective:1000px] cursor-pointer"
+        {/* 2. Four Service Imagery Cards (Figma: 306x346 each) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {figmaServices.map((srv) => (
+            <Link
+              key={srv.id}
+              href={`/services/${srv.slug}`}
+              className="group flex flex-col space-y-4 cursor-pointer"
             >
-              {/* Flipping Inner Container */}
-              <div
-                className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${
-                  isFlipped ? "[transform:rotateY(180deg)]" : "md:group-hover:[transform:rotateY(180deg)]"
-                }`}
-              >
-                
-                {/* FRONT FACE: Clean Beige Rectangular Box with Service Icon */}
-                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-[#dedad2] p-8 flex flex-col justify-between rounded-2xl shadow-sm border border-[#3d2e17]/5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-[#75787b] font-light">
-                      {item.id}
-                    </span>
-                    <div className="w-10 h-10 rounded-xl bg-[#3d2e17]/10 flex items-center justify-center text-xl shadow-inner select-none">
-                      {item.icon && (item.icon.startsWith("http") || item.icon.startsWith("/")) ? (
-                        <img src={item.icon} alt="" className="w-6 h-6 object-contain" />
-                      ) : (
-                        <span>{item.icon || "🌱"}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="my-auto text-center space-y-2">
-                    <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                      {item.titleEn || item.titleBn}
-                    </h3>
-                    <span className="text-[11px] font-mono text-[#75787b] md:hidden block mt-1">
-                      {t("ট্যাপ করে বিবরণ দেখুন ➔", "Tap to view details ➔")}
-                    </span>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-xs font-mono uppercase tracking-widest text-[#75787b] opacity-0 group-hover:opacity-100 transition-opacity hidden md:inline">
-                      {t("বিস্তারিত দেখুন →", "Hover to View Details →")}
-                    </span>
-                  </div>
-                </div>
-
-                {/* BACK FACE: Dark Brown Architectural Brief */}
-                <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#3d2e17] text-white p-7 sm:p-8 flex flex-col justify-between rounded-2xl shadow-xl">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base">{item.icon || "🌱"}</span>
-                        <span className="font-mono text-[11px] text-[#dedad2]/70 font-light block">
-                          {t("সেবার পরিধি", "Scope & Deliverables")}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setFlippedId(null);
-                        }}
-                        className="md:hidden text-[10px] font-mono text-white/60 hover:text-white underline cursor-pointer"
-                      >
-                        {t("✕ বন্ধ করুন", "✕ Close")}
-                      </button>
-                    </div>
-                    <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
-                      {item.titleEn || item.titleBn}
-                    </h4>
-                    <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
-                      {item.descBn || item.descEn}
-                    </p>
-                  </div>
-
-                  <div className="space-y-1.5 pt-3 border-t border-white/10">
-                    {(language === "bn" ? item.scopeBn : item.scopeEn).slice(0, 3).map((s, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs font-sans text-white/80">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#5a9dff]"></span>
-                        <span>{s}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-2">
-                    <a
-                      href="#newsletter"
-                      className="inline-block text-xs font-mono uppercase tracking-[0.18em] text-[#5a9dff] hover:text-white transition-colors"
-                    >
-                      {t("পরামর্শ নিন →", "Consult Studio →")}
-                    </a>
-                  </div>
-                </div>
-
+              <div className="relative aspect-[306/300] w-full overflow-hidden rounded-xl bg-stone-200">
+                <img
+                  src={srv.image}
+                  alt={srv.titleEn}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/hero_plants.png";
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
               </div>
-            </div>
-          );
-        })}
-      </div>
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif text-[24px] sm:text-[28px] font-normal text-[#183A2D] group-hover:text-[#194B37] transition-colors flex items-center gap-1.5">
+                  <span>{isBn ? srv.titleBn : srv.titleEn}</span>
+                  <span className="text-[18px] opacity-70 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
+                    ↗
+                  </span>
+                </h3>
+              </div>
+            </Link>
+          ))}
+        </div>
 
+        {/* 3. Sub-note (Figma: Also in our practice...) */}
+        <div className="mt-8 sm:mt-10 pt-4 border-t border-[#DADFD5]/60">
+          <p className="text-xs sm:text-[13px] text-[#6B746C] font-sans">
+            {isBn
+              ? "আমাদের বিশেষজ্ঞ সেবাসমূহের মধ্যে আরও অন্তর্ভুক্ত: স্মার্ট ড্রিপ সেচ ব্যবস্থা, ওয়াটারপ্রুফ ড্রেনেজ এবং অ্যাম্বিয়েন্ট গার্ডেন লাইটিং।"
+              : "Also in our practice: irrigation, drainage and garden lighting."}
+          </p>
+        </div>
       </div>
-
     </section>
   );
 }
