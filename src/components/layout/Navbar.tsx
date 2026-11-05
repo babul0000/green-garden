@@ -173,6 +173,22 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
             : "bg-gradient-to-b from-black/60 via-black/25 to-transparent py-4 sm:py-6 text-white"
         }`}
       >
+        {/* Top Architectural Contact Strip (Figma Spec) */}
+        <div className={`hidden md:block w-full border-b transition-colors duration-300 ${
+          isHeaderSolid ? "border-black/5 bg-stone-100/60 text-[#183A2D]" : "border-white/10 bg-black/30 text-white/90 backdrop-blur-xs"
+        }`}>
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-8 py-1.5 flex items-center justify-between text-[10px] tracking-[0.2em] font-mono uppercase">
+            <span>DHAKA, BANGLADESH — SPACES FOR A GREENER EVERYDAY</span>
+            <div className="flex items-center gap-4">
+              <span className="opacity-75">Facebook · LinkedIn</span>
+              <span className="opacity-40">/</span>
+              <a href="https://wa.me/8801883012641" target="_blank" rel="noopener noreferrer" className="hover:underline font-semibold">
+                WhatsApp 01883-012641
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div className="max-w-[1440px] mx-auto px-3 sm:px-6 md:px-8 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Column 1: Minimalist Thin 3-Line Hamburger Icon + Compact Language Switcher */}
@@ -185,20 +201,23 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
               <div className="flex flex-col gap-1 w-6 sm:w-7">
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isHeaderSolid ? "bg-[#323232]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                    isHeaderSolid ? "bg-[#183A2D]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isHeaderSolid ? "bg-[#323232]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                    isHeaderSolid ? "bg-[#183A2D]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                   }`}
                 ></span>
                 <span
                   className={`w-full h-[1.5px] transition-all duration-300 ${
-                    isHeaderSolid ? "bg-[#323232]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                    isHeaderSolid ? "bg-[#183A2D]" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                   }`}
                 ></span>
               </div>
+              <span className="hidden sm:inline-block text-[11px] font-mono tracking-[0.2em] uppercase font-medium">
+                MENU
+              </span>
             </button>
 
             {/* Language Switcher Pill Toggle */}

@@ -26,6 +26,27 @@ export default function ShmaHeroVideo() {
     return defaultHeroSettings;
   });
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      const nextMuted = !videoRef.current.muted;
+      videoRef.current.muted = nextMuted;
+      setIsMuted(nextMuted);
+    }
+  };
   const [isHovered, setIsHovered] = useState(false);
   const leaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -147,7 +168,7 @@ export default function ShmaHeroVideo() {
       : "h-[82svh] min-h-[82svh]";
 
   return (
-    <section className={`relative w-full ${mobileHeightClass} ${desktopHeightClass} overflow-hidden bg-[#041a2e] flex items-center justify-center select-none`}>
+    <section className={`relative w-full ${mobileHeightClass} ${desktopHeightClass} overflow-hidden bg-[#194B37] flex items-center justify-center select-none`}>
       {/* 1. Dynamic Video / Image Background Media with Anti-Cache Version */}
       <HeroBackgroundMedia
         mediaType={config.mediaType}
@@ -201,6 +222,80 @@ export default function ShmaHeroVideo() {
         btnContactStyle={config.btnContactStyle}
         contactLabel={contactLabel}
       />
+
+      {/* 5. Figma Architectural Film Controls Bar */}
+      <div className="absolute bottom-3 sm:bottom-5 left-0 right-0 z-20 pointer-events-none">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-12 lg:px-16 flex items-center justify-between">
+          <span className="text-white/75 text-[10px] sm:text-[11px] font-mono tracking-[0.2em] uppercase hidden md:inline-block drop-shadow">
+            DHAKA, BANGLADESH &nbsp; / &nbsp; A NEW WAY TO LIVE WITH NATURE
+          </span>
+
+          <div className="flex items-center gap-3 pointer-events-auto bg-black/45 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-white text-[11px] font-mono shadow-md">
+            <button
+              type="button"
+              onClick={togglePlay}
+              className="hover:text-[#DDE8AA] transition-colors p-1 cursor-pointer"
+              aria-label={isPlaying ? "Pause Video" : "Play Video"}
+            >
+              {isPlaying ? (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="hover:text-[#DDE8AA] transition-colors p-1 cursor-pointer"
+              aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+            >
+              {isMuted ? (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+                </svg>
+              ) : (
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                </svg>
+              )}
+            </button>
+
+            <span className="opacity-40">|</span>
+            <span className="tracking-widest uppercase">GARDEN FILM &nbsp; 01:24</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 6. Emergency Tree Doctor Floating Pill Badge (Figma: 202x52) */}
+      <button
+        type="button"
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent("open-tree-doctor"));
+        }}
+        className="fixed bottom-6 right-4 sm:right-8 z-40 bg-white hover:bg-stone-50 text-[#183A2D] px-4 sm:px-5 py-2.5 sm:py-3 rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.22)] border border-stone-200/90 flex items-center gap-2.5 transition-all hover:scale-105 active:scale-95 cursor-pointer group"
+        aria-label="Tree Doctor Get Help"
+      >
+        <div className="w-7 h-7 rounded-full bg-[#183A2D]/10 flex items-center justify-center text-[#183A2D]">
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3" />
+            <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4" />
+            <circle cx="20" cy="10" r="2" />
+          </svg>
+        </div>
+        <div className="text-left font-sans">
+          <span className="text-xs sm:text-[13px] font-semibold block leading-tight text-[#183A2D]">
+            Tree Doctor · Get help ↗
+          </span>
+          <span className="text-[9px] text-[#6B746C] block leading-tight">
+            অন-কল বৃক্ষ চিকিৎসা
+          </span>
+        </div>
+      </button>
 
       {/* 5. Mobile-Only Subtle Scroll Hint (respects prefers-reduced-motion) */}
       <button
