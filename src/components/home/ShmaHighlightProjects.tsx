@@ -294,16 +294,28 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
   }
 
   return (
-    <section id="projects" className="py-16 sm:py-24 text-[#183A2D] bg-[#FAFAF8] border-b border-[#DADFD5]/50">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-12 lg:px-16">
-      {/* 1. ARCHITECTURAL SECTION HEADER (FIGMA SPEC) */}
-      <div className="mb-10 sm:mb-16 space-y-2">
-        <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#6B746C] block font-medium">
-          {isBn ? "নির্বাচিত ল্যান্ডস্কেপ ও কনসেপ্ট পোর্টফোলিও" : "SELECTED LANDSCAPES / CONCEPT PORTFOLIO"}
-        </span>
-        <h2 className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] font-normal tracking-tight text-[#183A2D] leading-[1.1]">
-          {isBn ? "প্রতিদিনের জীবনে সবুজের নতুন স্নিগ্ধতা।" : "A different kind of everyday."}
-        </h2>
+    <section id="projects" className="py-12 sm:py-24 text-[#323232] bg-white">
+      <div className="px-4 sm:px-10 lg:px-16">
+      {/* 1. ARCHITECTURAL SECTION HEADER (MATCHING SHMA DESIGNS) */}
+      <div className="mb-10 sm:mb-20">
+        <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
+          <div className="space-y-1">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#75787b] block">
+              {t("নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
+            </span>
+            <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
+              Highlight Projects
+            </h2>
+          </div>
+          <Link
+            href="/projects"
+            className="group inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] transition-colors"
+          >
+            <span>{t("সকল প্রকল্প দেখুন", "View All Works")}</span>
+            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </Link>
+        </div>
+        <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
       {/* 2. ASYMMETRIC ALTERNATING ARCHITECTURAL SHOWCASE (SHMA SIGNATURE) */}
@@ -353,7 +365,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-black/25 transition-colors duration-500" />
                   
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <span className="px-5 py-2.5 bg-white/95 text-[#183A2D] text-xs font-mono uppercase tracking-[0.2em] backdrop-blur-sm shadow-md">
+                    <span className="px-5 py-2.5 bg-white/95 text-[#3d1916] text-xs font-mono uppercase tracking-[0.2em] backdrop-blur-sm shadow-md">
                       {t("কেস স্টাডি দেখুন ➔", "Explore Project ➔")}
                     </span>
                   </div>
@@ -376,7 +388,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 {/* Typology & Location */}
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="inline-block px-3 py-1 text-xs font-mono tracking-wider uppercase text-[#183A2D] bg-[#dedad2]/70 rounded-full">
+                    <span className="inline-block px-3 py-1 text-xs font-mono tracking-wider uppercase text-[#3d1916] bg-[#dedad2]/70 rounded-full">
                       {isBn ? item.categoryBn : item.categoryEn}
                     </span>
                     {item.year && (
@@ -393,7 +405,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 {/* Project Title (Architectural Display Typeface) */}
                 <h3
                   onClick={() => setActiveModalProject(item)}
-                  className="font-serif font-light text-2xl sm:text-3xl md:text-4xl text-[#183A2D] leading-tight tracking-tight hover:text-[#5a9dff] transition-colors cursor-pointer"
+                  className="font-display font-light text-2xl sm:text-3xl md:text-4xl text-[#3d1916] leading-tight tracking-tight hover:text-[#5a9dff] transition-colors cursor-pointer"
                 >
                   {item.nameEn || item.nameBn}
                 </h3>
@@ -407,7 +419,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 {item.ecoMetrics && (
                   <div className="pt-2 border-t border-[#e7e7e7] grid grid-cols-3 gap-2 sm:gap-4 text-center">
                     <div>
-                      <span className="block font-serif text-sm sm:text-lg text-[#183A2D] font-medium">
+                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
                         {isBn ? toBnDigits(item.ecoMetrics.tempDrop) : item.ecoMetrics.tempDrop}
                       </span>
                       <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
@@ -415,7 +427,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                       </span>
                     </div>
                     <div>
-                      <span className="block font-serif text-sm sm:text-lg text-[#183A2D] font-medium">
+                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
                         {isBn ? toBnDigits(item.ecoMetrics.greenCoverage) : item.ecoMetrics.greenCoverage}
                       </span>
                       <span className="text-[9px] sm:text-[10px] font-mono text-[#75787b] uppercase tracking-wider block">
@@ -423,7 +435,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                       </span>
                     </div>
                     <div>
-                      <span className="block font-serif text-sm sm:text-lg text-[#183A2D] font-medium">
+                      <span className="block font-display text-sm sm:text-lg text-[#3d1916] font-medium">
                         {isBn
                           ? item.ecoMetrics.rainwater
                               .replace("100% Drainage Safe", "১০০% নিরাপদ ড্রেনেজ")
@@ -444,7 +456,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 <div className="pt-2 flex items-center gap-4">
                   <button
                     onClick={() => setActiveModalProject(item)}
-                    className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#183A2D] hover:text-[#5a9dff] pb-1 border-b border-[#183A2D] hover:border-[#5a9dff] transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] pb-1 border-b border-[#3d1916] hover:border-[#5a9dff] transition-all cursor-pointer"
                   >
                     <span>{t("প্রকল্পের বিস্তারিত", "Project Case Study")}</span>
                     <span>→</span>
@@ -456,23 +468,13 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
         })}
       </div>
 
-      {/* 3. FIGMA ARCHITECTURAL RULE & PORTFOLIO NOTE */}
-      <div className="w-full h-[1px] bg-[#DADFD5] my-10 sm:my-14" />
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
-        <p className="text-[11px] sm:text-xs text-[#6B746C] font-sans">
-          {isBn
-            ? "আমাদের ইকোলজিক্যাল ডিজাইন দর্শন ও স্থাপত্য মান উপস্থাপনে প্রদর্শিত কনসেপ্ট পোর্টফোলিও।"
-            : "Illustrative project concepts shown to communicate our design approach."}
-        </p>
+      {/* 3. ARCHITECTURAL EXPLORE MORE FOOTER */}
+      <div className="mt-28 text-center border-t border-[#e7e7e7] pt-14">
         <Link
           href="/projects"
-          className="group/btn inline-flex items-center gap-2 self-start sm:self-auto px-6 py-3 rounded-full border border-[#183A2D]/30 hover:border-[#183A2D] bg-white hover:bg-[#183A2D] text-[#183A2D] hover:text-white text-xs sm:text-sm font-medium tracking-wide shadow-xs transition-all hover:scale-105 active:scale-95 shrink-0"
+          className="inline-block px-10 py-4 border border-[#3d1916] text-[#3d1916] text-xs font-mono uppercase tracking-[0.25em] hover:bg-[#3d1916] hover:text-white transition-all duration-300"
         >
-          <span>{isBn ? "সকল প্রকল্প দেখুন" : "Explore all projects"}</span>
-          <svg className="w-3.5 h-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7"></line>
-            <polyline points="7 7 17 7 17 17"></polyline>
-          </svg>
+          {t("সকল প্রকল্প ও কেস স্টাডি দেখুন", "Explore Complete Portfolio")}
         </Link>
       </div>
 
@@ -485,7 +487,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
             {/* Close Button */}
             <button
               onClick={() => setActiveModalProject(null)}
-              className="absolute top-6 right-6 text-2xl text-[#183A2D] hover:opacity-60 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors"
+              className="absolute top-6 right-6 text-2xl text-[#3d1916] hover:opacity-60 cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors"
               aria-label="Close"
             >
               ✕
@@ -496,7 +498,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
               <span className="text-xs uppercase tracking-[0.25em] text-[#75787b] block font-mono">
                 {t("স্থাপত্য বিশ্লেষণ ও সমীক্ষা", "ARCHITECTURAL CASE STUDY")}
               </span>
-              <h3 className="text-2xl sm:text-4xl font-light font-serif text-[#183A2D] tracking-tight">
+              <h3 className="text-2xl sm:text-4xl font-light font-display text-[#3d1916] tracking-tight">
                 {activeModalProject.nameEn || activeModalProject.nameBn}
               </h3>
               <p className="text-xs font-mono uppercase tracking-wider text-[#75787b] pt-1">
@@ -534,21 +536,21 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-[#f8faf9] border border-[#e7e7e7] text-xs">
               <div>
                 <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("টাইপোলজি", "Typology")}</span>
-                <span className="font-medium text-[#183A2D]">
+                <span className="font-medium text-[#3d1916]">
                   {isBn ? activeModalProject.categoryBn : activeModalProject.categoryEn}
                 </span>
               </div>
               <div>
                 <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("পরিসর / ক্ষেত্রফল", "Scale / Area")}</span>
-                <span className="font-medium text-[#183A2D]">{isBn ? toBnDigits(activeModalProject.area || "৩,৫০০ বর্গফুট") : (activeModalProject.area || "Custom Scope")}</span>
+                <span className="font-medium text-[#3d1916]">{isBn ? toBnDigits(activeModalProject.area || "৩,৫০০ বর্গফুট") : (activeModalProject.area || "Custom Scope")}</span>
               </div>
               <div>
                 <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("জলবায়ু উপযোগিতা", "Climate Adaptation")}</span>
-                <span className="font-medium text-[#183A2D]">{t("গ্রীষ্মমণ্ডলীয় মৌসুমি", "Tropical Monsoon")}</span>
+                <span className="font-medium text-[#3d1916]">{t("গ্রীষ্মমণ্ডলীয় মৌসুমি", "Tropical Monsoon")}</span>
               </div>
               <div>
                 <span className="block font-mono text-[10px] text-[#75787b] uppercase">{t("ওয়াটারপ্রুফিং", "Waterproofing")}</span>
-                <span className="font-medium text-[#183A2D]">{t("১০০% সুরক্ষিত নিশ্চয়তা", "100% Guaranteed")}</span>
+                <span className="font-medium text-[#3d1916]">{t("১০০% সুরক্ষিত নিশ্চয়তা", "100% Guaranteed")}</span>
               </div>
             </div>
 
@@ -569,14 +571,14 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
                 <Link
                   href={`/contact?subject=${encodeURIComponent(activeModalProject.nameEn)}`}
                   onClick={() => setActiveModalProject(null)}
-                  className="px-6 py-3 bg-[#183A2D] text-white text-xs font-mono uppercase tracking-widest hover:bg-[#5a9dff] transition-colors"
+                  className="px-6 py-3 bg-[#3d1916] text-white text-xs font-mono uppercase tracking-widest hover:bg-[#5a9dff] transition-colors"
                 >
                   {t("এই ডিজাইনে পরামর্শ নিন", "Inquire About This Project")}
                 </Link>
                 <Link
                   href="/projects"
                   onClick={() => setActiveModalProject(null)}
-                  className="px-6 py-3 border border-[#183A2D] text-[#183A2D] text-xs font-mono uppercase tracking-widest hover:bg-[#dedad2] transition-colors"
+                  className="px-6 py-3 border border-[#3d1916] text-[#3d1916] text-xs font-mono uppercase tracking-widest hover:bg-[#dedad2] transition-colors"
                 >
                   {t("সকল কাজ দেখুন", "All Case Studies")}
                 </Link>
@@ -584,7 +586,7 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
 
               <button
                 onClick={() => setActiveModalProject(null)}
-                className="text-xs font-mono uppercase text-[#75787b] hover:text-[#183A2D] transition-colors cursor-pointer"
+                className="text-xs font-mono uppercase text-[#75787b] hover:text-[#3d1916] transition-colors cursor-pointer"
               >
                 {t("বন্ধ করুন [ESC]", "Close [ESC]")}
               </button>

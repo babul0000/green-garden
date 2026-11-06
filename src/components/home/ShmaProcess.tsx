@@ -3,6 +3,47 @@
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
+import { optimizeImageUrl } from "@/lib/utils";
+
+interface ProcessStep {
+  titleBn: string;
+  titleEn: string;
+  descBn: string;
+  descEn: string;
+  image: string;
+}
+
+const steps: ProcessStep[] = [
+  {
+    titleBn: "সমস্যা ও সাইট বিশ্লেষণ",
+    titleEn: "Define Problem & Site Survey",
+    descBn: "ক্লায়েন্টের নির্দিষ্ট চাহিদা ও সাইটের পারিপার্স্বিক চ্যালেঞ্জ গভীরভাবে পর্যবেক্ষণ করে প্রকল্পের সর্বোচ্চ সম্ভাবনা নিশ্চিত করা।",
+    descEn: "Connecting with the client to understand requirements, analyzing spatial constraints, and uncovering true ecological potential.",
+    image: "/hero_plants.png",
+  },
+  {
+    titleBn: "নকশা ও সৃজনশীল ধারণা",
+    titleEn: "Idea & Biophilic Concept",
+    descBn: "সাইট জরিপ ও গবেষণার মাধ্যমে সমাজ এবং প্রকৃতির জন্য টেকসই পরিবেশ সৃষ্টিতে আধুনিক স্থাপত্য নকশার রূপরেখা প্রণয়ন।",
+    descEn: "Translating ecological research and client aspiration into cohesive biophilic master concepts and spatial zoning.",
+    image: "/featured_plant.png",
+  },
+  {
+    titleBn: "বৈজ্ঞানিক ডেটা ও সিমুলেশন",
+    titleEn: "Data Driven & Microclimate",
+    descBn: "মাইক্রোক্লাইমেট, সূর্যালোকের ব্যাপ্তি ও বৃষ্টির পানি প্রবাহের ডিজিটাল সিমুলেশন করে বৈজ্ঞানিক ভিত্তিতে পরিকল্পনা চূড়ান্তকরণ।",
+    descEn: "Simulating microclimate, sunlight patterns, soil biology, and rainfall catchment for environmentally grounded decisions.",
+    image: "/hero_plants.png",
+  },
+  {
+    titleBn: "টার্ন-কি বাস্তবায়ন ও যত্ন",
+    titleEn: "Prototyping & Execution",
+    descBn: "থ্রিডি মডেল, পরীক্ষামূলক উদ্ভিদ নির্বাচন এবং শতভাগ ওয়াটারপ্রুফ মেমব্রেনসহ দক্ষ প্রকৌশলীদের দিয়ে সাইটে নিখুঁত বাস্তবায়ন।",
+    descEn: "Transforming concepts into living landscapes through physical trials, waterproof layers, and turnkey engineering oversight.",
+    image: "/featured_plant.png",
+  },
+];
+
 interface ProcessConfig {
   titleEn?: string;
   titleBn?: string;
@@ -12,74 +53,97 @@ interface ProcessConfig {
     titleBn?: string;
     descEn?: string;
     descBn?: string;
+    image?: string;
   }>;
 }
 
-const figmaStages = [
-  {
-    step: "01",
-    titleEn: "Discovery & Site Analysis",
-    titleBn: "অনুসন্ধান ও সাইট বিশ্লেষণ",
-    descEn: "Sun, wind, drainage and the way you want to use your space.",
-    descBn: "সূর্যকিরণ, বাতাস, ড্রেনেজ ব্যবস্থা এবং আপনার চাহিদার গভীর পর্যবেক্ষণ।",
-  },
-  {
-    step: "02",
-    titleEn: "Concept & 3D Landscape Design",
-    titleBn: "কনসেপ্ট ও থ্রিডি ল্যান্ডস্কেপ নকশা",
-    descEn: "Plant palettes, material choices and a considered spatial direction.",
-    descBn: "উদ্ভিদ নির্বাচন, টেকসই উপকরণ এবং আধুনিক স্থাপত্য রূপরেখা প্রণয়ন।",
-  },
-  {
-    step: "03",
-    titleEn: "Implementation & Planting",
-    titleBn: "বাস্তবায়ন ও বৈজ্ঞানিক রোপণ",
-    descEn: "Careful site preparation, planting and irrigation installation.",
-    descBn: "নিখুঁত সাইট প্রস্তুতি, বৃক্ষরোপণ এবং স্বয়ংক্রিয় ড্রিপ সেচ স্থাপন।",
-  },
-  {
-    step: "04",
-    titleEn: "Lifelong Care & Maintenance",
-    titleBn: "আজীবন যত্ন ও দীর্ঘমেয়াদী পরিচর্যা",
-    descEn: "Seasonal visits and plant-health records for a living landscape.",
-    descBn: "মৌসুমী ভিজিট ও ডিজিটাল হেলথ ট্র্যাকিংয়ের মাধ্যমে দীর্ঘায়ু নিশ্চিতকরণ।",
-  },
-];
-
 export default function ShmaProcess({ processConfig }: { processConfig?: ProcessConfig }) {
-  const { language } = useLanguage();
-  const isBn = language === "bn";
+  const { language, t } = useLanguage();
+
+  const activeSteps = processConfig?.steps && processConfig.steps.length > 0
+    ? processConfig.steps.map((s, idx) => ({
+        titleBn: s.titleBn || steps[idx % steps.length]?.titleBn || "",
+        titleEn: s.titleEn || steps[idx % steps.length]?.titleEn || "",
+        descBn: s.descBn || steps[idx % steps.length]?.descBn || "",
+        descEn: s.descEn || steps[idx % steps.length]?.descEn || "",
+        image: s.image || steps[idx % steps.length]?.image || "/hero_plants.png",
+      }))
+    : steps;
 
   return (
-    <section id="process" className="py-16 sm:py-24 text-[#183A2D] bg-[#FAFAF8] border-b border-[#DADFD5]/50">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-12 lg:px-16">
-        {/* Header (Figma Spec) */}
-        <div className="mb-12 sm:mb-16 space-y-2">
-          <span className="font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#6B746C] block font-medium">
-            {isBn ? "আমরা যেভাবে কাজ করি" : "HOW WE WORK"}
+    <section id="process" className="py-20 text-[#323232] bg-white">
+      <div className="px-6 sm:px-10">
+      
+      {/* Header */}
+      <div className="mb-14">
+        <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
+          <div className="flex items-baseline gap-3">
+            <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
+              {processConfig?.titleEn || "Our Methodology"}
+            </h2>
+          </div>
+          <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
+            {t("ডিজাইন ও বাস্তবায়ন পর্যায়", "Design & Delivery Stages")}
           </span>
-          <h2 className="font-serif text-[32px] sm:text-[42px] lg:text-[48px] font-normal tracking-tight text-[#183A2D] leading-[1.1]">
-            {isBn ? "সুপরিকল্পিত প্রক্রিয়া। জীবন্ত স্নিগ্ধ ফল।" : "A thoughtful process. A living result."}
-          </h2>
+        </div>
+        <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
+      </div>
+
+      {/* Main Process Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        
+        {/* Left Column */}
+        <div className="lg:col-span-3 space-y-3">
+          <h3 className="font-display font-light text-2xl sm:text-3xl text-[#3d2e17] leading-tight">
+            {language === "bn" ? (
+              <>
+                টেকসই ও আধুনিক সমাধানের
+                <span className="block text-[#5a9dff] mt-1">সুপরিকল্পিত যাত্রা</span>
+              </>
+            ) : (
+              <>
+                A Thoughtful Journey to
+                <span className="block text-[#5a9dff] mt-1">Transformative Solutions</span>
+              </>
+            )}
+          </h3>
+          <p className="font-sans text-xs sm:text-sm text-[#75787b] font-light leading-relaxed pt-2">
+            {t(
+              "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।",
+              "Ensuring highest architectural standards, native plant health, and waterproofing resilience across every phase."
+            )}
+          </p>
         </div>
 
-        {/* Four Stage Process (Figma: Four stage process 1296x169, 300px each) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-8">
-          {figmaStages.map((stg) => (
-            <div key={stg.step} className="space-y-4 pt-4 border-t border-[#DADFD5]">
-              <span className="font-mono text-xs text-[#6B746C] block">
-                {stg.step}
-              </span>
-              <h3 className="font-serif text-[22px] sm:text-[26px] font-normal text-[#183A2D] leading-snug min-h-[56px]">
-                {isBn ? stg.titleBn : stg.titleEn}
-              </h3>
-              <p className="font-sans text-xs sm:text-[13px] text-[#6B746C] leading-relaxed">
-                {isBn ? stg.descBn : stg.descEn}
-              </p>
+        {/* Right Columns: Steps Grid */}
+        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {activeSteps.map((step, idx) => (
+            <div key={idx} className="space-y-3 group">
+              <div className="aspect-[4/3] overflow-hidden bg-stone-100">
+                <img
+                  src={optimizeImageUrl(step.image, 600)}
+                  alt={step.titleEn}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/hero_plants.png";
+                  }}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <h4 className="font-display font-light text-lg text-[#3d2e17]">
+                  {step.titleEn || step.titleBn}
+                </h4>
+                <p className="font-sans text-xs text-[#54595f] font-light leading-relaxed">
+                  {step.descBn || step.descEn}
+                </p>
+              </div>
             </div>
           ))}
         </div>
+
       </div>
+      </div>
+
     </section>
   );
 }
