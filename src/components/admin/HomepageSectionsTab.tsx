@@ -1041,15 +1041,36 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
                     <CloudinaryUploader
                       value={stepImage}
                       onUpload={(url) => setStepImage(url)}
-                      label="📁 ক্লাউডিনারি থেকে ছবি আপলোড"
+                      label="📁 ডিভাইস বা ক্লাউডিনারি থেকে ছবি আপলোড"
                     />
                     <input
                       type="text"
-                      placeholder="অথবা সরাসরি URL: https://... বা /hero_plants.png"
+                      placeholder="অথবা সরাসরি URL: https://... বা /step_sample.jpg"
                       value={stepImage}
                       onChange={(e) => setStepImage(e.target.value)}
                       className="w-full bg-white border border-stone-200 rounded-xl px-3.5 py-2 text-xs text-stone-900 focus:outline-none focus:border-emerald-600 min-h-[40px]"
                     />
+                    <div className="flex items-center gap-2 flex-wrap pt-1">
+                      <span className="text-[11px] text-stone-500 font-medium">প্রিসেট ছবি:</span>
+                      {[
+                        { label: "🌱 বোটানিক্যাল ১", url: "/hero_plants.png" },
+                        { label: "🌿 বোটানিক্যাল ২", url: "/featured_plant.png" },
+                        { label: "📸 কাস্টম ছবি", url: "/step_sample.jpg" },
+                      ].map((preset) => (
+                        <button
+                          key={preset.url}
+                          type="button"
+                          onClick={() => setStepImage(preset.url)}
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                            stepImage === preset.url
+                              ? "bg-emerald-600 text-white border-emerald-600 font-semibold"
+                              : "bg-white text-stone-600 border-stone-200 hover:border-emerald-500"
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
