@@ -266,7 +266,20 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
     setIsStepModalOpen(true);
   };
 
-  const handleSaveStepModal = (e: React.FormEvent) => {
+    const persistConfig = async (newConfig: HomepageConfig) => {
+    try {
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "homepage_sections", value: newConfig }),
+      });
+      window.dispatchEvent(new CustomEvent("homepage-config-updated", { detail: newConfig }));
+    } catch (err) {
+      console.error("Auto-save failed:", err);
+    }
+  };
+
+  const handleSaveStepModal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stepTitleEn.trim() && !stepTitleBn.trim()) {
       toast.warning("ধাপের অন্তত একটি শিরোনাম প্রদান করুন");
@@ -282,32 +295,31 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
       image: stepImage.trim() || "/hero_plants.png",
     };
 
-    if (editingStepIndex === null) {
-      // Add new step
-      setConfig((prev) => ({
-        ...prev,
-        process: {
-          ...prev.process,
-          steps: [...prev.process.steps, newStepItem],
-        },
-      }));
-      toast.success("নতুন ধাপ যুক্ত হয়েছে! সেভ করতে ভুলবেন না।", { title: "ধাপ যোগ হয়েছে" });
-    } else {
-      // Update existing step
-      setConfig((prev) => ({
-        ...prev,
-        process: {
-          ...prev.process,
-          steps: prev.process.steps.map((s, i) => (i === editingStepIndex ? newStepItem : s)),
-        },
-      }));
-      toast.success("ধাপের তথ্য আপডেট হয়েছে! সেভ করতে ভুলবেন না।", { title: "ধাপ হালনাগাদ" });
-    }
+    const newSteps =
+      editingStepIndex === null
+        ? [...config.process.steps, newStepItem]
+        : config.process.steps.map((s, i) => (i === editingStepIndex ? newStepItem : s));
 
+    const updatedConfig: HomepageConfig = {
+      ...config,
+      process: {
+        ...config.process,
+        steps: newSteps,
+      },
+    };
+
+    setConfig(updatedConfig);
     setIsStepModalOpen(false);
+
+    if (editingStepIndex === null) {
+      toast.success("নতুন ধাপ যুক্ত হয়েছে এবং স্বয়ংক্রিয়ভাবে সেভ হয়েছে! ✨", { title: "ধাপ যোগ হয়েছে" });
+    } else {
+      toast.success("ধাপের তথ্য আপডেট হয়েছে এবং স্বয়ংক্রিয়ভাবে সেভ হয়েছে! 🌿", { title: "ধাপ হালনাগাদ" });
+    }
+    await persistConfig(updatedConfig);
   };
 
-  const handleMoveStep = (index: number, direction: "up" | "down") => {
+  const handleMoveStep = async (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= config.process.steps.length) return;
 
@@ -316,28 +328,36 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
     newSteps[index] = newSteps[targetIndex];
     newSteps[targetIndex] = temp;
 
-    setConfig((prev) => ({
-      ...prev,
+    const updatedConfig: HomepageConfig = {
+      ...config,
       process: {
-        ...prev.process,
+        ...config.process,
         steps: newSteps,
       },
-    }));
-    toast.success("ধাপের ক্রম পরিবর্তন করা হয়েছে ↕️");
+    };
+
+    setConfig(updatedConfig);
+    toast.success("ধাপের ক্রম পরিবর্তন ও সেভ করা হয়েছে ↕️");
+    await persistConfig(updatedConfig);
   };
 
-  const handleDeleteStepConfirm = () => {
+  const handleDeleteStepConfirm = async () => {
     if (deleteStepIndex === null) return;
     const deletedStep = config.process.steps[deleteStepIndex];
-    setConfig((prev) => ({
-      ...prev,
+    const newSteps = config.process.steps.filter((_, i) => i !== deleteStepIndex);
+
+    const updatedConfig: HomepageConfig = {
+      ...config,
       process: {
-        ...prev.process,
-        steps: prev.process.steps.filter((_, i) => i !== deleteStepIndex),
+        ...config.process,
+        steps: newSteps,
       },
-    }));
-    toast.info(`"${deletedStep?.titleEn || deletedStep?.titleBn || 'ধাপ'}" মুছে ফেলা হয়েছে।`, { title: "মুছে ফেলা হয়েছে" });
+    };
+
+    setConfig(updatedConfig);
     setDeleteStepIndex(null);
+    toast.info(`"${deletedStep?.titleEn || deletedStep?.titleBn || 'ধাপ'}" মুছে ফেলা হয়েছে এবং সেভ হয়েছে।`, { title: "মুছে ফেলা হয়েছে" });
+    await persistConfig(updatedConfig);
   };
 
   if (loading) {

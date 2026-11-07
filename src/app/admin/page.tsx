@@ -330,17 +330,16 @@ export default function AdminPage() {
 
   const handleDeleteService = async (id?: string) => {
     if (!id) return;
-    if (!confirm("Delete this service?")) return;
     try {
       const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
       if (res.ok) {
         await fetchData();
       } else {
-        const err = await res.json();
-        alert("Failed to delete service: " + (err.error || "Server error"));
+        const err = await res.json().catch(() => ({}));
+        console.error("Failed to delete service:", err.error || "Server error");
       }
     } catch (err: any) {
-      alert("Network error deleting service: " + err.message);
+      console.error("Network error deleting service:", err.message);
     }
   };
 

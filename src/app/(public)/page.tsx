@@ -50,7 +50,10 @@ export default function Home() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch("/api/settings?key=homepage_sections");
+        const res = await fetch(`/api/settings?key=homepage_sections&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { Pragma: "no-cache", "Cache-Control": "no-cache" },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data?.value) {

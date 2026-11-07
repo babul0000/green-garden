@@ -881,12 +881,27 @@ export default function ServicesTab({
         <ConfirmModal
           isOpen={true}
           onClose={() => setDeleteTarget(null)}
-          onConfirm={() => {
+          onConfirm={async () => {
             const targetId = deleteTarget.id || (deleteTarget as any)._id;
             const name = deleteTarget.label || deleteTarget.title || "সেবা";
-            handleDeleteService(targetId);
-            toast.info(`"${name}" সেবাটি মুছে ফেলা হয়েছে।`, { title: "মুছে ফেলা হয়েছে" });
-            setDeleteTarget(null);
+            try {
+              const res = await fetch(`/api/services/${targetId}`, { method: "DELETE" });
+              if (res.ok) {
+                toast.info(`"${name}" সেবাটি মুছে ফেলা হয়েছে।`, { title: "মুছে ফেলা হয়েছে" });
+                handleDeleteService(targetId);
+                setTimeout(() => {
+                  if (typeof window !== "undefined") {
+                    window.location.reload();
+                  }
+                }, 400);
+              } else {
+                toast.error("মুছতে সমস্যা হয়েছে।", { title: "ব্যর্থ হয়েছে" });
+              }
+            } catch (err: any) {
+              toast.error(err.message || "নেটওয়ার্ক সমস্যা", { title: "ব্যর্থ হয়েছে" });
+            } finally {
+              setDeleteTarget(null);
+            }
           }}
           title="সেবা মুছে ফেলার নিশ্চিতকরণ"
           description={`আপনি কি নিশ্চিত যে "${deleteTarget.label || deleteTarget.title}" সেবাটি মুছে ফেলতে চান? এটি মুছে ফেললে ওয়েবসাইট থেকে সেবাটি প্রদর্শিত হবে না।`}

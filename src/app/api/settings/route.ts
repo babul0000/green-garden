@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 0;
 
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -127,7 +127,7 @@ export async function GET(req: Request) {
     const key = searchParams.get("key");
 
     const isStaff = req.headers.get("cookie")?.includes("auth-token");
-    const headers = isStaff ? NO_CACHE_HEADERS : PUBLIC_CACHE_HEADERS;
+    const headers = (isStaff || key === "homepage_sections" || key === "site_config") ? NO_CACHE_HEADERS : PUBLIC_CACHE_HEADERS;
 
     if (key) {
       // Return a single setting key
