@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ShmaService {
@@ -20,7 +20,7 @@ const services: ShmaService[] = [
     icon: "🏛️",
     titleBn: "ল্যান্ডস্কেপ স্থাপত্য ও নকশা",
     titleEn: "Landscape Architecture",
-    descBn: "ভবনের মূল স্থাপত্যের সাথে বায়োফিলিক উপাদান, মাটির আর্দ্রতা এবং জীবন্ত উদ্ভিদের সমন্বয়ে সমন্বিত মাস্টার লেআউট প্রণয়ন।",
+    descBn: "ভবনের মূল স্থাপত্যের সাথে বায়োফিলিক উপাদান, মাটির আর্দ্রতা এবং জীবন্ত উদ্ভিদের সমন্বয়ে সমন্বিত মাস্টার লেআউট প্রণয়ন।",
     descEn: "Comprehensive spatial design integrating built architecture with biophilic elements, soil hydrology, and living plant canopies.",
     scopeBn: ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "স্ট্রাকচারাল লোড ও ড্রেনেজ সমন্বয়", "১০০% ওয়াটারপ্রুফ মেমব্রেন আর্কিটেকচার", "টার্ন-কি সাইট বাস্তবায়ন"],
     scopeEn: ["Concept & 3D Visualization", "Structural Load & Drainage", "100% Waterproofing Architecture", "Turn-key Site Implementation"],
@@ -28,11 +28,11 @@ const services: ShmaService[] = [
   {
     id: "02",
     icon: "🗺️",
-    titleBn: "মাস্টারপ্ল্যানিং ও বৃহৎ সবুজায়ন",
+    titleBn: "মাস্টারপ্ল্যানিং ও বৃহৎ সবুজায়ন",
     titleEn: "Master Planning & Eco Parks",
-    descBn: "রিসোর্ট, আবাসিক কমিউনিটি, বিশ্ববিদ্যালয় ক্যাম্পাস ও ইকো-পার্কের জন্য পরিবেশবান্ধব বৃহৎ মাস্টারপ্ল্যান প্রণয়ন।",
+    descBn: "রিসোর্ট, আবাসিক কমিউনিটি, বিশ্ববিদ্যালয় ক্যাম্পাস ও ইকো-পার্কের জন্য পরিবেশবান্ধব বৃহৎ মাস্টারপ্ল্যান প্রণয়ন।",
     descEn: "Macro-scale zoning and environmental landscape masterplans for resorts, residential communities, campuses, and industrial eco-parks.",
-    scopeBn: ["সাইট জরিপ ও টপোগ্রাফি", "প্রাকৃতিক ড্রেনেজ নেটওয়ার্ক", "হাঁটার ট্রেইল ও সাইকেল লেন", "স্থানীয় প্রতিবেশ সংরক্ষণ"],
+    scopeBn: ["সাইট জরিপ ও টপোগ্রাফি", "প্রাকৃতিক ড্রেনেজ নেটওয়ার্ক", "হাঁটার ট্রেইল ও সাইকেল লেন", "স্থানীয় প্রতিবেশ সংরক্ষণ"],
     scopeEn: ["Site Analysis & Topography", "Hydrological Drainage Network", "Pedestrian Trails & Green Corridors", "Ecological Preservation"],
   },
   {
@@ -40,9 +40,9 @@ const services: ShmaService[] = [
     icon: "🏙️",
     titleBn: "আরবান ভিশন ও ক্লাইমেট স্ট্র্যাটেজি",
     titleEn: "Urban Biophilia & Microclimate",
-    descBn: "নগরীর অতিরিক্ত তাপমাত্রা হ্রাস, বৃষ্টির পানি নিষ্কাশন এবং ছাদ বাগানের মাধ্যমে সবুজ বলয় সৃষ্টি।",
+    descBn: "নগরীর অতিরিক্ত তাপমাত্রা হ্রাস, বৃষ্টির পানি নিষ্কাশন এবং ছাদ বাগানের মাধ্যমে সবুজ বলয় সৃষ্টি।",
     descEn: "Strategic urban green infrastructure frameworks addressing urban heat mitigation, stormwater management, and rooftop biophilia.",
-    scopeBn: ["নগর তাপমাত্রা হ্রাস ও শেডিং", "বৃষ্টির পানি সঞ্চয় ও পুনব্যবহার", "ছায়ানিবিড় পথচারী করিডোর", "কমিউনিটি পকেট পার্ক ডিজাইন"],
+    scopeBn: ["নগর তাপমাত্রা হ্রাস ও শেডিং", "বৃষ্টির পানি সঞ্চয় ও পুনব্যবহার", "ছায়ানিবিড় পথচারী করিডোর", "কমিউনিটি পকেট পার্ক ডিজাইন"],
     scopeEn: ["Urban Heat Mitigation", "Rainwater Harvesting & Reuse", "Shaded Pedestrian Corridors", "Public Pocket Park Design"],
   },
   {
@@ -50,9 +50,9 @@ const services: ShmaService[] = [
     icon: "🩺",
     titleBn: "বাস্তুতন্ত্র ও বৃক্ষ চিকিৎসা ক্লিনিক",
     titleEn: "Ecology & Tree Doctor Care",
-    descBn: "দেশীয় আবহাওয়ার উপযোগী দীর্ঘজীবী উদ্ভিদ নির্বাচন, বায়ু বিশুদ্ধকারী প্রজাতি এবং সার্টিফাইড বৃক্ষ চিকিৎসা সেবা।",
+    descBn: "দেশীয় আবহাওয়ার উপযোগী দীর্ঘজীবী উদ্ভিদ নির্বাচন, বায়ু বিশুদ্ধকারী প্রজাতি এবং সার্টিফাইড বৃক্ষ চিকিৎসা সেবা।",
     descEn: "Scientific curation of endemic Bangladeshi and tropical flora, air-purifying vertical species, soil conditioning, and tree doctor care.",
-    scopeBn: ["দেশীয় দীর্ঘজীবী প্রজাতি নির্বাচন", "বৃক্ষ সার্জারি ও রোগ নিরাময় ক্লিনিক", "উন্নত জৈব পুষ্টি ও মাটির মিশ্রণ", "পরাগায়ন সহায়ক বাগান"],
+    scopeBn: ["দেশীয় দীর্ঘজীবী প্রজাতি নির্বাচন", "বৃক্ষ সার্জারি ও রোগ নিরাময় ক্লিনিক", "উন্নত জৈব পুষ্টি ও মাটির মিশ্রণ", "পরাগায়ন সহায়ক বাগান"],
     scopeEn: ["Endemic Hardy Species Selection", "Tree Surgery & Clinic Care", "Substrate Media Engineering", "Pollinator Sanctuaries"],
   },
   {
@@ -60,7 +60,7 @@ const services: ShmaService[] = [
     icon: "⛲",
     titleBn: "জলপ্রপাত ফোয়ারা ও নান্দনিক পারগোলা",
     titleEn: "Water Features & Pergolas",
-    descBn: "শান্ত পানির ফোয়ারা, মার্বেল জলপ্রপাত, নান্দনিক কাঠের পারগোলা ও অ্যাম্বিয়েন্ট লাইটিং সহযোগে সামাজিক মিলনমেলা সৃষ্টি।",
+    descBn: "শান্ত পানির ফোয়ারা, মার্বেল জলপ্রপাত, নান্দনিক কাঠের পারগোলা ও অ্যাম্বিয়েন্ট লাইটিং সহযোগে সামাজিক মিলনমেলা সৃষ্টি।",
     descEn: "Designing tactile gathering spaces with reflective water plazas, cascading streams, custom pergolas, and evening ambient illumination.",
     scopeBn: ["আধুনিক হাইড্রলিক ফোয়ারা", "নান্দনিক কাঠের ও স্টিল পারগোলা", "লো-ভোল্টেজ অ্যাম্বিয়েন্ট লাইটিং", "আউটডোর সানকেন লাউঞ্জ"],
     scopeEn: ["Hydraulic Water Fountains", "Timber & Steel Pergolas", "Low-Voltage Mood Lighting", "Sunken Social Lounges"],
@@ -68,66 +68,22 @@ const services: ShmaService[] = [
   {
     id: "06",
     icon: "💧",
-    titleBn: "স্মার্ট স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি",
+    titleBn: "স্মার্ট স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি",
     titleEn: "Smart Irrigation & Automation",
-    descBn: "ওয়াইফাই ও টাইমার নিয়ন্ত্রিত ড্রিপ ইরিগেশন, রেইন সেন্সর ও স্বয়ংক্রিয় ফার্টিগেশন প্রযুক্তি যা ৭০% পানি সাশ্রয় করে।",
+    descBn: "ওয়াইফাই ও টাইমার নিয়ন্ত্রিত ড্রিপ ইরিগেশন, রেইন সেন্সর ও স্বয়ংক্রিয় ফার্টিগেশন প্রযুক্তি যা ৭০% পানি সাশ্রয় করে।",
     descEn: "WiFi-controlled automated micro-drip networks, moisture sensors, and root-zone fertigation systems saving 70% water.",
-    scopeBn: ["ডিজিটাল স্মার্ট কন্ট্রোলার", "প্রেশার ড্রিপার নেটওয়ার্ক", "সুষম তরল সার প্রয়োগ ব্যবস্থা", "মোবাইল রিমোট মনিটরিং"],
+    scopeBn: ["ডিজিটাল স্মার্ট কন্ট্রোলার", "প্রেশার ড্রিপার নেটওয়ার্ক", "সুষম তরল সার প্রয়োগ ব্যবস্থা", "মোবাইল রিমোট মনিটরিং"],
     scopeEn: ["Digital Smart Controllers", "Pressure Compensating Drippers", "Root-zone Fertigation System", "Mobile App Remote Monitoring"],
   },
 ];
 
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
-  const [serviceList, setServiceList] = useState<ShmaService[]>(services);
   const [flippedId, setFlippedId] = useState<string | null>(null);
 
   const toggleFlip = (id: string) => {
     setFlippedId((prev) => (prev === id ? null : id));
   };
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')}` : '';
-        const primaryUrl = "/api/services";
-        const fallbackUrl = apiBase ? `${apiBase}/services` : null;
-
-        let res = await fetch(primaryUrl).catch(() => null);
-        if ((!res || !res.ok) && fallbackUrl) {
-          res = await fetch(fallbackUrl).catch(() => null);
-        }
-
-        if (res && res.ok) {
-          const data = await res.json();
-          const items = Array.isArray(data) ? data : data?.services || [];
-          if (items.length > 0) {
-            const mapped: ShmaService[] = items.slice(0, 6).map((s: any, idx: number) => {
-              const fallback = services[idx % services.length];
-              return {
-                id: String(idx + 1).padStart(2, "0"),
-                icon: s.icon || fallback?.icon || "🌱",
-                titleBn: s.titleBn || s.bengaliTitle || fallback?.titleBn || s.label || s.title || "",
-                titleEn: s.titleEn || s.label || s.title || fallback?.titleEn || "",
-                descBn: s.descBn || fallback?.descBn || s.desc || s.description || "",
-                descEn: s.descEn || s.desc || s.description || fallback?.descEn || "",
-                scopeBn: s.scopeBn || fallback?.scopeBn || ["কনসেপ্ট ও থ্রিডি ভিজ্যুয়ালাইজেশন", "ড্রেনেজ সমন্বয়", "টার্ন-কি সাইট বাস্তবায়ন"],
-                scopeEn: s.scopeEn || s.features || fallback?.scopeEn || ["Concept & 3D Visualization", "Drainage Architecture", "Turn-key Implementation"],
-              };
-            });
-            setServiceList(mapped);
-          }
-        }
-      } catch (e) {
-        // Keeps default services on network failure
-      }
-    };
-    fetchServices();
-  }, []);
-
-  if (serviceList.length === 0) {
-    return null;
-  }
 
   const gridColsClass =
     columns === 1
@@ -157,9 +113,9 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
       </div>
 
-      {/* Dynamic Flip-Box Grid */}
+      {/* Flip-Box Grid */}
       <div className={`grid ${gridColsClass} gap-6 sm:gap-8`}>
-        {serviceList.map((item) => {
+        {services.map((item) => {
           const isFlipped = flippedId === item.id;
 
           return (
@@ -175,7 +131,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                 }`}
               >
                 
-                {/* FRONT FACE: Clean Beige Rectangular Box with Service Icon */}
+                {/* FRONT FACE */}
                 <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-[#dedad2] p-8 flex flex-col justify-between rounded-2xl shadow-sm border border-[#3d2e17]/5">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-xs text-[#75787b] font-light">
@@ -192,7 +148,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
 
                   <div className="my-auto text-center space-y-2">
                     <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                      {item.titleEn || item.titleBn}
+                      {language === "bn" ? item.titleBn : item.titleEn}
                     </h3>
                     <span className="text-[11px] font-mono text-[#75787b] md:hidden block mt-1">
                       {t("ট্যাপ করে বিবরণ দেখুন ➔", "Tap to view details ➔")}
@@ -206,7 +162,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                   </div>
                 </div>
 
-                {/* BACK FACE: Dark Brown Architectural Brief */}
+                {/* BACK FACE */}
                 <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#3d2e17] text-white p-7 sm:p-8 flex flex-col justify-between rounded-2xl shadow-xl">
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -228,10 +184,10 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                       </button>
                     </div>
                     <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
-                      {item.titleEn || item.titleBn}
+                      {language === "bn" ? item.titleBn : item.titleEn}
                     </h4>
                     <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
-                      {item.descBn || item.descEn}
+                      {language === "bn" ? item.descBn : item.descEn}
                     </p>
                   </div>
 

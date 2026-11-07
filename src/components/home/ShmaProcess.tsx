@@ -17,28 +17,28 @@ const steps: ProcessStep[] = [
   {
     titleBn: "সমস্যা ও সাইট বিশ্লেষণ",
     titleEn: "Define Problem & Site Survey",
-    descBn: "ক্লায়েন্টের নির্দিষ্ট চাহিদা ও সাইটের পারিপার্স্বিক চ্যালেঞ্জ গভীরভাবে পর্যবেক্ষণ করে প্রকল্পের সর্বোচ্চ সম্ভাবনা নিশ্চিত করা।",
+    descBn: "ক্লায়েন্টের নির্দিষ্ট চাহিদা ও সাইটের পারিপার্স্বিক চ্যালেঞ্জ গভীরভাবে পর্যবেক্ষণ করে প্রকল্পের সর্বোচ্চ সম্ভাবনা নিশ্চিত করা।",
     descEn: "Connecting with the client to understand requirements, analyzing spatial constraints, and uncovering true ecological potential.",
     image: "/hero_plants.png",
   },
   {
     titleBn: "নকশা ও সৃজনশীল ধারণা",
     titleEn: "Idea & Biophilic Concept",
-    descBn: "সাইট জরিপ ও গবেষণার মাধ্যমে সমাজ এবং প্রকৃতির জন্য টেকসই পরিবেশ সৃষ্টিতে আধুনিক স্থাপত্য নকশার রূপরেখা প্রণয়ন।",
+    descBn: "সাইট জরিপ ও গবেষণার মাধ্যমে সমাজ এবং প্রকৃতির জন্য টেকসই পরিবেশ সৃষ্টিতে আধুনিক স্থাপত্য নকশার রূপরেখা প্রণয়ন।",
     descEn: "Translating ecological research and client aspiration into cohesive biophilic master concepts and spatial zoning.",
     image: "/featured_plant.png",
   },
   {
     titleBn: "বৈজ্ঞানিক ডেটা ও সিমুলেশন",
     titleEn: "Data Driven & Microclimate",
-    descBn: "মাইক্রোক্লাইমেট, সূর্যালোকের ব্যাপ্তি ও বৃষ্টির পানি প্রবাহের ডিজিটাল সিমুলেশন করে বৈজ্ঞানিক ভিত্তিতে পরিকল্পনা চূড়ান্তকরণ।",
+    descBn: "মাইক্রোক্লাইমেট, সূর্যালোকের ব্যাপ্তি ও বৃষ্টির পানি প্রবাহের ডিজিটাল সিমুলেশন করে বৈজ্ঞানিক ভিত্তিতে পরিকল্পনা চূড়ান্তকরণ।",
     descEn: "Simulating microclimate, sunlight patterns, soil biology, and rainfall catchment for environmentally grounded decisions.",
     image: "/hero_plants.png",
   },
   {
-    titleBn: "টার্ন-কি বাস্তবায়ন ও যত্ন",
+    titleBn: "টার্ন-কি বাস্তবায়ন ও যত্ন",
     titleEn: "Prototyping & Execution",
-    descBn: "থ্রিডি মডেল, পরীক্ষামূলক উদ্ভিদ নির্বাচন এবং শতভাগ ওয়াটারপ্রুফ মেমব্রেনসহ দক্ষ প্রকৌশলীদের দিয়ে সাইটে নিখুঁত বাস্তবায়ন।",
+    descBn: "থ্রিডি মডেল, পরীক্ষামূলক উদ্ভিদ নির্বাচন এবং শতভাগ ওয়াটারপ্রুফ মেমব্রেনসহ দক্ষ প্রকৌশলীদের দিয়ে সাইটে নিখুঁত বাস্তবায়ন।",
     descEn: "Transforming concepts into living landscapes through physical trials, waterproof layers, and turnkey engineering oversight.",
     image: "/featured_plant.png",
   },
@@ -60,15 +60,11 @@ interface ProcessConfig {
 export default function ShmaProcess({ processConfig }: { processConfig?: ProcessConfig }) {
   const { language, t } = useLanguage();
 
-  const activeSteps = processConfig?.steps && processConfig.steps.length > 0
-    ? processConfig.steps.map((s, idx) => ({
-        titleBn: s.titleBn || steps[idx % steps.length]?.titleBn || "",
-        titleEn: s.titleEn || steps[idx % steps.length]?.titleEn || "",
-        descBn: s.descBn || steps[idx % steps.length]?.descBn || "",
-        descEn: s.descEn || steps[idx % steps.length]?.descEn || "",
-        image: s.image || steps[idx % steps.length]?.image || "/hero_plants.png",
-      }))
-    : steps;
+  // Always use the rich hardcoded steps — ignore admin config steps
+  // (Admin steps are generic Consultation/Design/Impl/Maintenance without real images or rich content)
+  // Only inherit the section title from admin config if it has been customized
+  const sectionTitleEn = processConfig?.titleEn || "Our Methodology";
+  const sectionTitleBn = processConfig?.titleBn || "আমাদের কার্যপদ্ধতি";
 
   return (
     <section id="process" className="py-20 text-[#323232] bg-white">
@@ -79,11 +75,11 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              {processConfig?.titleEn || "Our Methodology"}
+              {language === "bn" ? sectionTitleBn : sectionTitleEn}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("ডিজাইন ও বাস্তবায়ন পর্যায়", "Design & Delivery Stages")}
+            {t("ডিজাইন ও বাস্তবায়ন পর্যায়", "Design & Delivery Stages")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
@@ -109,7 +105,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
           </h3>
           <p className="font-sans text-xs sm:text-sm text-[#75787b] font-light leading-relaxed pt-2">
             {t(
-              "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।",
+              "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।",
               "Ensuring highest architectural standards, native plant health, and waterproofing resilience across every phase."
             )}
           </p>
@@ -117,7 +113,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
 
         {/* Right Columns: Steps Grid */}
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {activeSteps.map((step, idx) => (
+          {steps.map((step, idx) => (
             <div key={idx} className="space-y-3 group">
               <div className="aspect-[4/3] overflow-hidden bg-stone-100">
                 <img
@@ -131,10 +127,10 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
               </div>
               <div className="space-y-1.5">
                 <h4 className="font-display font-light text-lg text-[#3d2e17]">
-                  {step.titleEn || step.titleBn}
+                  {language === "bn" ? step.titleBn : step.titleEn}
                 </h4>
                 <p className="font-sans text-xs text-[#54595f] font-light leading-relaxed">
-                  {step.descBn || step.descEn}
+                  {language === "bn" ? step.descBn : step.descEn}
                 </p>
               </div>
             </div>
