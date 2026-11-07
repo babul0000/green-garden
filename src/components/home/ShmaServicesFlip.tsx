@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ShmaService {
   id: string;
+  slug: string;
   icon?: string;
   titleBn: string;
   titleEn: string;
@@ -18,6 +20,7 @@ interface ShmaService {
 const DEFAULT_SERVICES: ShmaService[] = [
   {
     id: "01",
+    slug: "landscape-design",
     icon: "🏛️",
     titleBn: "ল্যান্ডস্কেপ স্থাপত্য ও নকশা",
     titleEn: "Landscape Architecture",
@@ -28,6 +31,7 @@ const DEFAULT_SERVICES: ShmaService[] = [
   },
   {
     id: "02",
+    slug: "fountain",
     icon: "🗺️",
     titleBn: "মাস্টারপ্ল্যানিং ও বৃহৎ সবুজায়ন",
     titleEn: "Master Planning & Eco Parks",
@@ -38,6 +42,7 @@ const DEFAULT_SERVICES: ShmaService[] = [
   },
   {
     id: "03",
+    slug: "regular-garden-maintenance",
     icon: "🏙️",
     titleBn: "আরবান ভিশন ও ক্লাইমেট স্ট্র্যাটেজি",
     titleEn: "Urban Biophilia & Microclimate",
@@ -48,6 +53,7 @@ const DEFAULT_SERVICES: ShmaService[] = [
   },
   {
     id: "04",
+    slug: "smart-irrigation",
     icon: "🩺",
     titleBn: "বাস্তুতন্ত্র ও বৃক্ষ চিকিৎসা ক্লিনিক",
     titleEn: "Ecology & Tree Doctor Care",
@@ -58,6 +64,7 @@ const DEFAULT_SERVICES: ShmaService[] = [
   },
   {
     id: "05",
+    slug: "tree-doctor-service",
     icon: "⛲",
     titleBn: "জলপ্রপাত ফোয়ারা ও নান্দনিক পারগোলা",
     titleEn: "Water Features & Pergolas",
@@ -68,6 +75,7 @@ const DEFAULT_SERVICES: ShmaService[] = [
   },
   {
     id: "06",
+    slug: "rooftop-gardening",
     icon: "💧",
     titleBn: "স্মার্ট স্বয়ংক্রিয় ড্রিপ সেচ প্রযুক্তি",
     titleEn: "Smart Irrigation & Automation",
@@ -119,8 +127,11 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                 ? s.scopeBn
                 : scopeEnList;
 
+              const slug = s.slug || s.id || fallback.slug || String(idx + 1);
+
               return {
                 id: String(idx + 1).padStart(2, "0"),
+                slug,
                 icon: s.icon || fallback.icon || "🌱",
                 titleBn,
                 titleEn,
@@ -176,6 +187,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
           const displayTitle = language === "bn" ? (item.titleBn || item.titleEn) : (item.titleEn || item.titleBn);
           const displayDesc = language === "bn" ? (item.descBn || item.descEn) : (item.descEn || item.descBn);
           const displayScopes = (language === "bn" ? item.scopeBn : item.scopeEn) || [];
+          const detailUrl = `/services/${encodeURIComponent(item.slug || item.id)}`;
 
           return (
             <div
@@ -259,13 +271,14 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                     ))}
                   </div>
 
-                  <div className="pt-2">
-                    <a
-                      href="#newsletter"
-                      className="inline-block text-xs font-mono uppercase tracking-[0.18em] text-[#5a9dff] hover:text-white transition-colors"
+                  {/* Consult Studio -> Links to the exact service detail page */}
+                  <div className="pt-2" onClick={(e) => e.stopPropagation()}>
+                    <Link
+                      href={detailUrl}
+                      className="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-[0.18em] text-[#5a9dff] hover:text-white transition-colors group/btn py-1"
                     >
-                      {t("পরামর্শ নিন →", "Consult Studio →")}
-                    </a>
+                      <span>{t("পরামর্শ ও বুকিং নিন →", "Consult Studio →")}</span>
+                    </Link>
                   </div>
                 </div>
 

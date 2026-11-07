@@ -7,9 +7,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const decodedId = decodeURIComponent(id).trim();
+
     const service = await prisma.service.findFirst({
       where: {
-        OR: [{ id }, { slug: id }],
+        OR: [
+          { id: decodedId },
+          { slug: decodedId },
+          { slug: { equals: decodedId, mode: "insensitive" } },
+          { label: { equals: decodedId, mode: "insensitive" } },
+        ],
       },
     });
 
