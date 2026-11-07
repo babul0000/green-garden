@@ -63,6 +63,7 @@ export async function GET(req: Request) {
     const employees = await prisma.employee.findMany({
       where: isPublic ? { isPublicTeam: true, status: "ACTIVE" } : undefined,
       include: {
+        user: { select: { id: true, email: true, role: true, name: true } },
         attendances: { take: 5, orderBy: { date: "desc" } },
         projectAssignments: { include: { project: { select: { name: true, location: true, status: true } } } },
       },
@@ -71,7 +72,13 @@ export async function GET(req: Request) {
 
     const enriched = employees.map((emp) => {
       const exp = calculateExperience(emp.joiningDate);
-      return { ...emp, calculatedExperience: exp.text, calculatedYears: exp.years, calculatedMonths: exp.months };
+      return {
+        ...emp,
+        role: emp.user?.role || "EMPLOYEE",
+        calculatedExperience: exp.text,
+        calculatedYears: exp.years,
+        calculatedMonths: exp.months,
+      };
     });
 
     return NextResponse.json(enriched, { headers: NO_CACHE });
@@ -115,38 +122,120 @@ export const PUT = withAuthErrorHandling(async (req: Request) => {
   await requireAdmin(req);
 
   const body = await req.json();
-  const { id, name, designation, department, status, salary, skills, personalPhone, personalAddress } = body;
+  const {
+    id,
+    employeeId,
+    name,
+    designation,
+    department,
+    status,
+    salary,
+    skills,
+    personalPhone,
+    personalAddress,
+    photo,
+    joiningDate,
+    responsibility,
+    education,
+    training,
+    internalNotes,
+    isPublicTeam,
+    role,
+  } = body;
   if (!id) return apiError("Employee ID is required", 400);
+
+  let expUpdate = {};
+  if (joiningDate) {
+    const exp = calculateExperience(joiningDate);
+    expUpdate = {
+      joiningDate: new Date(joiningDate),
+      experienceYears: exp.years,
+      experienceMonths: exp.months,
+    };
+  }
 
   const updated = await prisma.employee.update({
     where: { id },
     data: {
+      ...(employeeId ? { employeeId } : {}),
       ...(name ? { name } : {}),
       ...(designation ? { designation } : {}),
       ...(department ? { department } : {}),
       ...(status ? { status } : {}),
-      ...(salary !== undefined ? { salary: parseFloat(String(salary)) } : {}),
+      ...(salary !== undefined ? { salary: parseFloat(String(salary)) || 0 } : {}),
       ...(Array.isArray(skills) ? { skills } : {}),
       ...(personalPhone !== undefined ? { personalPhone } : {}),
       ...(personalAddress !== undefined ? { personalAddress } : {}),
+      ...(photo !== undefined ? { photo } : {}),
+      ...(responsibility !== undefined ? { responsibility } : {}),
+      ...(education !== undefined ? { education } : {}),
+      ...(training !== undefined ? { training } : {}),
+      ...(internalNotes !== undefined ? { internalNotes } : {}),
+      ...(isPublicTeam !== undefined ? { isPublicTeam: Boolean(isPublicTeam) } : {}),
+      ...expUpdate,
+    },
+    include: {
+      user: { select: { id: true, email: true, role: true } },
     },
   });
 
-  return NextResponse.json({ success: true, employee: updated });
+  if (role) {
+    const targetRole = String(role).toUpperCase();
+    if (["ADMIN", "MODERATOR", "EDITOR", "EMPLOYEE", "CLIENT"].includes(targetRole)) {
+      if (updated.userId) {
+        await prisma.user.update({
+          where: { id: updated.userId },
+          data: { role: targetRole as any },
+        });
+      } else if (updated.personalPhone) {
+        const foundUser = await prisma.user.findFirst({
+          where: { phone: updated.personalPhone },
+        });
+        if (foundUser) {
+          await prisma.user.update({
+            where: { id: foundUser.id },
+            data: { role: targetRole as any },
+          });
+          await prisma.employee.update({
+            where: { id },
+            data: { userId: foundUser.id },
+          });
+        }
+      }
+    }
+  }
+
+  const exp = calculateExperience(updated.joiningDate);
+  return NextResponse.json({
+    success: true,
+    employee: {
+      ...updated,
+      role: role || updated.user?.role || "EMPLOYEE",
+      calculatedExperience: exp.text,
+    },
+  });
 });
 
 export const DELETE = withAuthErrorHandling(async (req: Request) => {
   await requireAdmin(req);
 
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
+  let id = searchParams.get("id");
+  if (!id) {
+    try {
+      const body = await req.json();
+      id = body?.id;
+    } catch {}
+  }
   if (!id) return apiError("Employee ID is required", 400);
 
   await prisma.$transaction([
     prisma.attendance.deleteMany({ where: { employeeId: id } }),
     prisma.projectAssignment.deleteMany({ where: { employeeId: id } }),
+    prisma.treeDoctorRequest.updateMany({ where: { assignedDoctorId: id }, data: { assignedDoctorId: null } }),
+    prisma.maintenanceSchedule.updateMany({ where: { assignedStaffId: id }, data: { assignedStaffId: null } }),
     prisma.employee.delete({ where: { id } }),
   ]);
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, message: "কর্মী সফলভাবে মুছে ফেলা হয়েছে।" });
 });

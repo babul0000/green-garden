@@ -12,7 +12,9 @@ export interface Employee {
   personalPhone?: string | null;
   personalAddress?: string | null;
   status: "ACTIVE" | "INACTIVE" | "ON_LEAVE" | string;
+  role?: "ADMIN" | "MODERATOR" | "EDITOR" | "EMPLOYEE" | "CLIENT" | string;
   photo?: string | null;
+  user?: { id: string; email?: string; role?: string; name?: string } | null;
   attendances?: { date: string; status: string; checkIn?: string; checkOut?: string }[];
 }
 
