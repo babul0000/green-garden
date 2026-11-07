@@ -14,7 +14,7 @@ interface ShmaService {
   scopeEn: string[];
 }
 
-// Hardcoded fallback — always shown if DB is empty or has incomplete data
+// Hardcoded fallback — shown while loading or if DB is empty
 const DEFAULT_SERVICES: ShmaService[] = [
   {
     id: "01",
@@ -78,16 +78,6 @@ const DEFAULT_SERVICES: ShmaService[] = [
   },
 ];
 
-/**
- * Checks if a DB service item has proper bilingual content
- * (titleBn AND descBn must both be non-trivial strings)
- */
-function isValidDbService(s: any): boolean {
-  const hasTitleBn = typeof s.titleBn === "string" && s.titleBn.trim().length > 3;
-  const hasDescBn = typeof s.descBn === "string" && s.descBn.trim().length > 10;
-  return hasTitleBn && hasDescBn;
-}
-
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
   const [serviceList, setServiceList] = useState<ShmaService[]>(DEFAULT_SERVICES);
@@ -100,35 +90,54 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("/api/services").catch(() => null);
+        const res = await fetch(`/api/services?_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { Pragma: "no-cache", "Cache-Control": "no-cache" },
+        }).catch(() => null);
+
         if (res && res.ok) {
           const data = await res.json();
           const items: any[] = Array.isArray(data) ? data : data?.services || data?.data || [];
 
-          // Only use DB services if ALL items have proper bilingual content
-          const validItems = items.filter(isValidDbService);
-          if (validItems.length >= 3) {
-            const mapped: ShmaService[] = validItems.slice(0, 6).map((s: any, idx: number) => {
+          if (items.length > 0) {
+            const mapped: ShmaService[] = items.slice(0, 6).map((s: any, idx: number) => {
               const fallback = DEFAULT_SERVICES[idx % DEFAULT_SERVICES.length];
+
+              const titleEn = (s.label || s.title || s.titleEn || fallback.titleEn).trim();
+              const titleBn = (s.titleBn && s.titleBn.trim()) ? s.titleBn.trim() : (titleEn || fallback.titleBn);
+
+              const descEn = (s.desc || s.description || s.descEn || fallback.descEn).trim();
+              const descBn = (s.descBn && s.descBn.trim()) ? s.descBn.trim() : (descEn || fallback.descBn);
+
+              const scopeEnList = Array.isArray(s.scopeEn) && s.scopeEn.length > 0
+                ? s.scopeEn
+                : Array.isArray(s.features) && s.features.length > 0
+                ? s.features
+                : fallback.scopeEn;
+
+              const scopeBnList = Array.isArray(s.scopeBn) && s.scopeBn.length > 0
+                ? s.scopeBn
+                : scopeEnList;
+
               return {
                 id: String(idx + 1).padStart(2, "0"),
                 icon: s.icon || fallback.icon || "🌱",
-                titleBn: s.titleBn || fallback.titleBn,
-                titleEn: s.titleEn || s.label || fallback.titleEn,
-                descBn: s.descBn || fallback.descBn,
-                descEn: s.descEn || s.desc || fallback.descEn,
-                scopeBn: Array.isArray(s.scopeBn) && s.scopeBn.length > 0 ? s.scopeBn : fallback.scopeBn,
-                scopeEn: Array.isArray(s.scopeEn) && s.scopeEn.length > 0 ? s.scopeEn : (Array.isArray(s.features) && s.features.length > 0 ? s.features : fallback.scopeEn),
+                titleBn,
+                titleEn,
+                descBn,
+                descEn,
+                scopeBn: scopeBnList,
+                scopeEn: scopeEnList,
               };
             });
             setServiceList(mapped);
           }
-          // else: DB data is incomplete — keep DEFAULT_SERVICES shown
         }
       } catch {
         // Keep default services on network failure
       }
     };
+
     fetchServices();
   }, []);
 
@@ -164,6 +173,9 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
       <div className={`grid ${gridColsClass} gap-6 sm:gap-8`}>
         {serviceList.map((item) => {
           const isFlipped = flippedId === item.id;
+          const displayTitle = language === "bn" ? (item.titleBn || item.titleEn) : (item.titleEn || item.titleBn);
+          const displayDesc = language === "bn" ? (item.descBn || item.descEn) : (item.descEn || item.descBn);
+          const displayScopes = (language === "bn" ? item.scopeBn : item.scopeEn) || [];
 
           return (
             <div
@@ -195,7 +207,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
 
                   <div className="my-auto text-center space-y-2">
                     <h3 className="font-display font-light text-2xl sm:text-[26px] text-[#3d2e17] leading-snug">
-                      {language === "bn" ? item.titleBn : item.titleEn}
+                      {displayTitle}
                     </h3>
                     <span className="text-[11px] font-mono text-[#75787b] md:hidden block mt-1">
                       {t("ট্যাপ করে বিবরণ দেখুন ➔", "Tap to view details ➔")}
@@ -231,18 +243,18 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
                       </button>
                     </div>
                     <h4 className="font-display font-light text-xl text-[#dedad2] mb-2">
-                      {language === "bn" ? item.titleBn : item.titleEn}
+                      {displayTitle}
                     </h4>
-                    <p className="font-sans text-xs text-white/85 font-light leading-relaxed">
-                      {language === "bn" ? item.descBn : item.descEn}
+                    <p className="font-sans text-xs text-white/85 font-light leading-relaxed line-clamp-4">
+                      {displayDesc}
                     </p>
                   </div>
 
                   <div className="space-y-1.5 pt-3 border-t border-white/10">
-                    {(language === "bn" ? item.scopeBn : item.scopeEn).slice(0, 3).map((s, idx) => (
+                    {displayScopes.slice(0, 3).map((s, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-xs font-sans text-white/80">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#5a9dff]"></span>
-                        <span>{s}</span>
+                        <span className="truncate">{s}</span>
                       </div>
                     ))}
                   </div>

@@ -4,7 +4,7 @@ import { requireModerator, apiError, withAuthErrorHandling } from "@/lib/apiAuth
 import { parsePaginationParams, formatDataResponse } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 120;
+export const revalidate = 0;
 
 const NO_CACHE = {
   "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
@@ -50,7 +50,7 @@ export async function GET(req: Request) {
         select: PUBLIC_SERVICE_SELECT,
       });
       if (!service) return NextResponse.json({ error: "Service not found" }, { status: 404 });
-      return NextResponse.json(service, { headers: PUBLIC_CACHE });
+      return NextResponse.json(service, { headers: NO_CACHE });
     }
 
     const searchFilter = q
@@ -82,7 +82,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(
       formatDataResponse(services, total, { isPaginated, page, limit }),
-      { headers: PUBLIC_CACHE }
+      { headers: NO_CACHE }
     );
   } catch (error: unknown) {
     const isDev = process.env.NODE_ENV === "development";

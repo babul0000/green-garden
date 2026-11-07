@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { IService } from "@/types";
 import CloudinaryUploader from "@/components/shared/CloudinaryUploader";
 import ConfirmModal from "@/components/admin/shared/ConfirmModal";
+import { toast, ToastContainer } from "@/components/shared/Toast";
 
 interface ServicesTabProps {
   services?: IService[];
@@ -174,7 +175,14 @@ export default function ServicesTab({
 
     try {
       await handleCreateOrUpdateService(e, servicePayload);
+      if (editingService) {
+        toast.success("সেবা সফলভাবে আপডেট করা হয়েছে! 🌿", { title: "হালনাগাদ সম্পন্ন" });
+      } else {
+        toast.success("নতুন সেবা সফলভাবে যোগ করা হয়েছে! ✨", { title: "সংরক্ষিত" });
+      }
       handleCloseModal();
+    } catch (err: any) {
+      toast.error(err?.message || "সেবা সংরক্ষণ করতে সমস্যা হয়েছে।", { title: "ব্যর্থ হয়েছে" });
     } finally {
       setIsSaving(false);
     }
@@ -199,12 +207,17 @@ export default function ServicesTab({
           order: idx,
         })),
       };
-      await fetch("/api/services", {
+      const res = await fetch("/api/services", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      window.location.reload();
+      if (res.ok) {
+        toast.success("সেবার নতুন ক্রম সংরক্ষণ করা হয়েছে ↕️", { title: "ক্রম পরিবর্তিত" });
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        toast.error("ক্রম পরিবর্তন করতে সমস্যা হয়েছে।", { title: "এরর" });
+      }
     } catch (err) {
       console.error("Failed to reorder services:", err);
     } finally {
@@ -860,6 +873,9 @@ export default function ServicesTab({
         </div>
       )}
 
+      {/* ── TOASTIFY CONTAINER ── */}
+      <ToastContainer position="top-right" />
+
       {/* ── CONFIRMATION MODAL FOR DELETION ── */}
       {deleteTarget && (
         <ConfirmModal
@@ -867,7 +883,9 @@ export default function ServicesTab({
           onClose={() => setDeleteTarget(null)}
           onConfirm={() => {
             const targetId = deleteTarget.id || (deleteTarget as any)._id;
+            const name = deleteTarget.label || deleteTarget.title || "সেবা";
             handleDeleteService(targetId);
+            toast.info(`"${name}" সেবাটি মুছে ফেলা হয়েছে।`, { title: "মুছে ফেলা হয়েছে" });
             setDeleteTarget(null);
           }}
           title="সেবা মুছে ফেলার নিশ্চিতকরণ"
