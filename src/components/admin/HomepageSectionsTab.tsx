@@ -159,10 +159,24 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
     fetchConfig();
   }, []);
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("gg_auth_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+    return headers;
+  };
+
   const fetchConfig = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/settings?key=homepage_sections&_t=${Date.now()}`, { cache: "no-store" });
+      const res = await fetch(`/api/settings?key=homepage_sections&_t=${Date.now()}`, {
+        cache: "no-store",
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data?.value) {
@@ -172,7 +186,7 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
             process: {
               ...DEFAULT_CONFIG.process,
               ...(data.value.process || {}),
-              steps: data.value.process?.steps?.length > 0 ? data.value.process.steps : DEFAULT_CONFIG.process.steps,
+              steps: Array.isArray(data.value.process?.steps) ? data.value.process.steps : DEFAULT_CONFIG.process.steps,
             },
           }));
         }
@@ -189,14 +203,16 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
     try {
       const res = await fetch("/api/settings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
+        credentials: "include",
         body: JSON.stringify({ key: "homepage_sections", value: config }),
       });
       if (res.ok) {
         toast.success("হোমপেজ ও প্রসেস কনফিগারেশন সফলভাবে সেভ হয়েছে! ✨", { title: "সংরক্ষিত" });
         window.dispatchEvent(new CustomEvent("homepage-config-updated", { detail: config }));
       } else {
-        toast.error("সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।", { title: "ব্যর্থ হয়েছে" });
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || "সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।", { title: "ব্যর্থ হয়েছে" });
       }
     } catch {
       toast.error("নেটওয়ার্ক এরর। ইন্টারনেট সংযোগ চেক করুন।", { title: "নেটওয়ার্ক সমস্যা" });
@@ -266,16 +282,24 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
     setIsStepModalOpen(true);
   };
 
-    const persistConfig = async (newConfig: HomepageConfig) => {
+  const persistConfig = async (newConfig: HomepageConfig) => {
     try {
-      await fetch("/api/settings", {
+      const res = await fetch("/api/settings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
+        credentials: "include",
         body: JSON.stringify({ key: "homepage_sections", value: newConfig }),
       });
-      window.dispatchEvent(new CustomEvent("homepage-config-updated", { detail: newConfig }));
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("Auto-save failed:", err);
+        toast.error(err.error || "সার্ভারে অটো-সেভ ব্যর্থ হয়েছে। দয়া করে উপরে 'পরিবর্তন সেভ করুন' চাপুন।", { title: "সেভ ব্যর্থ" });
+      } else {
+        window.dispatchEvent(new CustomEvent("homepage-config-updated", { detail: newConfig }));
+      }
     } catch (err) {
       console.error("Auto-save failed:", err);
+      toast.error("নেটওয়ার্ক সমস্যা: সার্ভারে পরিবর্তন সংরক্ষিত হয়নি।", { title: "সংযোগ বিচ্ছিন্ন" });
     }
   };
 

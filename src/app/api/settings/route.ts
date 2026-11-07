@@ -126,8 +126,8 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const key = searchParams.get("key");
 
-    const isStaff = req.headers.get("cookie")?.includes("auth-token");
-    const headers = (isStaff || key === "homepage_sections" || key === "site_config") ? NO_CACHE_HEADERS : PUBLIC_CACHE_HEADERS;
+    const isStaff = req.headers.get("cookie")?.includes("auth-token") || req.headers.get("cookie")?.includes("gg_auth_token") || Boolean(req.headers.get("authorization"));
+    const headers = NO_CACHE_HEADERS;
 
     if (key) {
       // Return a single setting key
@@ -193,9 +193,9 @@ export async function POST(req: Request) {
     ]);
 
     if (EDITOR_PERMITTED_KEYS.has(targetKey)) {
-      if (role !== "ADMIN" && role !== "EDITOR") {
+      if (role !== "ADMIN" && role !== "EDITOR" && role !== "MODERATOR") {
         return NextResponse.json(
-          { error: "Access Denied: Only Admin or Editor can edit website studio content" },
+          { error: "Access Denied: Only Admin, Moderator or Editor can edit website studio content" },
           { status: 403 }
         );
       }

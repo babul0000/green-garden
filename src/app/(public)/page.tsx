@@ -26,7 +26,13 @@ interface HomepageConfig {
   process?: {
     titleEn?: string;
     titleBn?: string;
-    steps?: Array<{ iconEn?: string; titleEn?: string; titleBn?: string; descEn?: string; descBn?: string }>;
+    categoryEn?: string;
+    categoryBn?: string;
+    headlineEn?: string;
+    headlineBn?: string;
+    descEn?: string;
+    descBn?: string;
+    steps?: Array<{ iconEn?: string; titleEn?: string; titleBn?: string; descEn?: string; descBn?: string; image?: string }>;
   };
   campaign?: { textEn?: string; textBn?: string };
 }
@@ -58,8 +64,9 @@ export default function Home() {
           const data = await res.json();
           if (data?.value) {
             setConfig((prev) => ({
-              ...DEFAULT_CONFIG,
+              ...prev,
               ...data.value,
+              process: data.value.process || prev.process,
               sections: data.value.sections || prev.sections,
             }));
           }

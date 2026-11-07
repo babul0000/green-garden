@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { optimizeImageUrl } from "@/lib/utils";
 
@@ -67,15 +67,54 @@ export interface ProcessConfig {
 }
 
 export default function ShmaProcess({ processConfig }: { processConfig?: ProcessConfig }) {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
+  const [liveConfig, setLiveConfig] = useState<ProcessConfig | undefined>(processConfig);
+
+  useEffect(() => {
+    if (processConfig) {
+      setLiveConfig(processConfig);
+    }
+  }, [processConfig]);
+
+  useEffect(() => {
+    // 1. Fetch latest live from /api/settings directly
+    const fetchLatest = async () => {
+      try {
+        const res = await fetch(`/api/settings?key=homepage_sections&_t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { Pragma: "no-cache", "Cache-Control": "no-cache" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.value?.process) {
+            setLiveConfig(data.value.process);
+          }
+        }
+      } catch {
+        // Fallback silently
+      }
+    };
+    fetchLatest();
+
+    // 2. Listen to custom event when admin updates in real-time
+    const handleUpdate = (e: any) => {
+      if (e?.detail?.process) {
+        setLiveConfig(e.detail.process);
+      }
+    };
+    window.addEventListener("homepage-config-updated", handleUpdate);
+    return () => window.removeEventListener("homepage-config-updated", handleUpdate);
+  }, []);
+
+  const currentConfig = liveConfig || processConfig;
 
   const activeSteps: ProcessStep[] =
-    processConfig?.steps && processConfig.steps.length > 0
-      ? processConfig.steps.map((s, idx) => ({
-          titleBn: s.titleBn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].titleBn,
-          titleEn: s.titleEn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].titleEn,
-          descBn: s.descBn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].descBn,
-          descEn: s.descEn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].descEn,
+    currentConfig?.steps && currentConfig.steps.length > 0
+      ? currentConfig.steps.map((s, idx) => ({
+          titleBn: s.titleBn || s.titleEn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].titleBn,
+          titleEn: s.titleEn || s.titleBn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].titleEn,
+          descBn: s.descBn || s.descEn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].descBn,
+          descEn: s.descEn || s.descBn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].descEn,
           // Use admin-set image if available, else cycle through defaults
           image: s.image && s.image.trim().length > 3
             ? s.image
@@ -83,17 +122,17 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         }))
       : DEFAULT_STEPS;
 
-  const sectionTitleEn = processConfig?.titleEn || "A Thoughtful Journey";
-  const sectionTitleBn = processConfig?.titleBn || "আমাদের কার্যপদ্ধতি";
+  const sectionTitleEn = currentConfig?.titleEn || "A Thoughtful Journey";
+  const sectionTitleBn = currentConfig?.titleBn || "আমাদের কার্যপদ্ধতি";
 
-  const categoryEn = processConfig?.categoryEn || "DESIGN & DELIVERY STAGES";
-  const categoryBn = processConfig?.categoryBn || "ডিজাইন ও বাস্তবায়ন পর্যায়";
+  const categoryEn = currentConfig?.categoryEn || "DESIGN & DELIVERY STAGES";
+  const categoryBn = currentConfig?.categoryBn || "ডিজাইন ও বাস্তবায়ন পর্যায়";
 
-  const headlineEn = processConfig?.headlineEn || "A Thoughtful Journey to Transformative Solutions";
-  const headlineBn = processConfig?.headlineBn || "টেকসই ও আধুনিক সমাধানের সুপরিকল্পিত যাত্রা";
+  const headlineEn = currentConfig?.headlineEn || "A Thoughtful Journey to Transformative Solutions";
+  const headlineBn = currentConfig?.headlineBn || "টেকসই ও আধুনিক সমাধানের সুপরিকল্পিত যাত্রা";
 
-  const descEn = processConfig?.descEn || "Ensuring highest architectural standards, native plant health, and waterproofing resilience across every phase.";
-  const descBn = processConfig?.descBn || "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।";
+  const descEn = currentConfig?.descEn || "Ensuring highest architectural standards, native plant health, and waterproofing resilience across every phase.";
+  const descBn = currentConfig?.descBn || "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।";
 
   // Grid columns class based on number of steps
   const gridColClass =
