@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface ShmaService {
@@ -14,7 +14,8 @@ interface ShmaService {
   scopeEn: string[];
 }
 
-const services: ShmaService[] = [
+// Hardcoded fallback — always shown if DB is empty or has incomplete data
+const DEFAULT_SERVICES: ShmaService[] = [
   {
     id: "01",
     icon: "🏛️",
@@ -77,13 +78,59 @@ const services: ShmaService[] = [
   },
 ];
 
+/**
+ * Checks if a DB service item has proper bilingual content
+ * (titleBn AND descBn must both be non-trivial strings)
+ */
+function isValidDbService(s: any): boolean {
+  const hasTitleBn = typeof s.titleBn === "string" && s.titleBn.trim().length > 3;
+  const hasDescBn = typeof s.descBn === "string" && s.descBn.trim().length > 10;
+  return hasTitleBn && hasDescBn;
+}
+
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
+  const [serviceList, setServiceList] = useState<ShmaService[]>(DEFAULT_SERVICES);
   const [flippedId, setFlippedId] = useState<string | null>(null);
 
   const toggleFlip = (id: string) => {
     setFlippedId((prev) => (prev === id ? null : id));
   };
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const res = await fetch("/api/services").catch(() => null);
+        if (res && res.ok) {
+          const data = await res.json();
+          const items: any[] = Array.isArray(data) ? data : data?.services || data?.data || [];
+
+          // Only use DB services if ALL items have proper bilingual content
+          const validItems = items.filter(isValidDbService);
+          if (validItems.length >= 3) {
+            const mapped: ShmaService[] = validItems.slice(0, 6).map((s: any, idx: number) => {
+              const fallback = DEFAULT_SERVICES[idx % DEFAULT_SERVICES.length];
+              return {
+                id: String(idx + 1).padStart(2, "0"),
+                icon: s.icon || fallback.icon || "🌱",
+                titleBn: s.titleBn || fallback.titleBn,
+                titleEn: s.titleEn || s.label || fallback.titleEn,
+                descBn: s.descBn || fallback.descBn,
+                descEn: s.descEn || s.desc || fallback.descEn,
+                scopeBn: Array.isArray(s.scopeBn) && s.scopeBn.length > 0 ? s.scopeBn : fallback.scopeBn,
+                scopeEn: Array.isArray(s.scopeEn) && s.scopeEn.length > 0 ? s.scopeEn : (Array.isArray(s.features) && s.features.length > 0 ? s.features : fallback.scopeEn),
+              };
+            });
+            setServiceList(mapped);
+          }
+          // else: DB data is incomplete — keep DEFAULT_SERVICES shown
+        }
+      } catch {
+        // Keep default services on network failure
+      }
+    };
+    fetchServices();
+  }, []);
 
   const gridColsClass =
     columns === 1
@@ -115,7 +162,7 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
 
       {/* Flip-Box Grid */}
       <div className={`grid ${gridColsClass} gap-6 sm:gap-8`}>
-        {services.map((item) => {
+        {serviceList.map((item) => {
           const isFlipped = flippedId === item.id;
 
           return (

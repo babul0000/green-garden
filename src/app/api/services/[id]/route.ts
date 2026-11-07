@@ -39,6 +39,8 @@ export async function PUT(
     if (body.slug !== undefined) updateData.slug = body.slug;
     if (body.category !== undefined) updateData.category = body.category;
     if (body.desc !== undefined) updateData.desc = body.desc;
+    if (body.titleBn !== undefined) updateData.titleBn = body.titleBn;
+    if (body.descBn !== undefined) updateData.descBn = body.descBn;
     if (body.icon !== undefined) updateData.icon = body.icon;
     if (body.banner !== undefined || body.bannerImage !== undefined) {
       updateData.bannerImage = body.bannerImage || body.banner;

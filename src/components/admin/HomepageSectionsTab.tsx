@@ -21,7 +21,7 @@ interface HomepageConfig {
   process: {
     titleEn: string;
     titleBn: string;
-    steps: { iconEn: string; titleEn: string; titleBn: string; descEn: string; descBn: string }[];
+    steps: { iconEn: string; titleEn: string; titleBn: string; descEn: string; descBn: string; image?: string }[];
   };
   campaign: { textEn: string; textBn: string };
   whyUs?: {
@@ -59,10 +59,10 @@ const DEFAULT_CONFIG: HomepageConfig = {
     titleEn: "A Thoughtful Journey to Transformative Solutions",
     titleBn: "রূপান্তরমূলক সমাধানের দিকে একটি সুচিন্তিত যাত্রা",
     steps: [
-      { iconEn: "💬", titleEn: "Consultation", titleBn: "পরামর্শ", descEn: "Free site visit & discussion", descBn: "বিনামূল্যে সাইট ভিজিট ও আলোচনা" },
-      { iconEn: "📐", titleEn: "Design", titleBn: "ডিজাইন", descEn: "Custom 3D concept design", descBn: "কাস্টম ৩ডি কনসেপ্ট ডিজাইন" },
-      { iconEn: "🌿", titleEn: "Implementation", titleBn: "বাস্তবায়ন", descEn: "Expert team execution", descBn: "দক্ষ দলের বাস্তবায়ন" },
-      { iconEn: "🔧", titleEn: "Maintenance", titleBn: "রক্ষণাবেক্ষণ", descEn: "Ongoing care & support", descBn: "নিয়মিত পরিচর্যা ও সহায়তা" },
+      { iconEn: "💬", titleEn: "Define Problem & Site Survey", titleBn: "সমস্যা ও সাইট বিশ্লেষণ", descEn: "Connecting with the client to understand requirements and uncovering true ecological potential.", descBn: "ক্লায়েন্টের নির্দিষ্ট চাহিদা ও সাইটের চ্যালেঞ্জ গভীরভাবে পর্যবেক্ষণ করে প্রকল্পের সর্বোচ্চ সম্ভাবনা নিশ্চিত করা।", image: "/hero_plants.png" },
+      { iconEn: "📐", titleEn: "Idea & Biophilic Concept", titleBn: "নকশা ও সৃজনশীল ধারণা", descEn: "Translating ecological research and client aspiration into cohesive biophilic master concepts.", descBn: "সাইট জরিপ ও গবেষণার মাধ্যমে টেকসই পরিবেশ সৃষ্টিতে আধুনিক স্থাপত্য নকশার রূপরেখা প্রণয়ন।", image: "/featured_plant.png" },
+      { iconEn: "🌿", titleEn: "Data Driven & Microclimate", titleBn: "বৈজ্ঞানিক ডেটা ও সিমুলেশন", descEn: "Simulating microclimate, sunlight patterns, and rainfall catchment for grounded decisions.", descBn: "মাইক্রোক্লাইমেট, সূর্যালোকের ব্যাপ্তি ও বৃষ্টির পানি প্রবাহের ডিজিটাল সিমুলেশন করে পরিকল্পনা চূড়ান্তকরণ।", image: "/hero_plants.png" },
+      { iconEn: "🔧", titleEn: "Prototyping & Execution", titleBn: "টার্ন-কি বাস্তবায়ন ও যত্ন", descEn: "Transforming concepts into living landscapes through waterproof layers and turnkey engineering.", descBn: "থ্রিডি মডেল ও শতভাগ ওয়াটারপ্রুফ মেমব্রেনসহ দক্ষ প্রকৌশলীদের দিয়ে সাইটে নিখুঁত বাস্তবায়ন।", image: "/featured_plant.png" },
     ],
   },
   campaign: {
@@ -403,6 +403,27 @@ export default function HomepageSectionsTab() {
                     onChange={(e) => updateProcessStep(i, "descBn", e.target.value)}
                     className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
                   />
+                </div>
+                {/* Image URL field for each step */}
+                <div className="mt-2">
+                  <label className="text-[11px] font-semibold text-gray-400 block mb-1">🖼️ Step Image URL (Cloudinary বা /public ফাইল, যেমন /hero_plants.png)</label>
+                  <input
+                    type="text"
+                    placeholder="https://... বা /hero_plants.png"
+                    value={(step as any).image || ""}
+                    onChange={(e) => updateProcessStep(i, "image", e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"
+                  />
+                  {(step as any).image && (
+                    <div className="mt-1.5 h-16 w-28 rounded-lg overflow-hidden border border-gray-200">
+                      <img
+                        src={(step as any).image}
+                        alt="preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

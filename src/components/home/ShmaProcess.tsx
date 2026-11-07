@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
-
 import { optimizeImageUrl } from "@/lib/utils";
 
 interface ProcessStep {
@@ -13,7 +12,8 @@ interface ProcessStep {
   image: string;
 }
 
-const steps: ProcessStep[] = [
+// Rich hardcoded defaults — used when admin hasn't saved custom steps
+const DEFAULT_STEPS: ProcessStep[] = [
   {
     titleBn: "সমস্যা ও সাইট বিশ্লেষণ",
     titleEn: "Define Problem & Site Survey",
@@ -44,6 +44,9 @@ const steps: ProcessStep[] = [
   },
 ];
 
+// Cycling images for steps that have no image set by admin
+const STEP_IMAGES = ["/hero_plants.png", "/featured_plant.png", "/hero_plants.png", "/featured_plant.png"];
+
 interface ProcessConfig {
   titleEn?: string;
   titleBn?: string;
@@ -60,9 +63,20 @@ interface ProcessConfig {
 export default function ShmaProcess({ processConfig }: { processConfig?: ProcessConfig }) {
   const { language, t } = useLanguage();
 
-  // Always use the rich hardcoded steps — ignore admin config steps
-  // (Admin steps are generic Consultation/Design/Impl/Maintenance without real images or rich content)
-  // Only inherit the section title from admin config if it has been customized
+  const activeSteps: ProcessStep[] =
+    processConfig?.steps && processConfig.steps.length > 0
+      ? processConfig.steps.map((s, idx) => ({
+          titleBn: s.titleBn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].titleBn,
+          titleEn: s.titleEn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].titleEn,
+          descBn: s.descBn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].descBn,
+          descEn: s.descEn || DEFAULT_STEPS[idx % DEFAULT_STEPS.length].descEn,
+          // Use admin-set image if available, else cycle through defaults
+          image: s.image && s.image.trim().length > 3
+            ? s.image
+            : DEFAULT_STEPS[idx % DEFAULT_STEPS.length].image || STEP_IMAGES[idx % STEP_IMAGES.length],
+        }))
+      : DEFAULT_STEPS;
+
   const sectionTitleEn = processConfig?.titleEn || "Our Methodology";
   const sectionTitleBn = processConfig?.titleBn || "আমাদের কার্যপদ্ধতি";
 
@@ -113,7 +127,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
 
         {/* Right Columns: Steps Grid */}
         <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {steps.map((step, idx) => (
+          {activeSteps.map((step, idx) => (
             <div key={idx} className="space-y-3 group">
               <div className="aspect-[4/3] overflow-hidden bg-stone-100">
                 <img
