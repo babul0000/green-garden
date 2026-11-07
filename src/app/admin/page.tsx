@@ -1000,9 +1000,9 @@ export default function AdminPage() {
             <DigitalServiceCardTab />
           )}
 
-          {/* TAB 20: HOMEPAGE SECTIONS MANAGER (Phase 2) */}
-          {activeTab === "homepage-sections" && (
-            <HomepageSectionsTab />
+          {/* TAB 20: HOMEPAGE SECTIONS & PROCESS MANAGER */}
+          {(activeTab === "homepage-sections" || activeTab === "process") && (
+            <HomepageSectionsTab defaultTab={activeTab === "process" ? "process" : "sections"} />
           )}
 
           {/* TAB 21: CONTENT MANAGER — All Text Dynamic (Phase 2) */}

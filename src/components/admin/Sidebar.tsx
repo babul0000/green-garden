@@ -346,6 +346,17 @@ export default function Sidebar({
             ),
           },
           {
+            id: "process",
+            labelBn: "📐 প্রসেস ও কার্যপদ্ধতি",
+            labelEn: "A Thoughtful Journey (Process)",
+            icon: (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            ),
+          },
+          {
             id: "content-manager",
             labelBn: "কনটেন্ট ম্যানেজার",
             labelEn: "Content Manager (Dynamic)",

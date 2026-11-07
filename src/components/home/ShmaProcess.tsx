@@ -47,9 +47,15 @@ const DEFAULT_STEPS: ProcessStep[] = [
 // Cycling images for steps that have no image set by admin
 const STEP_IMAGES = ["/hero_plants.png", "/featured_plant.png", "/hero_plants.png", "/featured_plant.png"];
 
-interface ProcessConfig {
+export interface ProcessConfig {
   titleEn?: string;
   titleBn?: string;
+  categoryEn?: string;
+  categoryBn?: string;
+  headlineEn?: string;
+  headlineBn?: string;
+  descEn?: string;
+  descBn?: string;
   steps?: Array<{
     iconEn?: string;
     titleEn?: string;
@@ -77,8 +83,27 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
         }))
       : DEFAULT_STEPS;
 
-  const sectionTitleEn = processConfig?.titleEn || "Our Methodology";
+  const sectionTitleEn = processConfig?.titleEn || "A Thoughtful Journey";
   const sectionTitleBn = processConfig?.titleBn || "আমাদের কার্যপদ্ধতি";
+
+  const categoryEn = processConfig?.categoryEn || "DESIGN & DELIVERY STAGES";
+  const categoryBn = processConfig?.categoryBn || "ডিজাইন ও বাস্তবায়ন পর্যায়";
+
+  const headlineEn = processConfig?.headlineEn || "A Thoughtful Journey to Transformative Solutions";
+  const headlineBn = processConfig?.headlineBn || "টেকসই ও আধুনিক সমাধানের সুপরিকল্পিত যাত্রা";
+
+  const descEn = processConfig?.descEn || "Ensuring highest architectural standards, native plant health, and waterproofing resilience across every phase.";
+  const descBn = processConfig?.descBn || "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।";
+
+  // Grid columns class based on number of steps
+  const gridColClass =
+    activeSteps.length === 1
+      ? "grid-cols-1 max-w-sm"
+      : activeSteps.length === 2
+      ? "grid-cols-1 sm:grid-cols-2 max-w-2xl"
+      : activeSteps.length === 3
+      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
 
   return (
     <section id="process" className="py-20 text-[#323232] bg-white">
@@ -93,7 +118,7 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("ডিজাইন ও বাস্তবায়ন পর্যায়", "Design & Delivery Stages")}
+            {language === "bn" ? categoryBn : categoryEn}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>
@@ -102,34 +127,21 @@ export default function ShmaProcess({ processConfig }: { processConfig?: Process
       {/* Main Process Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         
-        {/* Left Column */}
+        {/* Left Column: Headline and Description */}
         <div className="lg:col-span-3 space-y-3">
           <h3 className="font-display font-light text-2xl sm:text-3xl text-[#3d2e17] leading-tight">
-            {language === "bn" ? (
-              <>
-                টেকসই ও আধুনিক সমাধানের
-                <span className="block text-[#5a9dff] mt-1">সুপরিকল্পিত যাত্রা</span>
-              </>
-            ) : (
-              <>
-                A Thoughtful Journey to
-                <span className="block text-[#5a9dff] mt-1">Transformative Solutions</span>
-              </>
-            )}
+            {language === "bn" ? headlineBn : headlineEn}
           </h3>
           <p className="font-sans text-xs sm:text-sm text-[#75787b] font-light leading-relaxed pt-2">
-            {t(
-              "প্রাথমিক ভাবনা থেকে চূড়ান্ত বাস্তবায়ন পর্যন্ত প্রতিটি ধাপে আন্তর্জাতিক গুণগত মান, জীববৈচিত্র্য ও ওয়াটারপ্রুফিং সুরক্ষা নিশ্চিতকরণ।",
-              "Ensuring highest architectural standards, native plant health, and waterproofing resilience across every phase."
-            )}
+            {language === "bn" ? descBn : descEn}
           </p>
         </div>
 
-        {/* Right Columns: Steps Grid */}
-        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+        {/* Right Columns: Dynamic Steps Grid */}
+        <div className={`lg:col-span-9 grid ${gridColClass} gap-6 sm:gap-8`}>
           {activeSteps.map((step, idx) => (
             <div key={idx} className="space-y-3 group">
-              <div className="aspect-[4/3] overflow-hidden bg-stone-100">
+              <div className="aspect-[4/3] overflow-hidden bg-stone-100 rounded-xl">
                 <img
                   src={optimizeImageUrl(step.image, 600)}
                   alt={step.titleEn}

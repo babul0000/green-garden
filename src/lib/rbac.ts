@@ -41,6 +41,7 @@ export const TAB_SECTION_MAP: Record<string, AdminSection> = {
   "header-nav": "website_studio",
   hero: "website_studio",
   "homepage-sections": "website_studio",
+  process: "website_studio",
   "content-manager": "website_studio",
   content: "website_studio",
   settings: "security_roles",
