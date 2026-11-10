@@ -142,3 +142,4 @@ export const DELETE = withAuthErrorHandling(async (req: Request, { params }: { p
 
   return NextResponse.json({ success: true, message: "কর্মী সফলভাবে মুছে ফেলা হয়েছে।" });
 });
+
