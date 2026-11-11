@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface SettingsTabProps {
   settings?: Record<string, any>;
@@ -10,6 +10,11 @@ interface SettingsTabProps {
   handleSettingsChange: (key: string, value: any) => void;
   onOpenNavbarStudio?: () => void;
   onOpenHeroStudio?: () => void;
+  onOpenAboutStudio?: () => void;
+  onOpenTextsStudio?: () => void;
+  onOpenShopStudio?: () => void;
+  onOpenToolsStudio?: () => void;
+  onOpenLegalStudio?: () => void;
 }
 
 export default function SettingsTab({
@@ -20,6 +25,11 @@ export default function SettingsTab({
   handleSettingsChange,
   onOpenNavbarStudio,
   onOpenHeroStudio,
+  onOpenAboutStudio,
+  onOpenTextsStudio,
+  onOpenShopStudio,
+  onOpenToolsStudio,
+  onOpenLegalStudio,
 }: SettingsTabProps) {
   const [activeCategory, setActiveCategory] = useState<string>("general");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -36,6 +46,27 @@ export default function SettingsTab({
     { id: "notifications", label: "অটো-নোটিফিকেশন ও অ্যালার্ট", en: "Email & Alerts", icon: "🔔" },
     { id: "backup", label: "ব্যাকআপ ও রিস্টোর স্ন্যাপশট", en: "Data Backup & Sync", icon: "💾" },
   ];
+
+  // Support deep-linking to settings sub-category (e.g. ?tab=settings&sub=seo)
+  useEffect(() => {
+    const checkSub = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get("sub");
+      if (s && categories.some((c) => c.id === s)) {
+        setActiveCategory(s);
+      }
+    };
+    checkSub();
+
+    const handleSubNav = (e: any) => {
+      if (e.detail?.sub && categories.some((c) => c.id === e.detail.sub)) {
+        setActiveCategory(e.detail.sub);
+      }
+    };
+    window.addEventListener("admin-navigate-subtab", handleSubNav);
+    return () => window.removeEventListener("admin-navigate-subtab", handleSubNav);
+  }, []);
 
   const [dbExporting, setDbExporting] = useState<boolean>(false);
 
@@ -201,6 +232,16 @@ export default function SettingsTab({
 
           {/* Quick Studio Shortcuts */}
           <div className="mt-4 pt-3 border-t border-[#E4E2D7] space-y-2">
+            {onOpenAboutStudio && (
+              <button
+                type="button"
+                onClick={onOpenAboutStudio}
+                className="w-full py-2 px-3 rounded-xl bg-[#2B4D33]/10 hover:bg-[#2B4D33] text-[#2B4D33] hover:text-white text-xs font-mono font-bold border border-[#2B4D33]/25 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>📖 স্টুডিও পরিচিতি (/about)</span>
+                <span>➔</span>
+              </button>
+            )}
             {onOpenHeroStudio && (
               <button
                 type="button"
@@ -218,6 +259,46 @@ export default function SettingsTab({
                 className="w-full py-2 px-3 rounded-xl bg-[#F7F6F2] hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono font-medium border border-[#D6D2C4] flex items-center justify-between transition-colors cursor-pointer"
               >
                 <span>🎨 ন্যাভবার মেনু স্টুডিও</span>
+                <span>➔</span>
+              </button>
+            )}
+            {onOpenTextsStudio && (
+              <button
+                type="button"
+                onClick={onOpenTextsStudio}
+                className="w-full py-2 px-3 rounded-xl bg-[#F7F6F2] hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono font-medium border border-[#D6D2C4] flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>🔤 সব টেক্সট ও পেজ হেডার</span>
+                <span>➔</span>
+              </button>
+            )}
+            {onOpenShopStudio && (
+              <button
+                type="button"
+                onClick={onOpenShopStudio}
+                className="w-full py-2 px-3 rounded-xl bg-[#F7F6F2] hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono font-medium border border-[#D6D2C4] flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>🛒 গ্রিন শপ স্টুডিও</span>
+                <span>➔</span>
+              </button>
+            )}
+            {onOpenToolsStudio && (
+              <button
+                type="button"
+                onClick={onOpenToolsStudio}
+                className="w-full py-2 px-3 rounded-xl bg-[#F7F6F2] hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono font-medium border border-[#D6D2C4] flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>⚙️ এস্টিমেটর, উইজার্ড ও লয়্যালটি</span>
+                <span>➔</span>
+              </button>
+            )}
+            {onOpenLegalStudio && (
+              <button
+                type="button"
+                onClick={onOpenLegalStudio}
+                className="w-full py-2 px-3 rounded-xl bg-[#F7F6F2] hover:bg-[#E4E2D7] text-[#121813] text-xs font-mono font-medium border border-[#D6D2C4] flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>📜 লিগ্যাল ও পলিসি পেজ</span>
                 <span>➔</span>
               </button>
             )}
@@ -684,6 +765,30 @@ export default function SettingsTab({
                       onChange={(e) => handleSettingsChange("bookingActive", e.target.checked)}
                       className="w-5 h-5 accent-[#2B4D33] cursor-pointer"
                     />
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-amber-950">🛠️ মেইনটেনেন্স মোড চালু (Maintenance Mode)</p>
+                        <p className="text-[10px] text-amber-800">চালু করলে সাধারণ দর্শনার্থীরা আপগ্রেড নোটিশ দেখবে (অ্যাডমিন ও লগইন সক্রিয় থাকবে)।</p>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(settings.maintenanceMode)}
+                        onChange={(e) => handleSettingsChange("maintenanceMode", e.target.checked)}
+                        className="w-5 h-5 accent-amber-600 cursor-pointer"
+                      />
+                    </div>
+                    {settings.maintenanceMode && (
+                      <input
+                        type="text"
+                        value={settings.maintenanceMessage || ""}
+                        onChange={(e) => handleSettingsChange("maintenanceMessage", e.target.value)}
+                        placeholder="মেইনটেনেন্স বার্তা (যেমন: শীঘ্রই ফিরে আসছি!)"
+                        className="w-full bg-white border border-amber-300 rounded-xl px-3.5 py-2 text-xs text-[#121813]"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

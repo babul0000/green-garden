@@ -2,9 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import type { IBlog } from "@/types";
+import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 
 export default function BlogPage() {
+  const { language, t } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
+  const pageHeader = getPageHeader("blog");
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
   const [blogs, setBlogs] = useState<IBlog[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -18,6 +24,8 @@ export default function BlogPage() {
 
   // Newsletter states
   const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubmitting, setNewsletterSubmitting] = useState(false);
+  const [newsletterError, setNewsletterError] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   const fetchBlogs = async () => {
@@ -30,8 +38,11 @@ export default function BlogPage() {
         throw new Error("Failed to fetch");
       }
     } catch (err) {
-      console.warn("Backend unavailable, using static fallback for blogs:", err);
-      setBlogs([
+      console.warn("Backend unavailable for blogs:", err);
+      if (hideStaticFallbacks) {
+        setBlogs([]);
+      } else {
+        setBlogs([
         {
           _id: "b1",
           title: "5 Essential Tips for Rooftop Gardening in Dhaka",
@@ -58,7 +69,8 @@ export default function BlogPage() {
           createdAt: "2026-07-28T09:00:00.000Z",
           comments: []
         }
-      ]);
+        ]);
+      }
     } finally {
       setLoading(false);
     }
@@ -111,11 +123,29 @@ export default function BlogPage() {
     }
   };
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newsletterEmail) return;
-    setNewsletterSubscribed(true);
-    setNewsletterEmail("");
+    if (!newsletterEmail.trim()) return;
+    setNewsletterSubmitting(true);
+    setNewsletterError("");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail.trim(), source: "blog" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setNewsletterSubscribed(true);
+        setNewsletterEmail("");
+      } else {
+        setNewsletterError(data.error || t("সাবস্ক্রাইব করা যায়নি।", "Could not subscribe."));
+      }
+    } catch {
+      setNewsletterError(t("নেটওয়ার্ক ত্রুটি।", "Network error."));
+    } finally {
+      setNewsletterSubmitting(false);
+    }
   };
 
   const categories = ["All", "Rooftop Gardening", "Vertical Garden", "Plant Care"];
@@ -132,14 +162,15 @@ export default function BlogPage() {
         {/* Header (Hide when reading details) */}
         {!activeBlog && (
           <div className="text-center max-w-3xl mx-auto flex flex-col gap-5 animate-fade-in-up">
-            <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">Garden Blog</span>
+            <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">
+              {language === "bn" ? pageHeader.badgeBn : pageHeader.badgeEn}
+            </span>
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1a3020]">
-              Botanical Insights & <br />
-              <span className="text-primary-green italic font-medium">Urban Gardening Guides</span>
+              {language === "bn" ? pageHeader.titleBn : pageHeader.titleEn}
             </h1>
             <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded"></div>
             <p className="text-foreground/75 leading-relaxed text-sm">
-              Discover professional tips on waterproofing roofs, automated watering lines, and choosing subtropical plants.
+              {language === "bn" ? pageHeader.subtitleBn : pageHeader.subtitleEn}
             </p>
           </div>
         )}
@@ -186,10 +217,19 @@ export default function BlogPage() {
               <div className="border-t border-b border-foreground/5 py-4 my-4 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-foreground/50 tracking-wider">Share This Guide:</span>
                 <div className="flex gap-2">
-                  {["Facebook", "Twitter", "LinkedIn", "WhatsApp"].map(social => (
+                  {["Facebook", "LinkedIn", "WhatsApp", "Copy Link"].map(social => (
                     <button
                       key={social}
-                      onClick={() => alert(`Simulating sharing to ${social}!`)}
+                      type="button"
+                      onClick={() => {
+                        const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+                        const text = encodeURIComponent(activeBlog.title);
+                        const u = encodeURIComponent(pageUrl);
+                        if (social === "Facebook") window.open(`https://www.facebook.com/sharer/sharer.php?u=${u}`, "_blank");
+                        else if (social === "LinkedIn") window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${u}`, "_blank");
+                        else if (social === "WhatsApp") window.open(`https://wa.me/?text=${text}%20${u}`, "_blank");
+                        else if (navigator.clipboard) navigator.clipboard.writeText(pageUrl);
+                      }}
                       className="px-3 py-1.5 bg-[#f4f7f5] hover:bg-primary-green hover:text-white rounded-lg text-[11px] font-semibold transition-colors cursor-pointer text-[#1a3020]"
                     >
                       {social}
@@ -377,22 +417,28 @@ export default function BlogPage() {
                     ✓ Subscribed! Thank you for joining our ecosystem.
                   </div>
                 ) : (
-                  <form onSubmit={handleNewsletterSubmit} className="flex gap-2 w-full max-w-sm mt-2">
-                    <input 
-                      type="email"
-                      required
-                      placeholder="Enter your email address"
-                      value={newsletterEmail}
-                      onChange={(e) => setNewsletterEmail(e.target.value)}
-                      className="bg-white text-foreground placeholder-foreground/45 border-0 focus:outline-none rounded-xl py-3 px-4 text-xs flex-1 text-left"
-                    />
-                    <button
-                      type="submit"
-                      className="bg-primary-green hover:bg-primary-green-dark text-white font-bold text-xs px-6 py-3 rounded-xl transition-all cursor-pointer"
-                    >
-                      Subscribe
-                    </button>
-                  </form>
+                  <div className="w-full max-w-sm mt-2 flex flex-col gap-2 items-center">
+                    <form onSubmit={handleNewsletterSubmit} className="flex gap-2 w-full">
+                      <input 
+                        type="email"
+                        required
+                        placeholder={t("আপনার ইমেইল লিখুন", "Enter your email address")}
+                        value={newsletterEmail}
+                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                        className="bg-white text-foreground placeholder-foreground/45 border-0 focus:outline-none rounded-xl py-3 px-4 text-xs flex-1 text-left"
+                      />
+                      <button
+                        type="submit"
+                        disabled={newsletterSubmitting}
+                        className="bg-primary-green hover:bg-primary-green-dark disabled:opacity-50 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all cursor-pointer"
+                      >
+                        {newsletterSubmitting ? "..." : t("সাবস্ক্রাইব", "Subscribe")}
+                      </button>
+                    </form>
+                    {newsletterError && (
+                      <p className="text-[11px] text-rose-300 font-medium">{newsletterError}</p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

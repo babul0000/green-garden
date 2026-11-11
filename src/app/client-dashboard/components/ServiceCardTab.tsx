@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import type { ProjectItem, PlantHealthItem } from "../types";
 
 interface ServiceCardTabProps {
@@ -16,6 +17,10 @@ export default function ServiceCardTab({
   plantRecords,
 }: ServiceCardTabProps) {
   const { t } = useLanguage();
+  const { config } = useSiteConfig();
+  const companyName = String(config?.site_config?.companyName || "A R GREEN GARDEN").toUpperCase();
+  const hotline = config?.site_config?.phone || "01883012641";
+  const whatsappClean = String(config?.site_config?.whatsapp || "8801883012641").replace(/[^0-9]/g, "");
 
   return (
     <div className="space-y-6 mt-6 animate-fade-in-up">
@@ -41,7 +46,7 @@ export default function ServiceCardTab({
         <div className="flex justify-between items-start border-b border-white/10 pb-4">
           <div>
             <span className="text-[11px] text-emerald-300 font-mono tracking-widest uppercase block">
-              A R GREEN GARDEN • CLIENT WARRANTY & SERVICE PASSPORT
+              {companyName} • CLIENT WARRANTY & SERVICE PASSPORT
             </span>
             <h4 className="text-xl sm:text-2xl font-display font-bold text-[#E4E2D7] mt-1">
               {activeProject?.name || "Rooftop Oasis Luxury Retreat"}
@@ -111,7 +116,7 @@ export default function ServiceCardTab({
             </div>
           </div>
           <a
-            href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20renew%20my%20plant%20maintenance%20and%20warranty%20package."
+            href={`https://wa.me/${whatsappClean}?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20renew%20my%20plant%20maintenance%20and%20warranty%20package.`}
             target="_blank"
             rel="noopener noreferrer"
             className="whitespace-nowrap px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-stone-950 rounded-xl text-xs font-mono font-bold transition-all shadow-md flex items-center gap-1 cursor-pointer"
@@ -128,9 +133,9 @@ export default function ServiceCardTab({
           <div>
             <span className="text-emerald-400 block text-[11px] font-mono font-bold">{t("জরুরি ট্রি ডক্টর হটলাইন:", "Tree Doctor Hotline:")}</span>
             <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-white font-mono font-bold text-sm">01883012641</p>
+              <p className="text-white font-mono font-bold text-sm">{hotline}</p>
               <a
-                href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+                href={`https://wa.me/${whatsappClean}?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[10px] text-[#25D366] font-bold hover:underline"

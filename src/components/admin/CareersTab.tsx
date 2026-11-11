@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import JobPostingsManager from "./careers/JobPostingsManager";
 import CvApplicationsTracker from "./careers/CvApplicationsTracker";
 
@@ -20,6 +20,27 @@ export default function CareersTab({
   handleDeleteCareer,
 }: CareersTabProps) {
   const [subTab, setSubTab] = useState<"openings" | "applications">("openings");
+
+  useEffect(() => {
+    // Support deep-linking to sub-tab (e.g. ?tab=careers&sub=applications)
+    const checkSub = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get("sub");
+      if (s && ["openings", "applications"].includes(s)) {
+        setSubTab(s as any);
+      }
+    };
+    checkSub();
+
+    const handleSubNav = (e: any) => {
+      if (e.detail?.sub && ["openings", "applications"].includes(e.detail.sub)) {
+        setSubTab(e.detail.sub);
+      }
+    };
+    window.addEventListener("admin-navigate-subtab", handleSubNav);
+    return () => window.removeEventListener("admin-navigate-subtab", handleSubNav);
+  }, []);
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up font-sans text-[#E4E2D7]">

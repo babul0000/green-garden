@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import type { TreeDoctorItem } from "../types";
 
 interface ConsultationTabProps {
@@ -11,6 +12,8 @@ interface ConsultationTabProps {
 
 export default function ConsultationTab({ treeRequests }: ConsultationTabProps) {
   const { t } = useLanguage();
+  const { config } = useSiteConfig();
+  const whatsappClean = String(config?.site_config?.whatsapp || "8801883012641").replace(/[^0-9]/g, "");
 
   return (
     <div className="space-y-6 mt-6 animate-fade-in-up">
@@ -64,7 +67,7 @@ export default function ConsultationTab({ treeRequests }: ConsultationTabProps) 
             <div className="text-[11px] text-white/50 flex justify-between items-center pt-2 font-mono">
               <span>{t("বুকিং তারিখ:", "Booked:")} {new Date(req.createdAt).toLocaleDateString("bn-BD")}</span>
               <a
-                href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20need%20Tree%20Doctor%20consultation."
+                href={`https://wa.me/${whatsappClean}?text=Hello%20A%20R%20Green%20Garden,%20I%20need%20Tree%20Doctor%20consultation.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#25D366] font-bold hover:underline flex items-center gap-1"

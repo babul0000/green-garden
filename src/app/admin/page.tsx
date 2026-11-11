@@ -38,6 +38,12 @@ import DigitalServiceCardTab from "@/components/admin/DigitalServiceCardTab";
 // New Phase 2 Tabs
 import HomepageSectionsTab from "@/components/admin/HomepageSectionsTab";
 import ContentManagerTab from "@/components/admin/ContentManagerTab";
+import AboutStudioTab from "@/components/admin/AboutStudioTab";
+import AdminSearchModal from "@/components/admin/AdminSearchModal";
+import SiteTextsStudioTab from "@/components/admin/studios/SiteTextsStudioTab";
+import ShopStudioTab from "@/components/admin/studios/ShopStudioTab";
+import InteractiveToolsStudioTab from "@/components/admin/studios/InteractiveToolsStudioTab";
+import LegalPagesStudioTab from "@/components/admin/studios/LegalPagesStudioTab";
 
 // Mobile Shell Navigation (Phase 1)
 import MobileBottomBar from "@/components/admin/MobileBottomBar";
@@ -50,6 +56,25 @@ export default function AdminPage() {
   const sessionData = useMemo(() => (user ? { user } : null), [user]);
   const [activeTab, setActiveTab] = useState("analytics");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+
+  // Global Ctrl+K / Cmd+K and Header Search Button listener
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchModalOpen((prev) => !prev);
+      }
+    };
+    const handleOpenSearch = () => setSearchModalOpen(true);
+
+    window.addEventListener("keydown", handleGlobalKey);
+    window.addEventListener("admin-open-search-modal", handleOpenSearch);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKey);
+      window.removeEventListener("admin-open-search-modal", handleOpenSearch);
+    };
+  }, []);
 
   // Helper to read ?tab= parameter safely on client without SSR window access
   const getTabFromUrl = (): string | null => {
@@ -84,6 +109,16 @@ export default function AdminPage() {
         currentUrl.searchParams.set("tab", targetTab);
         window.history.replaceState({ tab: targetTab }, "", currentUrl.toString());
       }
+      const urlSub = currentUrl.searchParams.get("sub");
+      if (urlSub) {
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("admin-navigate-subtab", {
+              detail: { tab: targetTab, sub: urlSub },
+            })
+          );
+        }, 100);
+      }
     }
   }, [user]);
 
@@ -96,6 +131,15 @@ export default function AdminPage() {
         setSidebarOpen(false);
         if (typeof window !== "undefined") {
           localStorage.setItem("adminActiveTab", poppedTab);
+          const currentUrl = new URL(window.location.href);
+          const poppedSub = event.state?.sub || currentUrl.searchParams.get("sub");
+          if (poppedSub) {
+            window.dispatchEvent(
+              new CustomEvent("admin-navigate-subtab", {
+                detail: { tab: poppedTab, sub: poppedSub },
+              })
+            );
+          }
         }
       }
     };
@@ -105,21 +149,34 @@ export default function AdminPage() {
   }, [user]);
 
   // Save tab to URL (pushState) and localStorage on tab switch, and auto-close mobile drawer
-  const handleTabChange = (tab: string, pushHistory = true) => {
+  const handleTabChange = (tab: string, subTab?: string | boolean, pushHistory = true) => {
     const targetTab = tab === "quotations" ? "finance" : tab;
     if (user && !canAccessTab(user.role, targetTab)) return;
     
+    const actualSubTab = typeof subTab === "string" ? subTab : undefined;
+    const actualPushHistory = typeof subTab === "boolean" ? subTab : pushHistory;
+
     setActiveTab(targetTab);
     setSidebarOpen(false);
 
     if (typeof window !== "undefined") {
       localStorage.setItem("adminActiveTab", targetTab);
-      if (pushHistory) {
+      if (actualPushHistory) {
         const currentUrl = new URL(window.location.href);
-        if (currentUrl.searchParams.get("tab") !== targetTab) {
-          currentUrl.searchParams.set("tab", targetTab);
-          window.history.pushState({ tab: targetTab }, "", currentUrl.toString());
+        currentUrl.searchParams.set("tab", targetTab);
+        if (actualSubTab) {
+          currentUrl.searchParams.set("sub", actualSubTab);
+        } else {
+          currentUrl.searchParams.delete("sub");
         }
+        window.history.pushState({ tab: targetTab, sub: actualSubTab }, "", currentUrl.toString());
+      }
+      if (actualSubTab) {
+        window.dispatchEvent(
+          new CustomEvent("admin-navigate-subtab", {
+            detail: { tab: targetTab, sub: actualSubTab },
+          })
+        );
       }
     }
   };
@@ -923,6 +980,11 @@ export default function AdminPage() {
               handleSettingsChange={handleSettingsChange}
               onOpenNavbarStudio={() => handleTabChange("header-nav")}
               onOpenHeroStudio={() => handleTabChange("hero")}
+              onOpenAboutStudio={() => handleTabChange("about-studio")}
+              onOpenTextsStudio={() => handleTabChange("micro-texts")}
+              onOpenShopStudio={() => handleTabChange("shop-studio")}
+              onOpenToolsStudio={() => handleTabChange("tools-studio")}
+              onOpenLegalStudio={() => handleTabChange("legal-studio")}
             />
           )}
           {/* TAB 9: SECURITY */}
@@ -1008,6 +1070,31 @@ export default function AdminPage() {
           {activeTab === "content-manager" && (
             <ContentManagerTab />
           )}
+
+          {/* TAB 22: ABOUT STUDIO — Full /about Dynamic Editor */}
+          {activeTab === "about-studio" && (
+            <AboutStudioTab />
+          )}
+
+          {/* TAB 23: MICRO-TEXTS & ALL PAGE HEADERS */}
+          {activeTab === "micro-texts" && (
+            <SiteTextsStudioTab />
+          )}
+
+          {/* TAB 24: GREEN SHOP & ORDERS STUDIO */}
+          {activeTab === "shop-studio" && (
+            <ShopStudioTab />
+          )}
+
+          {/* TAB 25: INTERACTIVE TOOLS, LOYALTY & NEWSLETTER STUDIO */}
+          {activeTab === "tools-studio" && (
+            <InteractiveToolsStudioTab />
+          )}
+
+          {/* TAB 26: LEGAL POLICIES STUDIO */}
+          {activeTab === "legal-studio" && (
+            <LegalPagesStudioTab />
+          )}
           </>
         )}
         </div>
@@ -1018,6 +1105,13 @@ export default function AdminPage() {
         activeTab={activeTab}
         setActiveTab={handleTabChange}
         onOpenMenu={() => setSidebarOpen(true)}
+      />
+
+      {/* 4. UNIVERSAL COMMAND SEARCH MODAL (Ctrl+K / Header 🔍) */}
+      <AdminSearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+        onSelect={handleTabChange}
       />
 
     </div>

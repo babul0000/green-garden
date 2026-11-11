@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface IMenuLink {
   id: string;
@@ -84,6 +85,7 @@ interface NavbarProps {
 export default function Navbar({ onOpenEstimator }: NavbarProps) {
   const { user, logout } = useAuth();
   const { language, setLanguage, toggleLanguage, t } = useLanguage();
+  const { txt } = useSiteConfig();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -360,7 +362,7 @@ export default function Navbar({ onOpenEstimator }: NavbarProps) {
                 }`}
               >
                 <span>👤</span>
-                <span className="hidden xs:inline">{t("লগইন", "Login")}</span>
+                <span className="hidden xs:inline">{txt("nav.loginBtn", "লগইন / পোর্টাল", "Login")}</span>
               </Link>
             )}
           </div>

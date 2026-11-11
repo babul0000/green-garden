@@ -5,10 +5,16 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function EmergencyTreeDoctorModal() {
   const { user } = useAuth();
   const { language, t } = useLanguage();
+  const { config, txt } = useSiteConfig();
+  const treeConf = config?.tree_doctor_config || {};
+  const siteConf = config?.site_config || config || {};
+  const hotline = treeConf.hotline || siteConf.phone || "01883012641";
+  const whatsappNum = treeConf.whatsapp || siteConf.whatsapp || "8801883012641";
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,12 +134,12 @@ Photo: ${photoUrl || "No photo attached"}`,
                 <span className="text-[11px] text-red-700 font-bold uppercase block">
                   {t("Instant Direct Helpline:", "Instant Direct Helpline:")}
                 </span>
-                <a href="tel:01883012641" className="text-red-700 font-extrabold text-lg hover:underline font-mono">
-                  01883012641
+                <a href={`tel:${hotline}`} className="text-red-700 font-extrabold text-lg hover:underline font-mono">
+                  {hotline}
                 </a>
               </div>
               <a
-                href="https://wa.me/8801883012641?text=EMERGENCY:%20My%20tree%20is%20critically%20sick.%20Please%20help."
+                href={`https://wa.me/${whatsappNum}?text=EMERGENCY:%20My%20tree%20is%20critically%20sick.%20Please%20help.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-3.5 py-2 bg-[#25D366] text-stone-950 font-bold text-xs rounded-xl shadow-sm hover:bg-[#20bd5a] flex items-center gap-1.5"
@@ -292,7 +298,7 @@ Photo: ${photoUrl || "No photo attached"}`,
                     <span>{t("রিকোয়েস্ট পাঠানো হচ্ছে...", "Sending Request...")}</span>
                   ) : (
                     <>
-                      <span>🚨</span> {t("জরুরি ডাক্তার ভিজিট রিকোয়েস্ট পাঠান", "Send Emergency Visit Request")}
+                      <span>🚨</span> {txt("treeDoc.submitBtn", "জরুরি ডাক্তার ভিজিট রিকোয়েস্ট পাঠান", "Send Emergency Visit Request")}
                     </>
                   )}
                 </button>

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface BeforeAfterItem {
   id: string;
@@ -13,6 +14,9 @@ interface BeforeAfterItem {
 
 export default function BeforeAfterPage() {
   const { lang, t } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
+  const pageHeader = getPageHeader("beforeAfter");
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
   const [sliderPosition, setSliderPosition] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<BeforeAfterItem[]>([
@@ -42,14 +46,16 @@ export default function BeforeAfterPage() {
               before: f.beforeImageUrl,
               after: f.afterImageUrl,
             })));
+          } else if (hideStaticFallbacks) {
+            setItems([]);
           }
         }
       } catch (e) {
-        // use default
+        if (hideStaticFallbacks) setItems([]);
       }
     };
     fetchBA();
-  }, []);
+  }, [hideStaticFallbacks]);
 
   const activeItem = items[activeIndex] || items[0];
 
@@ -80,17 +86,14 @@ export default function BeforeAfterPage() {
       <div className="max-w-4xl mx-auto flex flex-col gap-12 text-center">
         <div>
           <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">
-            Visual Transformation
+            {lang === "bn" ? pageHeader.badgeBn : pageHeader.badgeEn}
           </span>
           <h1 className="text-3xl md:text-5xl font-serif font-bold text-[#1a3020] mt-3">
-            Before & After Slider
+            {lang === "bn" ? pageHeader.titleBn : pageHeader.titleEn}
           </h1>
           <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded mt-3"></div>
           <p className="text-xs md:text-sm text-foreground/75 mt-3 max-w-xl mx-auto">
-            {t(
-              "স্লাইডারটি ডানে-বামে সরিয়ে ছাদ ও ল্যান্ডস্কেপ প্রজেক্টের জাদুকরী রূপান্তর পর্যবেক্ষণ করুন।",
-              "Interact with our slider by dragging the bar sideways to view complete garden conversions."
-            )}
+            {lang === "bn" ? pageHeader.subtitleBn : pageHeader.subtitleEn}
           </p>
         </div>
 
@@ -113,54 +116,60 @@ export default function BeforeAfterPage() {
           </div>
         )}
 
-        <div 
-          ref={containerRef}
-          onMouseMove={handleMouseMove}
-          onTouchMove={handleTouchMove}
-          className="relative h-[250px] md:h-[480px] w-full overflow-hidden rounded-[32px] border border-white/50 shadow-2xl select-none cursor-ew-resize mx-auto"
-        >
-          {/* Before */}
-          <div className="absolute inset-0 bg-[#f4f7f5]">
-            <img 
-              src={activeItem.before} 
-              alt="Before"
-              className="w-full h-full object-cover pointer-events-none"
-              onContextMenu={e => e.preventDefault()}
-            />
-            <span className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg">
-              {t("পূর্ববর্তী রূপ: খালি কংক্রিট ছাদ", "Empty Concrete Roof")}
-            </span>
-          </div>
-
-          {/* After */}
+        {activeItem ? (
           <div 
-            className="absolute inset-0 z-10"
-            style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }}
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onTouchMove={handleTouchMove}
+            className="relative h-[250px] md:h-[480px] w-full overflow-hidden rounded-[32px] border border-white/50 shadow-2xl select-none cursor-ew-resize mx-auto"
           >
-            <img 
-              src={activeItem.after} 
-              alt="After"
-              className="w-full h-full object-cover pointer-events-none"
-              onContextMenu={e => e.preventDefault()}
-            />
-            <span className="absolute bottom-4 right-4 bg-primary-green/85 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg">
-              A R Green Garden
-            </span>
-            <span className="absolute bottom-4 left-4 bg-primary-green/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg z-20">
-              {t("পরবর্তী রূপ: জীবন্ত বাগান", "Living Garden Complete")}
-            </span>
-          </div>
+            {/* Before */}
+            <div className="absolute inset-0 bg-[#f4f7f5]">
+              <img 
+                src={activeItem.before} 
+                alt="Before"
+                className="w-full h-full object-cover pointer-events-none"
+                onContextMenu={e => e.preventDefault()}
+              />
+              <span className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg">
+                {t("পূর্ববর্তী রূপ: খালি কংক্রিট ছাদ", "Empty Concrete Roof")}
+              </span>
+            </div>
 
-          {/* Handler */}
-          <div 
-            className="absolute top-0 bottom-0 z-20 w-1 bg-white cursor-ew-resize flex items-center justify-center"
-            style={{ left: `${sliderPosition}%` }}
-          >
-            <div className="w-8 h-8 rounded-full bg-white text-primary-green shadow-lg flex items-center justify-center font-bold text-sm border-2 border-primary-green">
-              ↔
+            {/* After */}
+            <div 
+              className="absolute inset-0 z-10"
+              style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }}
+            >
+              <img 
+                src={activeItem.after} 
+                alt="After"
+                className="w-full h-full object-cover pointer-events-none"
+                onContextMenu={e => e.preventDefault()}
+              />
+              <span className="absolute bottom-4 right-4 bg-primary-green/85 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg">
+                A R Green Garden
+              </span>
+              <span className="absolute bottom-4 left-4 bg-primary-green/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg z-20">
+                {t("পরবর্তী রূপ: জীবন্ত বাগান", "Living Garden Complete")}
+              </span>
+            </div>
+
+            {/* Handler */}
+            <div 
+              className="absolute top-0 bottom-0 z-20 w-1 bg-white cursor-ew-resize flex items-center justify-center"
+              style={{ left: `${sliderPosition}%` }}
+            >
+              <div className="w-8 h-8 rounded-full bg-white text-primary-green shadow-lg flex items-center justify-center font-bold text-sm border-2 border-primary-green">
+                ↔
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="py-16 bg-white border border-stone-200 rounded-3xl text-stone-400 text-sm">
+            {t("এখনো কোনো Before/After স্লাইডার যোগ করা হয়নি।", "No Before/After showcase items available yet.")}
+          </div>
+        )}
 
       </div>
     </div>

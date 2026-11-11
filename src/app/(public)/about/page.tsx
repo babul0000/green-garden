@@ -1,179 +1,346 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-
-interface AboutConfig {
-  titleEn?: string;
-  titleBn?: string;
-  subtitleEn?: string;
-  subtitleBn?: string;
-  storyEn?: string;
-  storyBn?: string;
-  visionEn?: string;
-  visionBn?: string;
-  missionEn?: string;
-  missionBn?: string;
-  founderName?: string;
-  founderTitle?: string;
-  founderPhoto?: string;
-  founderQuoteEn?: string;
-  founderQuoteBn?: string;
-  stats?: Array<{ labelEn: string; labelBn: string; value: string }>;
-}
+import { useAuth } from "@/context/AuthContext";
+import { canAccessTab } from "@/lib/rbac";
+import { AboutPageConfig, DEFAULT_ABOUT_CONFIG } from "@/types/about";
 
 export default function AboutPage() {
   const { language } = useLanguage();
-  const [config, setConfig] = useState<AboutConfig | null>(null);
+  const { user } = useAuth();
+  const canEditAbout = Boolean(user && canAccessTab(user.role, "about-studio"));
+  const [config, setConfig] = useState<AboutPageConfig>(DEFAULT_ABOUT_CONFIG);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchAbout = async () => {
+    const fetchAboutData = async () => {
       try {
-        const res = await fetch(`/api/settings?key=about_config&_t=${Date.now()}`, {
+        const res = await fetch(`/api/settings?key=about_page_config&_t=${Date.now()}`, {
           cache: "no-store",
           headers: { "Cache-Control": "no-cache" },
         });
         if (res.ok) {
           const data = await res.json();
-          if (data?.value) setConfig(data.value);
+          if (data?.value) {
+            setConfig({
+              hero: { ...DEFAULT_ABOUT_CONFIG.hero, ...(data.value.hero || {}) },
+              storySection: { ...DEFAULT_ABOUT_CONFIG.storySection, ...(data.value.storySection || {}) },
+              statsSection: { ...DEFAULT_ABOUT_CONFIG.statsSection, ...(data.value.statsSection || {}) },
+              milestonesSection: { ...DEFAULT_ABOUT_CONFIG.milestonesSection, ...(data.value.milestonesSection || {}) },
+              teamSection: { ...DEFAULT_ABOUT_CONFIG.teamSection, ...(data.value.teamSection || {}) },
+              ctaSection: { ...DEFAULT_ABOUT_CONFIG.ctaSection, ...(data.value.ctaSection || {}) },
+            });
+          }
         }
-      } catch (e) {
-        // use defaults
+      } catch (err) {
+        console.warn("Using default about page configuration", err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchAbout();
+
+    fetchAboutData();
+
+    // Listen to real-time custom update event from admin preview
+    const handleLiveUpdate = (e: any) => {
+      if (e.detail) {
+        setConfig((prev) => ({ ...prev, ...e.detail }));
+      }
+    };
+    window.addEventListener("about-config-updated", handleLiveUpdate);
+    return () => window.removeEventListener("about-config-updated", handleLiveUpdate);
   }, []);
 
-  const team = [
-    { name: config?.founderName || "Tanvir Ahmed", role: config?.founderTitle || "Founder & CEO", desc: config?.founderQuoteEn || "12+ years in environmental engineering and landscape design.", icon: "👨‍💼" },
-    { name: "Sultana Yasmin", role: "Principal Landscape Architect", desc: "Renowned architect specialized in bio-climatic designs.", icon: "👩‍🎨" },
-    { name: "Dr. Rafiqul Islam", role: "Chief Botanist & Agronomist", desc: "Expert in soil health and sub-tropical plant biology.", icon: "👨‍🔬" }
-  ];
+  const isBn = language === "bn";
 
-  const milestones = [
-    { year: "2016", title: "Company Founded", desc: "Started as a small consulting firm in Dhanmondi, Dhaka with a mission to bring nature back to urban spaces." },
-    { year: "2019", title: "100+ Projects Completed", desc: "Expanded operations to Chittagong and completed major rooftop setups for top real estate developers." },
-    { year: "2022", title: "Pioneered Vertical Gardens", desc: "Introduced advanced drip-irrigation green wall panels to corporate offices and luxurious hotels." },
-    { year: "2026", title: "Bangladesh's Premier Landscaper", desc: "Ranked as the #1 design agency for sustainable urban landscaping and eco-friendly garden architecture." }
-  ];
+  // Helpers for localized text fallback
+  const getLocalized = (bnVal?: string, enVal?: string, fallback = ""): string => {
+    if (isBn) {
+      return bnVal?.trim() ? bnVal : enVal || fallback;
+    }
+    return enVal?.trim() ? enVal : bnVal || fallback;
+  };
 
-  // Headlines always stay in English in both English and Bengali themes
-  const title = config?.titleEn || "We Design Harmonious Urban Ecosystems";
-  const subtitle = config?.subtitleEn || "Our Journey";
-  const story = language === "bn" 
-    ? (config?.storyBn || "একটি সহজ চিন্তা থেকেই আমাদের যাত্রা শুরু: ঢাকার তীব্র নগরায়ন মানুষকে প্রকৃতি থেকে দূরে সরিয়ে দিচ্ছিল। তাই প্রকৃতি ও স্থাপত্যের মেলবন্ধন ঘটিয়ে আমরা গড়ে তুলছি টেকসই সবুজ সমাধান।")
-    : (config?.storyEn || "It all started with a simple observation: Dhaka's rapid urban growth was cutting off citizens from nature. Determined to make a change, our founders combined botanical sciences with modern architecture to create self-sustaining green solutions. Today, we are a full-service team crafting premium landscapes.");
-  const mission = language === "bn" ? (config?.missionBn || "স্থাপত্য নির্মাণে প্রাকৃতিক বাস্তুতন্ত্রের সংযোজন ঘটিয়ে নগরীর তাপমাত্রা হ্রাস এবং বিশুদ্ধ অক্সিজেন সমৃদ্ধ পরিবেশ তৈরি।") : (config?.missionEn || "To integrate natural ecology into modern construction, reducing urban heat islands and building resilient, oxygen-rich environments.");
-  const vision = language === "bn" ? (config?.visionBn || "একটি সবুজ বাংলাদেশের নেতৃত্ব দেওয়া যেখানে প্রতিটি ভবন হবে কার্বন শোষণকারী ছাদবাগান এবং গ্রিন ওয়ালে সজ্জিত।") : (config?.visionEn || "To lead Bangladesh's transition towards green cities where every building features carbon-absorbing rooftops and living vertical walls.");
+  const { hero, storySection, statsSection, milestonesSection, teamSection, ctaSection } = config;
 
   return (
-    <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6">
-      <div className="max-w-5xl mx-auto flex flex-col gap-24">
+    <div className="bg-[#FAF9F5] text-[#121813] font-sans min-h-screen py-16 sm:py-24 px-4 sm:px-6 lg:px-8 relative selection:bg-[#2B4D33] selection:text-white">
+      {/* Background Architectural Ambient Texture */}
+      <div className="absolute inset-0 bg-[radial-gradient(#D6D2C4_1px,transparent_1px)] [background-size:32px_32px] opacity-40 pointer-events-none"></div>
+
+      <div className="max-w-5xl mx-auto flex flex-col gap-20 sm:gap-28 relative z-10">
+
+        {/* ── ADMIN QUICK EDIT BAR (Visible only to logged-in Admin / Editor) ── */}
+        {canEditAbout && (
+          <div className="bg-[#18221A] text-white px-4 sm:px-6 py-3 rounded-2xl border border-emerald-500/30 shadow-lg flex flex-wrap items-center justify-between gap-3 -mb-10 sm:-mb-16">
+            <div className="flex items-center gap-2.5 text-xs">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span className="font-mono text-emerald-300 font-bold uppercase tracking-wider">Admin Mode</span>
+              <span className="text-stone-300 hidden sm:inline">
+                এই পেজের প্রতিটি লেখা, ছবি, মাইলস্টোন ও টিম মেম্বার সরাসরি এডিট ও ডিলিট করুন
+              </span>
+            </div>
+            <Link
+              href="/admin?tab=about-studio"
+              className="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-xs font-mono flex items-center gap-1.5 transition-all shadow-xs"
+            >
+              <span>✏️</span>
+              <span>About Studio খুলুন</span>
+              <span>➔</span>
+            </Link>
+          </div>
+        )}
         
-        {/* Section 1: Hero Banner */}
-        <div className="text-center max-w-3xl mx-auto flex flex-col gap-6 animate-fade-in-up">
-          <span className="text-[13px] font-bold tracking-wider text-primary-green uppercase">{subtitle}</span>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[#1a3020]">
-            {title}
-          </h1>
-          <div className="w-16 h-1.5 bg-primary-green/20 mx-auto rounded"></div>
-          <p className="text-foreground/75 leading-relaxed text-sm md:text-base">
-            AR Green Garden is Bangladesh's premier landscape architecture and urban design studio. Since 2016, we have transformed hundreds of concrete rooftops, balconies, and indoor spaces into vibrant, living sanctuaries.
-          </p>
-        </div>
+        {/* ── SECTION 1: HERO BANNER ── */}
+        {hero.visible !== false && (
+          <div className="text-center max-w-3xl mx-auto flex flex-col items-center gap-6 animate-fade-in-up">
+            {/* Architectural Sub-badge */}
+            <span className="text-xs sm:text-[13px] font-mono font-bold tracking-[0.2em] text-[#2B4D33] uppercase px-3.5 py-1 rounded-full bg-[#2B4D33]/10 border border-[#2B4D33]/20 shadow-2xs">
+              {getLocalized(hero.badgeBn, hero.badgeEn, "OUR JOURNEY")}
+            </span>
 
-        {/* Section 2: Story & Vision */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-          <div className="glass-card bg-white/60 border border-foreground/5 rounded-3xl p-8 shadow-md">
-            <h3 className="text-xl font-serif font-bold text-[#1a3020] mb-4">Our Story</h3>
-            <p className="text-sm text-foreground/75 leading-relaxed">
-              {story}
+            {/* Page Heading */}
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-[#121813] tracking-tight leading-[1.15]">
+              {getLocalized(hero.titleBn, hero.titleEn)}
+            </h1>
+
+            {/* Architectural Separator */}
+            <div className="w-16 h-1 bg-[#2B4D33]/30 rounded-full mx-auto"></div>
+
+            {/* Subtitle / Description */}
+            <p className="text-sm sm:text-base md:text-lg text-[#4F5255] leading-relaxed max-w-2xl font-light">
+              {getLocalized(hero.descriptionBn, hero.descriptionEn)}
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            <div className="bg-[#f4f7f5] border border-primary-green/10 rounded-2xl p-6 flex gap-4">
-              <span className="text-2xl mt-1">🎯</span>
-              <div>
-                <h4 className="font-bold text-[15px] text-[#1a3020]">Our Mission</h4>
-                <p className="text-xs text-foreground/70 mt-1 leading-relaxed">{mission}</p>
+            {/* Optional Cover Image */}
+            {hero.coverImage && (
+              <div className="w-full mt-4 rounded-3xl overflow-hidden border border-[#D6D2C4] shadow-xl max-h-[380px]">
+                <img
+                  src={hero.coverImage}
+                  alt="A R Green Garden Studio"
+                  className="w-full h-full object-cover"
+                />
               </div>
-            </div>
-            <div className="bg-[#f4f7f5] border border-primary-green/10 rounded-2xl p-6 flex gap-4">
-              <span className="text-2xl mt-1">👁️</span>
-              <div>
-                <h4 className="font-bold text-[15px] text-[#1a3020]">Our Vision</h4>
-                <p className="text-xs text-foreground/70 mt-1 leading-relaxed">{vision}</p>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* Section 3: Vertical Timeline */}
-        <div className="flex flex-col gap-12">
-          <div className="text-center">
-            <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#1a3020]">Company Milestones</h3>
-            <p className="text-xs text-foreground/50 mt-1">A timeline of our achievements and milestones over the years</p>
-          </div>
-          
-          <div className="relative border-l-2 border-primary-green/20 ml-4 md:mx-auto max-w-2xl flex flex-col gap-10">
-            {milestones.map((m, idx) => (
-              <div key={idx} className="relative pl-8 md:pl-10">
-                <span className="absolute -left-[11px] top-1.5 w-5 h-5 rounded-full bg-[#1a3020] border-4 border-white flex items-center justify-center"></span>
-                <span className="inline-block bg-[#1a3020] text-white text-xs font-bold px-3 py-1 rounded-full mb-2">
-                  {m.year}
+        {/* ── SECTION 2: STATS COUNTERS BAR ── */}
+        {statsSection.visible !== false && statsSection.items.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 bg-white/80 backdrop-blur-md border border-[#D6D2C4] rounded-3xl p-6 sm:p-8 shadow-sm">
+            {statsSection.items.map((stat, idx) => (
+              <div
+                key={stat.id || idx}
+                className="text-center flex flex-col items-center justify-center p-3 border-r last:border-r-0 border-[#E4E2D7]"
+              >
+                <span className="text-3xl sm:text-4xl md:text-5xl font-serif font-extrabold text-[#2B4D33] tracking-tight">
+                  {stat.value}
                 </span>
-                <h4 className="text-[17px] font-bold text-foreground font-serif">{m.title}</h4>
-                <p className="text-xs md:text-sm text-foreground/70 mt-1.5 leading-relaxed">{m.desc}</p>
+                <span className="text-xs sm:text-sm font-mono text-[#75787B] uppercase tracking-wider mt-1 font-semibold">
+                  {getLocalized(stat.labelBn, stat.labelEn)}
+                </span>
               </div>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* Section 4: Our Team */}
-        <div className="flex flex-col gap-12">
-          <div className="text-center max-w-xl mx-auto flex flex-col gap-3">
-            <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#1a3020]">Meet Our Leadership</h3>
-            <p className="text-xs text-foreground/60 leading-relaxed">
-              Our projects succeed thanks to our multidisciplinary team of designers, horticultural specialists, and support crew.
-            </p>
-          </div>
+        {/* ── SECTION 3: STORY, MISSION & VISION ── */}
+        {storySection.visible !== false && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 items-stretch">
+            {/* Our Story Card */}
+            <div className="bg-white/80 backdrop-blur-md border border-[#D6D2C4] rounded-3xl p-7 sm:p-9 shadow-sm flex flex-col justify-between">
+              <div>
+                <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#2B4D33] block mb-2">
+                  {isBn ? "প্রতিষ্ঠার পটভূমি" : "ORIGIN STORY"}
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#121813] mb-4">
+                  {getLocalized(storySection.storyTitleBn, storySection.storyTitleEn, "Our Story")}
+                </h3>
+                <p className="text-sm sm:text-[15px] text-[#4F5255] leading-relaxed font-light whitespace-pre-line">
+                  {getLocalized(storySection.storyBn, storySection.storyEn)}
+                </p>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((t, idx) => (
-              <div key={idx} className="glass-card bg-white/60 border border-foreground/5 rounded-3xl p-6 text-center hover:shadow-xl transition-all duration-300">
-                <div className="w-16 h-16 rounded-full bg-sage-pastel text-primary-green flex items-center justify-center text-3xl mx-auto mb-4 border border-[#1a3020]/10">
-                  {t.icon}
+              <div className="mt-6 pt-4 border-t border-[#E4E2D7] flex items-center justify-between text-xs font-mono text-[#75787B]">
+                <span>A R GREEN GARDEN</span>
+                <span>EST. 2016</span>
+              </div>
+            </div>
+
+            {/* Mission & Vision Cards */}
+            <div className="flex flex-col gap-6 justify-center">
+              {/* Mission */}
+              <div className="bg-white/80 backdrop-blur-md border border-[#D6D2C4] rounded-2xl p-6 sm:p-7 shadow-sm flex items-start gap-4 sm:gap-5 hover:border-[#2B4D33]/40 transition-colors">
+                <span className="text-3xl sm:text-4xl shrink-0 p-3 rounded-2xl bg-[#2B4D33]/10 border border-[#2B4D33]/15">
+                  🎯
+                </span>
+                <div>
+                  <h4 className="text-base sm:text-lg font-bold font-serif text-[#121813]">
+                    {getLocalized(storySection.missionTitleBn, storySection.missionTitleEn, "Our Mission")}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-[#4F5255] mt-1.5 leading-relaxed font-light">
+                    {getLocalized(storySection.missionBn, storySection.missionEn)}
+                  </p>
                 </div>
-                <h4 className="font-bold text-[16px] text-[#1a3020]">{t.name}</h4>
-                <p className="text-xs text-primary-green font-semibold mt-0.5">{t.role}</p>
-                <p className="text-xs text-foreground/60 mt-3 leading-relaxed">{t.desc}</p>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Section 5: Call to Action */}
-        <div className="bg-[#1a3020] text-white rounded-[32px] p-8 md:p-12 text-center flex flex-col items-center gap-6 shadow-xl">
-          <h3 className="text-2xl md:text-3xl font-serif font-bold">Ready to Remodel Your Space?</h3>
-          <p className="text-xs md:text-sm text-white/70 max-w-lg leading-relaxed">
-            Get in touch with our design studio today for a free design audit and estimate callback.
-          </p>
-          <div className="flex gap-4">
-            <button 
-              onClick={() => window.dispatchEvent(new Event("open-estimator"))} 
-              className="bg-white text-[#1a3020] font-bold text-xs md:text-sm px-6 py-3 rounded-full hover:bg-sage-pastel transition-colors cursor-pointer"
-            >
-              Get Free Estimate
-            </button>
-            <a 
-              href="/contact" 
-              className="border border-white/20 text-white font-bold text-xs md:text-sm px-6 py-3 rounded-full hover:bg-white/5 transition-colors"
-            >
-              Contact Us
-            </a>
+              {/* Vision */}
+              <div className="bg-white/80 backdrop-blur-md border border-[#D6D2C4] rounded-2xl p-6 sm:p-7 shadow-sm flex items-start gap-4 sm:gap-5 hover:border-[#2B4D33]/40 transition-colors">
+                <span className="text-3xl sm:text-4xl shrink-0 p-3 rounded-2xl bg-[#2B4D33]/10 border border-[#2B4D33]/15">
+                  👁️
+                </span>
+                <div>
+                  <h4 className="text-base sm:text-lg font-bold font-serif text-[#121813]">
+                    {getLocalized(storySection.visionTitleBn, storySection.visionTitleEn, "Our Vision")}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-[#4F5255] mt-1.5 leading-relaxed font-light">
+                    {getLocalized(storySection.visionBn, storySection.visionEn)}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* ── SECTION 4: MILESTONES TIMELINE ── */}
+        {milestonesSection.visible !== false && milestonesSection.items.length > 0 && (
+          <div className="flex flex-col gap-10 sm:gap-14">
+            <div className="text-center max-w-xl mx-auto flex flex-col items-center gap-2">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#2B4D33]">
+                {isBn ? "অগ্রযাত্রার মাইলফলক" : "ARCHITECTURAL TIMELINE"}
+              </span>
+              <h3 className="text-2xl sm:text-4xl font-serif font-bold text-[#121813] tracking-tight">
+                {getLocalized(milestonesSection.headingBn, milestonesSection.headingEn, "Company Milestones")}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#75787B] font-light">
+                {getLocalized(milestonesSection.subheadingBn, milestonesSection.subheadingEn)}
+              </p>
+            </div>
+
+            {/* Timeline Stream */}
+            <div className="relative border-l-2 border-[#2B4D33]/25 ml-4 md:mx-auto max-w-2xl flex flex-col gap-10">
+              {milestonesSection.items.map((m, idx) => (
+                <div key={m.id || idx} className="relative pl-8 sm:pl-10 group">
+                  {/* Timeline Node Dot */}
+                  <span className="absolute -left-[9px] top-1.5 w-4.5 h-4.5 rounded-full bg-[#2B4D33] border-4 border-[#FAF9F5] shadow-xs group-hover:scale-125 transition-transform"></span>
+
+                  <span className="inline-block bg-[#2B4D33] text-white text-xs font-mono font-bold px-3 py-1 rounded-full mb-2 shadow-xs">
+                    {m.year}
+                  </span>
+
+                  <h4 className="text-base sm:text-lg font-bold font-serif text-[#121813] tracking-tight">
+                    {getLocalized(m.titleBn, m.titleEn)}
+                  </h4>
+
+                  <p className="text-xs sm:text-sm text-[#4F5255] mt-1.5 leading-relaxed font-light">
+                    {getLocalized(m.descBn, m.descEn)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── SECTION 5: LEADERSHIP & TEAM ── */}
+        {teamSection.visible !== false && teamSection.members.length > 0 && (
+          <div className="flex flex-col gap-10 sm:gap-14">
+            <div className="text-center max-w-xl mx-auto flex flex-col items-center gap-2">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#2B4D33]">
+                {isBn ? "অভিজ্ঞ নেতৃত্ব" : "OUR PRACTICE TEAM"}
+              </span>
+              <h3 className="text-2xl sm:text-4xl font-serif font-bold text-[#121813] tracking-tight">
+                {getLocalized(teamSection.headingBn, teamSection.headingEn, "Meet Our Leadership")}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#75787B] font-light">
+                {getLocalized(teamSection.subheadingBn, teamSection.subheadingEn)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+              {teamSection.members.map((member, idx) => (
+                <div
+                  key={member.id || idx}
+                  className="bg-white/80 backdrop-blur-md border border-[#D6D2C4] rounded-3xl p-6 sm:p-7 text-center flex flex-col items-center shadow-sm hover:shadow-xl hover:border-[#2B4D33]/40 transition-all duration-300 group"
+                >
+                  {/* Photo or Icon */}
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#FAF9F5] border-2 border-[#2B4D33]/20 flex items-center justify-center text-4xl mx-auto mb-4 shadow-inner group-hover:scale-105 transition-transform">
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.nameEn}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{member.icon || "👨‍💼"}</span>
+                    )}
+                  </div>
+
+                  <h4 className="font-serif font-bold text-base sm:text-lg text-[#121813]">
+                    {getLocalized(member.nameBn, member.nameEn)}
+                  </h4>
+
+                  <p className="text-xs font-mono font-semibold text-[#2B4D33] uppercase tracking-wider mt-1">
+                    {getLocalized(member.roleBn, member.roleEn)}
+                  </p>
+
+                  <p className="text-xs text-[#555] mt-3 leading-relaxed font-light line-clamp-3">
+                    {getLocalized(member.bioBn, member.bioEn)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── SECTION 6: CALL TO ACTION (CTA) BANNER ── */}
+        {ctaSection.visible !== false && (
+          <div className="bg-[#18221A] text-white rounded-[32px] p-8 sm:p-12 md:p-16 text-center flex flex-col items-center gap-6 shadow-2xl border border-white/10 relative overflow-hidden">
+            {/* Ambient Lighting Glow */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+            <span className="text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] text-emerald-400 uppercase">
+              {isBn ? "প্রজেক্ট কনসালটেশন" : "START A COMMISSION"}
+            </span>
+
+            <h3 className="text-2xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight max-w-2xl leading-tight">
+              {getLocalized(ctaSection.titleBn, ctaSection.titleEn, "Ready to Remodel Your Space?")}
+            </h3>
+
+            <p className="text-xs sm:text-sm text-stone-300 max-w-lg leading-relaxed font-light">
+              {getLocalized(ctaSection.descBn, ctaSection.descEn)}
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-2">
+              {/* Primary Button */}
+              {ctaSection.primaryBtnLink === "#estimate" ? (
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event("open-estimator"))}
+                  className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all shadow-lg shadow-emerald-950/40 cursor-pointer active:scale-95"
+                >
+                  {getLocalized(ctaSection.primaryBtnTextBn, ctaSection.primaryBtnTextEn, "Get Free Estimate")}
+                </button>
+              ) : (
+                <Link
+                  href={ctaSection.primaryBtnLink || "#estimate"}
+                  className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all shadow-lg shadow-emerald-950/40 cursor-pointer text-center"
+                >
+                  {getLocalized(ctaSection.primaryBtnTextBn, ctaSection.primaryBtnTextEn, "Get Free Estimate")}
+                </Link>
+              )}
+
+              {/* Secondary Button */}
+              <Link
+                href={ctaSection.secondaryBtnLink || "/contact"}
+                className="w-full sm:w-auto border border-white/20 hover:bg-white/10 text-white font-semibold text-xs sm:text-sm px-7 py-3.5 rounded-full transition-all text-center"
+              >
+                {getLocalized(ctaSection.secondaryBtnTextBn, ctaSection.secondaryBtnTextEn, "Contact Us")}
+              </Link>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

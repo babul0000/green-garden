@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 import { optimizeImageUrl } from "@/lib/utils";
 
@@ -18,6 +19,8 @@ interface ActivityItem {
 
 export default function ShmaRecentActivities() {
   const { language, t } = useLanguage();
+  const { config, txt } = useSiteConfig();
+  const hdr = config?.homepage_sections?.activitiesHeader;
   const [activityList, setActivityList] = useState<ActivityItem[]>([]);
 
   useEffect(() => {
@@ -63,11 +66,15 @@ export default function ShmaRecentActivities() {
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Recent Activities
+              {language === "bn"
+                ? hdr?.titleBn || txt("home.activities.title", "সাম্প্রতিক কার্যক্রম", "Recent Activities")
+                : hdr?.titleEn || txt("home.activities.title", "সাম্প্রতিক কার্যক্রম", "Recent Activities")}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("স্টুডিও সংবাদ ও ইভেন্ট", "Studio News & Events")}
+            {language === "bn"
+              ? hdr?.eyebrowBn || txt("home.activities.eyebrow", "স্টুডিও সংবাদ ও ইভেন্ট", "Studio News & Events")
+              : hdr?.eyebrowEn || txt("home.activities.eyebrow", "স্টুডিও সংবাদ ও ইভেন্ট", "Studio News & Events")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>

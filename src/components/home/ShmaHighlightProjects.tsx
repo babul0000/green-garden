@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { toBnDigits } from "@/lib/formatters";
 
 import { optimizeImageUrl } from "@/lib/utils";
@@ -187,6 +188,8 @@ const DEFAULT_HIGHLIGHT_PROJECTS: HighlightProjectItem[] = [
 
 export default function ShmaHighlightProjects({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
+  const { config, txt } = useSiteConfig();
+  const hdr = config?.homepage_sections?.projectsHeader;
   const isBn = language === "bn";
   const [projectList, setProjectList] = useState<HighlightProjectItem[]>(DEFAULT_HIGHLIGHT_PROJECTS);
   const [activeModalProject, setActiveModalProject] = useState<HighlightProjectItem | null>(null);
@@ -301,17 +304,21 @@ export default function ShmaHighlightProjects({ columns }: { columns?: number } 
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="space-y-1">
             <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#75787b] block">
-              {t("নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
+              {language === "bn"
+                ? hdr?.eyebrowBn || txt("home.projects.eyebrow", "নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")
+                : hdr?.eyebrowEn || txt("home.projects.eyebrow", "নির্বাচিত ল্যান্ডস্কেপ স্থাপত্য", "ARCHITECTURAL PORTFOLIO")}
             </span>
             <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[54px] tracking-tight text-[#3d1916]">
-              Highlight Projects
+              {language === "bn"
+                ? hdr?.titleBn || txt("home.projects.title", "নির্বাচিত প্রজেক্টসমূহ", "Highlight Projects")
+                : hdr?.titleEn || txt("home.projects.title", "নির্বাচিত প্রজেক্টসমূহ", "Highlight Projects")}
             </h2>
           </div>
           <Link
             href="/projects"
             className="group inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-[#3d1916] hover:text-[#5a9dff] transition-colors"
           >
-            <span>{t("সকল প্রকল্প দেখুন", "View All Works")}</span>
+            <span>{txt("home.projects.viewAll", "সকল প্রকল্প দেখুন", "View All Works")}</span>
             <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </Link>
         </div>

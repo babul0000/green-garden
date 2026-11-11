@@ -1,85 +1,137 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
+import { DEFAULT_TREE_DOCTOR_CONFIG, TreeDoctorConfig } from "@/types/cms";
+
+interface PublicPlantRecord {
+  id?: string;
+  plantName: string;
+  photoUrl?: string | null;
+  photo?: string;
+  plantingDate?: string | null;
+  location?: string | null;
+  diseaseHistory?: string | null;
+  treatment?: string | null;
+  fertilizer?: string | null;
+  pruning?: string | null;
+  nextMaintenanceDate?: string | null;
+  doctorReport?: string | null;
+}
+
+const SAMPLE_PLANT_RECORDS: PublicPlantRecord[] = [
+  {
+    plantName: "Ficus Benjamina (Golden Weeping Fig)",
+    photoUrl: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=600&q=80",
+    plantingDate: "15 March 2025",
+    location: "Penthouse North Terrace, Dhanmondi",
+    diseaseHistory: "White Mealybug & Leaf Yellowing (মিলিবাগের আক্রমণ)",
+    treatment: "Neem Oil 5ml/L + Imidacloprid systematic spray; Root aeration applied.",
+    fertilizer: "Slow-release NPK (19:19:19) + Organic Vermicompost 500g",
+    pruning: "Canopy structural pruning conducted",
+    nextMaintenanceDate: "Upcoming Monthly Audit",
+    doctorReport: "গাছের নতুন কচি পাতা গজিয়েছে এবং কোনো পোকার উপস্থিতি নেই। গাছ বর্তমানে ১০০% সুস্থ।",
+  },
+  {
+    plantName: "Thai Amrapali Mango (Bonsai Container)",
+    photoUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&q=80",
+    plantingDate: "10 November 2024",
+    location: "Rooftop Orchard, Gulshan-2",
+    diseaseHistory: "Anthracnose Fungal Leaf Spot (পাতায় কালো দাগ)",
+    treatment: "Carbendazim + Mancozeb antifungal spray twice at 10-day intervals.",
+    fertilizer: "Bone Meal + Mustard Oil Cake organic feeding",
+    pruning: "Dead branch tip pruning completed",
+    nextMaintenanceDate: "Pre-Flowering Checkup",
+    doctorReport: "ছত্রাক সম্পূর্ণরূপে নিয়ন্ত্রণে। আগামী সিজনে প্রচুর মুকুল আসার অনুকূল অবস্থা রয়েছে।",
+  },
+];
 
 export default function TreeDoctorPage() {
-  const { user } = useAuth();
   const { language, t } = useLanguage();
-  const [name, setName] = useState(user?.name || "");
-  const [phone, setPhone] = useState(user?.phone || "");
+  const { user } = useAuth();
+  const { getSection, config, txt } = useSiteConfig();
+  const bn = language === "bn";
+
+  const tdCfg = getSection<TreeDoctorConfig>("tree_doctor_config", DEFAULT_TREE_DOCTOR_CONFIG);
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
+
+  const [records, setRecords] = useState<PublicPlantRecord[]>(
+    hideStaticFallbacks ? [] : SAMPLE_PLANT_RECORDS
+  );
+
+  // Booking form state
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
   const [treeName, setTreeName] = useState("");
   const [problem, setProblem] = useState("");
   const [preferredVisitTime, setPreferredVisitTime] = useState("Morning (10:00 AM - 1:00 PM)");
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [cloudinaryPhotoUrl, setCloudinaryPhotoUrl] = useState<string | null>(null);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [isEmergency, setIsEmergency] = useState(false);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("emergency=true")) {
-      setIsEmergency(true);
-    }
-  }, []);
+    if (user) setName((p) => p || user.name || "");
+  }, [user]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (tdCfg.showShowcaseRecords === false) {
+      setRecords([]);
+      return;
+    }
+    fetch(`/api/plant-health?public=true&_t=${Date.now()}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setRecords(data);
+        } else if (hideStaticFallbacks) {
+          setRecords([]);
+        }
+      })
+      .catch(() => {});
+  }, [tdCfg.showShowcaseRecords, hideStaticFallbacks]);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setPhotoPreview(URL.createObjectURL(file));
-      setIsUploadingPhoto(true);
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "tree-doctor");
-
-      try {
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.url) {
-            setCloudinaryPhotoUrl(data.url);
-          }
-        }
-      } catch (err) {
-        console.error("Cloudinary upload failed:", err);
-      } finally {
-        setIsUploadingPhoto(false);
-      }
+      setPhotoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setPhotoPreview(reader.result as string);
+      reader.readAsDataURL(file);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone || !treeName || !problem) {
-      alert("অনুগ্রহ করে আপনার নাম, মোবাইল নম্বর, গাছের নাম ও সমস্যার বিবরণ দিন।");
-      return;
-    }
-
-    if (isUploadingPhoto) {
-      alert("ছবি ক্লাউডিনারিতে আপলোড হচ্ছে, অনুগ্রহ করে কয়েক সেকেন্ড অপেক্ষা করুন...");
-      return;
-    }
-
+    setErrorMsg("");
     setIsSubmitting(true);
+
     try {
+      let cloudinaryPhotoUrl = "";
+      if (photoFile) {
+        const formData = new FormData();
+        formData.append("file", photoFile);
+        const upRes = await fetch("/api/upload", { method: "POST", body: formData });
+        if (upRes.ok) {
+          const upData = await upRes.json();
+          cloudinaryPhotoUrl = upData.url || upData.secure_url || "";
+        }
+      }
+
       const res = await fetch("/api/tree-doctor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientName: name,
-          clientPhone: phone,
-          location,
-          treeName,
-          problem,
+          clientName: name.trim(),
+          clientPhone: phone.trim(),
+          location: location.trim(),
+          treeName: treeName.trim(),
+          problem: problem.trim(),
           preferredVisitTime,
           treePhotoUrl: cloudinaryPhotoUrl || null,
           isEmergency: Boolean(isEmergency),
@@ -87,111 +139,71 @@ export default function TreeDoctorPage() {
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setIsSuccess(true);
       } else {
-        alert("Failed to submit booking request. Please try again.");
+        setErrorMsg(data.error || t("বুকিং সম্পন্ন করা যায়নি।", "Could not submit booking."));
       }
     } catch {
-      setIsSuccess(true);
+      setErrorMsg(t("নেটওয়ার্ক ত্রুটি, অনুগ্রহ করে কল করুন।", "Network error. Please call us."));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Sample Plant Health Records from PDF Requirement #7
-  const samplePlantRecords = [
-    {
-      plantName: "Ficus Benjamina (Golden Weeping Fig)",
-      photo: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=600&q=80",
-      plantingDate: "15 March 2025",
-      location: "Penthouse North Terrace, Dhanmondi",
-      diseaseHistory: "White Mealybug & Leaf Yellowing (মিলিবাগের আক্রমণ)",
-      treatment: "Neem Oil 5ml/L + Imidacloprid systematic spray; Root aeration applied.",
-      fertilizer: "Slow-release NPK (19:19:19) + Organic Vermicompost 500g",
-      pruning: "Canopy structural pruning conducted on 10 July 2026",
-      nextMaintenance: "15 October 2026",
-      doctorReport: "গাছের নতুন কচি পাতা গজিয়েছে এবং কোনো পোকার উপস্থিতি নেই। গাছ বর্তমানে ১০০% সুস্থ। — ডাঃ মোঃ রহিম",
-    },
-    {
-      plantName: "Thai Amrapali Mango (Bonsai Container)",
-      photo: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=600&q=80",
-      plantingDate: "10 November 2024",
-      location: "Rooftop Orchard, Gulshan-2",
-      diseaseHistory: "Anthracnose Fungal Leaf Spot (পাতায় কালো দাগ)",
-      treatment: "Carbendazim + Mancozeb antifungal spray twice at 10-day intervals.",
-      fertilizer: "Bone Meal + Mustard Oil Cake organic feeding",
-      pruning: "Dead branch tip pruning completed",
-      nextMaintenance: "05 November 2026",
-      doctorReport: "ছত্রাক সম্পূর্ণরূপে নিয়ন্ত্রণে। আগামী সিজনে প্রচুর মুকুল আসার অনুকূল অবস্থা রয়েছে।",
-    },
-  ];
+  const hotlineDial = (tdCfg.hotline || config.site_config.phone || "01883012641").replace(
+    /[^0-9+]/g,
+    ""
+  );
 
   return (
-    <div className="bg-gradient-to-b from-emerald-50/40 via-white to-white min-h-screen pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gradient-to-b from-emerald-50/40 via-white to-white min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-12 sm:space-y-16">
-        
         {/* Page Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>🩺</span> {t("Tree Doctor Clinical Healthcare", "Tree Doctor Clinical Healthcare")}
+            <span>🩺</span> {bn ? tdCfg.badgeBn : tdCfg.badgeEn}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            {t("Tree Doctor Service & Plant Health Care", "Tree Doctor Service & Plant Health Care")}
+            {bn ? tdCfg.titleBn : tdCfg.titleEn}
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            {t(
-              "গাছের যেকোনো রোগ নির্ণয়, পোকা দমন, পুষ্টির ঘাটতি পূরণ ও জরুরি ট্রিটমেন্টে আমাদের অভিজ্ঞ এগ্রোনমিস্ট ও ট্রি ডক্টর টিম রয়েছে আপনার পাশে।",
-              "Our experienced agronomists and plant pathology specialists diagnose tree diseases, eliminate pests, and revive plant vitality."
-            )}
+            {bn ? tdCfg.subtitleBn : tdCfg.subtitleEn}
           </p>
-        </div>
 
-        {/* Workflow Pipeline Card */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-emerald-100 shadow-sm space-y-6">
-          <div className="text-center space-y-1">
-            <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">
-              {t("Clinical Care Workflow", "Clinical Care Workflow")}
+          {/* Dynamic Hotline & Visit Fee Strip */}
+          <div className="flex flex-wrap justify-center gap-3 pt-2 text-xs font-semibold">
+            <span className="px-3.5 py-1.5 rounded-full bg-white border border-emerald-200 text-emerald-900">
+              💳 {bn ? tdCfg.visitFeeBn : tdCfg.visitFeeEn}
             </span>
-            <h3 className="text-xl font-serif font-bold text-gray-900">
-              {t("How Tree Doctor Clinic Operates", "How Tree Doctor Clinic Operates")}
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
-            {[
-              { step: "১", label: "Request", desc: "বুকিং রিকোয়েস্ট", icon: "📝" },
-              { step: "২", label: "Assign", desc: "ডাক্তার অ্যাসাইন", icon: "👨‍⚕️" },
-              { step: "৩", label: "Visit", desc: "বাগানে অন-সাইট ভিজিট", icon: "🚗" },
-              { step: "৪", label: "Diagnosis", desc: "রোগ ও সমস্যা নির্ণয়", icon: "🔬" },
-              { step: "৫", label: "Treatment", desc: "ওষুধ ও পরিচর্যা প্রয়োগ", icon: "💉" },
-              { step: "৬", label: "Follow-up", desc: "ফলো-আপ ও হেলথ লগ", icon: "📋" },
-            ].map((st, i) => (
-              <div key={i} className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/80 space-y-2">
-                <span className="text-2xl block">{st.icon}</span>
-                <span className="text-xs font-bold text-emerald-900 block">{st.label}</span>
-                <span className="text-[11px] text-gray-500 block">{st.desc}</span>
-              </div>
-            ))}
+            <span className="px-3.5 py-1.5 rounded-full bg-white border border-emerald-200 text-emerald-900">
+              ⚡ {bn ? tdCfg.responseTimeBn : tdCfg.responseTimeEn}
+            </span>
+            <a
+              href={`tel:${hotlineDial}`}
+              className="px-3.5 py-1.5 rounded-full bg-emerald-800 text-white hover:bg-emerald-900"
+            >
+              📞 {tdCfg.hotline}
+            </a>
           </div>
         </div>
 
-        {/* Tree Doctor Booking Form Section */}
+        {/* Booking Form + Sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Form */}
           <div className="lg:col-span-7 bg-white p-7 sm:p-9 rounded-3xl border border-emerald-100 shadow-sm space-y-6">
             <div>
-              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Book a Tree Doctor Visit</span>
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                {t("অন-সাইট ট্রি ক্লিনিক", "Book a Tree Doctor Visit")}
+              </span>
               <h2 className="text-2xl font-serif font-bold text-gray-900 mt-1">
-                {t("Tree Doctor Visit Booking Form", "Tree Doctor Visit Booking Form")}
+                {t("ট্রি ডক্টর ভিজিট বুকিং ফর্ম", "Tree Doctor Visit Booking Form")}
               </h2>
               <p className="text-xs text-gray-500 mt-1">
-                গাছের সমস্যা বিস্তারিত জানান; আমাদের বিশেষজ্ঞ টিম অন-সাইট পরিদর্শনে এসে সমাধান প্রদান করবেন।
+                {bn ? tdCfg.emergencyNoteBn : tdCfg.emergencyNoteEn}
               </p>
             </div>
 
-            {/* Emergency Priority Toggle Banner */}
             <div
               onClick={() => setIsEmergency(!isEmergency)}
               className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
@@ -204,121 +216,147 @@ export default function TreeDoctorPage() {
                 <span className="text-2xl">{isEmergency ? "🚨" : "🩺"}</span>
                 <div>
                   <h4 className={`text-xs font-bold ${isEmergency ? "text-red-900" : "text-emerald-900"}`}>
-                    {isEmergency ? "Emergency Service Active (High Priority Visit)" : "Standard Visit Booking"}
+                    {isEmergency
+                      ? t("ইমার্জেন্সি সার্ভিস চালু (অগ্রাধিকার ভিজিট)", "Emergency Service Active (High Priority)")
+                      : t("স্ট্যান্ডার্ড ভিজিট বুকিং", "Standard Visit Booking")}
                   </h4>
                   <p className="text-[11px] text-gray-500">
                     {isEmergency
-                      ? "আমাদের জরুরি দল তাৎক্ষণিক অন-সাইট চিকিৎসায় সর্বোচ্চ অগ্রাধিকার দেবে।"
-                      : "জরুরিভাবে গাছ বাঁচানোর প্রয়োজন হলে ক্লিক করে ইমার্জেন্সি মোড অন করুন।"}
+                      ? t("তাৎক্ষণিক অন-সাইট চিকিৎসায় সর্বোচ্চ অগ্রাধিকার দেওয়া হবে।", "Our urgent team prioritizes dying/pest-stricken plants.")
+                      : t("জরুরি গাছ বাঁচাতে ক্লিক করে ইমার্জেন্সি মোড অন করুন।", "Tap to activate priority emergency rescue mode.")}
                   </p>
                 </div>
               </div>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                isEmergency ? "bg-red-600 text-white" : "bg-gray-200 text-gray-500"
-              }`}>
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                  isEmergency ? "bg-red-600 text-white" : "bg-gray-200 text-gray-500"
+                }`}
+              >
                 {isEmergency ? "✓" : "+"}
               </div>
             </div>
 
             {isSuccess ? (
-              <div className="text-center py-12 space-y-4">
+              <div className="text-center py-10 space-y-4">
                 <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-3xl mx-auto">
                   ✓
                 </div>
                 <h3 className="text-2xl font-serif font-bold text-gray-900">
-                  {t("Booking Request Successful!", "Booking Request Successful!")}
+                  {t("বুকিং আবেদন সফলভাবে গৃহীত হয়েছে!", "Booking Request Successful!")}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
-                  ধন্যবাদ! আমাদের সিনিয়র ট্রি ডক্টর টিম আপনার দেওয়া নম্বরে <strong>({phone})</strong> ফোন করে ভিজিটের সময়সূচি চূড়ান্ত করবে।
+                  {t(
+                    `ধন্যবাদ! আমাদের সিনিয়র ট্রি ডক্টর টিম (${phone}) নম্বরে কল করে ভিজিট কনফার্ম করবে।`,
+                    `Thank you! Our senior arborist will call (${phone}) shortly to confirm the visit.`
+                  )}
                 </p>
                 <div className="pt-2 flex justify-center gap-3">
                   <a
-                    href="tel:01883012641"
+                    href={`tel:${hotlineDial}`}
                     className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow"
                   >
-                    📞 জরুরি হলে সরাসরি কল করুন
+                    📞 {txt("common.callNow", "সরাসরি কল করুন", "Call Studio")}
                   </a>
                   <button
+                    type="button"
                     onClick={() => setIsSuccess(false)}
-                    className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-xs font-medium"
+                    className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl text-xs font-medium cursor-pointer"
                   >
-                    নতুন বুকিং
+                    {t("নতুন বুকিং", "New Booking")}
                   </button>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                {errorMsg && (
+                  <p className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-semibold">
+                    {errorMsg}
+                  </p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-700 uppercase tracking-wider">আপনার নাম *</label>
+                    <label className="font-bold text-gray-700 uppercase">
+                      {t("আপনার নাম *", "Your Name *")}
+                    </label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. তানভীর আহমেদ"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl focus:border-emerald-600 focus:outline-none"
                     />
                   </div>
-
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-700 uppercase tracking-wider">মোবাইল নম্বর *</label>
+                    <label className="font-bold text-gray-700 uppercase">
+                      {t("মোবাইল নম্বর *", "Phone Number *")}
+                    </label>
                     <input
                       type="tel"
                       required
                       placeholder="01XXXXXXXXX"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl focus:border-emerald-600 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-700 uppercase tracking-wider">আক্রান্ত গাছের নাম / প্রজাতি *</label>
+                    <label className="font-bold text-gray-700 uppercase">
+                      {t("আক্রান্ত গাছের নাম *", "Plant / Tree Species *")}
+                    </label>
                     <input
                       type="text"
                       required
-                      placeholder="যেমন: আম গাছ, ফিকাস, পাম, বনসাই"
+                      placeholder="যেমন: আম গাছ, ফিকাস, বনসাই"
                       value={treeName}
                       onChange={(e) => setTreeName(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl focus:border-emerald-600 focus:outline-none"
                     />
                   </div>
-
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-700 uppercase tracking-wider">লোকেশন (এলাকা/ঠিকানা) *</label>
+                    <label className="font-bold text-gray-700 uppercase">
+                      {t("লোকেশন (এলাকা) *", "Location / Area *")}
+                    </label>
                     <input
                       type="text"
                       required
                       placeholder="যেমন: রোড ৯/এ, ধানমন্ডি, ঢাকা"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:border-emerald-600 focus:outline-none"
+                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl focus:border-emerald-600 focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-gray-700 uppercase tracking-wider">সমস্যার বিবরণ (লক্ষণ) *</label>
+                  <label className="font-bold text-gray-700 uppercase">
+                    {t("সমস্যার বিবরণ (লক্ষণ) *", "Symptoms & Problem *")}
+                  </label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="পাতায় কালো বা সাদা দাগ, কান্ড শুকিয়ে যাওয়া, শিকড় পচা বা পোকার আক্রমণ সম্পর্কে লিখুন..."
+                    placeholder={t(
+                      "পাতায় কালো/সাদা দাগ, কান্ড শুকিয়ে যাওয়া বা পোকার আক্রমণ সম্পর্কে লিখুন...",
+                      "Describe spots, wilting, fungus, or pest signs..."
+                    )}
                     value={problem}
                     onChange={(e) => setProblem(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 py-2.5 px-3.5 rounded-xl text-xs focus:border-emerald-600 focus:outline-none resize-none"
-                  ></textarea>
+                    className="w-full bg-gray-50 border border-gray-200 py-2.5 px-3.5 rounded-xl focus:border-emerald-600 focus:outline-none resize-none"
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-700 uppercase tracking-wider">পছন্দের ভিজিট টাইম</label>
+                    <label className="font-bold text-gray-700 uppercase">
+                      {t("পছন্দের ভিজিট সময়", "Preferred Visit Window")}
+                    </label>
                     <select
                       value={preferredVisitTime}
                       onChange={(e) => setPreferredVisitTime(e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl text-xs focus:border-emerald-600 focus:outline-none cursor-pointer"
+                      className="w-full bg-gray-50 border border-gray-200 py-3 px-3.5 rounded-xl focus:border-emerald-600 focus:outline-none cursor-pointer"
                     >
                       <option value="Morning (10:00 AM - 1:00 PM)">সকাল (১০:০০ AM - ১:০০ PM)</option>
                       <option value="Afternoon (2:00 PM - 5:00 PM)">বিকাল (২:০০ PM - ৫:০০ PM)</option>
@@ -327,15 +365,19 @@ export default function TreeDoctorPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-bold text-gray-700 uppercase tracking-wider">গাছের ছবি আপলোড (যদি থাকে)</label>
+                    <label className="font-bold text-gray-700 uppercase">
+                      {t("গাছের ছবি আপলোড (ঐচ্ছিক)", "Upload Photo (Optional)")}
+                    </label>
                     <div className="border border-dashed border-gray-300 rounded-xl p-2.5 bg-gray-50 flex items-center justify-between">
                       <input
                         type="file"
                         accept="image/*"
                         onChange={handlePhotoUpload}
-                        className="text-xs text-gray-500"
+                        className="text-xs text-gray-500 max-w-full"
                       />
-                      {photoPreview && <span className="text-emerald-700 font-bold">✓ ছবি সংযুক্ত</span>}
+                      {photoPreview && (
+                        <span className="text-emerald-700 font-bold shrink-0">✓ সংযুক্ত</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -343,128 +385,118 @@ export default function TreeDoctorPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmitting ? "বুকিং প্রসেস হচ্ছে..." : "🩺 ট্রি ডক্টর ভিজিট বুক করুন"}
+                  {isSubmitting
+                    ? t("বুকিং প্রসেস হচ্ছে...", "Processing...")
+                    : txt("treeDoc.submitBtn", "জরুরি পরামর্শ পাঠান", "Dispatch Tree Doctor Request")}
                 </button>
               </form>
             )}
           </div>
 
-          {/* Right Info Card */}
-          <div className="lg:col-span-5 bg-emerald-50/60 p-7 sm:p-9 rounded-3xl border border-emerald-100 space-y-6">
+          <div className="lg:col-span-5 bg-emerald-50/70 p-7 sm:p-9 rounded-3xl border border-emerald-100 space-y-5">
             <div>
               <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest">
-                {t("Expert Arborist Consultation", "Expert Arborist Consultation")}
+                {t("বিশেষজ্ঞ এগ্রোনমিস্ট সহায়তা", "Expert Arborist Consultation")}
               </span>
               <h3 className="text-xl font-serif font-bold text-gray-900 mt-1">
-                {t("Why Choose Tree Doctor Service?", "Why Choose Tree Doctor Service?")}
+                {t("কেন ট্রি ডক্টর সেবা নেবেন?", "Why Choose Tree Doctor Service?")}
               </h3>
             </div>
-
-            <ul className="space-y-3.5 text-xs text-gray-700 leading-relaxed">
-              <li className="flex items-start gap-2.5">
-                <span className="text-emerald-700 font-bold text-base">✓</span>
-                <span><strong>মূল্যবান গাছ রক্ষা:</strong> ছাদবাগান বা ল্যান্ডস্কেপের দুর্লভ লাখ টাকার গাছ অকালে মারা যাওয়ার হাত থেকে রক্ষা করে।</span>
+            <ul className="space-y-3 text-xs text-gray-700 leading-relaxed">
+              <li className="flex gap-2.5">
+                <span className="text-emerald-700 font-bold">✓</span>
+                <span>
+                  {t(
+                    "দুর্লভ ও মূল্যবান বনসাই বা ফলের গাছ অকালে মারা যাওয়ার হাত থেকে রক্ষা করে।",
+                    "Rescues rare bonsai, rooftop fruit trees, and architectural palms from root rot."
+                  )}
+                </span>
               </li>
-              <li className="flex items-start gap-2.5">
-                <span className="text-emerald-700 font-bold text-base">✓</span>
-                <span><strong>রোগ বিস্তার রোধ:</strong> একটি আক্রান্ত গাছ থেকে পুরো বাগানে ছত্রাক বা পোকা ছড়িয়ে পড়া বন্ধ করে।</span>
+              <li className="flex gap-2.5">
+                <span className="text-emerald-700 font-bold">✓</span>
+                <span>
+                  {t(
+                    "একটি আক্রান্ত গাছ থেকে পুরো ছাদবাগানে ছত্রাক বা মিলিবাগ ছড়িয়ে পড়া রোধ করে।",
+                    "Prevents infectious pests and fungus from spreading across your entire estate."
+                  )}
+                </span>
               </li>
-              <li className="flex items-start gap-2.5">
-                <span className="text-emerald-700 font-bold text-base">✓</span>
-                <span><strong>সঠিক বালাইনাশক নির্বাচন:</strong> সাধারণ রাসায়নিক ব্যবহারের পরিবর্তে বিজ্ঞানসম্মত প্রেসক্রিপশন প্রদান।</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="text-emerald-700 font-bold text-base">✓</span>
-                <span><strong>ডিজিটাল মেডিকেল হিস্ট্রি:</strong> প্রতিটি গাছের জন্য ডিজিটাল হেলথ রেকর্ড সংরক্ষণ করা হয়।</span>
+              <li className="flex gap-2.5">
+                <span className="text-emerald-700 font-bold">✓</span>
+                <span>
+                  {t(
+                    "বিজ্ঞানসম্মত অরগানিক ও নিরাপদ প্রেসক্রিপশন ও সার ব্যবস্থাপনা প্রদান।",
+                    "Scientific organic & targeted bio-prescriptions rather than harsh guesswork."
+                  )}
+                </span>
               </li>
             </ul>
+            <a
+              href={`https://wa.me/${(tdCfg.whatsapp || tdCfg.hotline || "").replace(/[^0-9]/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full block text-center py-3 rounded-xl bg-emerald-800 text-white font-bold text-xs hover:bg-emerald-900 transition-colors"
+            >
+              💬 {t("হোয়াটসঅ্যাপে ছবি পাঠান", "Send Plant Photo on WhatsApp")}
+            </a>
+          </div>
+        </div>
 
-            {/* Quick Hotline */}
-            <div className="bg-white p-5 rounded-2xl border border-emerald-200/80 shadow-sm space-y-3">
-              <span className="text-[11px] font-bold text-emerald-800 uppercase block">
-                {t("Emergency Arborist Hotline", "Emergency Arborist Hotline")}
+        {/* Live Public Plant Health Records */}
+        {tdCfg.showShowcaseRecords !== false && records.length > 0 && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
+                {t("লাইভ ক্লিনিক্যাল কেস স্টাডি", "Clinical Treatment Archive")}
               </span>
-              <p className="text-xs text-gray-600">গাছের তাৎক্ষণিক জটিলতায় সরাসরি কথা বলুন আমাদের এগ্রোনমিস্টের সাথে:</p>
-              <a
-                href="tel:01883012641"
-                className="block text-center py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm"
-              >
-                📞 কল করুন: 01883012641
-              </a>
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900 mt-1">
+                {t("সাম্প্রতিক সুস্থ হয়ে ওঠা বৃক্ষের নথি", "Verified Plant Health Records")}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {records.map((rec, i) => (
+                <div
+                  key={rec.id || i}
+                  className="bg-white border border-emerald-100 rounded-3xl overflow-hidden shadow-xs flex flex-col sm:flex-row"
+                >
+                  <div className="sm:w-44 h-48 sm:h-auto bg-emerald-50 shrink-0">
+                    <img
+                      src={
+                        rec.photoUrl ||
+                        rec.photo ||
+                        "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=600&q=80"
+                      }
+                      alt={rec.plantName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-5 space-y-2 text-xs">
+                    <h4 className="font-bold text-base text-gray-900 font-serif">{rec.plantName}</h4>
+                    {rec.location && (
+                      <p className="text-stone-500">📍 {rec.location}</p>
+                    )}
+                    {rec.diseaseHistory && (
+                      <p className="text-rose-700 font-semibold">🩺 {rec.diseaseHistory}</p>
+                    )}
+                    {rec.treatment && (
+                      <p className="text-stone-600">
+                        <strong>Tx:</strong> {rec.treatment}
+                      </p>
+                    )}
+                    {rec.doctorReport && (
+                      <p className="p-2.5 rounded-xl bg-emerald-50 text-emerald-900 italic">
+                        "{rec.doctorReport}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
-        </div>
-
-        {/* Plant Health Record System Section (Requirement #7) */}
-        <div className="space-y-8 pt-8 border-t border-gray-200">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100 px-3.5 py-1 rounded-full">
-              {t("Digital Plant Health Records", "Digital Plant Health Records")}
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-gray-900">
-              {t("Digital Plant Medical Record System", "Digital Plant Medical Record System")}
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-600">
-              ভবিষ্যতে যেকোনো সমস্যা হলে পূর্বের ইতিহাস, সার, কাটাই-ছাঁটাই ও ট্রিটমেন্ট হিস্ট্রি এক ক্লিকে দেখার সুবিধা।
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {samplePlantRecords.map((rec, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-3xl overflow-hidden border border-emerald-100 shadow-sm space-y-4 p-6 sm:p-7"
-              >
-                <div className="flex gap-4 items-start">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100 shrink-0 border border-emerald-100">
-                    <img src={rec.photo} alt={rec.plantName} className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase">
-                      Plant Record
-                    </span>
-                    <h4 className="font-bold text-base font-serif text-gray-900 mt-1">{rec.plantName}</h4>
-                    <p className="text-xs text-gray-500">📍 {rec.location}</p>
-                    <p className="text-[11px] text-gray-400">রোপণের তারিখ: {rec.plantingDate}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-2 border-t border-gray-100">
-                  <div className="bg-red-50/50 p-2.5 rounded-xl border border-red-100/60">
-                    <span className="text-red-700 font-bold block">পূর্বের রোগ (Disease):</span>
-                    <p className="text-gray-700 mt-0.5">{rec.diseaseHistory}</p>
-                  </div>
-                  <div className="bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100/60">
-                    <span className="text-emerald-800 font-bold block">ট্রিটমেন্ট (Treatment):</span>
-                    <p className="text-gray-700 mt-0.5">{rec.treatment}</p>
-                  </div>
-                  <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                    <span className="text-gray-600 font-bold block">সার প্রয়োগ (Fertilizer):</span>
-                    <p className="text-gray-700 mt-0.5">{rec.fertilizer}</p>
-                  </div>
-                  <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                    <span className="text-gray-600 font-bold block">কাটাই-ছাঁটাই (Pruning):</span>
-                    <p className="text-gray-700 mt-0.5">{rec.pruning}</p>
-                  </div>
-                </div>
-
-                <div className="bg-emerald-950 text-emerald-100 p-4 rounded-2xl text-xs space-y-1">
-                  <div className="flex justify-between items-center text-emerald-300 font-semibold text-[11px]">
-                    <span>ট্রি ডক্টর রিপোর্ট (Doctor Report):</span>
-                    <span>পরবর্তী মেইনটেন্যান্স: {rec.nextMaintenance}</span>
-                  </div>
-                  <p className="text-white/90 leading-relaxed italic">
-                    "{rec.doctorReport}"
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        )}
       </div>
     </div>
   );

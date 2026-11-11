@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 interface HeaderProps {
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (tab: string, subTab?: string) => void;
   setEditingService: (service: any) => void;
   fetchData: () => void;
   onToggleSidebar?: () => void;
@@ -41,6 +41,7 @@ const TAB_TITLES: Record<string, { bn: string; en: string }> = {
   "header-nav": { bn: "হেডার ও নেভবার", en: "Navbar" },
   hero: { bn: "হিরো ভিডিও স্টুডিও", en: "Hero Studio" },
   "homepage-sections": { bn: "হোমপেজ সেকশন", en: "Sections" },
+  "about-studio": { bn: "স্টুডিও পরিচিতি ও ইতিহাস", en: "About Studio" },
   "content-manager": { bn: "কনটেন্ট ম্যানেজার", en: "Content" },
   content: { bn: "কনটেন্ট হাব", en: "Content Hub" },
   settings: { bn: "মাস্টার সেটিংস হাব", en: "Settings" },
@@ -269,6 +270,16 @@ export default function Header({
 
       {/* Right: Notifications + Actions (Compact on mobile, full on desktop) */}
       <div className="flex items-center gap-2 shrink-0">
+        {/* Mobile Quick Universal Search Trigger (below lg) */}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent("admin-open-search-modal"))}
+          className="lg:hidden min-h-[40px] min-w-[40px] px-2.5 py-1.5 rounded-xl border border-[#D6D2C4] bg-white hover:bg-[#E4E2D7] text-[#121813] flex items-center justify-center transition-all shadow-2xs cursor-pointer"
+          title="সব অপশন খুঁজুন (Search)"
+          aria-label="Open Dashboard Search"
+        >
+          <span className="text-base leading-none">🔍</span>
+        </button>
         
         {/* Notification Bell Dropdown Container */}
         <div className="relative" ref={dropdownRef}>
@@ -452,8 +463,22 @@ export default function Header({
           )}
         </div>
 
-        {/* Desktop-Only Action Buttons (lg and above, unchanged) */}
+        {/* Desktop-Only Action Buttons (lg and above) */}
         <div className="hidden lg:flex items-center gap-2.5">
+          {/* Quick Search Shortcut */}
+          <button 
+            type="button"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("admin-open-search-modal"));
+            }} 
+            className="min-h-[44px] hover:text-[#121813] cursor-pointer text-xs font-mono font-semibold text-[#121813] bg-white hover:bg-[#E4E2D7] px-3.5 py-1.5 rounded-full border border-[#D6D2C4] transition-all flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
+            title="Search all sections & features (Ctrl + K)"
+          >
+            <span>🔍</span>
+            <span>খুঁজুন</span>
+            <kbd className="text-[9px] px-1.5 py-0.5 bg-[#E4E2D7]/70 border border-[#D6D2C4] rounded text-[#75787B] font-bold">Ctrl K</kbd>
+          </button>
+
           {/* Database Refresh */}
           <button 
             type="button"

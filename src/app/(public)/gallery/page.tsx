@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 
 interface GalleryProject {
@@ -23,6 +24,10 @@ interface GalleryProject {
 
 export default function GalleryPage() {
   const { lang, t } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
+  const pageHeader = getPageHeader("gallery");
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
+  const waDigits = (config.site_config.whatsapp || config.site_config.phone || "8801883012641").replace(/[^0-9]/g, "");
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
@@ -328,9 +333,15 @@ export default function GalleryPage() {
         }
 
         if (allDynamic.length > 0) {
-          const dbIds = new Set(allDynamic.map((f) => f.name.toLowerCase()));
-          const remaining = initialProjects.filter((p) => !dbIds.has(p.name.toLowerCase()));
-          setProjects([...allDynamic, ...remaining]);
+          if (hideStaticFallbacks) {
+            setProjects(allDynamic);
+          } else {
+            const dbIds = new Set(allDynamic.map((f) => f.name.toLowerCase()));
+            const remaining = initialProjects.filter((p) => !dbIds.has(p.name.toLowerCase()));
+            setProjects([...allDynamic, ...remaining]);
+          }
+        } else if (hideStaticFallbacks) {
+          setProjects([]);
         }
       } catch (err) {
         console.warn("Could not fetch DB projects, using rich masterplan projects:", err);
@@ -383,19 +394,13 @@ export default function GalleryPage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full border border-emerald-200">
-            🌿 Signature Project Portfolio
+            {lang === "bn" ? pageHeader.badgeBn : pageHeader.badgeEn}
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            A R Green Garden <br />
-            <span className="text-emerald-700 italic font-medium">
-              Landscape Masterworks & Portfolio
-            </span>
+            {lang === "bn" ? pageHeader.titleBn : pageHeader.titleEn}
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            {t(
-              "ধানমন্ডি, গুলশান, বনানী, উত্তরা ও শ্রীমঙ্গলসহ সারা দেশে আমাদের বাস্তবায়িত ছাদবাগান, লিভিং গ্রিন ওয়াল, বিলাসবহুল ভিলা ও করপোরেট ল্যান্ডস্কেপের সচিত্র রূপান্তর।",
-              "Showcasing signature rooftop gardens, living biophilic walls, luxury private villas, and corporate ecosystems crafted across Dhanmondi, Gulshan, Banani, and all over Bangladesh."
-            )}
+            {lang === "bn" ? pageHeader.subtitleBn : pageHeader.subtitleEn}
           </p>
 
           {/* Location & Title Search */}
@@ -685,7 +690,7 @@ export default function GalleryPage() {
                   {t("এই ধরণের প্রজেক্ট করাতে ফ্রি কোটেশন নিন →", "Get Free Quotation for This Project →")}
                 </Link>
                 <a
-                  href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20saw%20project:%20${encodeURIComponent(selectedProject.name)}%20and%20want%20to%20consult.`}
+                  href={`https://wa.me/${waDigits}?text=Hello%20A%20R%20Green%20Garden,%20I%20saw%20project:%20${encodeURIComponent(selectedProject.name)}%20and%20want%20to%20consult.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-3.5 px-6 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-semibold rounded-xl shadow text-center flex items-center justify-center gap-1.5"

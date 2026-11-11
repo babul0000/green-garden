@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface IReviewItem {
   id?: string;
@@ -20,7 +22,11 @@ const DEFAULT_REVIEWS: IReviewItem[] = [
 ];
 
 export default function TestimonialsPage() {
-  const [reviews, setReviews] = useState<IReviewItem[]>(DEFAULT_REVIEWS);
+  const { language } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
+  const pageHeader = getPageHeader("testimonials");
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
+  const [reviews, setReviews] = useState<IReviewItem[]>(hideStaticFallbacks ? [] : DEFAULT_REVIEWS);
   const [loading, setLoading] = useState(true);
 
   const [newName, setNewName] = useState("");
@@ -42,7 +48,7 @@ export default function TestimonialsPage() {
       const res = await fetch("/api/reviews?status=Approved");
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data) && (data.length > 0 || hideStaticFallbacks)) {
           setReviews(data);
         }
       }
@@ -96,10 +102,14 @@ export default function TestimonialsPage() {
       <div className="max-w-5xl mx-auto flex flex-col gap-12">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto flex flex-col gap-3">
-          <span className="text-xs text-primary-green font-bold uppercase tracking-wider">Customer Feedback</span>
-          <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">Client Testimonials</h1>
+          <span className="text-xs text-primary-green font-bold uppercase tracking-wider">
+            {language === "bn" ? pageHeader.badgeBn : pageHeader.badgeEn}
+          </span>
+          <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#1a3020]">
+            {language === "bn" ? pageHeader.titleBn : pageHeader.titleEn}
+          </h1>
           <p className="text-xs text-foreground/60 leading-relaxed mt-1">
-            Read verified reviews from home owners and corporate developers regarding our landscape styling and garden construction.
+            {language === "bn" ? pageHeader.subtitleBn : pageHeader.subtitleEn}
           </p>
 
           {/* Aggregate Rating Badge */}

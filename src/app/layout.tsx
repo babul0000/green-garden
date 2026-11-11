@@ -2,67 +2,86 @@ import type { Metadata, Viewport } from "next";
 import React from "react";
 import { AuthProvider } from "@/context/AuthContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { SiteConfigProvider } from "@/context/SiteConfigContext";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { prisma } from "@/lib/prisma";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://argreengarden.com"),
-  title: {
-    default: "AR Green Garden - ল্যান্ডস্কেপ আর্কিটেকচার ও গার্ডেন ডিজাইন | Bangladesh",
-    template: "%s | AR Green Garden",
-  },
-  description: "বাংলাদেশের শীর্ষস্থানীয় ল্যান্ডস্কেপ স্থাপত্য, ছাদবাগান, বায়োফিলিক গ্রিন ওয়াল ও আধুনিক বৃক্ষ সেবা প্রতিষ্ঠান।",
-  keywords: [
-    "landscape architecture bangladesh",
-    "rooftop gardening dhaka",
-    "বায়োফিলিক ডিজাইন",
-    "ছাদ বাগান",
-    "ট্রি ডক্টর",
-    "urban forestry",
-    "ar green garden",
-  ],
-  openGraph: {
-    title: "AR Green Garden - ল্যান্ডস্কেপ আর্কিটেকচার ও গার্ডেন ডিজাইন | Bangladesh",
-    description: "বাংলাদেশের শীর্ষস্থানীয় ল্যান্ডস্কেপ স্থাপত্য, ছাদবাগান, বায়োফিলিক গ্রিন ওয়াল ও আধুনিক বৃক্ষ সেবা প্রতিষ্ঠান।",
-    url: "https://argreengarden.com",
-    siteName: "AR Green Garden",
-    locale: "bn_BD",
-    type: "website",
-    images: [
-      {
-        url: "/hero_plants.png",
-        width: 1200,
-        height: 630,
-        alt: "AR Green Garden - Landscape Architecture Studio",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AR Green Garden - ল্যান্ডস্কেপ আর্কিটেকচার ও গার্ডেন ডিজাইন",
-    description: "বাংলাদেশের শীর্ষস্থানীয় ল্যান্ডস্কেপ স্থাপত্য, ছাদবাগান, বায়োফিলিক গ্রিন ওয়াল ও আধুনিক বৃক্ষ সেবা প্রতিষ্ঠান।",
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#2B4D33",
-  width: "device-width",
-  initialScale: 1,
-};
-
-async function getGaId(): Promise<string | null> {
+async function getSiteConfigFromDb(): Promise<Record<string, any>> {
   try {
     const setting = await prisma.setting.findUnique({ where: { key: "site_config" } });
-    const val = setting?.value as any;
-    return val?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID || null;
+    return (setting?.value as Record<string, any>) || {};
   } catch {
-    return process.env.NEXT_PUBLIC_GA_ID || null;
+    return {};
   }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const conf = await getSiteConfigFromDb();
+  const titleDefault =
+    conf.seoTitleDefault ||
+    `${conf.title || "A R Green Garden"} - ল্যান্ডস্কেপ আর্কিটেকচার ও গার্ডেন ডিজাইন | Bangladesh`;
+  const siteTitle = conf.title || "A R Green Garden";
+  const description =
+    conf.seoDescription ||
+    "বাংলাদেশের শীর্ষস্থানীয় ল্যান্ডস্কেপ স্থাপত্য, ছাদবাগান, বায়োফিলিক গ্রিন ওয়াল ও আধুনিক বৃক্ষ সেবা প্রতিষ্ঠান।";
+  const keywordsList =
+    typeof conf.seoKeywords === "string" && conf.seoKeywords.trim()
+      ? conf.seoKeywords.split(",").map((k: string) => k.trim()).filter(Boolean)
+      : [
+          "landscape architecture bangladesh",
+          "rooftop gardening dhaka",
+          "বায়োফিলিক ডিজাইন",
+          "ছাদ বাগান",
+          "ট্রি ডক্টর",
+          "urban forestry",
+          "ar green garden",
+        ];
+  const ogImg = conf.ogImage || conf.logoImage || "/hero_plants.png";
+
+  return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://argreengarden.com"),
+    title: {
+      default: titleDefault,
+      template: `%s | ${siteTitle}`,
+    },
+    description,
+    keywords: keywordsList,
+    openGraph: {
+      title: titleDefault,
+      description,
+      url: "https://argreengarden.com",
+      siteName: siteTitle,
+      locale: "bn_BD",
+      type: "website",
+      images: [
+        {
+          url: ogImg,
+          width: 1200,
+          height: 630,
+          alt: `${siteTitle} - Landscape Architecture Studio`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: titleDefault,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
+
+export async function generateViewport(): Promise<Viewport> {
+  const conf = await getSiteConfigFromDb();
+  return {
+    themeColor: conf.themeColor || "#2B4D33",
+    width: "device-width",
+    initialScale: 1,
+  };
 }
 
 export default async function RootLayout({
@@ -70,7 +89,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const gaId = await getGaId();
+  const conf = await getSiteConfigFromDb();
+  const gaId = conf?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID || null;
 
   return (
     <html lang="bn" className="h-full antialiased">
@@ -79,9 +99,11 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <LanguageProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <SiteConfigProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </SiteConfigProvider>
         </LanguageProvider>
       </body>
     </html>

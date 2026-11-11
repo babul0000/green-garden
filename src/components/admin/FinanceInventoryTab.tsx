@@ -50,6 +50,25 @@ export default function FinanceInventoryTab({ initialQuotationClient }: FinanceI
 
   useEffect(() => {
     fetchFinanceData();
+
+    // Support deep-linking to sub-tab (e.g. ?tab=finance&sub=invoices)
+    const checkSub = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get("sub");
+      if (s && ["quotation", "invoices", "inventory", "accounting"].includes(s)) {
+        setSubTab(s as any);
+      }
+    };
+    checkSub();
+
+    const handleSubNav = (e: any) => {
+      if (e.detail?.sub && ["quotation", "invoices", "inventory", "accounting"].includes(e.detail.sub)) {
+        setSubTab(e.detail.sub);
+      }
+    };
+    window.addEventListener("admin-navigate-subtab", handleSubNav);
+    return () => window.removeEventListener("admin-navigate-subtab", handleSubNav);
   }, []);
 
   return (

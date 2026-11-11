@@ -5,6 +5,7 @@ import SortableList, { DragHandle } from "@/components/shared/SortableList";
 import CloudinaryUploader from "@/components/shared/CloudinaryUploader";
 import { toast, ToastContainer } from "@/components/shared/Toast";
 import ConfirmModal from "@/components/admin/shared/ConfirmModal";
+import { emitSettingsSync } from "@/context/SiteConfigContext";
 
 interface HomeSection {
   id: string;
@@ -25,9 +26,38 @@ export interface ProcessStepItem {
   image?: string;
 }
 
+export interface CampaignSlide {
+  id: string;
+  tagEn?: string;
+  tagBn?: string;
+  titleEn: string;
+  titleBn: string;
+  subtitleEn: string;
+  subtitleBn: string;
+  ctaLabelEn: string;
+  ctaLabelBn: string;
+  ctaHref: string;
+  image: string;
+}
+
 export interface HomepageConfig {
   sections: HomeSection[];
-  manifesto: { lineEn: string; lineBn: string };
+  hideStaticFallbacks?: boolean;
+  manifesto: {
+    word1?: string;
+    word2?: string;
+    word3?: string;
+    lineEn: string;
+    lineBn: string;
+    descriptionEn?: string;
+    descriptionBn?: string;
+    image1?: string;
+    image2?: string;
+    accentColor?: string;
+  };
+  projectsHeader?: { eyebrowEn: string; eyebrowBn: string; titleEn: string; titleBn: string };
+  servicesHeader?: { eyebrowEn: string; eyebrowBn: string; titleEn: string; titleBn: string };
+  activitiesHeader?: { eyebrowEn: string; eyebrowBn: string; titleEn: string; titleBn: string };
   process: {
     titleEn: string;
     titleBn: string;
@@ -39,7 +69,11 @@ export interface HomepageConfig {
     descBn?: string;
     steps: ProcessStepItem[];
   };
-  campaign: { textEn: string; textBn: string };
+  campaign: {
+    textEn: string;
+    textBn: string;
+    items?: CampaignSlide[];
+  };
   whyUs?: {
     titleEn: string;
     titleBn: string;
@@ -67,9 +101,36 @@ const DEFAULT_CONFIG: HomepageConfig = {
     { id: "activities", label: "📸 Recent Activities", visible: true, order: 7, width: "contained", columns: 3, padding: "normal" },
     { id: "life", label: "🌱 Studio Life", visible: true, order: 8, width: "contained", columns: 2, padding: "normal" },
   ],
+  hideStaticFallbacks: false,
   manifesto: {
-    lineEn: "ENABLE CHANGE FOR A BETTER EARTH",
+    word1: "ENABLE",
+    word2: "CHANGE",
+    word3: "FOR",
+    lineEn: "A BETTER EARTH",
     lineBn: "একটি সুন্দর পৃথিবীর জন্য পরিবর্তন আনুন",
+    descriptionEn: "We design biophilic ecosystems, rooftop sanctuaries, and urban forests engineered to thrive sustainably for decades.",
+    descriptionBn: "আমরা টেকসই ছাদবাগান, বায়োফিলিক ইকোসিস্টেম এবং শহুরে সবুজ স্থাপত্য নির্মাণ করি যা প্রজন্মের পর প্রজন্ম টিকে থাকে।",
+    image1: "/hero_plants.png",
+    image2: "/featured_plant.png",
+    accentColor: "#2B4D33",
+  },
+  projectsHeader: {
+    eyebrowEn: "Selected Architectural Works",
+    eyebrowBn: "নির্বাচিত স্থাপত্যকর্ম",
+    titleEn: "Highlight Projects",
+    titleBn: "নির্বাচিত প্রজেক্টসমূহ",
+  },
+  servicesHeader: {
+    eyebrowEn: "Studio Capabilities",
+    eyebrowBn: "আমাদের দক্ষতা ও সেবা",
+    titleEn: "Our Services",
+    titleBn: "বিশেষায়িত সেবাসমূহ",
+  },
+  activitiesHeader: {
+    eyebrowEn: "Studio Dispatch & Events",
+    eyebrowBn: "স্টুডিও সংবাদ ও ইভেন্ট",
+    titleEn: "Recent Activities",
+    titleBn: "সাম্প্রতিক কার্যক্রম",
   },
   process: {
     titleEn: "A Thoughtful Journey",
@@ -157,6 +218,25 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
 
   useEffect(() => {
     fetchConfig();
+
+    // Support deep-linking to sub-tab (e.g. ?tab=homepage-sections&sub=process)
+    const checkSub = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get("sub");
+      if (s && ["sections", "manifesto", "process", "campaign", "studioLife"].includes(s)) {
+        setActiveTab(s as any);
+      }
+    };
+    checkSub();
+
+    const handleSubNav = (e: any) => {
+      if (e.detail?.sub && ["sections", "manifesto", "process", "campaign", "studioLife"].includes(e.detail.sub)) {
+        setActiveTab(e.detail.sub);
+      }
+    };
+    window.addEventListener("admin-navigate-subtab", handleSubNav);
+    return () => window.removeEventListener("admin-navigate-subtab", handleSubNav);
   }, []);
 
   const getAuthHeaders = (): Record<string, string> => {
@@ -183,6 +263,18 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
           setConfig((prev) => ({
             ...DEFAULT_CONFIG,
             ...data.value,
+            manifesto: { ...DEFAULT_CONFIG.manifesto, ...(data.value.manifesto || {}) },
+            projectsHeader: { ...DEFAULT_CONFIG.projectsHeader, ...(data.value.projectsHeader || {}) },
+            servicesHeader: { ...DEFAULT_CONFIG.servicesHeader, ...(data.value.servicesHeader || {}) },
+            activitiesHeader: { ...DEFAULT_CONFIG.activitiesHeader, ...(data.value.activitiesHeader || {}) },
+            campaign: {
+              ...DEFAULT_CONFIG.campaign,
+              ...(data.value.campaign || {}),
+              items:
+                Array.isArray(data.value.campaign?.items) && data.value.campaign.items.length > 0
+                  ? data.value.campaign.items
+                  : DEFAULT_CONFIG.campaign.items,
+            },
             process: {
               ...DEFAULT_CONFIG.process,
               ...(data.value.process || {}),
@@ -210,6 +302,7 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
       if (res.ok) {
         toast.success("হোমপেজ ও প্রসেস কনফিগারেশন সফলভাবে সেভ হয়েছে! ✨", { title: "সংরক্ষিত" });
         window.dispatchEvent(new CustomEvent("homepage-config-updated", { detail: config }));
+        emitSettingsSync("homepage-config-updated");
       } else {
         const err = await res.json().catch(() => ({}));
         toast.error(err.error || "সেভ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।", { title: "ব্যর্থ হয়েছে" });
@@ -782,59 +875,316 @@ export default function HomepageSectionsTab({ defaultTab = "sections" }: Homepag
 
       {/* ── SUB-TAB 3: MANIFESTO ── */}
       {activeTab === "manifesto" && (
-        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-stone-800">✨ Animated Manifesto টেক্সট</h3>
+        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+            <div>
+              <h3 className="font-bold text-stone-800">✨ Animated Manifesto সম্পূর্ণ এডিটর</h3>
+              <p className="text-xs text-stone-400">৩টি অ্যানিমেটেড বড় শব্দ, উপ-শিরোনাম, বিবরণ ও ২টি প্রদর্শনী ছবি পরিবর্তন করুন</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { k: "word1", label: "Word 1 (e.g. ENABLE)", def: "ENABLE" },
+              { k: "word2", label: "Word 2 (e.g. CHANGE)", def: "CHANGE" },
+              { k: "word3", label: "Word 3 (e.g. FOR)", def: "FOR" },
+            ].map((w) => (
+              <div key={w.k}>
+                <label className="text-xs font-semibold text-stone-600 block mb-1">{w.label}</label>
+                <input
+                  type="text"
+                  value={(config.manifesto as any)[w.k] || w.def}
+                  onChange={(e) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, [w.k]: e.target.value } }))}
+                  className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm font-bold uppercase focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-stone-600 block mb-1">English Text</label>
+              <label className="text-xs font-semibold text-stone-600 block mb-1">মূল শিরোনাম (English)</label>
               <input
                 type="text"
                 value={config.manifesto.lineEn}
                 onChange={(e) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, lineEn: e.target.value } }))}
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-stone-600 block mb-1">বাংলা টেক্সট</label>
+              <label className="text-xs font-semibold text-stone-600 block mb-1">মূল শিরোনাম (বাংলা)</label>
               <input
                 type="text"
                 value={config.manifesto.lineBn}
                 onChange={(e) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, lineBn: e.target.value } }))}
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-stone-600 block mb-1">বিবরণ (English)</label>
+              <textarea
+                rows={2}
+                value={config.manifesto.descriptionEn || ""}
+                onChange={(e) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, descriptionEn: e.target.value } }))}
+                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-emerald-500 resize-none"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-stone-600 block mb-1">বিবরণ (বাংলা)</label>
+              <textarea
+                rows={2}
+                value={config.manifesto.descriptionBn || ""}
+                onChange={(e) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, descriptionBn: e.target.value } }))}
+                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-emerald-500 resize-none"
               />
             </div>
           </div>
-          <div className="mt-4 bg-black rounded-2xl p-8 text-center">
-            <p className="text-white/40 text-xs tracking-widest mb-2 uppercase">Preview</p>
-            <h2 className="text-white text-2xl font-black tracking-wider uppercase">{config.manifesto.lineEn}</h2>
-            <p className="text-white/60 text-sm mt-1">{config.manifesto.lineBn}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div>
+              <label className="text-xs font-semibold text-stone-600 block mb-1">বাম পাশের ছবি / আপলোড</label>
+              <CloudinaryUploader
+                value={config.manifesto.image1 || "/hero_plants.png"}
+                onUpload={(url) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, image1: url } }))}
+                folder="homepage"
+                label="Image 1"
+                previewType="image"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-stone-600 block mb-1">ডান পাশের ছবি / আপলোড</label>
+              <CloudinaryUploader
+                value={config.manifesto.image2 || "/featured_plant.png"}
+                onUpload={(url) => setConfig((p) => ({ ...p, manifesto: { ...p.manifesto, image2: url } }))}
+                folder="homepage"
+                label="Image 2"
+                previewType="image"
+              />
+            </div>
+          </div>
+
+          {/* Also Section Heading Overrides */}
+          <div className="pt-4 border-t border-stone-100 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold text-stone-700 text-sm">🏷️ হোমপেজ সেকশন শিরোনাম ও ফলব্যাক নিয়ন্ত্রণ</h4>
+              <label className="flex items-center gap-2 text-xs font-semibold text-stone-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={Boolean(config.hideStaticFallbacks)}
+                  onChange={(e) => setConfig((p) => ({ ...p, hideStaticFallbacks: e.target.checked }))}
+                  className="w-4 h-4 accent-emerald-600"
+                />
+                ডেমো ফলব্যাক হাইড করুন (শুধু ডাটাবেজের আসল প্রজেক্ট/সার্ভিস দেখাবে)
+              </label>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              {(["projectsHeader", "servicesHeader", "activitiesHeader"] as const).map((hdrKey) => {
+                const hdr = config[hdrKey] || { eyebrowEn: "", eyebrowBn: "", titleEn: "", titleBn: "" };
+                return (
+                  <div key={hdrKey} className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                    <span className="font-mono font-bold text-[10px] uppercase text-emerald-700">{hdrKey}</span>
+                    <input
+                      type="text"
+                      placeholder="Eyebrow EN"
+                      value={hdr.eyebrowEn || ""}
+                      onChange={(e) => setConfig((p) => ({ ...p, [hdrKey]: { ...hdr, eyebrowEn: e.target.value } }))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-xs"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Eyebrow BN"
+                      value={hdr.eyebrowBn || ""}
+                      onChange={(e) => setConfig((p) => ({ ...p, [hdrKey]: { ...hdr, eyebrowBn: e.target.value } }))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-xs"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Title EN"
+                      value={hdr.titleEn || ""}
+                      onChange={(e) => setConfig((p) => ({ ...p, [hdrKey]: { ...hdr, titleEn: e.target.value } }))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-xs font-bold"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Title BN"
+                      value={hdr.titleBn || ""}
+                      onChange={(e) => setConfig((p) => ({ ...p, [hdrKey]: { ...hdr, titleBn: e.target.value } }))}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-xs font-bold"
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── SUB-TAB 4: CAMPAIGN ── */}
+      {/* ── SUB-TAB 4: CAMPAIGN SLIDES CRUD ── */}
       {activeTab === "campaign" && (
-        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200 shadow-sm space-y-4">
-          <h3 className="font-bold text-stone-800">📣 Campaign Banner Text</h3>
+        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200 shadow-sm space-y-5">
+          <div className="flex flex-wrap justify-between items-center gap-3 border-b border-stone-100 pb-3">
+            <div>
+              <h3 className="font-bold text-stone-800">📣 ক্যাম্পেইন ব্যানার ও স্লাইডার (Campaign Carousel)</h3>
+              <p className="text-xs text-stone-400">নতুন স্লাইড যোগ, এডিট বা ডিলিট করুন — হোমপেজে সরাসরি ক্যারোসেল হিসেবে দেখাবে</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const newSlide: CampaignSlide = {
+                  id: `camp-${Date.now()}`,
+                  tagEn: "STUDIO INITIATIVE",
+                  tagBn: "নতুন ক্যাম্পেইন",
+                  titleEn: "New Seasonal Landscape Campaign",
+                  titleBn: "নতুন মৌসুমের গার্ডেনিং ক্যাম্পেইন",
+                  subtitleEn: "Custom rooftop design consultation available across Bangladesh.",
+                  subtitleBn: "সারাদেশে কাস্টম ছাদবাগান ও আর্কিটেকচারাল পরামর্শ চলছে।",
+                  ctaLabelEn: "Explore Now",
+                  ctaLabelBn: "বিস্তারিত দেখুন",
+                  ctaHref: "/contact",
+                  image: "/hero_plants.png",
+                };
+                setConfig((p) => ({
+                  ...p,
+                  campaign: { ...p.campaign, items: [...(p.campaign?.items || []), newSlide] },
+                }));
+              }}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer"
+            >
+              + নতুন স্লাইড যোগ করুন
+            </button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-stone-600 block mb-1">English Text</label>
-              <textarea
-                rows={3}
+              <label className="text-xs font-semibold text-stone-600 block mb-1">Fallback Ticker Text (EN)</label>
+              <input
+                type="text"
                 value={config.campaign.textEn}
                 onChange={(e) => setConfig((p) => ({ ...p, campaign: { ...p.campaign, textEn: e.target.value } }))}
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 resize-none"
+                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-stone-600 block mb-1">বাংলা টেক্সট</label>
-              <textarea
-                rows={3}
+              <label className="text-xs font-semibold text-stone-600 block mb-1">ফলব্যাক ব্যানার টেক্সট (BN)</label>
+              <input
+                type="text"
                 value={config.campaign.textBn}
                 onChange={(e) => setConfig((p) => ({ ...p, campaign: { ...p.campaign, textBn: e.target.value } }))}
-                className="w-full border border-stone-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 resize-none"
+                className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:border-emerald-500"
               />
             </div>
+          </div>
+
+          <div className="space-y-4">
+            {(config.campaign?.items || []).map((slide, idx) => (
+              <div key={slide.id} className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-mono font-bold text-emerald-700">SLIDE #{idx + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig((p) => ({
+                        ...p,
+                        campaign: { ...p.campaign, items: (p.campaign?.items || []).filter((s) => s.id !== slide.id) },
+                      }))
+                    }
+                    className="text-xs text-red-600 hover:underline font-semibold cursor-pointer"
+                  >
+                    ✕ স্লাইড ডিলিট করুন
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <input
+                    type="text"
+                    placeholder="Title (EN)"
+                    value={slide.titleEn}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, titleEn: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-semibold"
+                  />
+                  <input
+                    type="text"
+                    placeholder="শিরোনাম (বাংলা)"
+                    value={slide.titleBn}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, titleBn: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-semibold"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Subtitle (EN)"
+                    value={slide.subtitleEn}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, subtitleEn: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="উপ-বিবরণ (বাংলা)"
+                    value={slide.subtitleBn}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, subtitleBn: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="CTA Label (EN)"
+                    value={slide.ctaLabelEn}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, ctaLabelEn: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="বাটন টেক্সট (বাংলা)"
+                    value={slide.ctaLabelBn}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, ctaLabelBn: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="CTA Link (/about, /contact, etc.)"
+                    value={slide.ctaHref}
+                    onChange={(e) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, ctaHref: e.target.value };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    className="px-3 py-2 rounded-xl border border-stone-200 bg-white font-mono"
+                  />
+                  <CloudinaryUploader
+                    value={slide.image}
+                    onUpload={(url) => {
+                      const items = [...(config.campaign?.items || [])];
+                      items[idx] = { ...slide, image: url };
+                      setConfig((p) => ({ ...p, campaign: { ...p.campaign, items } }));
+                    }}
+                    folder="campaigns"
+                    label="Slide Photo"
+                    previewType="image"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

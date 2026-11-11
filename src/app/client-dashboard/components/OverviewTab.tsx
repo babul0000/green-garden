@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import WeatherPlantCareWidget from "@/components/WeatherPlantCareWidget";
 import type { ClientDashboardData, ProjectItem } from "../types";
 
@@ -20,6 +21,9 @@ export default function OverviewTab({
   activeProject, totalBudget, totalPaid, totalDue, projectProgress, onTabChange,
 }: OverviewTabProps) {
   const { t } = useLanguage();
+  const { config } = useSiteConfig();
+  const hotline = config?.site_config?.phone || "01883012641";
+  const whatsappClean = String(config?.site_config?.whatsapp || "8801883012641").replace(/[^0-9]/g, "");
 
   const milestones = [
     { name: "Consultation", done: projectProgress >= 15, active: projectProgress < 25 },
@@ -272,9 +276,9 @@ export default function OverviewTab({
             {t("আপনার বাগানের যেকোনো সমস্যা বা নতুন ডিজাইনের জন্য সরাসরি হটলাইনে যোগাযোগ করুন।", "Connect with our certified landscape architects & tree doctors anytime.")}
           </p>
           <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-            <span className="font-mono font-bold text-emerald-400">01883012641</span>
+            <span className="font-mono font-bold text-emerald-400">{hotline}</span>
             <a
-              href="https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden."
+              href={`https://wa.me/${whatsappClean}?text=Hello%20A%20R%20Green%20Garden,%20I%20would%20like%20to%20consult%20about%20my%20garden.`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-3.5 py-1.5 bg-[#25D366] hover:bg-[#20b858] text-stone-950 font-bold font-mono rounded-xl transition-all shadow-md flex items-center gap-1.5"

@@ -4,10 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Login() {
   const { login } = useAuth();
   const { t } = useLanguage();
+  const { getPageHeader, txt, config } = useSiteConfig();
+  const pageHeader = getPageHeader("login");
+  const companyName = config?.site_config?.companyName || "AR Green Garden";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -102,7 +106,7 @@ export default function Login() {
 
         {/* Bottom copyright */}
         <p className="relative z-10 font-mono text-[10px] text-white/30 uppercase tracking-widest">
-          © 2025 AR Green Garden • Bangladesh
+          © {new Date().getFullYear()} {companyName}
         </p>
       </div>
 
@@ -124,10 +128,10 @@ export default function Login() {
           {/* Heading */}
           <div className="space-y-1.5">
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              {t("লগইন করুন", "Login")}
+              {t(pageHeader.titleBn, pageHeader.titleEn)}
             </h1>
             <p className="text-sm text-white/50 font-sans">
-              {t("আপনার পোর্টালে প্রবেশ করুন", "Access your studio portal")}
+              {t(pageHeader.subtitleBn, pageHeader.subtitleEn)}
             </p>
           </div>
 
@@ -197,7 +201,7 @@ export default function Login() {
                     {t("পাসওয়ার্ড", "Password")}
                   </label>
                   <Link href="/forgot-password" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-sans">
-                    {t("ভুলে গেছেন?", "Forgot Password?")}
+                    {txt("auth.forgotLink", "পাসওয়ার্ড ভুলে গেছেন?", "Forgot Password?")}
                   </Link>
                 </div>
                 <div className="relative">
@@ -236,7 +240,7 @@ export default function Login() {
               <p className="text-center text-sm text-white/40 font-sans pt-1">
                 {t("অ্যাকাউন্ট নেই?", "Don't have an account?")}{" "}
                 <Link href="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
-                  {t("রেজিস্ট্রেশন করুন", "Register Now")}
+                  {txt("auth.createAccountLink", "নতুন একাউন্ট তৈরি করুন", "Create an Account")}
                 </Link>
               </p>
             </form>

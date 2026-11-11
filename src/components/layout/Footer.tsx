@@ -4,58 +4,21 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Footer() {
   const { language, setLanguage, t } = useLanguage();
+  const { config, txt } = useSiteConfig();
   const pathname = usePathname();
   const [submitted, setSubmitted] = useState(false);
-  const [siteSettings, setSiteSettings] = useState<Record<string, any>>({
-    title: "A R GREEN GARDEN",
-    tagline: "LANDSCAPE ARCHITECTURE STUDIO",
-    phone: "01883012641",
-    whatsapp: "8801883012641",
-    whatsappMessage: "Hello A R Green Garden, I would like to consult about my garden.",
-    email: "admin@argreengarden.com",
-    projectEmail: "project@argreengarden.com",
-    address: "৪২/এ, রোড ৯/এ, ধানমন্ডি, ঢাকা-১২০৯, বাংলাদেশ",
-    fbPage: "https://facebook.com",
-    instagram: "https://instagram.com",
-    linkedin: "https://linkedin.com",
-    youtube: "https://youtube.com",
-    estYear: "2026",
-    bio: "বাংলাদেশজুড়ে আধুনিক ল্যান্ডস্কেপ আর্কিটেকচার, ছাদ বাগান, বায়োফিলিক ইন্টেরিয়র ও সার্টিফাইড বৃক্ষ চিকিৎসা সেবা প্রদানে আমরা নিবেদিতপ্রাণ।",
-  });
+  const [submitting, setSubmitting] = useState(false);
+  const [subError, setSubError] = useState("");
+  const [newsName, setNewsName] = useState("");
+  const [newsPhone, setNewsPhone] = useState("");
+  const [newsEmail, setNewsEmail] = useState("");
 
-  // Load master settings dynamically from API
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await fetch("/api/settings", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.value) {
-            setSiteSettings((prev) => ({
-              ...prev,
-              ...data.value,
-            }));
-          }
-        }
-      } catch (err) {
-        console.warn("Footer settings fallback to defaults");
-      }
-    };
-
-    fetchSettings();
-
-    // Listen to live update events from settings tab
-    const handleSettingsUpdated = (e: any) => {
-      if (e?.detail) {
-        setSiteSettings((prev) => ({ ...prev, ...e.detail }));
-      }
-    };
-    window.addEventListener("site-settings-updated", handleSettingsUpdated);
-    return () => window.removeEventListener("site-settings-updated", handleSettingsUpdated);
-  }, []);
+  const siteSettings = config?.site_config || config || {};
+  const footerConf = config?.footer_config || {};
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
@@ -64,10 +27,37 @@ export default function Footer() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    if (!newsEmail.trim()) return;
+    setSubmitting(true);
+    setSubError("");
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newsName,
+          phone: newsPhone,
+          email: newsEmail,
+          source: "footer",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSubmitted(true);
+        setNewsName("");
+        setNewsPhone("");
+        setNewsEmail("");
+        setTimeout(() => setSubmitted(false), 6000);
+      } else {
+        setSubError(data.error || "সাবস্ক্রিপশন ব্যর্থ হয়েছে।");
+      }
+    } catch {
+      setSubError("নেটওয়ার্ক ত্রুটি হয়েছে।");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const whatsappHref = `https://wa.me/${siteSettings.whatsapp || "8801883012641"}?text=${encodeURIComponent(
@@ -78,6 +68,7 @@ export default function Footer() {
     <footer id="newsletter" className="relative w-full text-white">
       
       {/* ================= PART 1: NEWSLETTER SECTION ================= */}
+      {footerConf.showNewsletter !== false && (
       <div className="relative w-full py-20 px-6 sm:px-10 bg-[#16202c] overflow-hidden">
         {/* Background Image Overlay */}
         <div className="absolute inset-0 w-full h-full opacity-25">
@@ -91,13 +82,14 @@ export default function Footer() {
         <div className="relative z-10 max-w-[1380px] mx-auto space-y-8">
           <div className="space-y-2">
             <h2 className="font-display font-light text-3xl sm:text-5xl md:text-[50px] text-white leading-tight">
-              {t("Join Our Community & Be Part of the Vision", "Join Our Community & Be Part of the Vision")}
+              {language === "bn"
+                ? footerConf.newsletterTitleBn || "নিয়মিত বোটানিক্যাল টিপস ও অফার পেতে যুক্ত হোন"
+                : footerConf.newsletterTitleEn || "Join Our Community & Be Part of the Vision"}
             </h2>
             <p className="font-sans text-sm sm:text-base text-white/80 font-normal">
-              {t(
-                "নিয়মিত ল্যান্ডস্কেপ স্থাপত্য আপডেট, ছাদবাগানের আধুনিক টিপস ও গবেষণা পেতে ইমেইল সাবস্ক্রাইব করুন।",
-                "Receive monthly landscape architecture case studies, biophilic tips, and ecological insights."
-              )}
+              {language === "bn"
+                ? footerConf.descriptionBn || "নিয়মিত ল্যান্ডস্কেপ স্থাপত্য আপডেট, ছাদবাগানের আধুনিক টিপস ও গবেষণা পেতে ইমেইল সাবস্ক্রাইব করুন।"
+                : footerConf.descriptionEn || "Receive monthly landscape architecture case studies, biophilic tips, and ecological insights."}
             </p>
           </div>
 
@@ -108,6 +100,8 @@ export default function Footer() {
                 <input
                   type="text"
                   required
+                  value={newsName}
+                  onChange={(e) => setNewsName(e.target.value)}
                   placeholder={t("আপনার নাম", "First Name")}
                   className="w-full bg-white text-[#323232] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a9dff]"
                 />
@@ -115,6 +109,8 @@ export default function Footer() {
               <div>
                 <input
                   type="text"
+                  value={newsPhone}
+                  onChange={(e) => setNewsPhone(e.target.value)}
                   placeholder={t("মোবাইল নম্বর", "Phone Number")}
                   className="w-full bg-white text-[#323232] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a9dff]"
                 />
@@ -123,11 +119,15 @@ export default function Footer() {
                 <input
                   type="email"
                   required
-                  placeholder={t("ইমেইল ঠিকানা", "Email Address")}
+                  value={newsEmail}
+                  onChange={(e) => setNewsEmail(e.target.value)}
+                  placeholder={txt("footer.newsletterPlaceholder", "আপনার ইমেইল লিখুন...", "Email Address")}
                   className="w-full bg-white text-[#323232] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5a9dff]"
                 />
               </div>
             </div>
+
+            {subError && <p className="text-xs text-rose-400 font-semibold">{subError}</p>}
 
             {/* Area of Interest Checkboxes */}
             <div className="space-y-3">
@@ -162,16 +162,20 @@ export default function Footer() {
             <div className="pt-2">
               <button
                 type="submit"
-                className="px-10 py-3 rounded-full bg-[#dedad2] hover:bg-white text-[#3d2e17] font-sans text-sm tracking-wide transition-all shadow-md cursor-pointer font-medium"
+                disabled={submitting}
+                className="px-10 py-3 rounded-full bg-[#dedad2] hover:bg-white text-[#3d2e17] font-sans text-sm tracking-wide transition-all shadow-md cursor-pointer font-medium disabled:opacity-60"
               >
-                {submitted
-                  ? t("ধন্যবাদ! আমরা শীঘ্রই যোগাযোগ করব।", "Thank you! We will reach out soon.")
-                  : t("সাবস্ক্রাইব করুন", "Subscribe Now")}
+                {submitting
+                  ? txt("common.loading", "লোড হচ্ছে...", "Submitting...")
+                  : submitted
+                  ? txt("footer.newsletterSuccess", "ধন্যবাদ! আমাদের মাসিক বোটানিক্যাল নিউজে যুক্ত হয়েছেন।", "Subscribed! Welcome to our dispatch.")
+                  : txt("footer.newsletterSubmit", "সাবস্ক্রাইব করুন", "Subscribe Now")}
               </button>
             </div>
           </form>
         </div>
       </div>
+      )}
 
       {/* ================= PART 2: FOOTER NAVIGATION & COORDINATES ================= */}
       <div className="w-full bg-[#041a2e] text-white/80 py-16 px-6 sm:px-10 border-t border-white/10">
@@ -305,20 +309,21 @@ export default function Footer() {
             <div className="flex flex-col md:items-end gap-2 pt-2">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60">
                 <Link href="/privacy-policy" className="hover:text-white transition-colors">
-                  {t("গোপনীয়তা নীতি", "Privacy Policy")}
+                  {txt("footer.privacyLabel", "গোপনীয়তা নীতি", "Privacy Policy")}
                 </Link>
                 <span className="text-white/30">•</span>
                 <Link href="/terms" className="hover:text-white transition-colors">
-                  {t("শর্তাবলী", "Terms & Conditions")}
+                  {txt("footer.termsLabel", "শর্তাবলী", "Terms & Conditions")}
                 </Link>
                 <span className="text-white/30">•</span>
                 <Link href="/refund-policy" className="hover:text-white transition-colors">
-                  {t("রিফান্ড পলিসি", "Refund Policy")}
+                  {txt("footer.refundLabel", "রিফান্ড পলিসি", "Refund Policy")}
                 </Link>
               </div>
 
               <p className="text-[11px] text-white/50">
-                © {siteSettings.estYear || "2026"} {siteSettings.title || "এ আর গ্রিন গার্ডেন"} • {t("সর্বস্বত্ব সংরক্ষিত", "All rights reserved.")}
+                {footerConf.copyrightText ||
+                  `© ${siteSettings.estYear || "2026"} ${siteSettings.title || "এ আর গ্রিন গার্ডেন"} • ${t("সর্বস্বত্ব সংরক্ষিত", "All rights reserved.")}`}
               </p>
             </div>
           </div>

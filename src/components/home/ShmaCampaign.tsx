@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface CampaignItem {
   titleBn: string;
@@ -36,15 +37,19 @@ interface CampaignConfig {
 
 export default function ShmaCampaign({ campaignConfig }: { campaignConfig?: CampaignConfig }) {
   const { language } = useLanguage();
+  const { config } = useSiteConfig();
+  const liveCampaignCfg: CampaignConfig = campaignConfig?.items?.length
+    ? campaignConfig
+    : config?.homepage_sections?.campaign || campaignConfig || {};
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const activeCampaigns = campaignConfig?.items && campaignConfig.items.length > 0
-    ? campaignConfig.items
-    : campaignConfig?.textEn
+  const activeCampaigns = liveCampaignCfg?.items && liveCampaignCfg.items.length > 0
+    ? liveCampaignCfg.items
+    : liveCampaignCfg?.textEn
     ? [
         {
-          titleBn: campaignConfig.textBn || campaigns[0].titleBn,
-          titleEn: campaignConfig.textEn || campaigns[0].titleEn,
+          titleBn: liveCampaignCfg.textBn || campaigns[0].titleBn,
+          titleEn: liveCampaignCfg.textEn || campaigns[0].titleEn,
           subtitleBn: campaigns[0].subtitleBn,
           subtitleEn: campaigns[0].subtitleEn,
           image: campaigns[0].image,
@@ -79,17 +84,33 @@ export default function ShmaCampaign({ campaignConfig }: { campaignConfig?: Camp
 
       {/* Centered Campaign Typography */}
       <div className="relative z-10 text-center text-white px-6 space-y-4 max-w-4xl mx-auto">
+        {(active as any).tagEn && (
+          <span className="inline-block px-3.5 py-1 rounded-full bg-white/15 border border-white/25 text-[11px] font-mono uppercase tracking-widest">
+            {language === "bn" ? ((active as any).tagBn || (active as any).tagEn) : (active as any).tagEn}
+          </span>
+        )}
         <h2 className="font-display font-light text-3xl sm:text-5xl md:text-6xl tracking-wider uppercase">
-          {active.titleEn}
+          {language === "bn" ? (active.titleBn || active.titleEn) : (active.titleEn || active.titleBn)}
         </h2>
         <p className="font-display font-light text-base sm:text-xl md:text-2xl text-white/90 tracking-wide">
-          {language === "bn" ? active.subtitleBn : active.subtitleEn}
+          {language === "bn" ? (active.subtitleBn || active.subtitleEn) : (active.subtitleEn || active.subtitleBn)}
         </p>
+        {(active as any).ctaHref && (
+          <div className="pt-2">
+            <a
+              href={(active as any).ctaHref}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-[#121813] text-xs font-bold uppercase tracking-wider hover:bg-[#e4e2d7] transition-colors"
+            >
+              <span>{language === "bn" ? ((active as any).ctaLabelBn || "আরও জানুন") : ((active as any).ctaLabelEn || "Explore")}</span>
+              <span>→</span>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Carousel Dots */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
-        {campaigns.map((_, idx) => (
+        {activeCampaigns.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}

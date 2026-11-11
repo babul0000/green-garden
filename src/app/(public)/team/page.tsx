@@ -1,220 +1,224 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
-interface PublicEmployee {
+interface TeamMember {
   id: string;
-  employeeId: string;
   name: string;
   designation: string;
-  department: string;
-  responsibility?: string;
-  experience: string;
+  dept?: string;
+  bio: string;
   education?: string;
-  training?: string;
-  skills: string[];
+  experience?: string;
   photo?: string;
+  skills: string[];
 }
 
-export default function PublicTeamPage() {
+interface TeamConfig {
+  badgeEn?: string;
+  badgeBn?: string;
+  titleEn?: string;
+  titleBn?: string;
+  subtitleEn?: string;
+  subtitleBn?: string;
+  members?: TeamMember[];
+}
+
+const DEFAULT_TEAM: TeamMember[] = [
+  {
+    id: "t-1",
+    name: "Ar. Rafiqul Islam",
+    designation: "Principal Landscape Architect",
+    dept: "Architecture Studio",
+    bio: "B.Arch (BUET) with 12+ years designing structural rooftop estates and bioclimatic terraces across Dhaka.",
+    education: "B.Arch, BUET Dhaka",
+    experience: "12+ Years Exp",
+    photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+    skills: ["Rooftop Engineering", "BIM 3D", "Waterproofing"],
+  },
+  {
+    id: "t-2",
+    name: "Dr. Nusrat Jahan",
+    designation: "Senior Agronomist & Tree Doctor",
+    dept: "Plant Pathology Clinic",
+    bio: "Specializes in organic disease therapy, tropical bonsai nutrition, and soil microbiome restoration.",
+    education: "PhD Horticulture, BAU",
+    experience: "9+ Years Exp",
+    photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80",
+    skills: ["Plant Pathology", "Organic Pest Control", "Soil Science"],
+  },
+];
+
+export default function TeamPage() {
   const { language, t } = useLanguage();
-  const [team, setTeam] = useState<PublicEmployee[]>([]);
+  const { config, txt } = useSiteConfig();
+  const bn = language === "bn";
+
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
+  const teamCfg = (config.team_config as TeamConfig) || {};
+
+  const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTeam = async () => {
+    const loadTeam = async () => {
       try {
-        const res = await fetch("/api/employees?public=true", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setTeam(data);
-            setLoading(false);
-            return;
+        const [empRes, cfgRes] = await Promise.all([
+          fetch(`/api/employees?public=true&_t=${Date.now()}`, { cache: "no-store" }),
+          fetch(`/api/settings?key=team_config&_t=${Date.now()}`, { cache: "no-store" }),
+        ]);
+
+        let dynamicMembers: TeamMember[] = [];
+        if (cfgRes.ok) {
+          const cfgData = await cfgRes.json();
+          if (Array.isArray(cfgData?.value?.members) && cfgData.value.members.length > 0) {
+            dynamicMembers = cfgData.value.members;
           }
         }
-        // Check settings team_config if employees empty
-        const configRes = await fetch(`/api/settings?key=team_config&_t=${Date.now()}`, { cache: "no-store" });
-        if (configRes.ok) {
-          const configData = await configRes.json();
-          if (configData?.value?.members && configData.value.members.length > 0) {
-            setTeam(configData.value.members.map((m: any, i: number) => ({
-              id: m.id || `team-${i}`,
-              employeeId: `EMP-${100 + i}`,
-              name: m.name,
-              designation: m.designation,
-              department: m.dept || "Architecture & Design",
-              experience: m.experience || "3+ Years",
-              skills: typeof m.skills === "string" ? m.skills.split(",").map((s: string) => s.trim()) : (m.skills || []),
-              photo: m.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
-            })));
-            setLoading(false);
-            return;
+
+        if (empRes.ok) {
+          const emps = await empRes.json();
+          if (Array.isArray(emps) && emps.length > 0) {
+            const empCards: TeamMember[] = emps.map((e: any) => ({
+              id: `emp-${e.id}`,
+              name: e.name,
+              designation: e.designation || e.role || "Landscape Specialist",
+              dept: e.department || "Studio Operations",
+              bio: e.bio || "Dedicated landscape specialist at A R Green Garden.",
+              education: e.education || "Certified Specialist",
+              experience: e.experience || "5+ Years",
+              photo: e.avatar || e.photo || "",
+              skills: Array.isArray(e.skills) ? e.skills : [e.role || "Landscaping"],
+            }));
+            // Combine CMS custom members with DB employees without duplicates by name
+            const existingNames = new Set(dynamicMembers.map((m) => m.name.toLowerCase()));
+            empCards.forEach((ec) => {
+              if (!existingNames.has(ec.name.toLowerCase())) dynamicMembers.push(ec);
+            });
           }
+        }
+
+        if (dynamicMembers.length > 0) {
+          setTeam(dynamicMembers);
+        } else {
+          setTeam(hideStaticFallbacks ? [] : DEFAULT_TEAM);
         }
       } catch {
-        // Use fallback if server not currently answering
+        setTeam(hideStaticFallbacks ? [] : DEFAULT_TEAM);
+      } finally {
+        setLoading(false);
       }
-
-      // High-quality verified team fallback
-      setTeam([
-        {
-          id: "e1",
-          employeeId: "EMP-101",
-          name: "Md. Rahim",
-          designation: "Senior Tree Doctor & Agronomist",
-          department: "Tree Doctor & Plant Health",
-          responsibility: "Clinical tree diagnosis, surgery, disease control & pathology testing",
-          experience: "৪ Years ৬ Months",
-          education: "B.Sc in Horticulture & Agriculture, BAU",
-          training: "Advanced Arboriculture & Tree Surgery Certified",
-          skills: ["Tree Diagnosis", "Plant Health", "Pest Management", "Soil Testing", "Fungicide Application"],
-          photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
-        },
-        {
-          id: "e2",
-          employeeId: "EMP-102",
-          name: "Ar. Sultana Yasmin",
-          designation: "Principal Landscape Architect",
-          department: "Landscape Design",
-          responsibility: "3D master layouts, rooftop load calculations, hardscape structural plans",
-          experience: "৬ Years ২ Months",
-          education: "B.Arch, BUET",
-          training: "Certified Sustainable Urban Landscape Designer",
-          skills: ["Rooftop Load Analysis", "Eco-Balcony", "Water Features", "Pergola Design"],
-          photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80",
-        },
-        {
-          id: "e3",
-          employeeId: "EMP-103",
-          name: "Engr. Md. Belal",
-          designation: "Smart Irrigation & Hydraulics Specialist",
-          department: "Irrigation & Drainage",
-          responsibility: "Automatic drip networks, rotary sprinkler arrays & drainage engineering",
-          experience: "৫ Years ৮ Months",
-          education: "B.Sc in Water Resources Engineering",
-          training: "Micro-Irrigation Automation Systems Certified",
-          skills: ["Automated Timers", "Rotary Sprinklers", "Sub-surface Drip", "Rain Sensors"],
-          photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&q=80",
-        },
-        {
-          id: "e4",
-          employeeId: "EMP-104",
-          name: "Abdul Halim",
-          designation: "Master Gardener & Nursery In-charge",
-          department: "Garden Maintenance",
-          responsibility: "Pruning artistry, nursery plant propagation & fertilizer schedule supervision",
-          experience: "১০ Years ০ Months",
-          education: "Certified Master Gardener, Dhaka Horticulture Center",
-          training: "Japanese Bonsai & Topiary Artistry",
-          skills: ["Bonsai Sculpting", "Soil Conditioning", "Lawn Sod Care", "Grafting"],
-          photo: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=600&q=80",
-        },
-      ]);
-      setLoading(false);
     };
+    loadTeam();
+  }, [hideStaticFallbacks]);
 
-    fetchTeam();
-  }, []);
+  const badge = bn
+    ? teamCfg.badgeBn || "স্টুডিও আর্কিটেক্ট ও বোটানিস্ট টিম"
+    : teamCfg.badgeEn || "Professional Landscape Team";
+  const title = bn
+    ? teamCfg.titleBn || "আমাদের বিশেষজ্ঞ দল"
+    : teamCfg.titleEn || "Meet the Experts Behind A R Green Garden";
+  const subtitle = bn
+    ? teamCfg.subtitleBn || "দক্ষ ল্যান্ডস্কেপ আর্কিটেক্ট, ইঞ্জিনিয়ার ও বৃক্ষ চিকিৎসকদের সমন্বয়ে আমাদের টিম।"
+    : teamCfg.subtitleEn || "A multidisciplinary studio of architects, structural engineers, and agronomists.";
 
   return (
-    <div className="bg-gradient-to-b from-emerald-50/40 via-white to-white min-h-screen py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-16">
-        
-        {/* Page Header */}
+    <div className="min-h-screen bg-[#fafafa] pt-28 pb-24 px-6">
+      <div className="max-w-7xl mx-auto space-y-14">
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-            <span>👥</span> Professional Landscape Team
+            <span>👥</span> {badge}
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            Meet the Experts Behind A R Green Garden
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#142a1b] leading-tight">
+            {title}
           </h1>
-          <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            {t(
-              "অভিজ্ঞ ল্যান্ডস্কেপ আর্কিটেক্ট, সার্টিফাইড ট্রি ডক্টর এবং দক্ষ হাইড্রোলিক ইঞ্জিনিয়ারদের সমন্বয়ে আমাদের নিবেদিত কর্মীদল।",
-              "A dedicated team of experienced landscape architects, certified plant doctors, and hydraulic engineers."
-            )}
-          </p>
+          <p className="text-sm md:text-base text-stone-600 leading-relaxed">{subtitle}</p>
         </div>
 
-        {/* Team Cards Grid */}
         {loading ? (
           <div className="text-center py-20">
-            <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-10 h-10 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          </div>
+        ) : team.length === 0 ? (
+          <div className="text-center py-16 bg-white border border-stone-200 rounded-3xl text-stone-400 text-sm">
+            {t("টিম মেম্বার তালিকা এখনো হালনাগাদ করা হয়নি।", "No team profiles configured yet.")}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {team.map((m) => (
               <div
                 key={m.id}
-                className="bg-white rounded-[32px] overflow-hidden border border-emerald-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
+                className="bg-white rounded-3xl border border-stone-200 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  {/* Photo Container */}
-                  <div className="relative aspect-[4/4] overflow-hidden bg-gray-100">
+                  <div className="relative aspect-[4/4] overflow-hidden bg-stone-100">
                     <img
-                      src={m.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80"}
+                      src={
+                        m.photo ||
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80"
+                      }
                       alt={m.name}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute top-3 right-3 bg-emerald-800/90 text-white text-[11px] font-semibold px-3 py-1 rounded-full backdrop-blur-md">
-                      {m.experience}
-                    </div>
+                    {m.experience && (
+                      <div className="absolute top-3 right-3 bg-emerald-800/90 text-white text-[11px] font-semibold px-3 py-1 rounded-full backdrop-blur-md">
+                        {m.experience}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Body Info */}
                   <div className="p-6 space-y-3">
                     <div>
-                      <h3 className="font-bold text-gray-900 text-lg font-serif">{m.name}</h3>
+                      <h3 className="font-bold text-[#142a1b] text-lg font-serif">{m.name}</h3>
                       <p className="text-xs font-semibold text-emerald-700 mt-0.5">{m.designation}</p>
-                      <span className="text-[11px] text-gray-400 block">{m.department}</span>
                     </div>
 
+                    {m.bio && <p className="text-xs text-stone-600 leading-relaxed">{m.bio}</p>}
+
                     {m.education && (
-                      <div className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                        <span className="font-bold text-gray-700 block text-[10px] uppercase">যোগ্যতা (Education):</span>
+                      <div className="text-xs text-stone-600 bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                        <span className="font-bold text-stone-700 block text-[10px] uppercase">
+                          {t("যোগ্যতা:", "Credentials:")}
+                        </span>
                         {m.education}
                       </div>
                     )}
 
-                    {m.responsibility && (
-                      <p className="text-xs text-gray-600 leading-relaxed">
-                        {m.responsibility}
-                      </p>
-                    )}
-
-                    {/* Verified Skills */}
-                    <div className="space-y-1 pt-1">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">অভিজ্ঞতা ও দক্ষতা:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {m.skills.map((s, idx) => (
-                          <span
-                            key={idx}
-                            className="text-[10px] bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-md font-medium border border-emerald-100"
-                          >
-                            ✓ {s}
-                          </span>
-                        ))}
+                    {Array.isArray(m.skills) && m.skills.length > 0 && (
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">
+                          {t("অভিজ্ঞতা ও দক্ষতা:", "Specialties:")}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {m.skills.map((s, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-semibold"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="p-6 pt-0">
                   <Link
                     href={`/contact?consultant=${encodeURIComponent(m.name)}`}
-                    className="w-full block text-center py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-sm transition-colors"
+                    className="w-full block text-center py-3 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold shadow-sm transition-colors"
                   >
-                    কনসালটেশন বুক করুন →
+                    {txt("team.ctaBtn", "টিমের সাথে কথা বলুন", "Consult Our Architects")}
                   </Link>
                 </div>
               </div>
             ))}
           </div>
         )}
-
       </div>
     </div>
   );

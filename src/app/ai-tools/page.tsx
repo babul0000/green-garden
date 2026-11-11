@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface ChatMessage {
   id: string;
@@ -22,11 +23,16 @@ const QUICK_PROMPTS = [
 
 export default function AIToolsPage() {
   const { t } = useLanguage();
+  const { config, getPageHeader } = useSiteConfig();
+  const pageHeader = getPageHeader("aiTools");
+  const companyName = config?.site_config?.companyName || "A R Green Garden";
+  const phone = config?.site_config?.phone || "01883012641";
+  const whatsappClean = String(config?.site_config?.whatsapp || "8801883012641").replace(/[^0-9]/g, "");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome",
       role: "assistant",
-      content: `নমস্কার / আসসালামু আলাইকুম! 🌿\n\nআমি **A R Green Garden-এর স্মার্ট এআই বৃক্ষ বিশারদ ও গার্ডেন সহকারী**।\n\nআপনি আপনার গাছের যেকোনো রোগবালাই, পাতা শুকানো, পোকার আক্রমণ, সার ও মাটির সঠিক ব্যবহার, ছাদবাগান কিংবা ল্যান্ডস্কেপিং সংক্রান্ত যেকোনো প্রশ্ন করতে পারেন—আমি বিস্তারিত সমাধান দেব।\n\n📷 **টিপ:** আপনার অসুস্থ গাছের একটি ছবি তুলে নিচে সংযুক্ত করুন, আমি রোগ নির্ণয় করে প্রেসক্রিপশন দিয়ে দেব!`,
+      content: `নমস্কার / আসসালামু আলাইকুম! 🌿\n\nআমি **${companyName}-এর স্মার্ট এআই বৃক্ষ বিশারদ ও গার্ডেন সহকারী**।\n\nআপনি আপনার গাছের যেকোনো রোগবালাই, পাতা শুকানো, পোকার আক্রমণ, সার ও মাটির সঠিক ব্যবহার, ছাদবাগান কিংবা ল্যান্ডস্কেপিং সংক্রান্ত যেকোনো প্রশ্ন করতে পারেন—আমি বিস্তারিত সমাধান দেব।\n\n📷 **টিপ:** আপনার অসুস্থ গাছের একটি ছবি তুলে নিচে সংযুক্ত করুন, আমি রোগ নির্ণয় করে প্রেসক্রিপশন দিয়ে দেব!`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -250,7 +256,7 @@ export default function AIToolsPage() {
                 🗑️ নতুন চ্যাট
               </button>
               <a
-                href="tel:01883012641"
+                href={`tel:${phone}`}
                 className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all"
               >
                 <span>🚨</span> অন-কল ডাক্তার
@@ -411,7 +417,7 @@ export default function AIToolsPage() {
                 <Link href="/tree-doctor" className="text-emerald-700 font-bold hover:underline">
                   জরুরি ডাক্তার ভিজিট রিকোয়েস্ট →
                 </Link>
-                <a href="https://wa.me/8801883012641" target="_blank" rel="noopener noreferrer" className="text-[#25D366] font-bold hover:underline flex items-center gap-1">
+                <a href={`https://wa.me/${whatsappClean}`} target="_blank" rel="noopener noreferrer" className="text-[#25D366] font-bold hover:underline flex items-center gap-1">
                   <span>💬</span> WhatsApp
                 </a>
               </div>

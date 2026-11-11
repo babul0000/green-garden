@@ -68,6 +68,32 @@ export const POST = withAuthErrorHandling(async (req: Request) => {
 export const GET = withAuthErrorHandling(async (req: Request) => {
   const { searchParams } = new URL(req.url);
   const projectId = searchParams.get("projectId");
+  const isPublicShowcase = searchParams.get("public") === "true";
+
+  if (isPublicShowcase) {
+    const publicRecords = await prisma.plantHealthRecord.findMany({
+      take: 12,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        plantName: true,
+        photoUrl: true,
+        plantingDate: true,
+        location: true,
+        diseaseHistory: true,
+        treatment: true,
+        fertilizer: true,
+        pruning: true,
+        nextMaintenanceDate: true,
+        doctorReport: true,
+        createdAt: true,
+        project: {
+          select: { name: true, category: true },
+        },
+      },
+    });
+    return NextResponse.json(publicRecords, { headers: NO_CACHE });
+  }
 
   // If no specific projectId is requested, require authenticated user
   if (!projectId) {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface ShmaService {
   id: string;
@@ -88,6 +89,8 @@ const DEFAULT_SERVICES: ShmaService[] = [
 
 export default function ShmaServicesFlip({ columns }: { columns?: number } = {}) {
   const { language, t } = useLanguage();
+  const { config, txt } = useSiteConfig();
+  const hdr = config?.homepage_sections?.servicesHeader;
   const [serviceList, setServiceList] = useState<ShmaService[]>(DEFAULT_SERVICES);
   const [flippedId, setFlippedId] = useState<string | null>(null);
 
@@ -170,11 +173,15 @@ export default function ShmaServicesFlip({ columns }: { columns?: number } = {})
         <div className="flex flex-wrap items-baseline justify-between gap-4 mb-4">
           <div className="flex items-baseline gap-3">
             <h2 className="font-display font-light text-3xl sm:text-4xl md:text-[40px] text-[#3d2e17]">
-              Our Services
+              {language === "bn"
+                ? hdr?.titleBn || txt("home.services.title", "আমাদের সেবাসমূহ", "Our Services")
+                : hdr?.titleEn || txt("home.services.title", "আমাদের সেবাসমূহ", "Our Services")}
             </h2>
           </div>
           <span className="font-mono text-xs uppercase tracking-widest text-[#75787b]">
-            {t("স্থাপত্য ও নকশা শৃঙ্খলা", "Architectural Disciplines")}
+            {language === "bn"
+              ? hdr?.eyebrowBn || txt("home.services.eyebrow", "স্থাপত্য ও নকশা শৃঙ্খলা", "Architectural Disciplines")
+              : hdr?.eyebrowEn || txt("home.services.eyebrow", "স্থাপত্য ও নকশা শৃঙ্খলা", "Architectural Disciplines")}
           </span>
         </div>
         <div className="w-full h-[1px] bg-[#e7e7e7]"></div>

@@ -3,13 +3,18 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
+import { DEFAULT_WIZARD_CONFIG, WizardConfig } from "@/types/cms";
 
 export default function DesignYourGardenWizard() {
   const { user } = useAuth();
   const { language, t } = useLanguage();
+  const { getSection } = useSiteConfig();
+  const wizardCfg = getSection<WizardConfig>("wizard_config", DEFAULT_WIZARD_CONFIG);
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [spaceType, setSpaceType] = useState("Rooftop");
-  const [designStyle, setDesignStyle] = useState("Modern");
+  const [spaceType, setSpaceType] = useState(wizardCfg.spaces?.[0]?.id || "Rooftop");
+  const [designStyle, setDesignStyle] = useState(wizardCfg.styles?.[0]?.id || "Modern");
   const [features, setFeatures] = useState<string[]>(["Lawn", "Lighting", "Irrigation"]);
   const [sitePhotoPreview, setSitePhotoPreview] = useState<string | null>(null);
   const [approxArea, setApproxArea] = useState<number>(800);
@@ -23,122 +28,33 @@ export default function DesignYourGardenWizard() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [referenceCode, setReferenceCode] = useState("");
 
-  // Step 1 spaces
-  const spaces = [
-    {
-      id: "Rooftop",
-      labelBn: "ছাদবাগান",
-      labelEn: "Rooftop Garden",
-      icon: "🌇",
-      descBn: "কংক্রিট ছাদের ওপর ওয়াটারপ্রুফ মেমব্রেন ও ড্রেনেজযুক্ত বাগান",
-      descEn: "Waterproof membrane and specialized drainage on concrete slab",
-    },
-    {
-      id: "Balcony",
-      labelBn: "বারান্দা",
-      labelEn: "Balcony",
-      icon: "🪴",
-      descBn: "কমপ্যাক্ট আধুনিক ব্যালকনি প্ল্যান্টার ও হ্যাঙ্গিং পট",
-      descEn: "Compact modern balcony planters and hanging pots",
-    },
-    {
-      id: "Yard",
-      labelBn: "উঠান বা আঙিনা",
-      labelEn: "Courtyard & Lawn",
-      icon: "🏡",
-      descBn: "বাড়ির আঙিনায় প্রাকৃতিক ঘাসের লন ও ওয়াকওয়ে",
-      descEn: "Natural sod lawn and paved garden walkways for houses",
-    },
-    {
-      id: "Office",
-      labelBn: "করপোরেট অফিস",
-      labelEn: "Corporate Office",
-      icon: "🏢",
-      descBn: "অফিসের অভ্যন্তরে বায়োফিলিক ডিজাইন ও ইনডোর প্ল্যান্ট",
-      descEn: "Indoor biophilic architecture and air-purifying foliage",
-    },
-    {
-      id: "Resort",
-      labelBn: "রিসোর্ট ও ফার্মহাউস",
-      labelEn: "Resort & Farmhouse",
-      icon: "🌴",
-      descBn: "প্রাকৃতিক রিসোর্ট ও সুবিশাল ল্যান্ডস্কেপ জোন",
-      descEn: "Expansive landscape masterplans for retreats and estates",
-    },
-    {
-      id: "Restaurant",
-      labelBn: "রুফটপ ক্যাফে ও রেস্তোরাঁ",
-      labelEn: "Rooftop Café & Dining",
-      icon: "☕",
-      descBn: "গ্রাহকদের আকর্ষিত করার মতো ওপেন এয়ার ক্যাফে ল্যান্ডস্কেপ",
-      descEn: "Open-air restaurant dining surrounded by curated nature",
-    },
-  ];
+  const spaces = (wizardCfg.spaces && wizardCfg.spaces.length > 0 ? wizardCfg.spaces : DEFAULT_WIZARD_CONFIG.spaces).map((s) => ({
+    id: s.id,
+    labelBn: s.labelBn,
+    labelEn: s.labelEn,
+    icon: s.icon || "🌿",
+    descBn: s.descBn || "",
+    descEn: s.descEn || "",
+  }));
 
-  // Step 2 design styles
-  const styles = [
-    {
-      id: "Luxury",
-      labelBn: "বিলাসবহুল ও প্রিমিয়াম",
-      labelEn: "Luxury & Premium",
-      icon: "👑",
-      descBn: "আমদানিকৃত দুর্লভ গাছ, মার্বেল ফাউন্টেন ও আর্কিটেকচারাল পারগোলা",
-      descEn: "Exotic specimen trees, architectural pergolas, and stone fountains",
-    },
-    {
-      id: "Modern",
-      labelBn: "আধুনিক ও মিনিমাল",
-      labelEn: "Modern Minimalist",
-      icon: "📐",
-      descBn: "পরিচ্ছন্ন জ্যামিতিক নকশা, স্মার্ট লাইটিং ও সহজ পরিচর্যা",
-      descEn: "Clean geometric layouts, ambient LED illumination, low maintenance",
-    },
-    {
-      id: "Natural",
-      labelBn: "প্রাকৃতিক ও ট্রপিক্যাল",
-      labelEn: "Tropical Natural",
-      icon: "🌿",
-      descBn: "ঘন সবুজ ট্রপিক্যাল অরণ্য ভাব ও দেশীয় ফুলের সমাহার",
-      descEn: "Lush endemic green foliage and fragrant flowering species",
-    },
-    {
-      id: "Standard",
-      labelBn: "স্ট্যান্ডার্ড ও বাজেট-বান্ধব",
-      labelEn: "Standard Budget-Friendly",
-      icon: "🎯",
-      descBn: "বাজেট-বান্ধব অথচ দীর্ঘস্থায়ী নান্দনিক গাছের সমাহার",
-      descEn: "Resilient, high-value, durable garden setups within budget",
-    },
-  ];
+  const styles = (wizardCfg.styles && wizardCfg.styles.length > 0 ? wizardCfg.styles : DEFAULT_WIZARD_CONFIG.styles).map((st) => ({
+    id: st.id,
+    labelBn: st.labelBn,
+    labelEn: st.labelEn,
+    icon: st.icon || "📐",
+    descBn: st.descBn || "",
+    descEn: st.descEn || "",
+  }));
 
-  // Step 3 features
-  const featureList = [
-    { id: "Lawn", labelBn: "ঘাসের লন", labelEn: "Natural Lawn", icon: "🌱" },
-    { id: "Flower Bed", labelBn: "ফুলের বেড", labelEn: "Flower Bed", icon: "🌸" },
-    { id: "Vertical Garden", labelBn: "দেয়ালবাগান", labelEn: "Living Vertical Wall", icon: "🍃" },
-    { id: "Seating", labelBn: "বসার জায়গা", labelEn: "Outdoor Seating", icon: "🪑" },
-    { id: "Pergola", labelBn: "কাঠের পারগোলা", labelEn: "Wooden Pergola", icon: "🪵" },
-    { id: "Fountain", labelBn: "ফোয়ারা বা ঝর্ণা", labelEn: "Water Fountain", icon: "⛲" },
-    { id: "Lighting", labelBn: "গার্ডেন লাইটিং", labelEn: "Garden Mood Lighting", icon: "💡" },
-    { id: "Irrigation", labelBn: "অটো ড্রিপ সেচ", labelEn: "Smart Drip Irrigation", icon: "💧" },
-  ];
+  const featureList = (wizardCfg.features && wizardCfg.features.length > 0 ? wizardCfg.features : DEFAULT_WIZARD_CONFIG.features).map((f) => ({
+    id: f.id,
+    labelBn: f.labelBn,
+    labelEn: f.labelEn,
+    icon: f.icon || "✨",
+  }));
 
-  // Step 6 budget ranges
-  const budgetOptionsBn = [
-    "৳৫০,০০০ - ৳১,০০,০০০ (ছোট ব্যালকনি / স্ট্যান্ডার্ড)",
-    "৳১,০০,০০০ - ৳২,৫০,০০০ (মাঝারি ছাদবাগান)",
-    "৳২,৫০,০০০ - ৳৫,০০,০০০ (প্রিমিয়াম ল্যান্ডস্কেপ ও পারগোলা)",
-    "৳৫,০০,০০০+ (লাক্সারি ফুল-স্কেল মাস্টারপিস)",
-  ];
-
-  const budgetOptionsEn = [
-    "BDT 50,000 - 100,000 (Small Balcony / Standard)",
-    "BDT 100,000 - 250,000 (Medium Rooftop)",
-    "BDT 250,000 - 500,000 (Premium Landscape & Pergola)",
-    "BDT 500,000+ (Full Luxury Masterpiece)",
-  ];
-
-  const budgetOptions = language === "bn" ? budgetOptionsBn : budgetOptionsEn;
+  const budgetOptionsList = wizardCfg.budgets && wizardCfg.budgets.length > 0 ? wizardCfg.budgets : DEFAULT_WIZARD_CONFIG.budgets;
+  const budgetOptions = budgetOptionsList.map((b) => (language === "bn" ? b.labelBn : b.labelEn));
 
   const toggleFeature = (fId: string) => {
     if (features.includes(fId)) {

@@ -5,10 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { canAccessTab } from "@/lib/rbac";
+import { searchDashboard, DashboardSearchItem } from "./adminSearchRegistry";
 
 interface SidebarProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (tab: string, subTab?: string) => void;
   sessionData?: any;
   inboxCount?: number;
   isOpen?: boolean;
@@ -357,6 +358,20 @@ export default function Sidebar({
             ),
           },
           {
+            id: "about-studio",
+            labelBn: "📖 স্টুডিও পরিচিতি (/about Editor)",
+            labelEn: "About Us & Timeline Studio",
+            badge: "/about",
+            icon: (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                <line x1="12" y1="6" x2="16" y2="6" />
+                <line x1="12" y1="10" x2="16" y2="10" />
+              </svg>
+            ),
+          },
+          {
             id: "content-manager",
             labelBn: "কনটেন্ট ম্যানেজার",
             labelEn: "Content Manager (Dynamic)",
@@ -364,6 +379,51 @@ export default function Sidebar({
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            ),
+          },
+          {
+            id: "micro-texts",
+            labelBn: "সব টেক্সট ও পেজ হেডার",
+            labelEn: "Micro-Texts & Page Studio",
+            badge: "100%",
+            icon: (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="4 7 4 4 20 4 20 7" />
+                <line x1="9" y1="20" x2="15" y2="20" />
+                <line x1="12" y1="4" x2="12" y2="20" />
+              </svg>
+            ),
+          },
+          {
+            id: "shop-studio",
+            labelBn: "গ্রিন শপ ও অর্ডার স্টুডিও",
+            labelEn: "Green Shop & Orders",
+            icon: (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+              </svg>
+            ),
+          },
+          {
+            id: "tools-studio",
+            labelBn: "এস্টিমেটর, উইজার্ড ও লয়্যালটি",
+            labelEn: "Tools, Loyalty & Newsletter",
+            icon: (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+              </svg>
+            ),
+          },
+          {
+            id: "legal-studio",
+            labelBn: "লিগ্যাল ও পলিসি পেজ",
+            labelEn: "Legal Policies (Privacy/Terms)",
+            icon: (
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             ),
           },
@@ -479,6 +539,66 @@ export default function Sidebar({
     setOpenSectionId(null);
   };
 
+  // Dedicated search input refs (separate for desktop & mobile drawers)
+  const desktopSearchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
+  const [selectedSearchIndex, setSelectedSearchIndex] = useState(0);
+
+  const focusVisibleSearchInput = () => {
+    if (typeof window !== "undefined" && window.innerWidth >= 1024) {
+      desktopSearchInputRef.current?.focus();
+    } else {
+      mobileSearchInputRef.current?.focus();
+    }
+  };
+
+  // Search results across ALL dashboard sections, sub-tabs, tools, and options (respecting RBAC)
+  const searchResults = useMemo(() => {
+    return searchDashboard(searchQuery, user?.role).filter((item) =>
+      canAccessTab(user?.role, item.tabId)
+    );
+  }, [searchQuery, user?.role]);
+
+  // Set of tab IDs present in current search results
+  const matchingTabIds = useMemo(() => {
+    return new Set(searchResults.map((r) => r.tabId));
+  }, [searchResults]);
+
+  // Focus visible search input when requested
+  useEffect(() => {
+    const handleFocusSidebar = () => focusVisibleSearchInput();
+    window.addEventListener("admin-focus-sidebar-search", handleFocusSidebar);
+    return () => window.removeEventListener("admin-focus-sidebar-search", handleFocusSidebar);
+  }, []);
+
+  // Keyboard navigation within search results
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (searchResults.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedSearchIndex((prev) => (prev + 1) % searchResults.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedSearchIndex((prev) => (prev - 1 + searchResults.length) % searchResults.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const target = searchResults[selectedSearchIndex] || searchResults[0];
+      if (target) {
+        handleSelectSearchItem(target);
+      }
+    } else if (e.key === "Escape") {
+      setSearchQuery("");
+      e.currentTarget.blur();
+    }
+  };
+
+  const handleSelectSearchItem = (item: DashboardSearchItem) => {
+    setActiveTab(item.tabId, item.sub);
+    setSearchQuery("");
+    if (onClose) onClose();
+  };
+
   // Filter groups and items by search query and RBAC
   const filteredGroups = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -487,6 +607,8 @@ export default function Sidebar({
         const matchingItems = group.items.filter((item) => {
           if (!canAccessTab(user?.role, item.id)) return false;
           if (!q) return true;
+          // Match direct item or any search registry hit in this tab
+          if (matchingTabIds.has(item.id)) return true;
           return (
             item.labelBn.toLowerCase().includes(q) ||
             item.labelEn.toLowerCase().includes(q) ||
@@ -501,7 +623,7 @@ export default function Sidebar({
         };
       })
       .filter((group) => group.items.length > 0);
-  }, [menuGroups, searchQuery, user?.role]);
+  }, [menuGroups, searchQuery, matchingTabIds, user?.role]);
 
   // Auto-close drawer when route changes
   const pathname = usePathname();
@@ -573,14 +695,14 @@ export default function Sidebar({
   }, [isOpen, onClose]);
 
   // Tapping leaf sub-item closes the mobile drawer automatically
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
+  const handleTabClick = (tabId: string, subTab?: string) => {
+    setActiveTab(tabId, subTab);
     if (onClose) {
       onClose();
     }
   };
 
-  const renderSidebarContent = () => (
+  const renderSidebarContent = (isMobileView = false) => (
     <div className="flex flex-col h-full min-h-0 select-none">
       
       {/* ── 1. HEADER: BRAND & ARCHITECTURAL BADGE ── */}
@@ -636,11 +758,16 @@ export default function Sidebar({
         {/* Search Bar for fast menu navigation (44px & 16px font on mobile, compact on desktop) */}
         <div className="relative">
           <input
+            ref={isMobileView ? mobileSearchInputRef : desktopSearchInputRef}
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSelectedSearchIndex(0);
+            }}
+            onKeyDown={handleSearchKeyDown}
             placeholder="মেনু বা পেজ খুঁজুন... / Search..."
-            className="w-full h-11 lg:h-8.5 pl-9 lg:pl-8 pr-8 lg:pr-7 text-[16px] lg:text-xs bg-white/95 border border-[#D6D2C4] rounded-xl text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] focus:ring-1 focus:ring-[#2B4D33] transition-all"
+            className="w-full h-11 lg:h-8.5 pl-9 lg:pl-8 pr-16 lg:pr-14 text-[16px] lg:text-xs bg-white/95 border border-[#D6D2C4] rounded-xl text-[#121813] placeholder-[#75787B] focus:outline-none focus:border-[#2B4D33] focus:ring-1 focus:ring-[#2B4D33] transition-all"
           />
           <svg
             className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-[#75787B] absolute left-3 lg:left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -654,10 +781,26 @@ export default function Sidebar({
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
+
+          {/* Clickable Ctrl+K badge to launch full Command Palette Modal */}
+          {!searchQuery && (
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("admin-open-search-modal"))}
+              className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#75787B] hover:text-[#121813] bg-[#E4E2D7]/80 hover:bg-[#D6D2C4] border border-[#D6D2C4] rounded-md absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer transition-colors"
+              title="পূর্ণাঙ্গ কমান্ড সার্চ খুলুন (Ctrl + K)"
+            >
+              Ctrl K
+            </button>
+          )}
+
           {searchQuery && (
             <button
               type="button"
-              onClick={() => setSearchQuery("")}
+              onClick={() => {
+                setSearchQuery("");
+                focusVisibleSearchInput();
+              }}
               className="absolute right-2.5 lg:right-2 top-1/2 -translate-y-1/2 w-5 h-5 lg:w-4 lg:h-4 rounded-full bg-black/10 hover:bg-black/20 text-[#121813] flex items-center justify-center text-xs lg:text-[10px] cursor-pointer"
               title="Clear search"
             >
@@ -669,7 +812,7 @@ export default function Sidebar({
         {/* Section Quick Controls (Desktop Only: hidden lg:flex) */}
         <div className="hidden lg:flex items-center justify-between px-1 text-[10px] font-mono text-[#75787B]">
           <span className="uppercase tracking-wider font-semibold">
-            {searchQuery ? `ফলাফল (${filteredGroups.length} সেকশন)` : `সেকশন তালিকা (${filteredGroups.length})`}
+            {searchQuery ? `খোঁজ: ${searchResults.length} অপশন` : `সেকশন তালিকা (${filteredGroups.length})`}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -693,22 +836,170 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* ── 2. SCROLLABLE NAVIGATION MENU: CLEARLY SEPARATED SECTION ACCORDIONS ── */}
-      <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto pr-1 py-2 custom-scrollbar my-1">
-        {filteredGroups.length === 0 ? (
-          <div className="bg-white/90 border border-dashed border-[#D6D2C4] rounded-2xl p-6 text-center text-xs text-[#75787B] my-4 flex flex-col items-center gap-2">
-            <span className="text-2xl">🔍</span>
-            <p className="font-semibold text-[#121813]">কোনো মেনু আইটেম পাওয়া যায়নি</p>
-            <p className="text-[11px]">অন্য কোনো কি-ওয়ার্ড দিয়ে আবার চেষ্টা করুন।</p>
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="mt-2 text-[11px] font-mono font-bold text-[#2B4D33] underline cursor-pointer"
-            >
-              সার্চ ফিল্টার রিসেট করুন
-            </button>
+      {/* ── 2. SCROLLABLE NAVIGATION MENU / SMART SEARCH RESULTS ── */}
+      <div className="flex flex-col gap-2.5 flex-1 min-h-0 overflow-y-auto pr-1 py-2 custom-scrollbar my-1">
+        {/* If user is searching: display rich instant search cards */}
+        {searchQuery.trim() ? (
+          <div className="flex flex-col gap-2">
+            {/* Results Counter Header */}
+            <div className="flex items-center justify-between px-2.5 py-1.5 text-[11px] font-mono text-[#75787B] bg-white/75 border border-[#D6D2C4]/80 rounded-xl shadow-2xs">
+              <span className="font-semibold text-[#2B4D33] flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#2B4D33] animate-pulse"></span>
+                {searchResults.length}টি অপশন পাওয়া গেছে
+              </span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-[10px] text-stone-500 hover:text-stone-900 underline cursor-pointer"
+              >
+                রিসেট [✕]
+              </button>
+            </div>
+
+            {/* Zero results state with helpful quick keyword chips */}
+            {searchResults.length === 0 ? (
+              <div className="bg-white/95 border border-dashed border-[#D6D2C4] rounded-2xl p-5 text-center text-xs text-[#75787B] my-2 flex flex-col items-center gap-2 shadow-2xs">
+                <span className="text-3xl">🔍</span>
+                <p className="font-bold text-[#121813]">"{searchQuery}" এর জন্য কিছু পাওয়া যায়নি</p>
+                <p className="text-[11px] text-[#75787B] leading-relaxed">
+                  নিচের জনপ্রিয় অপশনগুলো থেকে সরাসরি ক্লিক করে দেখতে পারেন:
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 justify-center mt-2 max-w-xs">
+                  {[
+                    { label: "About পেজ", q: "about" },
+                    { label: "হাজিরা শিট", q: "হাজিরা" },
+                    { label: "ইনভয়েস", q: "ইনভয়েস" },
+                    { label: "প্রসেস ৪-ধাপ", q: "প্রসেস" },
+                    { label: "ফোয়ারা ও ঝর্ণা", q: "ফাউন্টেন" },
+                    { label: "ট্রি ডক্টর", q: "ডাক্তার" },
+                    { label: "কোটেশন বিল্ডার", q: "কোটেশন" },
+                    { label: "কর্মী ডিরেক্টরি", q: "কর্মী" },
+                    { label: "লোগো ও নাম", q: "লোগো" },
+                    { label: "এসইও ও মেটা", q: "এসইও" },
+                    { label: "হিরো ভিডিও", q: "ভিডিও" },
+                    { label: "ডাটাবেস ব্যাকআপ", q: "ব্যাকআপ" },
+                    { label: "ইউজার পাসওয়ার্ড", q: "পাসওয়ার্ড" },
+                  ].map((pill) => (
+                    <button
+                      key={pill.q}
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery(pill.q);
+                        focusVisibleSearchInput();
+                      }}
+                      className="px-2.5 py-1 text-[10px] font-mono font-medium rounded-lg bg-[#E4E2D7]/80 hover:bg-[#2B4D33] hover:text-white text-[#121813] transition-all cursor-pointer border border-[#D6D2C4]"
+                    >
+                      #{pill.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Rich Result Cards with Direct Sub-Tab Jump */
+              <div className="flex flex-col gap-1.5 pb-2">
+                {searchResults.map((item, idx) => {
+                  const isHighlighted = idx === selectedSearchIndex;
+                  const isCurrentlyOpen = activeTab === item.tabId;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleSelectSearchItem(item)}
+                      onMouseEnter={() => setSelectedSearchIndex(idx)}
+                      className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-2.5 cursor-pointer border group relative ${
+                        isHighlighted
+                          ? "bg-[#2B4D33] text-white border-[#2B4D33] shadow-md shadow-[#2B4D33]/20 ring-1 ring-white/20"
+                          : isCurrentlyOpen
+                          ? "bg-white border-[#2B4D33]/60 text-[#121813] shadow-xs ring-1 ring-[#2B4D33]/20"
+                          : "bg-white/90 hover:bg-white border-[#D6D2C4] text-[#121813] hover:shadow-2xs"
+                      }`}
+                    >
+                      {/* Icon */}
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 mt-0.5 border transition-colors ${
+                          isHighlighted
+                            ? "bg-white/20 border-white/30 text-white"
+                            : "bg-[#F7F6F2] border-[#D6D2C4] text-[#121813]"
+                        }`}
+                      >
+                        {item.icon}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span
+                            className={`font-semibold text-xs leading-snug ${
+                              isHighlighted ? "text-white font-bold" : "text-[#121813]"
+                            }`}
+                          >
+                            {item.titleBn}
+                          </span>
+                          {item.badge && (
+                            <span
+                              className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase tracking-wider ${
+                                isHighlighted
+                                  ? "bg-white/25 text-white"
+                                  : "bg-[#2B4D33]/10 text-[#2B4D33]"
+                              }`}
+                            >
+                              {item.badge}
+                            </span>
+                          )}
+                          {isCurrentlyOpen && !isHighlighted && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-800 font-bold">
+                              খোলা আছে
+                            </span>
+                          )}
+                        </div>
+
+                        <div
+                          className={`text-[10px] font-mono mt-0.5 truncate ${
+                            isHighlighted ? "text-white/80" : "text-[#75787B]"
+                          }`}
+                        >
+                          {item.categoryBn} • {item.titleEn}
+                        </div>
+
+                        <p
+                          className={`text-[10.5px] mt-1 line-clamp-1 leading-normal ${
+                            isHighlighted ? "text-white/90" : "text-[#4F5255]"
+                          }`}
+                        >
+                          {item.descriptionBn}
+                        </p>
+                      </div>
+
+                      {/* Arrow */}
+                      <span
+                        className={`text-xs font-bold shrink-0 self-center transition-transform ${
+                          isHighlighted
+                            ? "text-white translate-x-0.5"
+                            : "text-[#75787B] group-hover:text-[#2B4D33] group-hover:translate-x-0.5"
+                        }`}
+                      >
+                        ➔
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Category Menu divider header */}
+            {filteredGroups.length > 0 && (
+              <div className="pt-2 pb-1 border-t border-[#D6D2C4]/70 mt-1">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#75787B] px-1 font-semibold block">
+                  📂 সংশ্লিষ্ট ক্যাটাগরি মেনু ({filteredGroups.length} সেকশন):
+                </span>
+              </div>
+            )}
           </div>
-        ) : (
+        ) : null}
+
+        {/* ── Normal / Filtered Accordion Menu Groups ── */}
+        {(!searchQuery.trim() || filteredGroups.length > 0) &&
           filteredGroups.map((group) => {
             const hasActiveItem = group.items.some((i) => i.id === activeTab);
             // If user is searching or clicked show all, show items; otherwise strictly only openSectionId
@@ -889,8 +1180,7 @@ export default function Sidebar({
                 </div>
               </div>
             );
-          })
-        )}
+          })}
 
         {/* ── Mobile-Only: Back to website leaf link inside the scroll area (lg:hidden) ── */}
         <div className="lg:hidden pt-1 pb-1">
@@ -999,7 +1289,7 @@ export default function Sidebar({
     <>
       {/* ================= 1. DESKTOP PERMANENT SIDEBAR (lg and above) ================= */}
       <aside className="hidden lg:flex lg:w-[305px] bg-[#E4E2D7] text-[#323232] flex-col px-3.5 py-4 sticky top-0 h-screen max-h-screen shrink-0 shadow-sm border-r border-[#D6D2C4] z-20 font-sans">
-        {renderSidebarContent()}
+        {renderSidebarContent(false)}
       </aside>
 
       {/* ================= 2. MOBILE & TABLET SLIDE-IN DRAWER (below lg) ================= */}
@@ -1030,7 +1320,7 @@ export default function Sidebar({
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          {renderSidebarContent()}
+          {renderSidebarContent(true)}
         </aside>
       </div>
     </>

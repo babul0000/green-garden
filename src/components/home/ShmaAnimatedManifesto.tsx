@@ -3,16 +3,27 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 interface ManifestoConfig {
+  word1?: string;
+  word2?: string;
+  word3?: string;
   lineEn?: string;
   lineBn?: string;
   descriptionEn?: string;
   descriptionBn?: string;
+  image1?: string;
+  image2?: string;
 }
 
 export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoConfig?: ManifestoConfig }) {
   const { language } = useLanguage();
+  const { config } = useSiteConfig();
+  const liveCfg: ManifestoConfig = {
+    ...(config?.homepage_sections?.manifesto || {}),
+    ...(manifestoConfig || {}),
+  };
   const containerRef = useRef<HTMLDivElement>(null);
   const enableRef = useRef<HTMLSpanElement>(null);
   const changeRef = useRef<HTMLSpanElement>(null);
@@ -28,17 +39,17 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
   const [animationStarted, setAnimationStarted] = useState(false);
 
   const textContent = language === "bn" ? {
-    enable: "ENABLE",
-    change: "CHANGE",
-    for_text: "FOR",
-    a_better_earth: manifestoConfig?.lineBn || "A BETTER EARTH",
-    description: manifestoConfig?.descriptionBn || "একটি সবুজ, সজীব ও টেকসই বাংলাদেশ বিনির্মাণের প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে এ আর গ্রিন গার্ডেন শহুরে ধূসর কংক্রিটকে রূপান্তর করে জীবন্ত ইকোসিস্টেমে। আমাদের স্থাপত্য পরিকল্পনা তাপমাত্রা হ্রাস করে, জীববৈচিত্র্য রক্ষা করে এবং নাগরিক জীবনে আনে স্নিগ্ধ প্রকৃতির পরম ছোঁয়া।",
+    enable: liveCfg?.word1 || "ENABLE",
+    change: liveCfg?.word2 || "CHANGE",
+    for_text: liveCfg?.word3 || "FOR",
+    a_better_earth: liveCfg?.lineBn || "A BETTER EARTH",
+    description: liveCfg?.descriptionBn || "একটি সবুজ, সজীব ও টেকসই বাংলাদেশ বিনির্মাণের প্রত্যয়ে—প্রকৃতি ও আধুনিক স্থাপত্যের সমন্বয়ে এ আর গ্রিন গার্ডেন শহুরে ধূসর কংক্রিটকে রূপান্তর করে জীবন্ত ইকোসিস্টেমে। আমাদের স্থাপত্য পরিকল্পনা তাপমাত্রা হ্রাস করে, জীববৈচিত্র্য রক্ষা করে এবং নাগরিক জীবনে আনে স্নিগ্ধ প্রকৃতির পরম ছোঁয়া।",
   } : {
-    enable: "ENABLE",
-    change: "CHANGE",
-    for_text: "FOR",
-    a_better_earth: manifestoConfig?.lineEn || "A BETTER EARTH",
-    description: manifestoConfig?.descriptionEn || "A R Green Garden envisions a climate-resilient Bangladesh where sustainability, ecological design, and architectural biophilia thrive together. Through scientific planting, stormwater hydrology, and green architecture, we transform urban concrete into living sanctuaries that cool our cities and restore lasting ecological harmony.",
+    enable: liveCfg?.word1 || "ENABLE",
+    change: liveCfg?.word2 || "CHANGE",
+    for_text: liveCfg?.word3 || "FOR",
+    a_better_earth: liveCfg?.lineEn || "A BETTER EARTH",
+    description: liveCfg?.descriptionEn || "A R Green Garden envisions a climate-resilient Bangladesh where sustainability, ecological design, and architectural biophilia thrive together. Through scientific planting, stormwater hydrology, and green architecture, we transform urban concrete into living sanctuaries that cool our cities and restore lasting ecological harmony.",
   };
 
   const states = {
@@ -205,7 +216,7 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
           {/* Image 1: Fades in during State 2 */}
           <div ref={image1Ref} className="image-container" id="image1">
             <img
-              src="/hero_plants.png"
+              src={liveCfg?.image1 || "/hero_plants.png"}
               alt="Landscape Architecture"
             />
           </div>
@@ -213,7 +224,7 @@ export default function ShmaAnimatedManifesto({ manifestoConfig }: { manifestoCo
           {/* Image 2: Visual card playing during State 4 */}
           <div ref={image2Ref} className="image-container" id="image2">
             <img
-              src="/featured_plant.png"
+              src={liveCfg?.image2 || "/featured_plant.png"}
               alt="Architectural Botany"
               className="w-full h-full object-cover"
             />

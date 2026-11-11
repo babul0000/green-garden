@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import Link from "next/link";
 import type {
   ProjectItem,
@@ -22,6 +23,8 @@ import SupportTab from "./components/SupportTab";
 export default function ClientDashboardPage() {
   const { user, loading: isPending, logout } = useAuth();
   const { t } = useLanguage();
+  const { config } = useSiteConfig();
+  const companyName = config?.site_config?.companyName || "A R Green Garden";
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -157,8 +160,8 @@ export default function ClientDashboardPage() {
         body: JSON.stringify({
           amount: inv.dueAmount || inv.totalAmount,
           customerName: user?.name || "Client",
-          customerPhone: user?.phone || "01883012641",
-          customerEmail: user?.email || "babulhossan.dev@gmail.com",
+          customerPhone: user?.phone || config?.site_config?.phone || "01883012641",
+          customerEmail: user?.email || config?.site_config?.email || "info@argreengarden.com",
           productName: `ইনভয়েস #${inv.invoiceNumber} পেমেন্ট`,
           invoiceId: inv.id,
         }),
@@ -236,7 +239,7 @@ export default function ClientDashboardPage() {
           </div>
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-400 mb-2">
-              A R Green Garden Studio
+              {companyName} Studio
             </div>
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#E4E2D7]">
               {t("ক্লায়েন্ট পোর্টাল", "Client Portal")}
@@ -289,7 +292,7 @@ export default function ClientDashboardPage() {
               </div>
               <div>
                 <span className="text-base font-display font-bold tracking-tight text-[#E4E2D7] block leading-none">
-                  A R Green Garden
+                  {companyName}
                 </span>
                 <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest mt-1 block">
                   Client Portal
@@ -386,7 +389,7 @@ export default function ClientDashboardPage() {
                   </div>
                   <div>
                     <span className="text-sm font-display font-bold text-[#E4E2D7] block leading-tight">
-                      A R Green Garden
+                      {companyName}
                     </span>
                     <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest block">
                       Client Portal

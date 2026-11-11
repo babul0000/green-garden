@@ -1,111 +1,196 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import type { IProduct } from "@/types";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
+import { ShopProduct } from "@/types/cms";
 
-const PRODUCTS_DATA: IProduct[] = [
-  { id: "p1", name: "Monstera Deliciosa (Swiss Cheese Plant)", category: "Live Plants", price: 1200, rating: 5, imageUrl: "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=400&auto=format&fit=crop", desc: "A popular tropical indoor foliage plant with iconic leaf splits. Thrives in indirect indoor light." },
-  { id: "p2", name: "Terracotta Clay Pot (Medium)", category: "Designer Pots", price: 350, rating: 4, imageUrl: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?q=80&w=400&auto=format&fit=crop", desc: "Breathable earthenware pot perfect for root aeration and prevention of moisture logging." },
-  { id: "p3", name: "Premium Coco-Peat Soil Bag (5KG)", category: "Botanical Soils", price: 250, rating: 5, imageUrl: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?q=80&w=400&auto=format&fit=crop", desc: "Lightweight, highly moisture-retentive organic medium mixed with bone meal and vermicompost." },
-  { id: "p4", name: "Heavy Duty Pruning Shears", category: "Garden Tools", price: 650, rating: 4, imageUrl: "https://images.unsplash.com/photo-1416339306562-f3d12fefd36f?q=80&w=400&auto=format&fit=crop", desc: "Ultra-sharp carbon steel bypass clippers for neat tree pruning, branch cutting, and trimming." },
-  { id: "p5", name: "Snake Plant (Laurentii)", category: "Live Plants", price: 450, rating: 5, imageUrl: "https://images.unsplash.com/photo-1597055181300-e3633a207518?q=80&w=400&auto=format&fit=crop", desc: "Hardy, air-purifying indoor plant that releases oxygen at night. Excellent for bedrooms." },
-  { id: "p6", name: "Self-Watering Planter Pot", category: "Designer Pots", price: 480, rating: 4, imageUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400&auto=format&fit=crop", desc: "Double-walled plastic pot with bottom water reservoir. Keeps plants watered for up to 14 days." }
-];
+const CART_STORAGE_KEY = "gg_shop_cart";
 
-export default function ProductDetailsPage() {
+export default function ShopProductDetailPage() {
   const params = useParams();
-  const rawId = params?.id;
-  const id = typeof rawId === "string" ? rawId : Array.isArray(rawId) ? rawId[0] : "";
-  const router = useRouter();
+  const id = String(params?.id || "");
+  const { language, t } = useLanguage();
+  const { txt, config } = useSiteConfig();
+  const bn = language === "bn";
 
-  const [product, setProduct] = useState<IProduct | null>(null);
+  const [product, setProduct] = useState<ShopProduct | null>(null);
+  const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    const matched = PRODUCTS_DATA.find(p => p.id === id);
-    if (matched) {
-      setProduct(matched);
-    }
+    setLoading(true);
+    fetch(`/api/shop/products?id=${encodeURIComponent(id)}&_t=${Date.now()}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.product) setProduct(data.product);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleAddToCart = () => {
-    if (!product) return;
-    const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existing = cartItems.find((item: any) => item.id === product.id);
-    if (existing) {
-      existing.qty += qty;
-    } else {
-      cartItems.push({ ...product, qty });
+    if (!product || product.stock <= 0) return;
+    try {
+      const raw = localStorage.getItem(CART_STORAGE_KEY);
+      const current: Array<{ id: string; qty: number }> = raw ? JSON.parse(raw) : [];
+      const existing = current.find((i) => i.id === product.id);
+      const next = existing
+        ? current.map((i) =>
+            i.id === product.id ? { ...i, qty: Math.min(product.stock, i.qty + qty) } : i
+          )
+        : [...current, { id: product.id, qty: Math.min(product.stock, qty) }];
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(next));
+      setAdded(true);
+    } catch {
+      setAdded(true);
     }
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
   };
 
-  if (!product) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <span className="w-8 h-8 border-3 border-primary-green/20 border-t-primary-green rounded-full animate-spin"></span>
+      <div className="min-h-screen bg-[#fafafa] pt-36 pb-24 px-6 flex items-center justify-center text-stone-500 text-sm">
+        {txt("common.loading", "লোড হচ্ছে...", "Loading...")}
       </div>
     );
   }
 
-  return (
-    <div className="bg-background text-foreground font-sans min-h-screen py-16 px-6 relative">
-      <div className="max-w-4xl mx-auto flex flex-col gap-8 animate-fade-in-up">
-        
-        {/* Navigation */}
-        <button 
-          onClick={() => router.back()}
-          className="text-xs font-bold text-[#1a3020] hover:text-primary-green transition-all text-left cursor-pointer"
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] pt-36 pb-24 px-6 flex flex-col items-center justify-center text-center">
+        <span className="text-5xl mb-4">🪴</span>
+        <h1 className="text-2xl font-serif font-bold text-[#142a1b]">
+          {t("পণ্যটি পাওয়া যায়নি", "Product Not Found")}
+        </h1>
+        <p className="text-stone-500 text-sm mt-2 mb-6">
+          {t("এই পণ্যটি স্টকে না থাকতে পারে অথবা সরানো হয়েছে।", "This item may have been removed from our catalog.")}
+        </p>
+        <Link
+          href="/shop"
+          className="px-6 py-3 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-900"
         >
-          ← Back to Shop
-        </button>
+          ← {t("শপে ফিরে যান", "Back to Shop")}
+        </Link>
+      </div>
+    );
+  }
 
-        {/* Product Layout Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-          {/* Image */}
-          <div className="h-80 md:h-[400px] rounded-3xl overflow-hidden shadow-md bg-sage-pastel/10">
-            <img src={product.imageUrl} className="w-full h-full object-cover" alt={product.name} />
+  const outOfStock = product.stock <= 0;
+  const badgeText = bn ? product.badgeBn : product.badgeEn;
+
+  return (
+    <div className="min-h-screen bg-[#fafafa] pt-28 pb-24 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Link
+          href="/shop"
+          className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 hover:underline mb-6"
+        >
+          ← {t("গ্রিন শপ ক্যাটালগে ফিরে যান", "Back to Green Store")}
+        </Link>
+
+        <div className="bg-white border border-stone-200 rounded-[32px] p-6 md:p-10 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          <div className="rounded-2xl overflow-hidden bg-stone-100 aspect-square">
+            <img
+              src={product.image || "/hero_plants.png"}
+              alt={bn ? product.nameBn : product.nameEn}
+              className="w-full h-full object-cover"
+            />
           </div>
 
-          {/* Details */}
           <div className="flex flex-col gap-5">
-            <div>
-              <span className="text-xs text-primary-green font-bold uppercase tracking-wider bg-primary-green/10 px-3 py-1 rounded-full">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-50 text-emerald-800">
                 {product.category}
               </span>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#1a3020] mt-3">{product.name}</h1>
-              <div className="flex gap-0.5 text-xs text-yellow-500 mt-2">
-                {"★".repeat(product.rating)}
-              </div>
+              {badgeText && (
+                <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-900">
+                  {badgeText}
+                </span>
+              )}
+              <span className="text-xs font-mono text-stone-500 ml-auto">
+                {outOfStock
+                  ? txt("shop.outOfStock", "স্টক শেষ", "Out of Stock")
+                  : `${t("স্টক আছে:", "In Stock:")} ${product.stock} ${bn ? product.unitBn : product.unitEn}`}
+              </span>
             </div>
 
-            <p className="text-xs md:text-sm text-foreground/75 leading-relaxed">{product.desc}</p>
-            
-            <div className="font-serif font-bold text-xl md:text-2xl text-[#1a3020]">৳{product.price} BDT</div>
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-[#142a1b]">
+              {bn ? product.nameBn : product.nameEn}
+            </h1>
 
-            {/* Qty Selector & Add */}
-            <div className="flex gap-4 items-center border-t border-foreground/5 pt-5">
-              <div className="flex items-center gap-3 bg-white rounded-xl border border-foreground/10 px-4 py-2">
-                <button onClick={() => setQty(q => Math.max(1, q - 1))} className="font-bold text-foreground/50 hover:text-primary-green text-sm cursor-pointer">-</button>
-                <span className="font-bold w-6 text-center text-xs">{qty}</span>
-                <button onClick={() => setQty(q => q + 1)} className="font-bold text-foreground/50 hover:text-primary-green text-sm cursor-pointer">+</button>
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl font-serif font-bold text-emerald-800">
+                ৳{product.price.toLocaleString()} BDT
+              </span>
+              {product.oldPrice && product.oldPrice > product.price && (
+                <span className="text-base text-stone-400 line-through">
+                  ৳{product.oldPrice.toLocaleString()}
+                </span>
+              )}
+            </div>
+
+            <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-line">
+              {bn ? product.descriptionBn : product.descriptionEn}
+            </p>
+
+            {(bn ? product.careTipsBn : product.careTipsEn) && (
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 text-xs text-emerald-950 space-y-1">
+                <strong className="block text-emerald-900">
+                  🌱 {t("উদ্ভিদ পরিচর্যা নির্দেশনা", "Horticulture Care Guide")}
+                </strong>
+                <p>{bn ? product.careTipsBn : product.careTipsEn}</p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-stone-100">
+              <div className="flex items-center border border-stone-200 rounded-xl bg-stone-50">
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  className="px-3.5 py-2.5 text-sm font-bold text-stone-600 cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="px-3 text-sm font-bold">{qty}</span>
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => Math.min(Math.max(1, product.stock), q + 1))}
+                  className="px-3.5 py-2.5 text-sm font-bold text-stone-600 cursor-pointer"
+                >
+                  +
+                </button>
               </div>
 
               <button
+                type="button"
+                disabled={outOfStock}
                 onClick={handleAddToCart}
-                className="bg-primary-green hover:bg-primary-green-dark text-white font-bold text-xs px-6 py-3 rounded-xl transition-all cursor-pointer"
+                className="flex-1 bg-emerald-800 hover:bg-emerald-900 disabled:bg-stone-300 text-white font-bold text-xs py-3.5 px-6 rounded-xl transition-all cursor-pointer"
               >
-                {added ? "Added to Cart ✓" : "Add to Cart"}
+                {outOfStock
+                  ? txt("shop.outOfStock", "স্টক শেষ", "Out of Stock")
+                  : txt("shop.addToCart", "ব্যাগে যোগ করুন", "Add to Bag")}
               </button>
+            </div>
+
+            {added && (
+              <div className="p-3.5 rounded-2xl bg-emerald-100 border border-emerald-200 flex items-center justify-between text-xs font-bold text-emerald-900">
+                <span>✓ {t("ব্যাগে যোগ করা হয়েছে!", "Added to your shopping bag!")}</span>
+                <Link href="/shop?cart=open" className="underline text-emerald-950">
+                  {t("অর্ডার কনফার্ম করুন ➔", "Open Bag & Checkout ➔")}
+                </Link>
+              </div>
+            )}
+
+            <div className="text-[11px] text-stone-400 pt-2">
+              {t("সরাসরি অর্ডারের জন্য কল করুন:", "Direct Nursery Desk:")} {config.site_config.phone}
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

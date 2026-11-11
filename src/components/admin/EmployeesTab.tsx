@@ -52,6 +52,25 @@ export default function EmployeesTab() {
 
   useEffect(() => {
     fetchEmployeesData();
+
+    // Support deep-linking to sub-tab (e.g. ?tab=employees&sub=attendance)
+    const checkSub = () => {
+      if (typeof window === "undefined") return;
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get("sub");
+      if (s && ["directory", "assignments", "attendance"].includes(s)) {
+        setSubTab(s as any);
+      }
+    };
+    checkSub();
+
+    const handleSubNav = (e: any) => {
+      if (e.detail?.sub && ["directory", "assignments", "attendance"].includes(e.detail.sub)) {
+        setSubTab(e.detail.sub);
+      }
+    };
+    window.addEventListener("admin-navigate-subtab", handleSubNav);
+    return () => window.removeEventListener("admin-navigate-subtab", handleSubNav);
   }, []);
 
   return (

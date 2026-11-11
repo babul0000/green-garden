@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { IProject } from "@/types";
 import { optimizeImageUrl } from "@/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function ProjectDetailsPage() {
+  const { t } = useLanguage();
+  const { config, txt } = useSiteConfig();
   const params = useParams();
   const rawSlug = params?.slug;
   const slug = typeof rawSlug === "string" ? rawSlug : Array.isArray(rawSlug) ? rawSlug[0] : "";
@@ -135,6 +140,32 @@ export default function ProjectDetailsPage() {
             </div>
           </div>
         )}
+
+        {/* Dynamic Studio CTA */}
+        <div className="bg-[#142a1b] text-white rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+          <div>
+            <h4 className="font-serif font-bold text-lg">
+              {t("এই ধরনের প্রজেক্ট তৈরি করতে চান?", "Interested in a similar landscape design?")}
+            </h4>
+            <p className="text-xs text-emerald-100/80 mt-1">
+              {config.site_config.phone} • {config.site_config.contactEmail}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Link
+              href="/contact"
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 text-xs font-bold"
+            >
+              {txt("common.bookConsultation", "সাইট ভিজিট বুক করুন", "Book Site Audit")}
+            </Link>
+            <Link
+              href="/projects"
+              className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold"
+            >
+              ← {t("সব প্রজেক্ট", "All Projects")}
+            </Link>
+          </div>
+        </div>
 
       </div>
     </div>

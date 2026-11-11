@@ -4,10 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Register() {
   const { register } = useAuth();
   const { t } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
+  const pageHeader = getPageHeader("register");
+  const companyName = config?.site_config?.companyName || "AR Green Garden";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -103,7 +107,7 @@ export default function Register() {
 
         {/* Bottom copyright */}
         <p className="relative z-10 font-mono text-[10px] text-white/30 uppercase tracking-widest">
-          © 2025 AR Green Garden • Bangladesh
+          © {new Date().getFullYear()} {companyName}
         </p>
       </div>
 
@@ -125,10 +129,10 @@ export default function Register() {
           {/* Heading */}
           <div className="space-y-1.5">
             <h1 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
-              {t("অ্যাকাউন্ট খুলুন", "Create Account")}
+              {t(pageHeader.titleBn, pageHeader.titleEn)}
             </h1>
             <p className="text-sm text-white/50 font-sans">
-              {t("আমাদের ক্লায়েন্ট পোর্টালে যোগ দিন", "Join our landscape architecture platform")}
+              {t(pageHeader.subtitleBn, pageHeader.subtitleEn)}
             </p>
           </div>
 

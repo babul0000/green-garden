@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 
 interface IServiceDetail {
@@ -19,6 +21,11 @@ interface IServiceDetail {
 }
 
 export default function ServiceDetailsPage() {
+  const { language } = useLanguage();
+  const { config } = useSiteConfig();
+  const bookingOpen = config.site_config.bookingActive !== false;
+  const studioPhone = config.site_config.phone || "01883012641";
+  const waDigits = (config.site_config.whatsapp || studioPhone || "8801883012641").replace(/[^0-9]/g, "");
   const params = useParams();
   const rawSlug = params?.slug;
   const slug = typeof rawSlug === "string" ? rawSlug : Array.isArray(rawSlug) ? rawSlug[0] : "";
@@ -193,7 +200,7 @@ export default function ServiceDetailsPage() {
                 অনলাইন বুকিং করুন →
               </a>
               <a
-                href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20want%20to%20consult%20about%20${encodeURIComponent(service.label)}`}
+                href={`https://wa.me/${waDigits}?text=Hello%20A%20R%20Green%20Garden,%20I%20want%20to%20consult%20about%20${encodeURIComponent(service.label)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] text-white font-bold text-xs sm:text-sm px-6 py-3.5 rounded-full hover:bg-[#20bd5a] transition-all shadow text-center flex items-center justify-center gap-2 whitespace-nowrap"
@@ -276,7 +283,14 @@ export default function ServiceDetailsPage() {
             </p>
           </div>
 
-          {submittedRef ? (
+          {!bookingOpen ? (
+            <div className="bg-amber-50 border border-amber-200 text-amber-900 p-6 rounded-2xl text-center space-y-2 text-xs font-semibold">
+              <p>অনলাইন বুকিং সাময়িকভাবে বন্ধ রয়েছে। জরুরি প্রয়োজনে নিচের নম্বরে কল করুন।</p>
+              <a href={`tel:${studioPhone.replace(/\s+/g, "")}`} className="inline-block underline font-bold text-emerald-800">
+                📞 {studioPhone}
+              </a>
+            </div>
+          ) : submittedRef ? (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-950 p-6 rounded-2xl text-center space-y-3">
               <div className="w-12 h-12 bg-emerald-700 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                 ✓
@@ -337,8 +351,8 @@ export default function ServiceDetailsPage() {
 
           <div className="text-center pt-2 border-t border-gray-100">
             <span className="text-xs text-gray-400">সরাসরি কল করতে পারেন: </span>
-            <a href="tel:01883012641" className="text-xs font-bold text-emerald-800 hover:underline">
-              01883012641
+            <a href={`tel:${studioPhone.replace(/\s+/g, "")}`} className="text-xs font-bold text-emerald-800 hover:underline">
+              {studioPhone}
             </a>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { toBnDigits } from "@/lib/formatters";
 import { optimizeImageUrl } from "@/lib/utils";
 
@@ -200,10 +201,15 @@ const ARCHITECTURAL_PROJECTS: ProjectDetail[] = [
 
 export default function ProjectsPage() {
   const { language, t } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
   const isBn = language === "bn";
+  const hideStaticFallbacks = Boolean(config.homepage_sections?.hideStaticFallbacks);
+  const pageHeader = getPageHeader("projects");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
-  const [projectsList, setProjectsList] = useState<ProjectDetail[]>(ARCHITECTURAL_PROJECTS);
+  const [projectsList, setProjectsList] = useState<ProjectDetail[]>(
+    hideStaticFallbacks ? [] : ARCHITECTURAL_PROJECTS
+  );
   const [loading, setLoading] = useState(false);
 
   // Sync with live database while retaining architectural metadata
@@ -270,22 +276,28 @@ export default function ProjectsPage() {
                 clientTestimonial: p.clientTestimonial || fallback.clientTestimonial,
               };
             });
-            // Merge unique projects with Shma curated showcases
-            const combined = [...mapped];
-            ARCHITECTURAL_PROJECTS.forEach((arch) => {
-              if (!combined.some((c) => c.slug === arch.slug)) {
-                combined.push(arch);
-              }
-            });
-            setProjectsList(combined);
+            if (hideStaticFallbacks) {
+              setProjectsList(mapped);
+            } else {
+              // Merge unique projects with Shma curated showcases
+              const combined = [...mapped];
+              ARCHITECTURAL_PROJECTS.forEach((arch) => {
+                if (!combined.some((c) => c.slug === arch.slug)) {
+                  combined.push(arch);
+                }
+              });
+              setProjectsList(combined);
+            }
+          } else if (hideStaticFallbacks) {
+            setProjectsList([]);
           }
         }
       } catch (err) {
-        // Fall back gracefully to curated Shma architectural portfolio
+        if (hideStaticFallbacks) setProjectsList([]);
       }
     };
     fetchLiveProjects();
-  }, []);
+  }, [hideStaticFallbacks]);
 
   const categories = [
     { key: "All", en: "All Typologies", bn: "সকল প্রকল্প" },
@@ -314,16 +326,13 @@ export default function ProjectsPage() {
 
         <div className="relative z-10 max-w-[1440px] mx-auto space-y-6">
           <span className="font-mono text-xs uppercase tracking-[0.3em] text-[#E4E2D7] block">
-            {t("পোর্টফোলিও • স্থাপত্য ও বায়োফিলিক ল্যান্ডস্কেপ", "PORTFOLIO • ARCHITECTURAL LANDSCAPES & BIOPHILIA")}
+            {isBn ? pageHeader.badgeBn : pageHeader.badgeEn}
           </span>
           <h1 className="font-display font-light text-4xl sm:text-6xl md:text-7xl lg:text-[76px] tracking-tight leading-[1.08] text-white max-w-4xl">
-            Weaving Living Nature into <span className="font-normal italic text-[#5a9dff]">Modern Architecture</span>
+            {isBn ? pageHeader.titleBn : pageHeader.titleEn}
           </h1>
           <p className="font-sans text-sm sm:text-base font-light text-white/80 max-w-2xl leading-relaxed pt-2">
-            {t(
-              "শহুরে ধূসর কংক্রিটকে রূপান্তর করছি জলবায়ু সহনশীল জীবন্ত বাস্তুতন্ত্রে। উচ্চ-মানের ওয়াটারপ্রুফিং ড্রেনেজ, বৈজ্ঞানিক বৃক্ষ চিকিৎসা এবং বিশ্বমানের স্থাপত্যে নির্মিত আমাদের পূর্ণাঙ্গ প্রকল্প তালিকা।",
-              "Pioneering climate-resilient landscapes, zero-seepage biophilic rooftops, and enduring civic green spaces tailored to the subtropical conditions of Bangladesh."
-            )}
+            {isBn ? pageHeader.subtitleBn : pageHeader.subtitleEn}
           </p>
         </div>
       </section>

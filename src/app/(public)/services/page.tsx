@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 
 interface IServiceItem {
@@ -28,6 +29,10 @@ interface ServiceCategory {
 
 export default function ServicesPage() {
   const { lang, t } = useLanguage();
+  const { getPageHeader, config } = useSiteConfig();
+  const pageHeader = getPageHeader("services");
+  const bookingOpen = config.site_config.bookingActive !== false;
+  const waDigits = (config.site_config.whatsapp || config.site_config.phone || "8801883012641").replace(/[^0-9]/g, "");
   const [activeCategory, setActiveCategory] = useState("landscape-design");
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -544,19 +549,13 @@ export default function ServicesPage() {
         {/* Header Section */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold tracking-widest text-emerald-800 uppercase bg-emerald-100/80 px-4 py-1.5 rounded-full border border-emerald-200">
-            {t("🌿 Complete Services Catalog", "🌿 Complete Services Catalog")}
+            {lang === "bn" ? pageHeader.badgeBn : pageHeader.badgeEn}
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 leading-tight">
-            A R Green Garden <br />
-            <span className="text-emerald-700 italic font-medium">
-              {t("7 Core Architectural Landscape Disciplines", "7 Core Architectural Landscape Disciplines")}
-            </span>
+            {lang === "bn" ? pageHeader.titleBn : pageHeader.titleEn}
           </h1>
           <p className="text-sm md:text-base text-gray-600 leading-relaxed">
-            {t(
-              "আন্তর্জাতিক মানের ল্যান্ডস্কেপ ডিজাইন, ১০০% ওয়াটারপ্রুফ ছাদবাগান, লিভিং গ্রিন ওয়াল, আধুনিক অটো ইরিগেশন, এবং বিশেষজ্ঞ ট্রি ডক্টর চিকিৎসা — আপনার বাগান সাজাতে সবকিছু এক ছাদের নিচে।",
-              "International standard landscape architecture, 100% leakproof rooftop gardens, living green walls, smart automated drip irrigation, and dedicated botanical tree doctor care — all under one roof."
-            )}
+            {lang === "bn" ? pageHeader.subtitleBn : pageHeader.subtitleEn}
           </p>
 
           {/* Live Search Bar */}
@@ -719,7 +718,7 @@ export default function ServicesPage() {
                   </button>
 
                   <a
-                    href={`https://wa.me/8801883012641?text=Hello%20A%20R%20Green%20Garden,%20I%20am%20interested%20in%20your%20service:%20${encodeURIComponent(srv.title)}`}
+                    href={`https://wa.me/${waDigits}?text=Hello%20A%20R%20Green%20Garden,%20I%20am%20interested%20in%20your%20service:%20${encodeURIComponent(srv.title)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold transition-all text-center flex items-center justify-center gap-1"
@@ -755,7 +754,14 @@ export default function ServicesPage() {
                 </p>
               </div>
 
-              {bookingSuccess ? (
+              {!bookingOpen ? (
+                <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-6 text-center space-y-2 text-xs font-semibold">
+                  <p>{t("অনলাইন বুকিং সাময়িকভাবে বন্ধ রয়েছে। সরাসরি কল করুন:", "Online booking is temporarily paused. Call our studio:")}</p>
+                  <a href={`tel:${(config.site_config.phone || "").replace(/\s+/g, "")}`} className="inline-block underline font-bold text-emerald-800">
+                    📞 {config.site_config.phone}
+                  </a>
+                </div>
+              ) : bookingSuccess ? (
                 <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl p-6 text-center space-y-3">
                   <div className="w-12 h-12 bg-emerald-700 text-white rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                     ✓
